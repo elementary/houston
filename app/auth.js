@@ -1,5 +1,6 @@
 var app = require.main.require('./app/index');
 var config = require.main.require('./config');
+var User = require.main.require('./app/models/user').User;
 var passport = require('passport');
 var GitHubStrategy = require('passport-github').Strategy;
 
@@ -20,11 +21,19 @@ passport.use(new GitHubStrategy({
         callbackURL: "http://server2.elementaryos.org:3000/auth/github/callback"
     },
     function(accessToken, refreshToken, profile, done) {
-        // To keep the example simple, the user's GitHub profile is returned to
-        // represent the logged-in user.  In a typical application, you would want
-        // to associate the GitHub account with a user record in your database,
-        // and return that user instead.
-        return done(null, profile);
+	console.log("Access Token: " + accessToken);
+	console.log("Refresh Token: " + refreshToken);
+	console.log(profile);
+        User.findOrCreate({username: profile.username}, {
+            username: profile.username,
+            email:    profile.emails[0].value,
+            avatar:   profile._json.avatar_url,
+            github:   {accessToken: accessToken, refreshToken: refreshToken},
+            joined:   Date.now(),
+            active:   true
+        }, function(err, user, created) {
+            return done(null, user);
+        });
     }
 ));
 

@@ -26,6 +26,9 @@ app.use(cookieParser());
 app.use(session(config.session));
 app.use(express.static(path.join(__dirname, '../public')));
 
+// Let's get the DB going
+require.main.require('./app/mongodb');
+
 // Setup routes
 require.main.require('./app/home');
 require.main.require('./app/auth');

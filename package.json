@@ -16,6 +16,7 @@
     "passport": "~0.2.1",
     "passport-github": "~0.1.5",
     "express-session": "~1.11.1",
-    "mongoose": "~4.0.2"
+    "mongoose": "~4.0.2",
+    "mongoose-findorcreate": "~0.1.2"
   }
 }
