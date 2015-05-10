@@ -12,6 +12,10 @@
     "express": "~4.12.2",
     "morgan": "~1.5.2",
     "serve-favicon": "~2.2.0",
-    "express-handlebars": "~2.0.1"
+    "express-handlebars": "~2.0.1",
+    "passport": "~0.2.1",
+    "passport-github": "~0.1.5",
+    "express-session": "~1.11.1",
+    "mongoose": "~4.0.2"
   }
 }

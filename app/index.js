@@ -5,26 +5,31 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var session = require('express-session');
 
-var routes = require('./routes/index');
+var config = require.main.require('./config');
 
+// Initialize Application
 var app = express();
+module.exports = app;
 
-// Setup Handlebars
+// Setup Handlebars Templates
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
 // Initialize Middleware
-app.use(favicon(__dirname + '/public/favicon.ico'));
+app.use(favicon(path.join(__dirname, '../public/favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(session(config.session));
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Setup routes
-app.use('/', routes);
-
+require.main.require('./app/home');
+require.main.require('./app/auth');
+require.main.require('./app/dashboard');
 
 // Catch 404 Errors
 app.use(function(req, res, next) {
@@ -54,5 +59,3 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-
-module.exports = app;
