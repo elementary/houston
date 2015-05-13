@@ -18,7 +18,7 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new GitHubStrategy({
     clientID: config.GITHUB_CLIENT_ID,
     clientSecret: config.GITHUB_CLIENT_SECRET,
-    callbackURL: 'http://server2.elementaryos.org:3000/auth/github/callback',
+    callbackURL: config.GITHUB_CALLBACK,
   },
   function(accessToken, refreshToken, profile, done) {
     console.log('Access Token: ' + accessToken);
