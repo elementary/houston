@@ -94,6 +94,24 @@ img {
     max-width: 100%;
 }
 
+.read-more:after {
+    content: "";
+    font-family: "FontAwesome";
+    font-style: normal;
+    font-weight: inherit;
+    color: inherit;
+    padding-left: 6px;
+    position: absolute;
+    margin-top: 0.20em;
+    -webkit-transition: padding 0.15s ease-in-out;
+    -o-transition: padding 0.15s ease-in-out;
+    transition: padding 0.15s ease-in-out;
+}
+
+.read-more:hover:after {
+    padding-left: 10px;
+}
+
 /*********
 * Button *
 *********/
@@ -183,6 +201,7 @@ button.suggested-action,
 section {
     max-width: 1280px;
     margin: 0 auto;
+    padding: 2% 0;
 }
 
 .third {
@@ -191,8 +210,27 @@ section {
     vertical-align: top;
 }
 
+.third a {
+    color: inherit;
+}
+
+.third a:hover {
+    color: #08C;
+    fill: #08C;
+}
+
+.third a p {
+    text-align: center;
+}
+
 .third h3{
     text-align: center;
+}
+
+.third i.fa {
+    font-size: 32px;
+    text-align: center;
+    display: block;
 }
 
 @media (min-width: 800px) {
@@ -221,5 +259,13 @@ section.hero .button.suggested-action{
     font-size: 1rem;
 }
 
+/********************
+* Secondary Section *
+********************/
+
+section.secondary {
+    background-color: #eee;
+    max-width: 100%;
+}
 
 
