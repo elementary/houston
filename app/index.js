@@ -23,7 +23,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(session(config.session));
+app.use(session(config.SESSION));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Let's get the DB going

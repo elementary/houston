@@ -1,0 +1,8 @@
+{
+  "GITHUB_CLIENT_ID":		"GITHUBCLIENTHERE",
+  "GITHUB_CLIENT_SECRET":	"GITHUBSECRETHERE",
+  "SESSION": {
+    "secret": "testingsessions"
+  },
+  "MONGODB_URL": 		"mongodb://localhost/houston-dev"
+}
