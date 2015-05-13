@@ -7,34 +7,34 @@ var GitHubStrategy = require('passport-github').Strategy;
 
 // Serialize User for sessions
 passport.serializeUser(function(user, done) {
-    done(null, user);
+  done(null, user);
 });
 
 passport.deserializeUser(function(obj, done) {
-    done(null, obj);
+  done(null, obj);
 });
 
 // Define GitHub Login Strategy
 passport.use(new GitHubStrategy({
-        clientID: config.GITHUB_CLIENT_ID,
-        clientSecret: config.GITHUB_CLIENT_SECRET,
-        callbackURL: "http://server2.elementaryos.org:3000/auth/github/callback"
-    },
-    function(accessToken, refreshToken, profile, done) {
-	console.log("Access Token: " + accessToken);
-	console.log("Refresh Token: " + refreshToken);
-	console.log(profile);
-        User.findOrCreate({username: profile.username}, {
-            username: profile.username,
-            email:    profile.emails[0].value,
-            avatar:   profile._json.avatar_url,
-            github:   {accessToken: accessToken, refreshToken: refreshToken},
-            joined:   Date.now(),
-            active:   true
-        }, function(err, user, created) {
-            return done(null, user);
-        });
-    }
+    clientID: config.GITHUB_CLIENT_ID,
+    clientSecret: config.GITHUB_CLIENT_SECRET,
+    callbackURL: 'http://server2.elementaryos.org:3000/auth/github/callback',
+  },
+  function(accessToken, refreshToken, profile, done) {
+    console.log('Access Token: ' + accessToken);
+    console.log('Refresh Token: ' + refreshToken);
+    console.log(profile);
+    User.findOrCreate({username: profile.username}, {
+      username: profile.username,
+      email:    profile.emails[0].value,
+      avatar:   profile._json.avatar_url,
+      github:   {accessToken: accessToken, refreshToken: refreshToken},
+      joined:   Date.now(),
+      active:   true,
+    }, function(err, user, created) {
+      return done(null, user);
+    });
+  }
 ));
 
 
@@ -51,10 +51,10 @@ app.get('/auth/github',
 app.get('/auth/github/callback',
     passport.authenticate('github', {failureRedirect: '/loginerror'}),
     function(req, res) {
-        res.redirect('/dashboard');
+      res.redirect('/dashboard');
     });
 
 app.get('/logout', function(req, res) {
-    req.logout();
-    res.redirect('/');
+  req.logout();
+  res.redirect('/');
 });
