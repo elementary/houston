@@ -14,7 +14,12 @@ var app = express();
 module.exports = app;
 
 // Setup Handlebars Templates
-app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+app.engine('handlebars', exphbs({
+  defaultLayout: 'main',
+  helpers: {
+    json: function(obj) { return JSON.stringify(obj, null, 4); },
+  },
+}));
 app.set('view engine', 'handlebars');
 
 // Initialize Middleware
