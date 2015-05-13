@@ -21,9 +21,6 @@ passport.use(new GitHubStrategy({
     callbackURL: 'http://server2.elementaryos.org:3000/auth/github/callback',
   },
   function(accessToken, refreshToken, profile, done) {
-    console.log('Access Token: ' + accessToken);
-    console.log('Refresh Token: ' + refreshToken);
-    console.log(profile);
     User.findOrCreate({username: profile.username}, {
       username: profile.username,
       email:    profile.emails[0].value,
