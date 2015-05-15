@@ -1,9 +1,10 @@
-var app = require.main.require('./app/index.js');
+var app = require.main.require('./app/index');
+var auth = require.main.require('./app/auth');
 var async = require('async');
 var github = require('octonode');
 var _ = require('underscore');
 
-app.get('/dashboard', ensureAuthenticated, function(req, res) {
+app.get('/dashboard', auth.loggedIn, function(req, res) {
   var client = github.client(req.user.github.accessToken);
   var ghme   = client.me();
 
@@ -28,8 +29,3 @@ app.get('/dashboard', ensureAuthenticated, function(req, res) {
     }
   );
 });
-
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) { return next(); }
-  res.redirect('/auth/github');
-}

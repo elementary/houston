@@ -55,3 +55,11 @@ app.get('/logout', function(req, res) {
   req.logout();
   res.redirect('/');
 });
+
+// Export some convienience functions
+module.exports = {
+  loggedIn: function(req, res, next) {
+    if (req.isAuthenticated()) { return next(); }
+    res.redirect('/auth/github');
+  },
+};
