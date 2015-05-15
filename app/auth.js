@@ -5,11 +5,12 @@ var passport = require('passport');
 var GitHubStrategy = require('passport-github').Strategy;
 
 
-// Serialize User for sessions
+// TODO: Serialize User for sessions
 passport.serializeUser(function(user, done) {
   done(null, user);
 });
 
+// TODO: Deserialize User for sessions
 passport.deserializeUser(function(obj, done) {
   done(null, obj);
 });
@@ -20,34 +21,33 @@ passport.use(new GitHubStrategy({
     clientSecret: config.GITHUB_CLIENT_SECRET,
     callbackURL: 'http://server2.elementaryos.org:3000/auth/github/callback',
   },
+  // TODO: Pretty up this Promise part
   function(accessToken, refreshToken, profile, done) {
-    User.findOrCreate({username: profile.username}, {
-      username: profile.username,
-      email:    profile.emails[0].value,
-      avatar:   profile._json.avatar_url,
-      github:   {accessToken: accessToken, refreshToken: refreshToken},
-      joined:   Date.now(),
-      active:   true,
-    }, function(err, user, created) {
-      return done(null, user);
-    });
+    User.findOrCreateGitHub(accessToken, refreshToken, profile)
+      .then(function(user) {
+        done(null, user);
+      }, function(err) {
+        done(err);
+      });
   }
 ));
-
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 // Redirect to GitHub to login
 app.get('/auth/github',
     passport.authenticate('github', { scope: 'repo' }),
-    function(req, res) { });
+    function(req, res) {
+      // Just a redirect, no actions here.
+    });
 
 // GitHub Login callback
+// TODO: Add failure redirect
 app.get('/auth/github/callback',
-    passport.authenticate('github', {failureRedirect: '/loginerror'}),
+    passport.authenticate('github'),
     function(req, res) {
+      // Send Users to the Dashboard after login
       res.redirect('/dashboard');
     });
 

@@ -1,5 +1,4 @@
 var mongoose = require('mongoose');
-var findOrCreate = require('mongoose-findorcreate');
 
 var UserSchema = mongoose.Schema({
   username:   String,
@@ -12,7 +11,25 @@ var UserSchema = mongoose.Schema({
   rights:     String,
 });
 
-UserSchema.plugin(findOrCreate);
+UserSchema.statics.findOrCreateGitHub =
+  function(accessToken, refreshToken, profile) {
+    var self = this;
+    return self.findOne({username: profile.username}).exec()
+      .then(function(user) {
+        if (user) {
+          return user;
+        } else {
+          return self.create({
+            username: profile.username,
+            email:    profile.emails[0].value,
+            avatar:   profile._json.avatar_url,
+            github:   {accessToken: accessToken, refreshToken: refreshToken},
+            joined:   Date.now(),
+            active:   true,
+          });
+        }
+      });
+  };
 
 var User = mongoose.model('user', UserSchema);
 

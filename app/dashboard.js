@@ -1,31 +1,30 @@
 var app = require.main.require('./app/index');
 var auth = require.main.require('./app/auth');
-var async = require('async');
-var github = require('octonode');
+var Hubkit = require('hubkit');
 var _ = require('underscore');
 
-app.get('/dashboard', auth.loggedIn, function(req, res) {
-  var client = github.client(req.user.github.accessToken);
-  var ghme   = client.me();
+// Create an instance of Hubkit
+var gh = new Hubkit({});
 
-  async.parallel([
-      function(callback) {
-        ghme.repos(callback);
-      },
-      function(callback) {
-        ghme.orgs(function(err, data) {
-          async.map(data, function(data, cb) {
-            client.org(data.login).repos(cb);
-          }, callback);
-        });
-      },
-    ],
-    function(err, repos) {
-      repos[0][1] = null;
-      res.render('dashboard', {
-        user: req.user,
-        repos: _.compact(_.flatten(repos)),
-      });
-    }
-  );
+app.get('/dashboard', auth.loggedIn, function(req, res) {
+  // Get the repositories the User has access to
+  var repos = [
+    gh.request('GET /user/repos', {token: req.user.github.accessToken}),
+    gh.request('GET /user/orgs', {token: req.user.github.accessToken})
+      .then(function(orgs) {
+        // Map each Org to their repos
+        return Promise.all(orgs.map(function(org) {
+          return gh.request('GET /orgs/' + org.login + '/repos',
+            {token: req.user.github.accessToken});
+        }));
+      }),
+  ];
+  // Combine these Promises back together and render the output
+  Promise.all(repos).then(function(repos) {
+    console.log('Test', repos);
+    res.render('dashboard', {
+      user: req.user,
+      repos: _.compact(_.flatten(repos)),
+    });
+  });
 });
