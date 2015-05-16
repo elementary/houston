@@ -1,4 +1,4 @@
-var app = require.main.require('./app/index');
+var app = require.main.require('./app');
 var auth = require.main.require('./app/auth');
 var Hubkit = require('hubkit');
 var _ = require('underscore');
@@ -21,10 +21,12 @@ app.get('/dashboard', auth.loggedIn, function(req, res) {
   ];
   // Combine these Promises back together and render the output
   Promise.all(repos).then(function(repos) {
-    console.log('Test', repos);
     res.render('dashboard', {
       user: req.user,
       repos: _.compact(_.flatten(repos)),
     });
+  }).catch(function(err) {
+    console.log('Error', err);
+    throw err;
   });
 });
