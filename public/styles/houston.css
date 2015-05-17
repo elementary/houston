@@ -1,6 +1,6 @@
 /* Copyright 2015 elementary LLC.
 *
-* This file is part of elementaryos.org
+* This file is part of elementary.io
 */
 
 /*********
@@ -19,7 +19,7 @@
 .dark button.suggested-action:active,
 .dark .button.suggested-action:active {
     background-color: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0,, 0.25);
+    border-color: rgba(0, 0, 0, 0.25);
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15),
                 0 0 0 1px rgba(0, 0, 0, 0.25),
                 0 2px 0 0 rgba(255, 255, 255, 0.10);
@@ -54,7 +54,7 @@ section.hero .button.suggested-action{
     fill: #08C;
 }
 
-.third i.fa {
+.third .fa {
     font-size: 32px;
     text-align: center;
     display: block;
