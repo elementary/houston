@@ -4,4 +4,10 @@
         {{user.username}}
     </a>
     <pre>{{json user}}</pre>
+    <hr/>
+    <ul>
+      {{#each repos}}
+        <li><a href="/project/gh/{{full_name}}">{{full_name}}</a></li>
+      {{/each}}
+    </ul>
 </div>
