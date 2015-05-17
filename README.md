@@ -18,4 +18,9 @@ For a local development environment, you will need:
 * `mongodb`
 * `npm`
 
-run `npm install` to grab dependencies
+1. Create your own GitHub application at https://github.com/settings/applications/new
+2. Copy `config.example.json` to `config.json`
+3. Take the keys and put them in the `config.json` file.
+4. Configure all the other settings in `config.json`
+5. Run `npm install` to install all required packages.
+6. Run the server in the repo with `./server` (optionally install forever and run it with that to have it restart automatically on file changes)
