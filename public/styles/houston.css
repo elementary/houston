@@ -1,0 +1,61 @@
+/* Copyright 2015 elementary LLC.
+*
+* This file is part of elementary.io
+*/
+
+/*********
+* Button *
+*********/
+
+.dark button.suggested-action,
+.dark .button.suggested-action {
+    border: none;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
+                inset 0 -1px 0 0 rgba(255, 255, 255, 0.15),
+                0 1px 0 0 rgba(0, 0, 0, 0.15);
+}
+
+.dark button.suggested-action:active,
+.dark .button.suggested-action:active {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.25);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(0, 0, 0, 0.25),
+                0 2px 0 0 rgba(255, 255, 255, 0.10);
+}
+
+/*******
+* Hero *
+*******/
+
+section.hero {
+    background-color: #3A416F;
+    color: #fff;
+    text-align: center;
+    padding: 10% 0;
+    max-width: 100%;
+}
+
+section.hero .button.suggested-action{
+    max-width: 100%;
+}
+
+/**************
+* Third Links *
+**************/
+
+.third a {
+    color: inherit;
+}
+
+.third a:hover {
+    color: #08C;
+    fill: #08C;
+}
+
+.third .fa {
+    font-size: 32px;
+    text-align: center;
+    display: block;
+}
