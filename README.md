@@ -19,7 +19,7 @@ For a local development environment, you will need:
 * `npm`
 
 1. Create your own GitHub application at https://github.com/settings/applications/new
-2. Copy `config.example.json` to `config.json`
+2. `cp config.example.json config.json`
 3. Take the keys and put them in the `config.json` file.
 4. Configure all the other settings in `config.json`
 5. Run `npm install` to install all required packages.
