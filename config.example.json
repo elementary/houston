@@ -1,8 +1,9 @@
 {
-  "GITHUB_CLIENT_ID":		"GITHUBCLIENTHERE",
-  "GITHUB_CLIENT_SECRET":	"GITHUBSECRETHERE",
+  "GITHUB_CLIENT_ID":     "GITHUBCLIENTHERE",
+  "GITHUB_CLIENT_SECRET": "GITHUBSECRETHERE",
+  "GITHUB_CALLBACK":      "http://server2.elementaryos.org:3000/auth/github/callback",
   "SESSION": {
     "secret": "testingsessions"
   },
-  "MONGODB_URL": 		"mongodb://localhost/houston-dev"
+  "MONGODB_URL":           "mongodb://localhost/houston-dev"
 }
