@@ -38,6 +38,7 @@ require.main.require('./app/mongodb');
 require.main.require('./app/home');
 require.main.require('./app/auth');
 require.main.require('./app/dashboard');
+require.main.require('./app/jenkins-hook');
 require.main.require('./app/project');
 
 // Catch 404 Errors

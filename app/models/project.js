@@ -45,6 +45,43 @@ ProjectSchema.statics.findOrCreateGitHub = function(org, reponame, user) {
     });
 };
 
+ProjectSchema.statics.updateBuild = function(data) {
+  var self = this;
+  return self.findOne(
+    {
+      builds: {
+        $elemMatch: {
+          arch:    data.parameters.ARCH,
+          target:  data.parameters.DIST,
+          version: data.parameters.VERSION,
+        },
+      },
+    }).exec()
+    .then(function(project) {
+      for (var build in project.builds) {
+        if (project.builds[build].arch    === data.parameters.ARCH &&
+            project.builds[build].target  === data.parameters.DIST &&
+            project.builds[build].version === data.parameters.VERSION) {
+          switch (data.phase) {
+            case 'FINALIZED': {
+              // TODO: Implement notifications for builds
+              project.builds[build].status = data.status;
+              return project.save();
+              break;
+            }
+            case 'STARTED': {
+              project.builds[build].status = 'BUILDING';
+              return project.save();
+              break;
+            }
+          }
+        }
+
+      }
+    });
+};
+
+
 ProjectSchema.methods.doBuild = function(params) {
   var self = this;
   if (!params) {
