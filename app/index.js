@@ -7,7 +7,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 
-var config = require.main.require('./config');
+var CONFIG = require.main.require('./config');
 
 // Initialize Application
 var app = express();
@@ -28,7 +28,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(session(config.SESSION));
+app.use(session(CONFIG.SESSION));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Let's get the DB going
@@ -38,6 +38,7 @@ require.main.require('./app/mongodb');
 require.main.require('./app/home');
 require.main.require('./app/auth');
 require.main.require('./app/import');
+require.main.require('./app/jenkins-hook');
 require.main.require('./app/project');
 
 // Catch 404 Errors
