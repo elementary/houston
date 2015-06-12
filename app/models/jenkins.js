@@ -11,8 +11,8 @@ var Jenkins = {
       parameters: params,
     });
   },
-  getLogs: function(project, build) {
-    jenkins.build.log();
+  getLogs: function(build) {
+    return jenkins.build.log(CONFIG.JENKINS_JOB, build);
   },
 };
 

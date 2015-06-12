@@ -65,8 +65,12 @@ ProjectSchema.statics.updateBuild = function(data) {
           switch (data.phase) {
             case 'FINALIZED': {
               // TODO: Implement notifications for builds
-              project.builds[build].status = data.status;
-              return project.save();
+              return Jenkins.getLogs(data.number)
+                .then(function(log) {
+                  project.builds[build].status = data.status;
+                  project.builds[build].log = log;
+                  return project.save();
+                });
               break;
             }
             case 'STARTED': {
