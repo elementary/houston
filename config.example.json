@@ -6,6 +6,7 @@
     "secret": "testingsessions"
   },
   "MONGODB_URL":           "mongodb://localhost/houston-dev",
+  "JENKINS_ENABLED":       false,
   "JENKINS_URL":           "JENKINSAPIURL(WITHPW)",
   "JENKINS_JOB":           "deb-new-test",
   "JENKINS_SECRET":        "test"

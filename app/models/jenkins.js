@@ -2,7 +2,7 @@ var app = require.main.require('./app');
 var CONFIG = require.main.require('./config');
 var jenkinsClient = require('then-jenkins');
 
-jenkins = jenkinsClient(CONFIG.JENKINS_URL);
+if(CONFIG.JENKINS_ENABLED) jenkins = jenkinsClient(CONFIG.JENKINS_URL);
 
 var Jenkins = {
   doBuild: function(project, params) {
@@ -16,4 +16,6 @@ var Jenkins = {
   },
 };
 
-module.exports = Jenkins;
+// If Jenkins isn't set to be enabled, export an empty object so when somebody
+// tries to access it we get an intentional failure.
+module.exports = CONFIG.JENKINS_ENABLED ? Jenkins : {};
