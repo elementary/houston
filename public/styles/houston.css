@@ -71,8 +71,7 @@ section.hero .button.suggested-action{
 
 .repo {
     display: block;
-    padding: 9px;
-    height: 56px;
+    padding: 6px;
     border-radius: 6px;
     background-color: #3A416F;
     margin: 12px auto;
@@ -81,10 +80,11 @@ section.hero .button.suggested-action{
     text-align: left;
 }
 
-.repo img {
-    height: 32px;
-    width: 32px;
+.repo .app-icon {
+    height: 64px;
+    width: 64px;
     margin-right: 6px;
+    vertical-align: top;
 }
 
 .repo .description {
@@ -93,7 +93,7 @@ section.hero .button.suggested-action{
 
 .repo p {
     margin: 0;
-    padding: 0;
+    padding-bottom: 3px;
 }
 
 .repo p.subtext {
