@@ -1,13 +1,16 @@
-<div>
-    <a href="{{user.username}}">
-        <img src="{{user.avatar}}"/>
-        {{user.username}}
-    </a>
-    <pre>{{json user}}</pre>
-    <hr/>
-    <ul>
-      {{#each repos}}
-        <li><a href="/project/gh/{{full_name}}">{{full_name}}</a></li>
-      {{/each}}
-    </ul>
+<div id="nav-secondary">
+    <img class="avatar" src="{{user.avatar}}"/>
 </div>
+
+<div class="row">
+    <h1>Select an App:</h1>
+    {{#each repos}}<a class="repo" href="/project/gh/{{full_name}}">
+        <img src="{{owner.avatar_url}}"/>
+        <div>
+            <p>{{name}}</p>
+            <p class="subtext">{{full_name}}</p>
+        </div>
+    </a>{{/each}}
+</div>
+
+    <pre>{{json repos}}</pre>
