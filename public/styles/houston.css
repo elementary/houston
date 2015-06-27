@@ -71,18 +71,24 @@ section.hero .button.suggested-action{
 
 .repo {
     display: block;
-    padding: 6px;
+    padding: 9px;
     height: 56px;
     border-radius: 6px;
     background-color: #3A416F;
     margin: 12px auto;
     color: #fff;
     max-width: 500px;
+    text-align: left;
 }
 
 .repo img {
     height: 32px;
     width: 32px;
+    margin-right: 6px;
+}
+
+.repo .description {
+    display: inline-block;
 }
 
 .repo p {
