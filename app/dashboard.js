@@ -24,6 +24,7 @@ app.get('/dashboard', auth.loggedIn, function(req, res) {
     res.render('dashboard', {
       user: req.user,
       repos: _.compact(_.flatten(repos)),
+      title: 'Import',
     });
   }).catch(function(err) {
     console.log('Error', err);
