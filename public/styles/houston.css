@@ -92,10 +92,12 @@ section.hero .button.suggested-action{
     color: #333;
     max-width: 500px;
     text-align: left;
+    white-space: nowrap;
 }
 
 .repo:focus {
     background-color: rgba(0, 0, 0, 0.20);
+    text-decoration: none;
 }
 
 .repo .app-icon {
