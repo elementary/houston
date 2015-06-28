@@ -3,6 +3,18 @@
 * This file is part of elementary.io
 */
 
+/******
+* NAV *
+******/
+
+nav {
+    background-color: #3A416F;
+    color: #fff;
+    fill: #fff;
+    position: relative;
+    z-index: 100;
+}
+
 /**********
 * SUB NAV *
 **********/
@@ -11,15 +23,18 @@
     width: 100%;
     height: 56px;
     line-height: 56px;
-    background-color: #3A416F;
-    padding: 3px 6px;
+    background-color: #4A5383;
+    padding: 6px;
+    text-align: right;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.12),
+                inset 0 1px 2px rgba(0,0,0,0.24);
 }
 
 .avatar {
-    height: 48px;
-    width: 48px;
+    height: 44px;
+    width: 44px;
     border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(0, 0, 0, 0.25);
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05),
                 inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
                 inset 0 -1px 0 0 rgba(255, 255, 255, 0.15),
@@ -73,22 +88,28 @@ section.hero .button.suggested-action{
     display: block;
     padding: 6px;
     border-radius: 6px;
-    background-color: #3A416F;
     margin: 12px auto;
-    color: #fff;
+    color: #333;
     max-width: 500px;
     text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.repo:focus {
+    background-color: rgba(0, 0, 0, 0.20);
+    text-decoration: none;
 }
 
 .repo .app-icon {
     height: 64px;
     width: 64px;
-    margin-right: 6px;
     vertical-align: top;
 }
 
 .repo .description {
     display: inline-block;
+    margin: 6px;
 }
 
 .repo p {
@@ -97,8 +118,7 @@ section.hero .button.suggested-action{
 }
 
 .repo p.subtext {
-    opacity: 0.75;
-    font-size: 12px;
+    opacity: 0.65;
 }
 
 /**************
