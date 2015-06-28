@@ -94,6 +94,8 @@ section.hero .button.suggested-action{
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
+
+    position: relative;
 }
 
 .repo:focus {
@@ -119,6 +121,14 @@ section.hero .button.suggested-action{
 
 .repo p.subtext {
     opacity: 0.65;
+}
+
+.repo .status {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 48px;
+    margin: 6px;
 }
 
 /**************
