@@ -3,6 +3,20 @@
 * This file is part of elementary.io
 */
 
+/******
+* NAV *
+******/
+
+nav {
+    background-color: #3A416F;
+    color: #fff;
+    fill: #fff;
+    position: relative;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12),
+                0 1px 2px rgba(0,0,0,0.24);
+}
+
 /**********
 * SUB NAV *
 **********/
@@ -11,13 +25,13 @@
     width: 100%;
     height: 56px;
     line-height: 56px;
-    background-color: #3A416F;
-    padding: 3px 6px;
+    background-color: #4A5383;
+    padding: 6px;
 }
 
 .avatar {
-    height: 48px;
-    width: 48px;
+    height: 44px;
+    width: 44px;
     border-radius: 50%;
     border: 1px solid rgba(0, 0, 0, 0.35);
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05),
