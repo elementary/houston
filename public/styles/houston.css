@@ -93,6 +93,7 @@ section.hero .button.suggested-action{
     max-width: 500px;
     text-align: left;
     white-space: nowrap;
+    overflow: hidden;
 }
 
 .repo:focus {
