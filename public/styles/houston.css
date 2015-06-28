@@ -13,8 +13,6 @@ nav {
     fill: #fff;
     position: relative;
     z-index: 100;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12),
-                0 1px 2px rgba(0,0,0,0.24);
 }
 
 /**********
@@ -28,6 +26,8 @@ nav {
     background-color: #4A5383;
     padding: 6px;
     text-align: right;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.12),
+                inset 0 1px 2px rgba(0,0,0,0.24);
 }
 
 .avatar {
