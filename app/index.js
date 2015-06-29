@@ -6,7 +6,9 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
 
+var mongooseConnection = require.main.require('./app/mongodb');
 var CONFIG = require.main.require('./config');
 
 // Initialize Application
@@ -28,11 +30,15 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(session(CONFIG.SESSION));
+app.use(session({
+  secret: CONFIG.SESSION_SECRET,
+  saveUninitialized: false, // don't create session until something stored
+  resave: false, // don't save session if unmodified
+  store: new MongoStore({
+    mongooseConnection: mongooseConnection
+  })
+}));
 app.use(express.static(path.join(__dirname, '../public')));
-
-// Let's get the DB going
-require.main.require('./app/mongodb');
 
 // Setup routes
 require.main.require('./app/home');

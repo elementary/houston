@@ -2,9 +2,7 @@
   "GITHUB_CLIENT_ID": "GITHUBCLIENTHERE",
   "GITHUB_CLIENT_SECRET": "GITHUBSECRETHERE",
   "GITHUB_CALLBACK": "http://server2.elementaryos.org:3000/auth/github/callback",
-  "SESSION": {
-    "secret": "testingsessions"
-  },
+  "SESSION_SECRET": "testingsessions",
   "MONGODB_URL": "mongodb://localhost/houston-dev",
   "JENKINS_ENABLED": false,
   "JENKINS_URL": "http://<jenkins username>:<jenkins user api token>@jenkins.elementaryos.org",
