@@ -47,8 +47,7 @@ app.get('/auth/github',
 app.get('/auth/github/callback',
   passport.authenticate('github'),
     function(req, res) {
-      // Send Users to the Import page after login
-      res.redirect('/import');
+      res.redirect('/dashboard');
     });
 
 app.get('/logout', function(req, res) {

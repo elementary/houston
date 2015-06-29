@@ -37,7 +37,7 @@ require.main.require('./app/mongodb');
 // Setup routes
 require.main.require('./app/home');
 require.main.require('./app/auth');
-require.main.require('./app/import');
+require.main.require('./app/dashboard');
 require.main.require('./app/jenkins-hook');
 require.main.require('./app/project');
 

@@ -6,7 +6,7 @@ var _ = require('underscore');
 // Create an instance of Hubkit
 var gh = new Hubkit({});
 
-app.get('/import', auth.loggedIn, function(req, res) {
+app.get('/dashboard', auth.loggedIn, function(req, res) {
   // Get the repositories the User has access to
   var repos = [
     gh.request('GET /user/repos', {token: req.user.github.accessToken}),
@@ -21,10 +21,10 @@ app.get('/import', auth.loggedIn, function(req, res) {
   ];
   // Combine these Promises back together and render the output
   Promise.all(repos).then(function(repos) {
-    res.render('import', {
+    res.render('dashboard', {
       user: req.user,
       repos: _.compact(_.flatten(repos)),
-      title: 'Import',
+      title: 'Dashboard',
     });
   }).catch(function(err) {
     console.log('Error', err);
