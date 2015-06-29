@@ -18,7 +18,5 @@ app.get('/dashboard', auth.loggedIn, function(req, res, next) {
       title: 'Dashboard',
     });
   })
-  .catch(function(err) {
-    next(err);
-  })
+  .catch(next)
 });
