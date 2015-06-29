@@ -17,6 +17,5 @@ app.get('/dashboard', auth.loggedIn, function(req, res, next) {
       repos: repos,
       title: 'Dashboard',
     });
-  })
-  .catch(next)
+  }, next);
 });
