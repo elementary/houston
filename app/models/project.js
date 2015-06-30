@@ -30,13 +30,13 @@ ProjectSchema.statics.findOrCreateGitHub = function(org, reponame, user) {
         return repo;
       } else {
         return gh.request('GET /repos/' + org + '/' + reponame,
-          {token: user.github.accessToken})
+          { token: user.github.accessToken })
           .then(function(repoData) {
             return self.create({
               source:     'github',
               name:       org + '/' + reponame,
               package:    reponame,
-              repoUrl:    repoData.git_url,
+              repoUrl:    repoData['git_url'],
               keysSetup:  false,
               hookSetup:  false,
             });
