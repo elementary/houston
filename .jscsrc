@@ -1,3 +1,4 @@
 {
-  "preset": "node-style-guide"
+  "preset": "node-style-guide",
+  "esnext": true
 }
