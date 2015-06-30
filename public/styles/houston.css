@@ -23,11 +23,28 @@ nav {
     width: 100%;
     height: 56px;
     line-height: 56px;
+    padding: 0 12px;
     background-color: #4A5383;
-    padding: 6px;
-    text-align: right;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.12),
                 inset 0 1px 2px rgba(0,0,0,0.24);
+}
+
+#nav-secondary .left {
+    float: left;
+}
+
+#nav-secondary .right {
+    float: right;
+}
+
+#nav-secondary button {
+    margin: 0;
+    padding: 3px 24px;
+}
+
+#nav-secondary span {
+    color: #fff;
+    margin-right: 12px;
 }
 
 .avatar {
@@ -40,6 +57,7 @@ nav {
                 inset 0 -1px 0 0 rgba(255, 255, 255, 0.15),
                 0 1px 3px rgba(0, 0, 0, 0.12),
                 0 1px 2px rgba(0,0, 0, 0.24);
+  vertical-align: middle;
 }
 
 /*********
@@ -72,21 +90,24 @@ input[type="checkbox"] {
     display:none;
 }
 
-input[type="checkbox"] + label span {
-    display: inline-block;
+input[type="checkbox"] + span {
+    display: none;
     height: 14px;
     width: 14px;
     background-image: linear-gradient(to bottom, #f4f4f4 0%, #ffffff 100%);
-    border: 1px solid rgba(67, 67, 67, 0.35);
+    border: 1px solid rgba(0, 0, 0, 0.3);
     border-radius: 2px;
     box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.05),
-                0 0 0 1px rgba(255, 255, 255, 0.25);
-    margin: 1px;
-    vertical-align:middle;
+                0 1px 0 0 rgba(255, 255, 255, 0.25);
+    margin: 6px;
     cursor: pointer;
 }
 
-input[type="checkbox"]:checked + label span {
+.edit-mode input[type="checkbox"] + span {
+    display: inline-block;
+}
+
+input[type="checkbox"]:checked + span {
     background-image: url('/images/check-active.svg'),
                       linear-gradient(to bottom, #56c1ec 0%, #45a3e9 100%);
     background-position: center;
@@ -125,7 +146,8 @@ section.hero .button.suggested-action{
     overflow: hidden;
 }
 
-.repo:focus {
+.repo:hover {
+    cursor: pointer;
     background-color: rgba(0, 0, 0, 0.20);
     text-decoration: none;
 }
@@ -148,6 +170,46 @@ section.hero .button.suggested-action{
 
 .repo p.subtext {
     opacity: 0.65;
+}
+
+.repo i {
+    font-size: 24px;
+    display: none 
+}
+
+.repo i.fa-check-circle {
+    color: #73d216;
+}
+
+.repo i.fa-exclamation-triangle {
+    color: #fbc02d;
+}
+
+.repo i.fa-refresh {
+    color: #3d9bda;
+}
+
+.repo.success i.fa-check-circle {
+    display: initial;
+}
+
+.repo.failure i.fa-exclamation-triangle {
+    display: initial;
+}
+
+.repo.in-progress i.fa-refresh {
+    display: initial;
+    -webkit-animation:spin 4s linear infinite;
+    -moz-animation:spin 4s linear infinite;
+    animation:spin 4s linear infinite;
+}
+
+@-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+@keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+
+.edit-mode i {
+    display: none !important;
 }
 
 /**************
