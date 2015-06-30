@@ -22,7 +22,7 @@ UserSchema.statics.findOrCreateGitHub =
           return self.create({
             username: profile.username,
             email:    profile.emails[0].value,
-            avatar:   profile._json.avatar_url,
+            avatar:   profile._json['avatar_url'],
             github:   {accessToken: accessToken, refreshToken: refreshToken},
             joined:   Date.now(),
             active:   true,

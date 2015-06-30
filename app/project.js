@@ -14,7 +14,7 @@ app.get('/project/gh/:org/:name', auth.loggedIn, function(req, res, next) {
 });
 
 // Manually trigger a jenkins build job
-app.get('/project/gh/:org/:name/build', auth.loggedIn, function(req, res, next) {
+app.get('/project/gh/:org/:name/build', auth.loggedIn, (req, res, next) => {
   Project.findOrCreateGitHub(req.params.org, req.params.name, req.user)
   .then(function(project) {
     return project.doBuild();

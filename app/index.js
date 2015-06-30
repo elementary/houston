@@ -32,11 +32,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(session({
   secret: CONFIG.SESSION_SECRET,
-  saveUninitialized: false, // don't create session until something stored
-  resave: false, // don't save session if unmodified
+  saveUninitialized: false, // Don't create session until something stored
+  resave: false, // Don't save session if unmodified
   store: new MongoStore({
-    mongooseConnection: mongooseConnection
-  })
+    mongooseConnection: mongooseConnection,
+  }),
 }));
 app.use(express.static(path.join(__dirname, '../public')));
 
