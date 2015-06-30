@@ -1,18 +1,25 @@
 {{> nav-secondary}}
 
-<div id="repo-list" class="row edit-mode">
-    <h2>Select App</h2>
+<div class="row">
+    <h2>Select an App</h2>
     {{#each repos}}
-      <label id="repo-{{full_name}}" class="repo" for="input-{{full_name}}">
-        <input id="input-{{full_name}}" type="checkbox"></input><span></span>
-        <img class="app-icon" src="/images/application-default-icon.png"/>
+      <a class="repo" href="/project/gh/{{owner}}/{{repoName}}">
+        {{#if icon}}
+          <img class="app-icon" src="/images/application-default-icon.png"/>
+        {{else}}
+          <img class="app-icon" src="data:image/svg+xml;base64,{{{icon_data}}}" />
+        {{/if}}
         <div class="description">
-            <p>{{name}}</p>
-            <p class="subtext">{{full_name}}</p>
+          <p>{{appName}}</p>
+          <p class="subtext">{{owner}}</p>
         </div>
         <i class="fa fa-check-circle"></i>
         <i class="fa fa-exclamation-triangle"></i>
         <i class="fa fa-refresh"></i>
-      </label>
+      </a>
+    {{else}}
+      <h3>No elementary apps found!</h3>
+      An empty <code>.elementary</code> in the root of the repo is how houston
+      knows which apps to look at.
     {{/each}}
 </div>
