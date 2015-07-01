@@ -130,26 +130,17 @@ section.hero .button.suggested-action{
     max-width: 100%;
 }
 
-/*********
-* Import *
-*********/
+/************
+* Dashboard *
+************/
 
 .repo {
     display: block;
-    padding: 6px;
-    border-radius: 6px;
     margin: 12px auto;
     color: #333;
     max-width: 500px;
     text-align: left;
     white-space: nowrap;
-    overflow: hidden;
-}
-
-.repo:hover {
-    cursor: pointer;
-    background-color: rgba(0, 0, 0, 0.20);
-    text-decoration: none;
 }
 
 .repo .app-icon {
@@ -174,31 +165,49 @@ section.hero .button.suggested-action{
 
 .repo i {
     font-size: 24px;
-    display: none 
+    color: #fff;
+    display: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12),
+                0 1px 2px rgba(0,0,0,0.24);
+    vertical-align: 10px;
+    margin-left: 24px;
+    text-align: center;
 }
 
-.repo i.fa-check-circle {
-    color: #73d216;
+.repo i:hover {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16),
+                0 3px 6px rgba(0,0,0,0.23);
 }
 
-.repo i.fa-exclamation-triangle {
-    color: #fbc02d;
+.repo.needs-release i.fa-tag {
+    display: inline-block;
+    background-color: #3d9bda;
 }
 
-.repo i.fa-refresh {
-    color: #3d9bda;
-}
-
-.repo.success i.fa-check-circle {
-    display: initial;
+.repo.publish i.fa-arrow-up {
+    display: inline-block;
+    background-color: #73d216;;
 }
 
 .repo.failure i.fa-exclamation-triangle {
-    display: initial;
+    display: inline-block;
+    background-color: #fbc02d;
 }
 
+.repo.needs-review i.fa-user,
 .repo.in-progress i.fa-refresh {
-    display: initial;
+    display: inline-block;
+    color: #777;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12),
+                0 1px 2px rgba(0,0,0,0.24);
+}
+
+.repo.in-progress .fa-refresh:before {
     -webkit-animation:spin 4s linear infinite;
     -moz-animation:spin 4s linear infinite;
     animation:spin 4s linear infinite;
@@ -208,8 +217,26 @@ section.hero .button.suggested-action{
 @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
 @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
 
-.edit-mode i {
-    display: none !important;
+.popover {
+    display: inline;
+}
+
+.popover .popover-content {
+    z-index: 999;
+    margin-left: 6px;
+    bottom: 56px;
+    width: auto;
+    min-width: 200px;
+}
+
+.popover .popover-content h2 {
+    text-align: center;
+    font-size: 18px;
+    margin: 12px;
+}
+
+.popover .popover-content p {
+    margin: 12px;
 }
 
 /**************

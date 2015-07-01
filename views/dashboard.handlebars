@@ -1,9 +1,8 @@
 {{> nav-secondary}}
 
 <div class="row">
-    <h2>Select an App</h2>
     {{#each repos}}
-      <a class="repo" href="/project/gh/{{owner}}/{{repoName}}">
+      <div class="repo needs-review" href="/project/gh/{{owner}}/{{repoName}}">
         {{#if icon}}
           <img class="app-icon" src="/images/application-default-icon.png"/>
         {{else}}
@@ -11,12 +10,29 @@
         {{/if}}
         <div class="description">
           <p>{{appName}}</p>
-          <p class="subtext">{{owner}}</p>
+          <p class="subtext">{{owner}}/{{repoName}}</p>
         </div>
-        <i class="fa fa-check-circle"></i>
-        <i class="fa fa-exclamation-triangle"></i>
-        <i class="fa fa-refresh"></i>
-      </a>
+        <div class="popover">
+            <a href="https://github.com/{{owner}}/{{repoName}}/releases/new" target="_blank"><i class="fa fa-tag"></i></a>
+            {{> popover-needs-release}}
+        </div>
+        <div class="popover">
+            <a href="#"><i class="fa fa-arrow-up"></i></a>
+            {{> popover-publish}}
+        </div>
+        <div class="popover">
+            <a href="#"><i class="fa fa-refresh"></i></a>
+            {{> popover-in-progress}}
+        </div>
+        <div class="popover">
+            <a href="https://github.com/{{owner}}/{{repoName}}/issues" target="_blank"><i class="fa fa-exclamation-triangle" ></i></a>
+            {{> popover-failure}}
+        </div>
+        <div class="popover">
+            <a href="#"><i class="fa fa-user"></i></a>
+            {{> popover-needs-review}}
+        </div>
+      </div>
     {{else}}
       <h3>No elementary apps found!</h3>
       An empty <code>.elementary</code> in the root of the repo is how houston
