@@ -4,4 +4,4 @@ config.js
 config.json
 .ftpconfig
 npm-debug.log
-
+.DS_Store

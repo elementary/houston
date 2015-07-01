@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var CONFIG = require.main.require('./config');
 
-BuildSchema = mongoose.Schema({
+var BuildSchema = mongoose.Schema({
   arch:       String,
   target:     String,
   version:    String,

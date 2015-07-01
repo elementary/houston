@@ -3,7 +3,7 @@ var CONFIG = require.main.require('./config');
 var jenkinsClient = require('then-jenkins');
 
 if (CONFIG.JENKINS_ENABLED) {
-  jenkins = jenkinsClient(CONFIG.JENKINS_URL);
+  var jenkins = jenkinsClient(CONFIG.JENKINS_URL);
 }
 
 var Jenkins = {
