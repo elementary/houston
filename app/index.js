@@ -16,11 +16,10 @@ var app = express();
 module.exports = app;
 
 // Setup Handlebars Templates
+var HandlebarHelpers = require('./handlebars-helpers');
 app.engine('handlebars', exphbs({
   defaultLayout: 'main',
-  helpers: {
-    json: function(obj) { return JSON.stringify(obj, null, 4); },
-  },
+  helpers: HandlebarHelpers,
 }));
 app.set('view engine', 'handlebars');
 

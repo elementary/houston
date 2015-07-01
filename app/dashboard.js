@@ -7,11 +7,11 @@ var ini = require('ini');
 function getRepoDetails(gh, owner, repo) {
   // TODO: Rather than assuming the .desktop we want is
   // `data/${repo}`.desktop, we might want to list the directory
-  // contents and identify more generally if it's named something else.
+  // Contents and identify more generally if it's named something else.
   return new Promise((resolve, reject) => {
     return Q(gh.request(`GET /repos/:owner/:repo/contents/data/:repo.desktop`, {
       owner,
-      repo
+      repo,
     }))
     // Parse the .desktop file
     .then(desktopFileContents => {
@@ -24,8 +24,8 @@ function getRepoDetails(gh, owner, repo) {
         gh.request('GET /repos/:owner/:repo/contents/icons/64/:appIcon.svg', {
           owner,
           repo,
-          appIcon
-        })
+          appIcon,
+        }),
       ];
     })
     .spread((appName, iconFileContents) => {
@@ -33,7 +33,7 @@ function getRepoDetails(gh, owner, repo) {
         owner,
         appName,
         repoName: repo,
-        icon_data: iconFileContents.content
+        iconData: iconFileContents.content,
       });
     }, reject);
   });
@@ -41,7 +41,7 @@ function getRepoDetails(gh, owner, repo) {
 
 app.get('/dashboard', auth.loggedIn, (req, res, next) => {
   let gh = new Hubkit({
-    token: req.user.github.accessToken
+    token: req.user.github.accessToken,
   });
 
   // Get the repositories the user owns or is a member of
@@ -53,7 +53,7 @@ app.get('/dashboard', auth.loggedIn, (req, res, next) => {
         return gh.request('GET /repos/:owner/:repo/contents/:path', {
           owner: repo.owner.login,
           repo: repo.name,
-          path: '.elementary'
+          path: '.elementary',
         });
       }));
   })
@@ -66,7 +66,7 @@ app.get('/dashboard', auth.loggedIn, (req, res, next) => {
       // XXX: Would be better to get this data from the
       // GET ``/user/repos` request. Just haven't figured out
       // a good way to pass that data down the promise chain.
-      .map(content => content.value.url.split('/').slice(4,6))
+      .map(content => content.value.url.split('/').slice(4, 6))
       .map(([owner, repo]) => getRepoDetails(gh, owner, repo))
     );
   })
