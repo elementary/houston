@@ -7,7 +7,7 @@ if (CONFIG.JENKINS_ENABLED) {
 }
 
 var Jenkins = {
-  doBuild: function(project, params) {
+  doBuild: function(params) {
     return jenkins.job.build({
       name: CONFIG.JENKINS_JOB,
       parameters: params,
