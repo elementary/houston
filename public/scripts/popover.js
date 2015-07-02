@@ -1,10 +1,7 @@
 $(function () {
-    var $document;
-
-    $document = $(document);
+    var $document = $(document);
 
     $document.on('mouseover', '.popover > a', function (event) {
-        event.preventDefault();
 
         var $body = $('body');
         var $link = $(event.target);
@@ -16,14 +13,10 @@ $(function () {
         var popoverPos = ( $popover.outerWidth() / 2 ) - ( $content.outerWidth() / 2 );
         $content.css({ left: popoverPos });
 
-        $document.on('click scroll touchmove mousewheel wheel', function (event) {
-            if (!$(event.target).is('.popover-content *')) {
-                event.stopImmediatePropagation();
-                event.preventDefault();
+        $document.on('mouseover', $body, function (event) {
+            if (!$(event.target).is ('.popover *')) {
+                $popover.removeClass('active');
             }
-
-            $popover.removeClass('active');
-            $body.click();
         });
     });
 });
