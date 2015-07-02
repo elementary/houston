@@ -53,14 +53,14 @@ app.get('/dashboard', auth.loggedIn, (req, res, next) => {
         return gh.request('GET /repos/:owner/:repo/contents/:path', {
           owner: repo.owner.login,
           repo: repo.name,
-          path: '.elementary',
+          path: '.apphub',
         });
       }));
   })
   .then(contents => {
     return Promise.all(
       contents
-      // If the .elementary file doesn't exist, the request to the
+      // If the .apphub file doesn't exist, the request to the
       // GitHub API returned a 404, which means the promise was rejected.
       .filter(contentPromise => contentPromise.state === 'fulfilled')
       // XXX: Would be better to get this data from the
