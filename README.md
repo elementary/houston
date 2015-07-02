@@ -1,7 +1,7 @@
 # elementary Houston
 **Prepare for liftoff.**
 
-Prototype for the AppShop developer dashboard and backend.
+Prototype for the AppHub developer dashboard and backend.
 
 # Architecture
 * HTML/CSS/JS/Node.js
