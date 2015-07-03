@@ -114,6 +114,30 @@ input[type="checkbox"]:checked + span {
     border-color: rgba(0, 84, 133, 0.5);
 }
 
+/*************************
+* Floating Action Button *
+*************************/
+
+i.fab {
+    font-size: 24px;
+    text-align: center;
+    color: #fff;
+    background-color: #3d9bda;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
+                0 1px 2px rgba(0,0, 0, 0.24);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.10);
+    transition: all 200ms ease-in-out;
+}
+
+i.fab:hover {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16),
+                0 3px 6px rgba(0,0,0,0.23);
+}
+
 /*******
 * Hero *
 *******/
@@ -164,28 +188,14 @@ section.hero .button.suggested-action{
 }
 
 .repo i {
-    font-size: 24px;
-    color: #fff;
     display: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    padding: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12),
-                0 1px 2px rgba(0,0,0,0.24);
     vertical-align: 10px;
     margin-left: 24px;
-    text-align: center;
-}
-
-.repo i:hover {
-    box-shadow: 0 3px 6px rgba(0,0,0,0.16),
-                0 3px 6px rgba(0,0,0,0.23);
+    font-size: 24px;
 }
 
 .repo.needs-release i.fa-tag {
     display: inline-block;
-    background-color: #3d9bda;
 }
 
 .repo.publish i.fa-arrow-up {
