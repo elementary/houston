@@ -1,81 +1,86 @@
 var app = require.main.require('./app');
 var auth = require.main.require('./app/auth');
 var Hubkit = require('hubkit');
-var Q = require('q');
+var Promise = require('bluebird');
 var ini = require('ini');
 
-function getRepoDetails(gh, owner, repo) {
-  // TODO: Rather than assuming the .desktop we want is
-  // `data/${repo}`.desktop, we might want to list the directory
-  // Contents and identify more generally if it's named something else.
-  return new Promise((resolve, reject) => {
-    return Q(gh.request(`GET /repos/:owner/:repo/contents/data/:repo.desktop`, {
-      owner,
-      repo,
-    }))
-    // Parse the .desktop file
-    .then(desktopFileContents => {
-      const contentBuf = new Buffer(desktopFileContents.content, 'base64');
-      const desktopData = ini.parse(contentBuf.toString());
-      const appName = desktopData['Desktop Entry'].Name;
-      const appIcon = desktopData['Desktop Entry'].Icon;
-      return [
-        appName,
-        gh.request('GET /repos/:owner/:repo/contents/icons/64/:appIcon.svg', {
-          owner,
-          repo,
-          appIcon,
-        }),
-      ];
-    })
-    .spread((appName, iconFileContents) => {
-      return resolve({
-        owner,
-        appName,
-        repoName: repo,
-        iconData: iconFileContents.content,
-      });
-    }, reject);
-  });
-}
-
 app.get('/dashboard', auth.loggedIn, (req, res, next) => {
+
   let gh = new Hubkit({
     token: req.user.github.accessToken,
   });
 
-  // Get the repositories the user owns or is a member of
-  gh.request('GET /user/repos', { type: 'member' })
-  .then(repos => {
-    return Q.allSettled(
-      repos
-      .map(repo => {
-        return gh.request('GET /repos/:owner/:repo/contents/:path', {
-          owner: repo.owner.login,
-          repo: repo.name,
-          path: '.apphub',
-        });
-      }));
+  Promise.resolve(gh.request('GET /user/repos', { type: 'public' }))
+  .map(repoResult => {
+    return Promise.resolve(gh.request(
+      `GET /repos/${repoResult.full_name}/contents/.apphub`
+    )).then(appHubFileResult => ({
+      repo: {
+        owner: repoResult.owner.login, // 'elementary'
+        name: repoResult.name, // 'wingpanel'
+        fullName: repoResult.full_name, // 'elementary/wingpanel'
+      },
+      icon: {
+        name: null, // 'wingpanel'
+        data: null, // <base64-encoded image>
+      },
+      priceUSD: null, // An integer, from appHubFileResult
+      appHubFileResult: appHubFileResult,
+    })).reflect();
   })
-  .then(contents => {
-    return Promise.all(
-      contents
-      // If the .apphub file doesn't exist, the request to the
-      // GitHub API returned a 404, which means the promise was rejected.
-      .filter(contentPromise => contentPromise.state === 'fulfilled')
-      // XXX: Would be better to get this data from the
-      // GET ``/user/repos` request. Just haven't figured out
-      // a good way to pass that data down the promise chain.
-      .map(content => content.value.url.split('/').slice(4, 6))
-      .map(([owner, repo]) => getRepoDetails(gh, owner, repo))
-    );
-  })
-  .then(repos => {
+  // Filter out repos which do not contain a top-level '.apphub' file
+  .filter(promise => promise.isFulfilled())
+  // De-reflect promise
+  .map(promise => promise.value())
+  .map(parseAppHubFile)
+  .map(fetchDesktopFileIfPossible)
+  .map(fetchAppIconIfPossible)
+  .then(apps => {
     res.render('dashboard', {
       title: 'Dashboard',
       user: req.user,
-      repos,
+      apps,
     });
-  }, next);
+  })
+  .catch(next);
+
+  function parseAppHubFile(app) {
+    return Promise.try(() => {
+      // Parse the .desktop file
+      const appHubFileBuf = new Buffer(app.appHubFileResult.content, 'base64');
+      const appHubData = JSON.parse(appHubFileBuf.toString());
+      app.priceUSD = appHubData.priceUSD;
+      delete app.appHubFileResult;
+      return app;
+    })
+    .catch(() => (app));
+  }
+
+  function fetchDesktopFileIfPossible(app) {
+    return gh.request(
+      `GET /repos/${app.repo.fullName}/contents/data/${app.repo.name}.desktop`
+    )
+    .then(desktopFileResult => {
+      // Parse the .desktop file
+      const desktopFileBuf = new Buffer(desktopFileResult.content, 'base64');
+      const desktopData = ini.parse(desktopFileBuf.toString());
+      app.name = desktopData['Desktop Entry'].Name;
+      app.icon.name = desktopData['Desktop Entry'].Icon;
+      return app;
+    })
+    .catch(() => (app));
+  }
+
+  function fetchAppIconIfPossible(app) {
+    return gh.request(
+      `GET /repos/${app.repo.fullName}/contents/icons/64/${app.icon.name}.svg`
+    )
+    .then(appIconResult => {
+      // `appIconResult.content` is already base64-encoded
+      app.icon.data = appIconResult.content;
+      return app;
+    })
+    .catch(() => (app));
+  }
 
 });

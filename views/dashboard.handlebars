@@ -1,17 +1,23 @@
 {{> nav-secondary}}
 
 <div class="row">
-    {{#each repos}}
-      <div class="repo needs-release" href="/project/gh/{{owner}}/{{repoName}}">
-        {{#if icon}}
-          <img class="app-icon" src="/images/application-default-icon.png"/>
+    {{#each apps}}
+      {{json this}}
+      <div class="repo needs-release" href="/project/gh/{{repo.fullName}}">
+        {{#if icon.data}}
+          <img class="app-icon" src="data:image/svg+xml;base64,{{{icon.data}}}" />
         {{else}}
-          <img class="app-icon" src="data:image/svg+xml;base64,{{{iconData}}}" />
+          <img class="app-icon" src="/images/application-default-icon.png"/>
         {{/if}}
         <div class="description">
-          <p>{{appName}}</p>
-          <p class="subtext">{{owner}}/{{repoName}}</p>
+          {{#if name}}
+            <p>{{name}}</p>
+          {{else}}
+            <p><em>unknown app</em></p>
+          {{/if}}
+          <p class="subtext">{{repo.fullName}}</p>
         </div>
+
         {{> popover-needs-release}}
         {{> popover-publish}}
         {{> popover-in-progress}}
