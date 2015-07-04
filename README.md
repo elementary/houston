@@ -23,6 +23,6 @@ For a local development environment, you will need:
 3. Take the keys and put them in the `config.json` file.
 4. Configure all the other settings in `config.json`
 5. Run `npm install` to install all required packages.
-6. Run the server in the repo with `./server` (optionally install forever and run it with that to have it restart automatically on file changes)
+6. Run the server in the repo with `npm start` (optionally install nodemon (`npm -g install nodemon`) and run it with that to have it restart automatically on file changes, e.g. `nodemon --exec "npm start"`)
 
 We all validate our coding style with [jscs](http://jscs.info) to avoid using different code styles throughout our javascript and validate syntax. Please check all of the code you contribute.
