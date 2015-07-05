@@ -26,7 +26,7 @@ app.get('/dashboard', auth.loggedIn, (req, res, next) => {
     appHubFileResult: null,
   }))
   // Ask GitHub for the .AppHub file
-  .map(loadAppHubFile)
+  .map(fetchAppHubFile)
   // Filter out repos which do not contain a top-level '.apphub' file
   .filter(promise => promise.isFulfilled())
   // De-reflect promise
@@ -43,7 +43,7 @@ app.get('/dashboard', auth.loggedIn, (req, res, next) => {
   })
   .catch(next);
 
-  function loadAppHubFile(application) {
+  function fetchAppHubFile(application) {
     const fullName = application.repo.fullName;
     return Promise.resolve(gh.request(`GET /repos/${fullName}/contents/.apphub`))
     .then(appHubFileResult => {
