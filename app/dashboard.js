@@ -11,76 +11,89 @@ app.get('/dashboard', auth.loggedIn, (req, res, next) => {
   });
 
   Promise.resolve(gh.request('GET /user/repos', { type: 'public' }))
-  .map(repoResult => {
-    return Promise.resolve(gh.request(
-      `GET /repos/${repoResult.full_name}/contents/.apphub`
-    )).then(appHubFileResult => ({
-      repo: {
-        owner: repoResult.owner.login, // 'elementary'
-        name: repoResult.name, // 'wingpanel'
-        fullName: repoResult.full_name, // 'elementary/wingpanel'
-      },
-      icon: {
-        name: null, // 'wingpanel'
-        data: null, // <base64-encoded image>
-      },
-      priceUSD: null, // An integer, from appHubFileResult
-      appHubFileResult: appHubFileResult,
-    })).reflect();
-  })
+  // Transform the repo results from GitHub into our application format
+  .map(repoResult => ({
+    repo: {
+      owner: repoResult.owner.login, // 'elementary'
+      name: repoResult.name, // 'wingpanel'
+      fullName: repoResult.full_name, // 'elementary/wingpanel'
+    },
+    icon: {
+      name: null, // 'wingpanel'
+      data: null, // <base64-encoded image>
+    },
+    priceUSD: null, // An integer, from appHubFileResult
+    appHubFileResult: null,
+  }))
+  // Ask GitHub for the .AppHub file
+  .map(loadAppHubFile)
   // Filter out repos which do not contain a top-level '.apphub' file
   .filter(promise => promise.isFulfilled())
   // De-reflect promise
   .map(promise => promise.value())
-  .map(parseAppHubFile)
+  .map(parseAppHubFileIfPossible)
   .map(fetchDesktopFileIfPossible)
   .map(fetchAppIconIfPossible)
-  .then(apps => {
+  .then(applications => {
     res.render('dashboard', {
       title: 'Dashboard',
       user: req.user,
-      apps,
+      applications,
     });
   })
   .catch(next);
 
-  function parseAppHubFile(app) {
-    return Promise.try(() => {
-      // Parse the .desktop file
-      const appHubFileBuf = new Buffer(app.appHubFileResult.content, 'base64');
-      const appHubData = JSON.parse(appHubFileBuf.toString());
-      app.priceUSD = appHubData.priceUSD;
-      delete app.appHubFileResult;
-      return app;
+  function loadAppHubFile(application) {
+    const fullName = application.repo.fullName;
+    return Promise.resolve(gh.request(`GET /repos/${fullName}/contents/.apphub`))
+    .then(appHubFileResult => {
+      application.appHubFileResult = appHubFileResult;
+      return application;
     })
-    .catch(() => (app));
+    // We want this promise to always be successful when settled
+    // because "failing" is not unexpected behavior (when it's a 404).
+    // That simply means the repository doesn't have an .apphub file,
+    // and so we should filter it out.
+    .reflect();
   }
 
-  function fetchDesktopFileIfPossible(app) {
-    return gh.request(
-      `GET /repos/${app.repo.fullName}/contents/data/${app.repo.name}.desktop`
-    )
+  function parseAppHubFileIfPossible(application) {
+    return Promise.try(() => {
+      // Parse the .desktop file
+      const appHubFileBuf = new Buffer(application.appHubFileResult.content, 'base64');
+      const appHubData = JSON.parse(appHubFileBuf.toString());
+      application.priceUSD = appHubData.priceUSD;
+      delete application.appHubFileResult;
+      return application;
+    })
+    .catch(() => application);
+  }
+
+  function fetchDesktopFileIfPossible(application) {
+    const fullName = application.repo.fullName;
+    const repoName = application.repo.name;
+    return gh.request(`GET /repos/${fullName}/contents/data/${repoName}.desktop`)
     .then(desktopFileResult => {
       // Parse the .desktop file
       const desktopFileBuf = new Buffer(desktopFileResult.content, 'base64');
       const desktopData = ini.parse(desktopFileBuf.toString());
-      app.name = desktopData['Desktop Entry'].Name;
-      app.icon.name = desktopData['Desktop Entry'].Icon;
-      return app;
+      application.name = desktopData['Desktop Entry'].Name;
+      application.icon.name = desktopData['Desktop Entry'].Icon;
+      return application;
     })
-    .catch(() => (app));
+    .catch(() => application);
   }
 
-  function fetchAppIconIfPossible(app) {
-    return gh.request(
-      `GET /repos/${app.repo.fullName}/contents/icons/64/${app.icon.name}.svg`
-    )
+  function fetchAppIconIfPossible(application) {
+    const fullName = application.repo.fullName;
+    const iconName = application.icon.name;
+    return gh.request(`GET /repos/${fullName}/contents/icons/64/${iconName}.svg`)
     .then(appIconResult => {
       // `appIconResult.content` is already base64-encoded
-      app.icon.data = appIconResult.content;
-      return app;
+      application.icon.data = appIconResult.content;
+      return application;
     })
-    .catch(() => (app));
+    .catch(() => application);
   }
 
 });
