@@ -1,4 +1,5 @@
 {
   "preset": "node-style-guide",
-  "esnext": true
+  "esnext": true,
+  "requireCamelCaseOrUpperCaseIdentifiers": null
 }
