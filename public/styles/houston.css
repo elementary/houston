@@ -160,6 +160,7 @@ section.hero .button.suggested-action{
 
 .repo {
     display: block;
+    position: relative;
     margin: 12px auto;
     color: #333;
     max-width: 500px;
@@ -189,9 +190,135 @@ section.hero .button.suggested-action{
 
 .repo i {
     display: none;
+    position: relative;
     vertical-align: 10px;
     margin-left: 24px;
+    margin-right: 24px;
     font-size: 24px;
+}
+
+.repo i .popover-container{
+    position: absolute;
+    right: 50%;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.repo i .popover-container .popover-content {
+    position: relative;
+    right: -50%;
+    bottom: 30px;
+    width: 200px;
+    z-index: 2;
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 5px;
+    background: white;
+    color: #333;
+    background-clip: content-box;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    text-align: left;
+    font-size: 14px;
+    font-family: 'Open Sans', 'Droid Sans', Helvetica, sans-serif;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: visibility 0s 250ms, opacity 250ms;
+}
+
+.repo i .popover-container .popover-content:before,
+.repo i .popover-container .popover-content:after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 50%;
+    margin-left: -5px;
+    width: 0px;
+    height: 0px;
+    border: 10px outset transparent;
+}
+
+.repo i .popover-container .popover-content:before {
+    bottom: -20px;
+    border-top: 10px solid rgba(0,0,0,0.2);
+}
+
+.repo i .popover-container .popover-content:after {
+    bottom: -18px;
+    border-top: 10px solid white;
+}
+
+.repo i:hover .popover-container .popover-content {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+    transition: opacity 250ms;
+}
+
+.repo i .popover-container .popover-content strong {
+    display: inline-block;
+    margin: 15px;
+    margin-bottom: 10px;
+}
+
+.repo i .popover-container .popover-content ul {
+    margin: 5px 0;
+    padding: 0;
+    max-height: 500px;
+    overflow: auto;
+}
+
+@media (max-height: 700px) {
+
+    .repo i .popover-container .popover-content ul {
+        max-height: 300px;
+    }
+
+}
+
+@media (max-height: 450px) {
+
+    .repo i .popover-container .popover-content ul {
+        max-height: 200px;
+    }
+
+}
+
+.repo i .popover-container .popover-content ul li {
+    display: block;
+    margin: 0;
+}
+
+.repo i .popover-container .popover-content ul li a {
+    display: block;
+    padding: 5px 15px;
+}
+
+.repo i .popover-container .popover-content ul li a:hover {
+    background-color: #e0e0e0;
+}
+
+.repo i .popover-container .popover-content hr {
+    background: #e0e0e0;
+    height: 1px;
+    border: 0;
+}
+
+.repo i .popover-container .popover-content {
+    z-index: 999;
+    margin-right: 8px;
+    bottom: 50px;
+    width: auto;
+    min-width: 200px;
+}
+
+.repo i .popover-container .popover-content h2 {
+    text-align: center;
+    font-size: 18px;
+    margin: 12px;
+}
+
+.repo i .popover-container .popover-content p {
+    margin: 12px;
 }
 
 .repo.needs-release i.fa-tag {
@@ -225,27 +352,6 @@ section.hero .button.suggested-action{
 @-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
 @keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
 
-.popover {
-    display: inline;
-}
-
-.popover .popover-content {
-    z-index: 999;
-    margin-left: 6px;
-    bottom: 56px;
-    width: auto;
-    min-width: 200px;
-}
-
-.popover .popover-content h2 {
-    text-align: center;
-    font-size: 18px;
-    margin: 12px;
-}
-
-.popover .popover-content p {
-    margin: 12px;
-}
 
 /**************
 * Third Links *
