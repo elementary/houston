@@ -184,8 +184,14 @@ section.hero .button.suggested-action{
     padding-bottom: 3px;
 }
 
-.repo p.subtext {
+.repo p.subtext a {
     opacity: 0.65;
+    color: #333;
+}
+
+.repo p.subtext a:hover {
+    color: #08C;
+    opacity: 1.0;
 }
 
 .repo i {
