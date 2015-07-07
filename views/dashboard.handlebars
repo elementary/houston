@@ -15,7 +15,7 @@
           {{else}}
             <p><em>unknown app</em></p>
           {{/if}}
-          <p class="subtext">{{repo.fullName}}</p>
+          <p class="subtext"><a href="https://github.com/{{repo.fullName}}" target="_blank">{{repo.fullName}}</a></p>
         </div>
 
         {{> popover-needs-release}}
