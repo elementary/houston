@@ -184,8 +184,9 @@ section.hero .button.suggested-action{
     padding-bottom: 3px;
 }
 
-.repo p.subtext {
+.repo p.subtext a {
     opacity: 0.65;
+    color: #333
 }
 
 .repo i {
