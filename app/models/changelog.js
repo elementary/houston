@@ -1,13 +1,11 @@
-var mongoose = require('mongoose');
-var CONFIG = require.main.require('./config');
+import mongoose from 'mongoose';
 
-var ChangeLogSchema = mongoose.Schema({
+const ChangeLogSchema = mongoose.Schema({
   version:    String,
   author:     String,
   date:       Date,
   items:      [String],
 });
 
-module.exports = {
-  Schema: ChangeLogSchema,
-};
+
+export { ChangeLogSchema };

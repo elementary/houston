@@ -1,8 +1,9 @@
-var app = require.main.require('./app/index');
-var CONFIG = require.main.require('./config');
-var User = require.main.require('./app/models/user').User;
-var passport = require('passport');
-var GitHubStrategy = require('passport-github').Strategy;
+import passport from 'passport';
+import { Strategy as GitHubStrategy } from 'passport-github';
+
+import app from './index.js';
+import { User } from './models/user';
+const CONFIG = require('../config.json');
 
 
 // TODO: Serialize User for sessions
@@ -56,11 +57,9 @@ app.get('/logout', function(req, res) {
 });
 
 // Export some convienience functions
-module.exports = {
-  loggedIn: function(req, res, next) {
-    if (req.isAuthenticated()) {
-      return next();
-    }
-    res.redirect('/auth/github');
-  },
-};
+export function loggedIn(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/auth/github');
+}

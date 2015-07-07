@@ -1,10 +1,10 @@
-var app = require.main.require('./app');
-var mongoose = require('mongoose');
-var Hubkit = require('hubkit');
-var CONFIG = require.main.require('./config');
-var Jenkins = require.main.require('./app/models/jenkins');
-var BuildSchema = require.main.require('./app/models/build').Schema;
-var ChangeLogSchema = require.main.require('./app/models/changelog').Schema;
+import mongoose from 'mongoose';
+import Hubkit from 'hubkit';
+import Jenkins from './jenkins';
+
+import app from '../index.js';
+import { BuildSchema } from './build.js';
+import { ChangeLogSchema } from './changelog.js';
 
 // Create an instance of Hubkit
 var gh = new Hubkit({});
@@ -196,7 +196,4 @@ ProjectSchema.pre('save', function(next) {
 
 var Project = mongoose.model('project', ProjectSchema);
 
-module.exports = {
-  Schema: ProjectSchema,
-  Model:  Project,
-};
+export { ProjectSchema, Project };

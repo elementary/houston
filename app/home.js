@@ -1,4 +1,5 @@
-var app = require.main.require('./app/index.js');
+import app from './index.js';
+
 
 /* GET home page. */
 app.get('/', function(req, res, next) {

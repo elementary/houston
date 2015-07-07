@@ -1,8 +1,8 @@
-var app = require.main.require('./app');
-var Project = require.main.require('./app/models/project').Model;
-var CONFIG = require.main.require('./config');
+import app from './index.js';
+import { Project } from './models/project';
+const config = require('../config.json');
 
-app.post('/jenkins-hook/' + CONFIG.JENKINS_SECRET, function(req, res) {
+app.post('/jenkins-hook/' + config.JENKINS_SECRET, function(req, res) {
   Project.updateBuild(req.body.build)
     .then(function() {
       res.end('ok');
