@@ -3,7 +3,7 @@
 <div class="row">
     {{#each applications}}
       <div class="repo needs-release" href="/project/gh/{{repo.fullName}}">
-        <pre>{{{json this}}}</pre>
+        <!-- {{{json this}}} -->
         {{#if icon.data}}
           <img class="app-icon" src="data:image/svg+xml;base64,{{{icon.data}}}" />
         {{else}}
