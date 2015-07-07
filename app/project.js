@@ -1,8 +1,8 @@
 import _ from 'underscore';
 
-import app from './index.js';
-import { Project } from './models/project';
-import { loggedIn } from './auth';
+import app from 'houston/app';
+import { Project } from 'houston/app/models/project';
+import { loggedIn } from 'houston/app/auth';
 
 // Show project information
 app.get('/project/gh/:org/:name', loggedIn, function(req, res, next) {

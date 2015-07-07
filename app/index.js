@@ -9,16 +9,16 @@ import session from 'express-session';
 // TODO: Not sure how to express (ha, pun) this idiom with ES6 modules
 let MongoStore = require('connect-mongo')(session);
 
-import mongooseConnection from './mongodb';
+import mongooseConnection from 'houston/app/mongodb';
 
-const CONFIG = require('../config.json');
+const CONFIG = require('houston/config.json');
 
 // Initialize Application
 let app = express();
 export default app;
 
 // Setup Handlebars Templates
-import * as HandlebarHelpers from './handlebars-helpers';
+import * as HandlebarHelpers from 'houston/app/handlebars-helpers';
 app.engine('handlebars', exphbs({
   defaultLayout: 'main',
   helpers: HandlebarHelpers,

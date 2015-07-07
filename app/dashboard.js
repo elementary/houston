@@ -2,8 +2,8 @@ import Hubkit from 'hubkit';
 import Promise from 'bluebird';
 import ini from 'ini';
 
-import app from './index.js';
-import { loggedIn } from './auth.js';
+import app from 'houston/app';
+import { loggedIn } from 'houston/app/auth.js';
 
 app.get('/dashboard', loggedIn, (req, res, next) => {
 

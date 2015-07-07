@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
-import app from './index.js';
-const config = require('../config.json');
+import app from 'houston/app';
+import CONFIG from 'houston/config.json';
 
-mongoose.connect(config.MONGODB_URL);
+mongoose.connect(CONFIG.MONGODB_URL);
 
 mongoose.connection.on(
   'error',
