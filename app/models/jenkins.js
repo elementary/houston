@@ -1,5 +1,5 @@
-import app from '../index.js';
-var CONFIG = require.main.require('./config');
+import app from 'houston/app';
+import CONFIG from 'houston/config.json';
 import jenkinsClient from 'then-jenkins';
 
 if (CONFIG.JENKINS_ENABLED) {

@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 import Hubkit from 'hubkit';
-import Jenkins from './jenkins';
+import Jenkins from 'houston/app/models/jenkins';
 
-import app from '../index.js';
-import { BuildSchema } from './build.js';
-import { ChangeLogSchema } from './changelog.js';
+import app from 'houston/app';
+import { BuildSchema } from 'houston/app/models/build.js';
+import { ChangeLogSchema } from 'houston/app/models/changelog.js';
 
 // Create an instance of Hubkit
 var gh = new Hubkit({});

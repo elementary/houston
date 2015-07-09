@@ -1,9 +1,9 @@
 import passport from 'passport';
 import { Strategy as GitHubStrategy } from 'passport-github';
 
-import app from './index.js';
-import { User } from './models/user';
-const CONFIG = require('../config.json');
+import app from 'houston/app';
+import { User } from 'houston/app/models/user';
+import CONFIG from 'houston/config.json';
 
 
 // TODO: Serialize User for sessions
