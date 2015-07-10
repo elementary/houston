@@ -1,10 +1,11 @@
-var app = require.main.require('./app');
-var auth = require.main.require('./app/auth');
-var Hubkit = require('hubkit');
-var Promise = require('bluebird');
-var ini = require('ini');
+import Hubkit from 'hubkit';
+import Promise from 'bluebird';
+import ini from 'ini';
 
-app.get('/dashboard', auth.loggedIn, (req, res, next) => {
+import app from 'houston/app';
+import { loggedIn } from 'houston/app/auth.js';
+
+app.get('/dashboard', loggedIn, (req, res, next) => {
 
   let gh = new Hubkit({
     token: req.user.github.accessToken,

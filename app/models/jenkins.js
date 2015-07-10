@@ -1,6 +1,6 @@
-var app = require.main.require('./app');
-var CONFIG = require.main.require('./config');
-var jenkinsClient = require('then-jenkins');
+import app from 'houston/app';
+import CONFIG from 'houston/config.json';
+import jenkinsClient from 'then-jenkins';
 
 if (CONFIG.JENKINS_ENABLED) {
   var jenkins = jenkinsClient(CONFIG.JENKINS_URL);
@@ -19,6 +19,4 @@ var Jenkins = {
   },
 };
 
-// If Jenkins isn't set to be enabled, export an empty object so when somebody
-// tries to access it we get an intentional failure.
-module.exports = CONFIG.JENKINS_ENABLED ? Jenkins : {};
+export default Jenkins;

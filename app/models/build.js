@@ -1,7 +1,6 @@
-var mongoose = require('mongoose');
-var CONFIG = require.main.require('./config');
+import mongoose from 'mongoose';
 
-var BuildSchema = mongoose.Schema({
+const BuildSchema = mongoose.Schema({
   arch:       String,
   target:     String,
   version:    String,
@@ -11,6 +10,4 @@ var BuildSchema = mongoose.Schema({
   log:        String,
 });
 
-module.exports = {
-  Schema: BuildSchema,
-};
+export { BuildSchema };

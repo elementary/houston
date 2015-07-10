@@ -1,10 +1,11 @@
-var app = require.main.require('./app');
-var Project = require.main.require('./app/models/project').Model;
-var auth = require.main.require('./app/auth');
-var _ = require('underscore');
+import _ from 'underscore';
+
+import app from 'houston/app';
+import { Project } from 'houston/app/models/project';
+import { loggedIn } from 'houston/app/auth';
 
 // Show project information
-app.get('/project/gh/:org/:name', auth.loggedIn, function(req, res, next) {
+app.get('/project/gh/:org/:name', loggedIn, function(req, res, next) {
   Project.findOrCreateGitHub(req.params.org, req.params.name, req.user)
   .then(function(project) {
     res.render('project', {
@@ -14,7 +15,7 @@ app.get('/project/gh/:org/:name', auth.loggedIn, function(req, res, next) {
 });
 
 // Manually trigger a jenkins build job
-app.get('/project/gh/:org/:name/build', auth.loggedIn, (req, res, next) => {
+app.get('/project/gh/:org/:name/build', loggedIn, (req, res, next) => {
   Project.findOrCreateGitHub(req.params.org, req.params.name, req.user)
     .then(function(project) {
       return project.doBuild();
@@ -25,7 +26,7 @@ app.get('/project/gh/:org/:name/build', auth.loggedIn, (req, res, next) => {
 });
 
 // Manually regenerate changelog
-app.get('/project/gh/:org/:name/changelog', auth.loggedIn, function(req, res) {
+app.get('/project/gh/:org/:name/changelog', loggedIn, function(req, res) {
   Project.findOrCreateGitHub(req.params.org, req.params.name, req.user)
     .then(function(project) {
       if (project.changelog.length === 0) {
@@ -48,7 +49,7 @@ app.get('/project/gh/:org/:name/changelog', auth.loggedIn, function(req, res) {
 });
 
 // Delete the project from houston
-app.get('/project/gh/:org/:name/delete', auth.loggedIn, function(req, res) {
+app.get('/project/gh/:org/:name/delete', loggedIn, function(req, res) {
   Project.findOrCreateGitHub(req.params.org, req.params.name, req.user)
     .then(function(project) {
       project.remove();

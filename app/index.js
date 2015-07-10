@@ -1,22 +1,24 @@
-var express = require('express');
-var exphbs  = require('express-handlebars');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var session = require('express-session');
-var MongoStore = require('connect-mongo')(session);
+import express from 'express';
+import exphbs from 'express-handlebars';
+import path from 'path';
+import favicon from 'serve-favicon';
+import logger from 'morgan';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import session from 'express-session';
+// TODO: Not sure how to express (ha, pun) this idiom with ES6 modules
+let MongoStore = require('connect-mongo')(session);
 
-var mongooseConnection = require.main.require('./app/mongodb');
-var CONFIG = require.main.require('./config');
+import mongooseConnection from 'houston/app/mongodb';
+
+const CONFIG = require('houston/config.json');
 
 // Initialize Application
-var app = express();
-module.exports = app;
+let app = express();
+export default app;
 
 // Setup Handlebars Templates
-var HandlebarHelpers = require('./handlebars-helpers');
+import * as HandlebarHelpers from 'houston/app/handlebars-helpers';
 app.engine('handlebars', exphbs({
   defaultLayout: 'main',
   helpers: HandlebarHelpers,
@@ -40,6 +42,7 @@ app.use(session({
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Setup routes
+// TODO: Not sure how to idiomatically port this to ES6-modules;
 require.main.require('./app/home');
 require.main.require('./app/auth');
 require.main.require('./app/dashboard');

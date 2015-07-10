@@ -1,13 +1,16 @@
-var app = require.main.require('./app/index');
-var config = require.main.require('./config');
+import mongoose from 'mongoose';
 
-var mongoose = require('mongoose');
-mongoose.connect(config.MONGODB_URL);
+import app from 'houston/app';
+import CONFIG from 'houston/config.json';
 
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function(callback) {
+mongoose.connect(CONFIG.MONGODB_URL);
+
+mongoose.connection.on(
+  'error',
+  console.error.bind(console, 'connection error:')
+);
+mongoose.connection.once('open', callback => {
   console.log('Successfully connected to database.');
 });
 
-module.exports = db;
+export default mongoose.connection;

@@ -1,4 +1,4 @@
-var mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 var UserSchema = mongoose.Schema({
   username:   String,
@@ -33,4 +33,4 @@ UserSchema.statics.findOrCreateGitHub =
 
 var User = mongoose.model('user', UserSchema);
 
-module.exports = {UserSchema: UserSchema, User: User};
+export { UserSchema, User };
