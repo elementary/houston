@@ -22,8 +22,8 @@ var ApplicationSchema = mongoose.Schema({
   name:       String,   // Applications actual name
   package:    String,   // Debian Package Name
   status:     { type: String, default: '' },   // Status of the latest built
-  version:    String,                 // Currently published & reviewed version
-  iterations:   [IterationsSchema],   // Changelog of all published versions with build results
+  version:    String,                          // Currently published & reviewed version
+  iterations: [IterationsSchema],              // Changelog of all published versions with builds
 });
 
 /* Make sure all virtual Properties show up in JSON */
@@ -31,37 +31,6 @@ ApplicationSchema.set('toJSON', { virtuals: true });
 
 /* Create the Project if it does not exist,
  * needs user data for private GH repos */
-/*
-ProjectSchema.statics.findOrCreateGitHub = function(owner, reponame, user) {
-  var self = this;
-  return self.findOne({'github.owner': owner, 'github.name': reponame}).exec()
-    .then(function(repo) {
-      if (repo) {
-        return repo;
-      } else {
-        return gh.request('GET /repos/:owner/:repo', {
-            owner: owner,
-            repo:  reponame,
-            token: user.github.accessToken,
-          }).then(function(repoData) {
-            return self.create({
-              source:     'github',
-              name:       owner + '/' + reponame,
-              package:    reponame,
-              repoUrl:    repoData['git_url'],
-              keysSetup:  false,
-              hookSetup:  false,
-              github: {
-                owner:    owner,
-                repo:     reponame,
-                token:    user.github.accessToken,
-              },
-            });
-          });
-      }
-    });
-};*/
-
 ApplicationSchema.statics.findOrCreateGitHubData = function(repoData) {
   return this.findOne({'github.fullName': repoData.full_name}).exec()
     .then(repo => {
@@ -85,83 +54,75 @@ ApplicationSchema.statics.findOrCreateGitHubData = function(repoData) {
 }
 
 ApplicationSchema.statics.updateBuild = function(data) {
-  var self = this;
-  return self.findOne({
-      builds: {
-        $elemMatch: {
-          arch:    data.parameters.ARCH,
-          target:  data.parameters.DIST,
-          version: data.parameters.VERSION,
-        },
-      },
-    }).exec()
-    .then(function(project) {
-      for (var build in project.builds) {
-        if (project.builds[build].arch    === data.parameters.ARCH &&
-            project.builds[build].target  === data.parameters.DIST &&
-            project.builds[build].version === data.parameters.VERSION) {
-          switch (data.phase) {
-            case 'FINALIZED': {
-              // TODO: Implement notifications for builds
-              return Jenkins.getLogs(data.number)
-                .then(function(log) {
-                  project.builds[build].status = data.status;
-                  project.builds[build].log = log;
+  return this.findOne({ 'github.repoUrl': data.parameters.REPO }).exec()
+    .then(project => {
+      for (var iter in project.iterations) {
+        if (project.iterations[iter].version === data.parameters.VERSION) {
+          for (var build in project.iterations[iter].builds) {
+            if (project.iterations[iter].builds[build].arch   === data.parameters.ARCH &&
+                project.iterations[iter].builds[build].target === data.parameters.DIST) {
+              switch (data.phase) {
+                case 'FINALIZED': {
+                  // TODO: Implement notifications for builds
+                  return Jenkins.getLogs(data.number)
+                    .then(function(log) {
+                      project.iterations[iter].builds[build].status = data.status;
+                      // TODO: Only save failed builds
+                      roject.iterations[iter].builds[build].log = log;
+                      return project.save();
+                    });
+                  break;
+                }
+                case 'STARTED': {
+                  roject.iterations[iter].builds[build].status = 'BUILDING';
                   return project.save();
-                });
-              break;
-            }
-            case 'STARTED': {
-              project.builds[build].status = 'BUILDING';
-              return project.save();
-              break;
+                  break;
+                }
+              }
             }
           }
         }
-
       }
     });
 };
 
 ApplicationSchema.methods.doBuild = function(params) {
-  var self = this;
   if (!params) {
     params = {
-      PACKAGE:   self.package,
-      REPO:      self.repoUrl,
+      PACKAGE:   this.package,
+      REPO:      this.github.repoUrl,
       ARCH:      'amd64',  // TODO: iterate over enabled archs
       DIST:      'trusty', // TODO: iterate over enabled dists
       REFERENCE: 'master', // TODO: use reference from github hooks
       unstable:  true,     // TODO: seprate out stable & unstable builds
     }
   }
-  return self.debianVersion(params)
-    .then(self.debianChangelog.bind(self))
+  return this.debianVersion(params)
+    .then(this.debianChangelog.bind(this))
     .then(Jenkins.doBuild)
-    .then(function(buildId) {
+    .then(buildId => {
       // Insert a new Build into the Project DB
-      self.builds.push({
+      this.builds.push({
         arch:       params.ARCH,
         target:     params.DIST,
         version:    params.VERSION,
         status:     'QUEUED',
       });
-      return self.save();
+      return this.save();
     });
 }
 
 ApplicationSchema.methods.generateGitHubChangelog = function() {
-  var self = this;
   // TODO: Add Access Token for private repos
   return gh.request('GET /repos/:owner/:repo/releases', {
-      owner: self.github.owner,
-      repo: self.github.repo,
+      owner: this.github.owner,
+      repo: this.github.repo,
       // TODO: Add Token to this request  // token: ,
-    }).then(function(releases) {
+    }).then(releases => {
       for (var i in releases) {
         // Only count them if they use proper (GitHub suggested) versioning
         if (releases[i].tag_name.substring(0, 1) === 'v') {
-          self.changelog.push({
+          this.changelog.push({
             version: releases[i].tag_name.substring(1),
             author:  releases[i].author.login,
             date:    releases[i].published_at,
@@ -169,21 +130,20 @@ ApplicationSchema.methods.generateGitHubChangelog = function() {
           });
         }
       }
-      return self.save();
+      return this.save();
     });
 };
 
 ApplicationSchema.methods.debianChangelog = function(params) {
-  var self = this;
-  return new Promise(function(resolve, reject) {
+  return new Promise((resolve, reject) => {
     app.render('debian-chlg', {
       layout:       false,
       dist:         params.DIST,
-      package:      self.package,
-      changelog:    self.changelog,
+      package:      this.package,
+      changelog:    this.changelog,
       version:      params.VERSION,
       unstable:     params.unstable,
-    }, function(err, changelog) {
+    }, (err, changelog) => {
       if (err) {
         reject(err);
       } else {
@@ -195,21 +155,20 @@ ApplicationSchema.methods.debianChangelog = function(params) {
 };
 
 ApplicationSchema.methods.debianVersion = function(params) {
-  var self = this;
   if (!params.unstable) {
     // Use latest Release on GitHub for Versioning
-    params.VERSION = self.changelog[0].version;
+    params.VERSION = this.changelog[0].version;
     // Reset build counter
-    self.update({buildId: 0});
+    this.update({buildId: 0});
     return params;
   } else {
     // Use unstable versioning, basing off of latest Release
-    return self.update({ $inc: { buildId: 1 }})
-      .then(function(result) {
+    return this.update({ $inc: { buildId: 1 }})
+      .then(result => {
         if (result.ok) {
           // Add more meta information for non stable Builds
-          params.VERSION = self.changelog[0].version + '+build'
-            + self.buildId + '~git.' + params.REFERENCE;
+          params.VERSION = this.changelog[0].version + '+build'
+            + this.buildId + '~git.' + params.REFERENCE;
           return params;
         } else {
           throw new Error('Failed to Update BuildId');
