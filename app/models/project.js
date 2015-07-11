@@ -3,31 +3,38 @@ import Hubkit from 'hubkit';
 import Jenkins from 'houston/app/models/jenkins';
 
 import app from 'houston/app';
-import { BuildSchema } from 'houston/app/models/build.js';
-import { ChangeLogSchema } from 'houston/app/models/changelog.js';
+import { IterationsSchema } from 'houston/app/models/iterations.js';
 
 // Create an instance of Hubkit
 var gh = new Hubkit({});
 
-var ProjectSchema = mongoose.Schema({
-  source:     String,
-  name:       String,
-  package:    String,
-  repoUrl:    String,
-  version:    String,
-  keysSetup:  Boolean,
-  hookSetup:  Boolean,
-  github:     {owner: String, repo: String, token: String},
-  buildId:    {type: Number, default: 0 },
-  builds:     [BuildSchema],
-  changelog:  [ChangeLogSchema],
+var ApplicationSchema = mongoose.Schema({
+  github: {
+    owner:    String,   // Owner of the GitHub repository
+    name:     String,   // Github Repository name
+    repoUrl:  String,   // GitHub Git Repository url
+  },
+  icon: {
+    name:     String,   // 'wingpanel'
+    data:     String,   // <base64-encoded image>
+  },
+  priceUSD:   Number,   // An integer, from appHubFileResult
+  name:       String,   // Applications actual name
+  package:    String,   // Debian Package Name
+  status:     { type: String, default: '' },   // Status of the latest built
+  version:    String,                 // Currently published & reviewed version
+  iterations:   [IterationsSchema],   // Changelog of all published versions with build results
 });
+
+/* Make sure all virtual Properties show up in JSON */
+ApplicationSchema.set('toJSON', { virtuals: true });
 
 /* Create the Project if it does not exist,
  * needs user data for private GH repos */
+/*
 ProjectSchema.statics.findOrCreateGitHub = function(owner, reponame, user) {
   var self = this;
-  return self.findOne({'github.owner': owner, 'github.repo': reponame}).exec()
+  return self.findOne({'github.owner': owner, 'github.name': reponame}).exec()
     .then(function(repo) {
       if (repo) {
         return repo;
@@ -53,9 +60,31 @@ ProjectSchema.statics.findOrCreateGitHub = function(owner, reponame, user) {
           });
       }
     });
-};
+};*/
 
-ProjectSchema.statics.updateBuild = function(data) {
+ApplicationSchema.statics.findOrCreateGitHubData = function(repoData) {
+  return this.findOne({'github.fullName': repoData.full_name}).exec()
+    .then(repo => {
+      if (repo) {
+        return repo;
+      } else {
+        return this.create({
+          github: {
+            owner: repoData.owner.login,
+            name: repoData.name,
+            fullName: repoData.full_name,
+          },
+          icon: {
+            name: null,
+            data: null,
+          },
+          priceUSD: null,
+        })
+      }
+    });
+}
+
+ApplicationSchema.statics.updateBuild = function(data) {
   var self = this;
   return self.findOne({
       builds: {
@@ -94,7 +123,7 @@ ProjectSchema.statics.updateBuild = function(data) {
     });
 };
 
-ProjectSchema.methods.doBuild = function(params) {
+ApplicationSchema.methods.doBuild = function(params) {
   var self = this;
   if (!params) {
     params = {
@@ -121,7 +150,7 @@ ProjectSchema.methods.doBuild = function(params) {
     });
 }
 
-ProjectSchema.methods.generateGitHubChangelog = function() {
+ApplicationSchema.methods.generateGitHubChangelog = function() {
   var self = this;
   // TODO: Add Access Token for private repos
   return gh.request('GET /repos/:owner/:repo/releases', {
@@ -144,7 +173,7 @@ ProjectSchema.methods.generateGitHubChangelog = function() {
     });
 };
 
-ProjectSchema.methods.debianChangelog = function(params) {
+ApplicationSchema.methods.debianChangelog = function(params) {
   var self = this;
   return new Promise(function(resolve, reject) {
     app.render('debian-chlg', {
@@ -165,7 +194,7 @@ ProjectSchema.methods.debianChangelog = function(params) {
   });
 };
 
-ProjectSchema.methods.debianVersion = function(params) {
+ApplicationSchema.methods.debianVersion = function(params) {
   var self = this;
   if (!params.unstable) {
     // Use latest Release on GitHub for Versioning
@@ -189,11 +218,25 @@ ProjectSchema.methods.debianVersion = function(params) {
   }
 }
 
-ProjectSchema.pre('save', function(next) {
-  // TODO: Limit kept build results to some number set in CONFIG
-  next();
+ApplicationSchema.virtual('github.fullName').get(function() {
+  return this.github.owner + '/' + this.github.name;
+});
+ApplicationSchema.virtual('state.standby').get(function() {
+  return (this.status === '' || this.status === null);
+});
+ApplicationSchema.virtual('state.new-release').get(function() {
+  return this.status === 'NEW RELEASE';
+});
+ApplicationSchema.virtual('state.building').get(function() {
+  return this.status === 'BUILDING';
+});
+ApplicationSchema.virtual('state.failed').get(function() {
+  return this.status === 'FAILED';
+});
+ApplicationSchema.virtual('state.reviewing').get(function() {
+  return this.status === 'REVIEWING';
 });
 
-var Project = mongoose.model('project', ProjectSchema);
+var Application = mongoose.model('application', ApplicationSchema);
 
-export { ProjectSchema, Project };
+export { ApplicationSchema, Application };

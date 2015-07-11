@@ -1,5 +1,10 @@
 export function json(obj) {
-  return JSON.stringify(obj, null, 4);
+  if (obj.constructor.name === 'model') {
+    /* Make Mongoose Objects properly render JSON */
+    return JSON.stringify(obj.toJSON(), null, 4);
+  } else {
+    return JSON.stringify(obj, null, 4);
+  }
 }
 
 export function debianTime(date) {

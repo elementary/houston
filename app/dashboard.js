@@ -4,6 +4,7 @@ import ini from 'ini';
 
 import app from 'houston/app';
 import { loggedIn } from 'houston/app/auth.js';
+import { Application } from 'houston/app/models/project';
 
 app.get('/dashboard', loggedIn, (req, res, next) => {
 
@@ -13,19 +14,7 @@ app.get('/dashboard', loggedIn, (req, res, next) => {
 
   Promise.resolve(gh.request('GET /user/repos', { type: 'public' }))
   // Transform the repo results from GitHub into our application format
-  .map(repoResult => ({
-    repo: {
-      owner: repoResult.owner.login, // 'elementary'
-      name: repoResult.name, // 'wingpanel'
-      fullName: repoResult.full_name, // 'elementary/wingpanel'
-    },
-    icon: {
-      name: null, // 'wingpanel'
-      data: null, // <base64-encoded image>
-    },
-    priceUSD: null, // An integer, from appHubFileResult
-    appHubFileResult: null,
-  }))
+  .map(repoData => Application.findOrCreateGitHubData(repoData))
   // Ask GitHub for the .AppHub file
   .map(fetchAppHubFile)
   // Filter out repos which do not contain a top-level '.apphub' file
@@ -35,6 +24,7 @@ app.get('/dashboard', loggedIn, (req, res, next) => {
   .map(parseAppHubFileIfPossible)
   .map(fetchDesktopFileIfPossible)
   .map(fetchAppIconIfPossible)
+  .map(application => application.save())
   .then(applications => {
     res.render('dashboard', {
       title: 'Dashboard',
@@ -45,7 +35,7 @@ app.get('/dashboard', loggedIn, (req, res, next) => {
   .catch(next);
 
   function fetchAppHubFile(application) {
-    const fullName = application.repo.fullName;
+    const fullName = application.github.fullName;
     return Promise.resolve(gh.request(`GET /repos/${fullName}/contents/.apphub`))
     .then(appHubFileResult => {
       application.appHubFileResult = appHubFileResult;
@@ -71,8 +61,8 @@ app.get('/dashboard', loggedIn, (req, res, next) => {
   }
 
   function fetchDesktopFileIfPossible(application) {
-    const fullName = application.repo.fullName;
-    const repoName = application.repo.name;
+    const fullName = application.github.fullName;
+    const repoName = application.github.name;
     return gh.request(`GET /repos/${fullName}/contents/data/${repoName}.desktop`)
     .then(desktopFileResult => {
       // Parse the .desktop file
@@ -86,7 +76,7 @@ app.get('/dashboard', loggedIn, (req, res, next) => {
   }
 
   function fetchAppIconIfPossible(application) {
-    const fullName = application.repo.fullName;
+    const fullName = application.github.fullName;
     const iconName = application.icon.name;
     return gh.request(`GET /repos/${fullName}/contents/icons/64/${iconName}.svg`)
     .then(appIconResult => {

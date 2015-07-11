@@ -2,7 +2,7 @@
 
 <div class="row">
     {{#each applications}}
-      <div class="repo needs-release" href="/project/gh/{{repo.fullName}}">
+      <div class="repo" href="/project/gh/{{github.fullName}}">
         <!-- {{{json this}}} -->
         {{#if icon.data}}
           <img class="app-icon" src="data:image/svg+xml;base64,{{{icon.data}}}" />
@@ -15,14 +15,30 @@
           {{else}}
             <p><em>unknown app</em></p>
           {{/if}}
-          <p class="subtext"><a href="https://github.com/{{repo.fullName}}" target="_blank">{{repo.fullName}}</a></p>
+          <p class="subtext">
+            <a href="https://github.com/{{github.fullName}}" target="_blank">{{github.fullName}}</a>
+          </p>
         </div>
 
-        {{> popover-needs-release}}
-        {{> popover-publish}}
-        {{> popover-in-progress}}
-        {{> popover-failure}}
-        {{> popover-needs-review}}
+        {{#if state.standby }}
+          {{> popover-needs-release}}
+        {{/if}}
+
+        {{#if state.new-releases }}
+          {{> popover-publish}}
+        {{/if}}
+
+        {{#if state.building }}
+          {{> popover-in-progress}}
+        {{/if}}
+
+        {{#if state.failed }}
+          {{> popover-failure}}
+        {{/if}}
+
+        {{#if state.reviewing }}
+          {{> popover-needs-review}}
+        {{/if}}
       </div>
     {{else}}
       <h3>No elementary apps found!</h3>
