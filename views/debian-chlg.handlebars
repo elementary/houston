@@ -1,12 +1,7 @@
-{{#if unstable}}
-{{../package}} ({{version}}) {{dist}}; urgency=low
-  Daily Build
- -- Daily Build <daily@houston.elementary.io>  {{{debianTimeNow}}}
-{{/if}}
-{{#each changelog}}
+{{#eachReverse iterations}}
 {{../package}} ({{version}}) {{../dist}}; urgency=low
   {{#each items}}
     * {{{this}}}
   {{/each}}
  -- {{{author}}} <{{{author}}}@houston.elementary.io>  {{{debianTime date}}}
-{{/each}}
+{{/eachReverse}}

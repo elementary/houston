@@ -6,6 +6,7 @@ const IterationsSchema = mongoose.Schema({
   date:       Date,
   items:      [String],
   status:     String,
+  tag:        String,
   builds:     [ {
     arch:       String,
     target:     String,

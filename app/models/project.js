@@ -1,18 +1,22 @@
 import mongoose from 'mongoose';
 import Hubkit from 'hubkit';
-import Jenkins from 'houston/app/models/jenkins';
+import Promise from 'bluebird';
+import ini from 'ini';
+import semver from 'semver';
 
 import app from 'houston/app';
+import Jenkins from 'houston/app/models/jenkins';
 import { IterationsSchema } from 'houston/app/models/iterations.js';
 
 // Create an instance of Hubkit
-var gh = new Hubkit({});
+var gh = new Hubkit();
 
 var ApplicationSchema = mongoose.Schema({
   github: {
     owner:    String,   // Owner of the GitHub repository
     name:     String,   // Github Repository name
     repoUrl:  String,   // GitHub Git Repository url
+    APItoken: String,   // GitHub accessToken of the last user to access this app
   },
   icon: {
     name:     String,   // 'wingpanel'
@@ -21,6 +25,8 @@ var ApplicationSchema = mongoose.Schema({
   priceUSD:   Number,   // An integer, from appHubFileResult
   name:       String,   // Applications actual name
   package:    String,   // Debian Package Name
+  dists:      [String], // Enabled Dists for builds
+  archs:      [String], // Enabled Archs for builds
   status:     { type: String, default: '' },   // Status of the latest built
   version:    String,                          // Currently published & reviewed version
   iterations: [IterationsSchema],              // Changelog of all published versions with builds
@@ -29,31 +35,99 @@ var ApplicationSchema = mongoose.Schema({
 /* Make sure all virtual Properties show up in JSON */
 ApplicationSchema.set('toJSON', { virtuals: true });
 
-/* Create the Project if it does not exist,
- * needs user data for private GH repos */
-ApplicationSchema.statics.findOrCreateGitHubData = function(repoData) {
-  return this.findOne({'github.fullName': repoData.full_name}).exec()
-    .then(repo => {
-      if (repo) {
-        return repo;
-      } else {
-        return this.create({
-          github: {
-            owner: repoData.owner.login,
-            name: repoData.name,
-            fullName: repoData.full_name,
-          },
-          icon: {
-            name: null,
-            data: null,
-          },
-          priceUSD: null,
-        })
+ApplicationSchema.statics.fetchReleases = function(application) {
+  console.log(application.github.fullName);
+  return gh.request('GET /repos/:fullName/releases', {
+    fullName: application.github.fullName,
+    token: application.github.APItoken,
+  }).then(releases => {
+    let newReleases = false;
+    if (typeof application.iterations === 'undefined') {
+      application.iterations = [];
+    }
+    let newestRelease = application.iterations[application.iterations.length - 1];
+    if (!newestRelease) {
+      newestRelease = { version: '0.0.0' };
+    }
+    for (var i = releases.length - 1; i >= 0; i--) {
+      if (semver.valid(releases[i].tag_name, true)) {
+        // Only count them if they use proper (GitHub suggested) versioning and
+        // are newer than the current project version
+        if (semver.gt(releases[i].tag_name, newestRelease.version, true)) {
+          application.iterations.push({
+            version:    semver.clean(releases[i].tag_name, true),
+            author:     releases[i].author.login,
+            date:       releases[i].published_at,
+            items:      releases[i].body.split('\r\n'),
+            status:     'NEW',
+            tag:        releases[i].tag_name,
+            builds:     [],
+          });
+          newReleases = true;
+        }
       }
-    });
+    }
+    if (newReleases && (application.status === '' || application.status === undefined)) {
+      application.status = 'NEW RELEASE';
+    }
+    return application;
+  });
+}
+
+ApplicationSchema.statics.fetchAppHubFile = function(application) {
+  const fullName = application.github.fullName;
+  return Promise.resolve(gh.request(`GET /repos/${fullName}/contents/.apphub`, {
+    token: application.github.APItoken,
+  })).then(appHubFileResult => {
+    application.appHubFileResult = appHubFileResult;
+    return application;
+  });
+}
+
+
+ApplicationSchema.statics.parseAppHubFileIfPossible = function(application) {
+  return Promise.try(() => {
+    // Parse the .desktop file
+    const appHubFileBuf = new Buffer(application.appHubFileResult.content, 'base64');
+    const appHubData = JSON.parse(appHubFileBuf.toString());
+    application.priceUSD = appHubData.priceUSD;
+    delete application.appHubFileResult;
+    return application;
+  })
+  .catch(() => application);
+}
+
+ApplicationSchema.statics.fetchDesktopFileIfPossible = function(application) {
+  const fullName = application.github.fullName;
+  const repoName = application.github.name;
+  return gh.request(`GET /repos/${fullName}/contents/data/${repoName}.desktop`, {
+    token: application.github.APItoken,
+  }).then(desktopFileResult => {
+    // Parse the .desktop file
+    const desktopFileBuf = new Buffer(desktopFileResult.content, 'base64');
+    const desktopData = ini.parse(desktopFileBuf.toString());
+    application.name = desktopData['Desktop Entry'].Name;
+    application.icon.name = desktopData['Desktop Entry'].Icon;
+    return application;
+  })
+  .catch(() => application);
+}
+
+ApplicationSchema.statics.fetchAppIconIfPossible = function(application) {
+  const fullName = application.github.fullName;
+  const iconName = application.icon.name;
+  return gh.request(`GET /repos/${fullName}/contents/icons/64/${iconName}.svg`, {
+    token: application.github.APItoken,
+  }).then(appIconResult => {
+    // `appIconResult.content` is already base64-encoded
+    application.icon.data = appIconResult.content;
+    return application;
+  })
+  .catch(() => application);
 }
 
 ApplicationSchema.statics.updateBuild = function(data) {
+  // TODO: Clean this up, it's crappy code!
   return this.findOne({ 'github.repoUrl': data.parameters.REPO }).exec()
     .then(project => {
       for (var iter in project.iterations) {
@@ -68,7 +142,7 @@ ApplicationSchema.statics.updateBuild = function(data) {
                     .then(function(log) {
                       project.iterations[iter].builds[build].status = data.status;
                       // TODO: Only save failed builds
-                      roject.iterations[iter].builds[build].log = log;
+                      project.iterations[iter].builds[build].log = log;
                       return project.save();
                     });
                   break;
@@ -84,65 +158,40 @@ ApplicationSchema.statics.updateBuild = function(data) {
         }
       }
     });
-};
+}
 
-ApplicationSchema.methods.doBuild = function(params) {
-  if (!params) {
-    params = {
-      PACKAGE:   this.package,
-      REPO:      this.github.repoUrl,
-      ARCH:      'amd64',  // TODO: iterate over enabled archs
-      DIST:      'trusty', // TODO: iterate over enabled dists
-      REFERENCE: 'master', // TODO: use reference from github hooks
-      unstable:  true,     // TODO: seprate out stable & unstable builds
-    }
-  }
-  return this.debianVersion(params)
-    .then(this.debianChangelog.bind(this))
+ApplicationSchema.statics.doBuild = function(application) {
+  const iteration = application.iterations[application.iterations.length - 1];
+
+  const params = {
+    PACKAGE:   application.package ? application.package : application.github.name ,
+    REPO:      application.github.repoUrl,
+    VERSION:   iteration.version,
+    ARCH:      'amd64',        // TODO: iterate over enabled archs
+    DIST:      'trusty',       // TODO: iterate over enabled dists
+    REFERENCE: iteration.tag,
+  };
+  console.log(params);
+  return ApplicationSchema.statics.debianChangelog(application, params)
     .then(Jenkins.doBuild)
     .then(buildId => {
       // Insert a new Build into the Project DB
-      this.builds.push({
+      iteration.builds.push({
         arch:       params.ARCH,
         target:     params.DIST,
-        version:    params.VERSION,
         status:     'QUEUED',
       });
-      return this.save();
+      return application.save();
     });
 }
 
-ApplicationSchema.methods.generateGitHubChangelog = function() {
-  // TODO: Add Access Token for private repos
-  return gh.request('GET /repos/:owner/:repo/releases', {
-      owner: this.github.owner,
-      repo: this.github.repo,
-      // TODO: Add Token to this request  // token: ,
-    }).then(releases => {
-      for (var i in releases) {
-        // Only count them if they use proper (GitHub suggested) versioning
-        if (releases[i].tag_name.substring(0, 1) === 'v') {
-          this.changelog.push({
-            version: releases[i].tag_name.substring(1),
-            author:  releases[i].author.login,
-            date:    releases[i].published_at,
-            items:   releases[i].body.split('\r\n'),
-          });
-        }
-      }
-      return this.save();
-    });
-};
-
-ApplicationSchema.methods.debianChangelog = function(params) {
+ApplicationSchema.statics.debianChangelog = function(application, params) {
   return new Promise((resolve, reject) => {
     app.render('debian-chlg', {
       layout:       false,
       dist:         params.DIST,
-      package:      this.package,
-      changelog:    this.changelog,
-      version:      params.VERSION,
-      unstable:     params.unstable,
+      package:      params.PACKAGE,
+      iterations:   application.iterations,
     }, (err, changelog) => {
       if (err) {
         reject(err);
@@ -152,31 +201,9 @@ ApplicationSchema.methods.debianChangelog = function(params) {
       }
     })
   });
-};
-
-ApplicationSchema.methods.debianVersion = function(params) {
-  if (!params.unstable) {
-    // Use latest Release on GitHub for Versioning
-    params.VERSION = this.changelog[0].version;
-    // Reset build counter
-    this.update({buildId: 0});
-    return params;
-  } else {
-    // Use unstable versioning, basing off of latest Release
-    return this.update({ $inc: { buildId: 1 }})
-      .then(result => {
-        if (result.ok) {
-          // Add more meta information for non stable Builds
-          params.VERSION = this.changelog[0].version + '+build'
-            + this.buildId + '~git.' + params.REFERENCE;
-          return params;
-        } else {
-          throw new Error('Failed to Update BuildId');
-        }
-      });
-  }
 }
 
+/* Add some helper properties to make our lives easy */
 ApplicationSchema.virtual('github.fullName').get(function() {
   return this.github.owner + '/' + this.github.name;
 });
