@@ -16,6 +16,7 @@ app.get('/dashboard', loggedIn, (req, res, next) => {
   }))
   // Transform the repo results from GitHub into our application format, or load from the DB
   .map(repoData => findOrCreatefromGitHubData(repoData, req.user))
+  // De-reflect promise
   .filter(promise => promise.isFulfilled())
   .map(promise => promise.value())
   .then(applications => {
@@ -57,7 +58,6 @@ function findOrCreatefromGitHubData(repoData, user) {
         priceUSD: null,
       })
       .then(Application.fetchAppHubFile)
-      // De-reflect promise
       .then(Application.parseAppHubFileIfPossible)
       .then(Application.fetchDesktopFileIfPossible)
       .then(Application.fetchAppIconIfPossible)

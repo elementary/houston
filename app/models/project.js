@@ -27,18 +27,19 @@ var ApplicationSchema = mongoose.Schema({
   package:    String,   // Debian Package Name
   dists:      [String], // Enabled Dists for builds
   archs:      [String], // Enabled Archs for builds
-  status:     { type: String, default: '' },   // Status of the latest built
+  status:     { type: String, default: '', enum: [
+    'REVIEWING', 'FAILED', 'BUILDING', 'NEW RELEASE', '',
+  ], },   // Status of the latest built
   version:    String,                          // Currently published & reviewed version
   iterations: [IterationsSchema],              // Changelog of all published versions with builds
 });
 
-/* Make sure all virtual Properties show up in JSON */
+// Make sure all virtual Properties show up in JSON
 ApplicationSchema.set('toJSON', { virtuals: true });
 
 ApplicationSchema.statics.fetchReleases = function(application) {
-  console.log(application.github.fullName);
-  return gh.request('GET /repos/:fullName/releases', {
-    fullName: application.github.fullName,
+  const fullName = application.github.fullName;
+  return gh.request(`GET /repos/${fullName}/releases`, {
     token: application.github.APItoken,
   }).then(releases => {
     let newReleases = false;
@@ -49,7 +50,7 @@ ApplicationSchema.statics.fetchReleases = function(application) {
     if (!newestRelease) {
       newestRelease = { version: '0.0.0' };
     }
-    for (var i = releases.length - 1; i >= 0; i--) {
+    for (let i = releases.length - 1; i >= 0; i--) {
       if (semver.valid(releases[i].tag_name, true)) {
         // Only count them if they use proper (GitHub suggested) versioning and
         // are newer than the current project version
@@ -83,7 +84,6 @@ ApplicationSchema.statics.fetchAppHubFile = function(application) {
     return application;
   });
 }
-
 
 ApplicationSchema.statics.parseAppHubFileIfPossible = function(application) {
   return Promise.try(() => {
@@ -126,8 +126,9 @@ ApplicationSchema.statics.fetchAppIconIfPossible = function(application) {
   .catch(() => application);
 }
 
+// Updates Information on Builds based on Jenkins hooks (build started, build finished ...)
 ApplicationSchema.statics.updateBuild = function(data) {
-  // TODO: Clean this up, it's crappy code!
+  // TODO: Clean this up, it's chttp://www.squarespace.com/rappy code!
   return this.findOne({ 'github.repoUrl': data.parameters.REPO }).exec()
     .then(project => {
       for (var iter in project.iterations) {
@@ -162,7 +163,6 @@ ApplicationSchema.statics.updateBuild = function(data) {
 
 ApplicationSchema.statics.doBuild = function(application) {
   const iteration = application.iterations[application.iterations.length - 1];
-
   const params = {
     PACKAGE:   application.package ? application.package : application.github.name ,
     REPO:      application.github.repoUrl,
@@ -171,7 +171,6 @@ ApplicationSchema.statics.doBuild = function(application) {
     DIST:      'trusty',       // TODO: iterate over enabled dists
     REFERENCE: iteration.tag,
   };
-  console.log(params);
   return ApplicationSchema.statics.debianChangelog(application, params)
     .then(Jenkins.doBuild)
     .then(buildId => {
@@ -203,9 +202,9 @@ ApplicationSchema.statics.debianChangelog = function(application, params) {
   });
 }
 
-/* Add some helper properties to make our lives easy */
+// Add some helper properties to make our lives easy
 ApplicationSchema.virtual('github.fullName').get(function() {
-  return this.github.owner + '/' + this.github.name;
+  return `${this.github.owner}/${this.github.name}`;
 });
 ApplicationSchema.virtual('state.standby').get(function() {
   return (this.status === '' || this.status === null);
