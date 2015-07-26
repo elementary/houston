@@ -43,20 +43,14 @@ function findOrCreatefromGitHubData(repoData, user) {
         .then(application => application.save())
         .reflect();
     } else {
-      return Promise.resolve({
+      return Promise.resolve(new Application({
         github: {
           owner: repoData.owner.login,
           name: repoData.name,
           repoUrl: repoData.git_url,
-          fullName: repoData.full_name,
           APItoken: user.github.accessToken,
         },
-        icon: {
-          name: null,
-          data: null,
-        },
-        priceUSD: null,
-      })
+      }))
       .then(Application.fetchAppHubFile)
       .then(Application.parseAppHubFileIfPossible)
       .then(Application.fetchDesktopFileIfPossible)
@@ -64,7 +58,7 @@ function findOrCreatefromGitHubData(repoData, user) {
       .then(Application.fetchReleases)
       .then(application => {
         console.log('Created repo: ' + application.name);
-        return Application.create(application);
+        return application.save();
       })
       .reflect();
     }

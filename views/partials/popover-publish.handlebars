@@ -5,6 +5,11 @@
                 <h2>Publish</h2>
                 <p>Click to submit {{name}} for review.</p>
                 <p>Once it has been reviewed it will automatically be published in AppHub.</p>
+                <h2>Your latest release:</h2>
+                {{#lastElement iterations}}
+                  <!-- TODO: Add some pretty to be released version info -->
+                  <pre>{{json this}}</pre>
+                {{/lastElement}}
             </div>
         </div>
     </i>

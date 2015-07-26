@@ -27,3 +27,8 @@ export function eachReverse(context) {
   }
   return ret;
 };
+
+export function lastElement(context) {
+  var options = arguments[arguments.length - 1];
+  return options.fn(context[context.length - 1]);
+}

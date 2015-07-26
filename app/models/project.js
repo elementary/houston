@@ -25,10 +25,10 @@ var ApplicationSchema = mongoose.Schema({
   priceUSD:   Number,   // An integer, from appHubFileResult
   name:       String,   // Applications actual name
   package:    String,   // Debian Package Name
-  dists:      [String], // Enabled Dists for builds
-  archs:      [String], // Enabled Archs for builds
-  status:     { type: String, default: '', enum: [
-    'REVIEWING', 'FAILED', 'BUILDING', 'NEW RELEASE', '',
+  dists:      {type: [String], default: ['trusty-amd64', 'trusty-i386'] },
+  // Enabled Dists-Arch for builds eg. trusty-amd64, trusty-i386
+  status:     { type: String, default: 'STANDBY', enum: [
+    'REVIEWING', 'FAILED', 'BUILDING', 'NEW RELEASE', 'STANDBY',
   ], },   // Status of the latest built
   version:    String,                          // Currently published & reviewed version
   iterations: [IterationsSchema],              // Changelog of all published versions with builds
@@ -68,7 +68,7 @@ ApplicationSchema.statics.fetchReleases = function(application) {
         }
       }
     }
-    if (newReleases && (application.status === '' || application.status === undefined)) {
+    if (newReleases && application.state.standby) {
       application.status = 'NEW RELEASE';
     }
     return application;
@@ -163,43 +163,54 @@ ApplicationSchema.statics.updateBuild = function(data) {
 
 ApplicationSchema.statics.doBuild = function(application) {
   const iteration = application.iterations[application.iterations.length - 1];
-  const params = {
-    PACKAGE:   application.package ? application.package : application.github.name ,
-    REPO:      application.github.repoUrl,
-    VERSION:   iteration.version,
-    ARCH:      'amd64',        // TODO: iterate over enabled archs
-    DIST:      'trusty',       // TODO: iterate over enabled dists
-    REFERENCE: iteration.tag,
-  };
-  return ApplicationSchema.statics.debianChangelog(application, params)
-    .then(Jenkins.doBuild)
-    .then(buildId => {
+  let params = [];
+  for (let i = 0; i < application.dists.length; i++) {
+    const archAndDist = application.dists[i].split('-');
+    params.push({
+      PACKAGE:   application.package ? application.package : application.github.name ,
+      REPO:      application.github.repoUrl,
+      VERSION:   iteration.version,
+      DIST:      archAndDist[0],
+      ARCH:      archAndDist[1],
+      REFERENCE: iteration.tag,
+    });
+  }
+  return Promise.all(ApplicationSchema.statics.debianChangelog(application, params))
+    .map(Jenkins.doBuild)
+    .map(params => {
       // Insert a new Build into the Project DB
       iteration.builds.push({
         arch:       params.ARCH,
         target:     params.DIST,
         status:     'QUEUED',
       });
+    })
+    .then(builds => {
+      application.status = 'BUILDING';
       return application.save();
     });
 }
 
 ApplicationSchema.statics.debianChangelog = function(application, params) {
-  return new Promise((resolve, reject) => {
-    app.render('debian-chlg', {
-      layout:       false,
-      dist:         params.DIST,
-      package:      params.PACKAGE,
-      iterations:   application.iterations,
-    }, (err, changelog) => {
-      if (err) {
-        reject(err);
-      } else {
-        params.CHANGELOG = changelog;
-        resolve(params);
-      }
-    })
-  });
+  const promises = [];
+  for (let i in params) {
+    promises.push(new Promise((resolve, reject) => {
+      app.render('debian-chlg', {
+        layout:       false,
+        dist:         params[i].DIST,
+        package:      params[i].PACKAGE,
+        iterations:   application.iterations,
+      }, (err, changelog) => {
+        if (err) {
+          reject(err);
+        } else {
+          params[i].CHANGELOG = changelog;
+          resolve(params[i]);
+        }
+      })
+    }));
+  }
+  return promises;
 }
 
 // Add some helper properties to make our lives easy
@@ -207,7 +218,7 @@ ApplicationSchema.virtual('github.fullName').get(function() {
   return `${this.github.owner}/${this.github.name}`;
 });
 ApplicationSchema.virtual('state.standby').get(function() {
-  return (this.status === '' || this.status === null);
+  return this.status === 'STANDBY';
 });
 ApplicationSchema.virtual('state.new-release').get(function() {
   return this.status === 'NEW RELEASE';

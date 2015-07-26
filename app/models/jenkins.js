@@ -11,7 +11,7 @@ var Jenkins = {
     return jenkins.job.build({
       name: CONFIG.JENKINS_JOB,
       parameters: params,
-    });
+    }).then(buildId => params);
   },
 
   getLogs: function(build) {
