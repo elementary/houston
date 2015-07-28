@@ -128,35 +128,27 @@ ApplicationSchema.statics.fetchAppIconIfPossible = function(application) {
 
 // Updates Information on Builds based on Jenkins hooks (build started, build finished ...)
 ApplicationSchema.statics.updateBuild = function(data) {
-  // TODO: Clean this up, it's chttp://www.squarespace.com/rappy code!
-  return this.findOne({ 'github.repoUrl': data.parameters.REPO }).exec()
-    .then(project => {
-      for (var iter in project.iterations) {
-        if (project.iterations[iter].version === data.parameters.VERSION) {
-          for (var build in project.iterations[iter].builds) {
-            if (project.iterations[iter].builds[build].arch   === data.parameters.ARCH &&
-                project.iterations[iter].builds[build].target === data.parameters.DIST) {
-              switch (data.phase) {
-                case 'FINALIZED': {
-                  // TODO: Implement notifications for builds
-                  return Jenkins.getLogs(data.number)
-                    .then(function(log) {
-                      project.iterations[iter].builds[build].status = data.status;
-                      // TODO: Only save failed builds
-                      project.iterations[iter].builds[build].log = log;
-                      return project.save();
-                    });
-                  break;
-                }
-                case 'STARTED': {
-                  roject.iterations[iter].builds[build].status = 'BUILDING';
-                  return project.save();
-                  break;
-                }
-              }
-            }
-          }
+  const objectIDs = data.parameters.IDENTIFIER.split('#');
+  return this.findOne({ _id: objectIDs[0]}).exec()
+    .then(application => {
+      const iteration = application.iterations.id(objectIDs[1]);
+      const build = iteration.id(objectIDs[2]);
+      if (data.phase === 'FINALIZED') {
+        // We are done with this build, let's update the DB
+        build.status = data.status;
+        if (data.status === 'FAILED') {
+          return Jenkins.getLogs(data.number)
+          .then(function(log) {
+            build.log = log;
+            return application.save();
+          });
+        } else {
+          return application.save();
         }
+      } else if (data.phase === 'STARTED') {
+        // Jenkins started building this Build, let's update the DB
+        build.status = 'BUILDING';
+        return application.save();
       }
     });
 }
@@ -167,24 +159,27 @@ ApplicationSchema.statics.doBuild = function(application) {
   for (let i = 0; i < application.dists.length; i++) {
     const archAndDist = application.dists[i].split('-');
     params.push({
-      PACKAGE:   application.package ? application.package : application.github.name ,
+      PACKAGE:   application.package ? application.package : application.github.name,
       REPO:      application.github.repoUrl,
       VERSION:   iteration.version,
       DIST:      archAndDist[0],
       ARCH:      archAndDist[1],
       REFERENCE: iteration.tag,
+      IDENTIFIER: application._id + '#' + iteration._id + '#',
     });
   }
   return Promise.all(ApplicationSchema.statics.debianChangelog(application, params))
-    .map(Jenkins.doBuild)
     .map(params => {
       // Insert a new Build into the Project DB
-      iteration.builds.push({
+      const i = iteration.builds.push({
         arch:       params.ARCH,
         target:     params.DIST,
         status:     'QUEUED',
       });
+      params.IDENTIFIER += iteration.builds[i - 1]._id;
+      return params;
     })
+    .map(Jenkins.doBuild)
     .then(builds => {
       application.status = 'BUILDING';
       return application.save();
