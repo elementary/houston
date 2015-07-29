@@ -131,58 +131,36 @@ ApplicationSchema.statics.updateBuild = function(data) {
   const objectIDs = data.parameters.IDENTIFIER.split('#');
   return this.findOne({ _id: objectIDs[0]}).exec()
     .then(application => {
-      const iteration = application.iterations.id(objectIDs[1]);
-      const build = iteration.id(objectIDs[2]);
-      if (data.phase === 'FINALIZED') {
-        // We are done with this build, let's update the DB
-        build.status = data.status;
-        if (data.status === 'FAILED') {
-          return Jenkins.getLogs(data.number)
-          .then(function(log) {
-            build.log = log;
-            return application.save();
-          });
-        } else {
-          return application.save();
-        }
-      } else if (data.phase === 'STARTED') {
-        // Jenkins started building this Build, let's update the DB
-        build.status = 'BUILDING';
-        return application.save();
-      }
-    });
-}
-
-ApplicationSchema.statics.doBuild = function(application) {
-  const iteration = application.iterations[application.iterations.length - 1];
-  let params = [];
-  for (let i = 0; i < application.dists.length; i++) {
-    const archAndDist = application.dists[i].split('-');
-    params.push({
-      PACKAGE:   application.package ? application.package : application.github.name,
-      REPO:      application.github.repoUrl,
-      VERSION:   iteration.version,
-      DIST:      archAndDist[0],
-      ARCH:      archAndDist[1],
-      REFERENCE: iteration.tag,
-      IDENTIFIER: application._id + '#' + iteration._id + '#',
-    });
-  }
-  return Promise.all(ApplicationSchema.statics.debianChangelog(application, params))
-    .map(params => {
-      // Insert a new Build into the Project DB
-      const i = iteration.builds.push({
-        arch:       params.ARCH,
-        target:     params.DIST,
-        status:     'QUEUED',
-      });
-      params.IDENTIFIER += iteration.builds[i - 1]._id;
-      return params;
-    })
-    .map(Jenkins.doBuild)
-    .then(builds => {
-      application.status = 'BUILDING';
-      return application.save();
+      const iteration = application.releases.id(objectIDs[1]);
+      // Update that Build with Jenkins Data
+      return iteration.updateBuild(objectIDs[2], data)
+        .then(iteration => {
+          let buildsFinished = true;
+          let buildsFailed = false;
+          const iteration = application.releases.id(objectIDs[1]);
+          for (let i = 0; i < iteration.builds.length; i++) {
+            switch (releases.builds[i].status) {
+              case 'FAILED': {
+                buildsFailed = true;
+                break;
+              }
+              case 'QUEUED':
+              case 'STARTED': {
+                buildsFinished = false;
+                break;
+              }
+            }
+          }
+          if (buildsFinished) {
+            if (buildsFailed) {
+              // TODO: Builds Failed, File issues on GitHub
+              iteration.status = 'FAILED';
+            } else {
+              iteration.status = 'SUCESS'
+            }
+          }
+          application.save()
+        });
     });
 }
 
