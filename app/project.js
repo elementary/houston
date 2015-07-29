@@ -1,7 +1,5 @@
-import _ from 'underscore';
-
 import app from 'houston/app';
-import { Application } from 'houston/app/models/project';
+import { Application } from 'houston/app/models/application';
 import { loggedIn } from 'houston/app/auth';
 
 // Manually trigger a jenkins build job
@@ -10,7 +8,10 @@ app.get('/project/gh/:org/:name/build', loggedIn, (req, res, next) => {
     'github.owner': req.params.org,
     'github.name': req.params.name,
   })
-  .then(Application.doBuild)
+  .then(application => {
+    const iteration = application.releases[application.releases.length - 1];
+    return iteration.doBuild();
+  })
   .then(build => res.redirect('/dashboard'), next);
 });
 

@@ -6,7 +6,7 @@ import semver from 'semver';
 
 import app from 'houston/app';
 import Jenkins from 'houston/app/models/jenkins';
-import { IterationsSchema } from 'houston/app/models/iterations.js';
+import { ReleasesSchema } from 'houston/app/models/releases';
 
 // Create an instance of Hubkit
 var gh = new Hubkit();
@@ -31,7 +31,7 @@ var ApplicationSchema = mongoose.Schema({
     'REVIEWING', 'FAILED', 'BUILDING', 'NEW RELEASE', 'STANDBY',
   ], },   // Status of the latest built
   version:    String,                          // Currently published & reviewed version
-  iterations: [IterationsSchema],              // Changelog of all published versions with builds
+  releases: [ReleasesSchema],              // Changelog of all published versions with builds
 });
 
 // Make sure all virtual Properties show up in JSON
@@ -43,10 +43,10 @@ ApplicationSchema.statics.fetchReleases = function(application) {
     token: application.github.APItoken,
   }).then(releases => {
     let newReleases = false;
-    if (typeof application.iterations === 'undefined') {
-      application.iterations = [];
+    if (typeof application.releases === 'undefined') {
+      application.releases = [];
     }
-    let newestRelease = application.iterations[application.iterations.length - 1];
+    let newestRelease = application.releases[application.releases.length - 1];
     if (!newestRelease) {
       newestRelease = { version: '0.0.0' };
     }
@@ -55,7 +55,7 @@ ApplicationSchema.statics.fetchReleases = function(application) {
         // Only count them if they use proper (GitHub suggested) versioning and
         // are newer than the current project version
         if (semver.gt(releases[i].tag_name, newestRelease.version, true)) {
-          application.iterations.push({
+          application.releases.push({
             version:    semver.clean(releases[i].tag_name, true),
             author:     releases[i].author.login,
             date:       releases[i].published_at,
@@ -194,7 +194,7 @@ ApplicationSchema.statics.debianChangelog = function(application, params) {
         layout:       false,
         dist:         params[i].DIST,
         package:      params[i].PACKAGE,
-        iterations:   application.iterations,
+        releases:   application.releases,
       }, (err, changelog) => {
         if (err) {
           reject(err);
