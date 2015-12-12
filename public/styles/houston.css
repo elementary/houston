@@ -120,6 +120,7 @@ input[type="checkbox"]:checked + span {
 
 i.fab {
     font-size: 24px;
+    float: right;
     text-align: center;
     color: #fff;
     background-color: #3d9bda;
