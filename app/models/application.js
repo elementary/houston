@@ -39,9 +39,10 @@ ApplicationSchema.set('toJSON', { virtuals: true });
 
 ApplicationSchema.statics.fetchReleases = function(application) {
   const fullName = application.github.fullName;
-  return gh.request(`GET /repos/${fullName}/releases`, {
+  console.log(`fetching releases for app with full name ${fullName}`);
+  return Promise.resolve(gh.request(`GET /repos/${fullName}/releases`, {
     token: application.github.APItoken,
-  }).then(releases => {
+  })).then(releases => {
     let newReleases = false;
     if (typeof application.releases === 'undefined') {
       application.releases = [];
@@ -60,7 +61,7 @@ ApplicationSchema.statics.fetchReleases = function(application) {
             author:     releases[i].author.login,
             date:       releases[i].published_at,
             items:      releases[i].body.split('\r\n'),
-            status:     'NEW',
+            status:     'NEW RELEASE',
             tag:        releases[i].tag_name,
             builds:     [],
           });

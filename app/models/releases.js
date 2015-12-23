@@ -1,5 +1,8 @@
 import mongoose from 'mongoose';
+import Promise from 'bluebird';
 import Jenkins from 'houston/app/models/jenkins';
+
+import { ApplicationSchema } from 'houston/app/models/application';
 
 const ReleasesSchema = mongoose.Schema({
   version:    String,
