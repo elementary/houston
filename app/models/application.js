@@ -131,13 +131,13 @@ ApplicationSchema.statics.updateBuild = function(data) {
   const objectIDs = data.parameters.IDENTIFIER.split('#');
   return this.findOne({ _id: objectIDs[0]}).exec()
     .then(application => {
-      const iteration = application.releases.id(objectIDs[1]);
+      let iteration = application.releases.id(objectIDs[1]);
       // Update that Build with Jenkins Data
       return iteration.updateBuild(objectIDs[2], data)
         .then(iteration => {
           let buildsFinished = true;
           let buildsFailed = false;
-          const iteration = application.releases.id(objectIDs[1]);
+          iteration = application.releases.id(objectIDs[1]);
           for (let i = 0; i < iteration.builds.length; i++) {
             switch (releases.builds[i].status) {
               case 'FAILED': {
