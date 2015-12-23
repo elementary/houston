@@ -1,4 +1,4 @@
-import app from './index';
+import app from '~/';
 var debug = require('debug')('houston:server');
 import http from 'http';
 

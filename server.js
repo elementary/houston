@@ -1,8 +1,6 @@
 #!/usr/bin/env node
-require("babel-register");
+require('babel-register');
 
-var server = require("./app/server");
+CONFIG = require('./config');
 
-/**
- * Module dependencies.
- */
+var server = require('./app/server');

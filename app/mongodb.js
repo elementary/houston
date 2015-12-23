@@ -1,8 +1,5 @@
 import mongoose from 'mongoose';
 
-import app from 'houston/app';
-import CONFIG from 'houston/config.json';
-
 mongoose.connect(CONFIG.MONGODB_URL);
 
 mongoose.connection.on(

@@ -1,6 +1,6 @@
-import app from 'houston/app';
-import { Application } from 'houston/app/models/application';
-import { loggedIn } from 'houston/app/auth';
+import app from '~/';
+import { Application } from '~/models/application';
+import { loggedIn } from '~/auth';
 
 // Manually trigger a jenkins build job
 app.get('/project/gh/:org/:name/build', loggedIn, (req, res, next) => {

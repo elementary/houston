@@ -2,9 +2,9 @@ import Hubkit from 'hubkit';
 import Promise from 'bluebird';
 import ini from 'ini';
 
-import app from 'houston/app';
-import { loggedIn } from 'houston/app/auth';
-import { Application } from 'houston/app/models/application';
+import app from '~/';
+import { loggedIn } from '~/auth';
+import { Application } from '~/models/application';
 
 // Create Hubkit with a static instance
 let gh = new Hubkit();

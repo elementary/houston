@@ -1,10 +1,8 @@
 import passport from 'passport';
 import { Strategy as GitHubStrategy } from 'passport-github';
 
-import app from 'houston/app';
-import { User } from 'houston/app/models/user';
-import CONFIG from 'houston/config.json';
-
+import app from '~/';
+import { User } from '~/models/user';
 
 // TODO: Serialize User for sessions
 passport.serializeUser(function(user, done) {
