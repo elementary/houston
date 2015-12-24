@@ -324,6 +324,11 @@ section.hero .button.suggested-action{
     margin: 12px;
 }
 
+.repo i .popover-container .popover-content h3 {
+    font-size: 16px;
+    margin: 12px;
+}
+
 .repo i .popover-container .popover-content p {
     margin: 12px;
 }
