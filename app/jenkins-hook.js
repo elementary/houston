@@ -1,9 +1,9 @@
 import app from 'houston/app';
-import { Project } from 'houston/app/models/project';
+import { Application } from 'houston/app/models/application';
 import CONFIG from 'houston/config.json';
 
 app.post('/jenkins-hook/' + CONFIG.JENKINS_SECRET, function(req, res) {
-  Project.updateBuild(req.body.build)
+  Application.updateBuild(req.body.build)
     .then(function() {
       res.end('ok');
     });

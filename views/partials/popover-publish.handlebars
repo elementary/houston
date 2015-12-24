@@ -1,10 +1,15 @@
-<a href="#">
+<a href="/project/gh/{{github.fullName}}/build">
     <i class="fa fab fa-arrow-up">
         <div class="popover-container">
             <div class="popover-content">
                 <h2>Publish</h2>
                 <p>Click to submit {{name}} for review.</p>
                 <p>Once it has been reviewed it will automatically be published in AppHub.</p>
+                <h2>Your latest release:</h2>
+                {{#lastElement releases}}
+                  <!-- TODO: Add some pretty to be released version info -->
+                  <pre>{{json this}}</pre>
+                {{/lastElement}}
             </div>
         </div>
     </i>

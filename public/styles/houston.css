@@ -196,7 +196,7 @@ section.hero .button.suggested-action{
 }
 
 .repo i {
-    display: none;
+    display: inline-block;
     position: relative;
     vertical-align: 10px;
     margin-left: 24px;
@@ -328,28 +328,21 @@ section.hero .button.suggested-action{
     margin: 12px;
 }
 
-.repo.needs-release i.fa-tag {
-    display: inline-block;
-}
-
-.repo.publish i.fa-arrow-up {
-    display: inline-block;
+.repo i.fa-arrow-up {
     background-color: #73d216;;
 }
 
-.repo.failure i.fa-exclamation-triangle {
-    display: inline-block;
+.repo i.fa-exclamation-triangle {
     background-color: #fbc02d;
 }
 
-.repo.needs-review i.fa-user,
-.repo.in-progress i.fa-refresh {
-    display: inline-block;
+.repo i.fa-user,
+.repo i.fa-refresh {
     color: #777;
     box-shadow: none;
 }
 
-.repo.in-progress .fa-refresh:before {
+.repo .fa-refresh:before {
     -webkit-animation:spin 4s linear infinite;
     -moz-animation:spin 4s linear infinite;
     animation:spin 4s linear infinite;

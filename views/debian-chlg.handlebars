@@ -1,9 +1,4 @@
-{{#if unstable}}
-{{../package}} ({{version}}) {{dist}}; urgency=low
-  Daily Build
- -- Daily Build <daily@houston.elementary.io>  {{{debianTimeNow}}}
-{{/if}}
-{{#each changelog}}
+{{#each iterations}}
 {{../package}} ({{version}}) {{../dist}}; urgency=low
   {{#each items}}
     * {{{this}}}
