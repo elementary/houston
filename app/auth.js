@@ -21,13 +21,11 @@ passport.use(new GitHubStrategy({
     clientID: CONFIG.GITHUB_CLIENT_ID,
     clientSecret: CONFIG.GITHUB_CLIENT_SECRET,
     callbackURL: CONFIG.GITHUB_CALLBACK,
-  },
-  // TODO: Pretty up this Promise part
-  function(accessToken, refreshToken, profile, done) {
-    User.findOrCreateGitHub(accessToken, refreshToken, profile)
-      .then(function(user) {
+  }, (accessToken, refreshToken, profile, done) => {
+    User.updateOrCreate(accessToken, profile)
+      .then(user => {
         done(null, user);
-      }, function(err) {
+      }, err => {
         done(err);
       });
   }
