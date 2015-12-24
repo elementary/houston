@@ -13,6 +13,7 @@ const ReleasesSchema = mongoose.Schema({
     'NEW RELEASE', 'BUILDING', 'REVIEWING', 'FAILED', 'SUCCESS',
   ], },
   tag:        String,
+  body:       String, // release notes
   builds:     [ {
     arch:       String,
     target:     String,
