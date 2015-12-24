@@ -11,25 +11,29 @@ var UserSchema = mongoose.Schema({
   rights:     String,
 });
 
-UserSchema.statics.findOrCreateGitHub =
-  function(accessToken, refreshToken, profile) {
-    var self = this;
-    return self.findOne({username: profile.username}).exec()
-      .then(function(user) {
-        if (user) {
-          return user;
-        } else {
-          return self.create({
-            username: profile.username,
-            email:    profile.emails[0].value,
-            avatar:   profile._json['avatar_url'],
-            github:   {accessToken: accessToken, refreshToken: refreshToken},
-            joined:   Date.now(),
-            active:   true,
-          });
-        }
+UserSchema.statics.updateOrCreate = function(accessToken, profile) {
+  return this.findOne({
+    username: profile.username
+  })
+  .exec()
+  .then(user => {
+    if (user) {
+      user.email = profile.emails[0].value;
+      user.avatar = profile._json['avatar_url'];
+      user.github = {accessToken: accessToken};
+      return user.save();
+    } else {
+      return this.create({
+        username: profile.username,
+        email:    profile.emails[0].value,
+        avatar:   profile._json['avatar_url'],
+        github:   {accessToken: accessToken},
+        joined:   Date.now(),
+        active:   true,
       });
-  };
+    }
+  });
+};
 
 var User = mongoose.model('user', UserSchema);
 
