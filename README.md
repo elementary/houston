@@ -18,21 +18,13 @@ AppHub developer dashboard and backend.
 
 We'd love your help hacking on Houston! Getting a local development environment set up is easy, and we've prepared a short guide to walk you through step-by-step. Just follow along below, and if you have any issues, don't hesitate to [ask for help](https://github.com/elementary/houston/issues/new).
 
-We use [Vagrant](https://www.vagrantup.com/) to simplify management of our local development environments.
+To get started working on Houston:
 
-1. Setting up Vagrant is super simple. Just download and install [Vagrant](https://www.vagrantup.com/downloads.html) and [VirtualBox](https://www.virtualbox.org/wiki/Downloads). If you're running elementary OS or Ubuntu, you can use:
-
-  ```sudo apt-get install vagrant virtualbox```
-
-2. Run `vagrant up` from the root of the directory where you cloned this repository.
-
-    This will spin up an Ubuntu virtual machine as per our Vagrant file and [rsync](https://en.wikipedia.org/wiki/Rsync) the contents of the repository directory into the VM. If you'd like to connect to the VM and poke around, you can do so with `vagrant ssh`. The synced directory lives in `~/houston`.
-
-3. Now that you've got your development environment set up, you'll need to set up Houston's config file, `config.json`. Copy the config file template:
+1. You'll need to set up Houston's config file, `config.json`. Copy the config file template:
 
   ```cp config.example.json config.json```
 
-4. Then, create a GitHub OAuth application for testing Houston: https://github.com/settings/applications/new.
+2. Then, create a GitHub OAuth application for testing Houston: https://github.com/settings/applications/new.
 
   Name the application "Houston Local", and set the homepage and callback URLs to your local machine, like this:
 
@@ -44,7 +36,7 @@ We use [Vagrant](https://www.vagrantup.com/) to simplify management of our local
 
    ![](https://i.imgur.com/PGKT7GC.png)
 
-5. Click Register application, and then copy and paste the newly created application's Client ID into `config.json` under `GITHUB_CLIENT_ID` and copy the Client Secret under `GITHUB_CLIENT_SECRET`.
+3. Click Register application, and then copy and paste the newly created application's Client ID into `config.json` under `GITHUB_CLIENT_ID` and copy the Client Secret under `GITHUB_CLIENT_SECRET`.
 
    ![](https://i.imgur.com/D0VxJcX.png)
 
@@ -64,11 +56,29 @@ We use [Vagrant](https://www.vagrantup.com/) to simplify management of our local
   }
   ```
 
-6. Now, re-sync the Vagrant VM with `vagrant reload`.
+We use [Vagrant](https://www.vagrantup.com/) to simplify management of our local development environments. Or you can skip the steps below to develop without Vagrant:
 
-7. Open up a browser and visit http://localhost:3000, and you should see the Houston website.
+1. Setting up Vagrant is super simple. Just download and install [Vagrant](https://www.vagrantup.com/downloads.html) and [VirtualBox](https://www.virtualbox.org/wiki/Downloads). If you're running elementary OS or Ubuntu, you can use:
 
-If you do — congratulations, you're all ready to hack on Houston! Please take a look at the [open issues](https://github.com/elementary/houston/issues) and submit a [Pull Request](https://help.github.com/articles/creating-a-pull-request/) with your changes :) We really appreciate your help!
+  ```sudo apt-get install vagrant virtualbox```
+
+2. Run `vagrant up` from the root of the directory where you cloned this repository.
+
+    This will spin up an Ubuntu virtual machine as per our Vagrant file and [rsync](https://en.wikipedia.org/wiki/Rsync) the contents of the repository directory into the VM. If you'd like to connect to the VM and poke around, you can do so with `vagrant ssh`. The synced directory lives in `~/houston`.
+
+You can also choose to develop without Vagrant.
+
+1. Install node.js and npm
+
+  ```sudo apt-get install nodejs-legacy npm```
+  
+2. run `npm install` to fetch needed dependencies.
+3. Start the server with `npm start`
+
+
+In either case, open up a browser and visit http://localhost:3000, and you should see the Houston website. If you do — congratulations, you're all ready to hack on Houston!
+
+Please take a look at the [open issues](https://github.com/elementary/houston/issues) and submit a [Pull Request](https://help.github.com/articles/creating-a-pull-request/) with your changes :) We really appreciate your help!
 
 ## Contributing
 
