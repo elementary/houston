@@ -79,7 +79,7 @@ Vagrant.configure(2) do |config|
     sudo apt-get install -y build-essential nodejs mongodb-org git
 
     # start the database
-    sudo service mongodb start
+    sudo service mongod start
 
     # setup log file
     sudo touch /var/log/houston.log
@@ -100,7 +100,7 @@ Vagrant.configure(2) do |config|
 
 description "elementary houston node server"
 
-start on mounted mongodb
+start on mounted mongod
 stop on shutdown
 
 respawn
