@@ -6,7 +6,8 @@ import semver from 'semver';
 
 import app from 'houston/app';
 import Jenkins from 'houston/app/models/jenkins';
-import { ReleasesSchema } from 'houston/app/models/releases';
+import ReleasesSchema from 'houston/app/models/releases';
+import IssueSchema from 'houston/app/models/issue';
 
 // Create an instance of Hubkit
 var gh = new Hubkit();
@@ -32,6 +33,7 @@ var ApplicationSchema = mongoose.Schema({
   ], },   // Status of the latest built
   version:    String,                          // Currently published & reviewed version
   releases: [ReleasesSchema],              // Changelog of all published versions with builds
+  issues: [IssueSchema],
 });
 
 // Make sure all virtual Properties show up in JSON
@@ -185,6 +187,12 @@ ApplicationSchema.statics.debianChangelog = function(application, params) {
     }));
   }
   return promises;
+}
+
+ApplicationSchema.methods.syncIssuesToGitHub = function() {
+  return Promise
+  .all(this.issues.map(issue => issue.syncToGitHub()))
+  .then(() => this);
 }
 
 // Add some helper properties to make our lives easy

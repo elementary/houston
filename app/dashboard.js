@@ -40,6 +40,7 @@ function findOrCreatefromGitHubData(repoData, user) {
       console.log('Found repo: ' + repo.name);
       return Promise.resolve(repo)
         .then(Application.fetchReleases)
+        .then(application => application.syncIssuesToGitHub())
         .then(application => application.save())
         .reflect();
     } else {
