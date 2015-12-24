@@ -72,8 +72,8 @@ You can also choose to develop without Vagrant.
 
   ```sudo apt-get install nodejs-legacy npm```
   
-2. run `npm-install` to fetch needed dependencies.
-3. Start the server with `npm-start`
+2. run `npm install` to fetch needed dependencies.
+3. Start the server with `npm start`
 
 
 In either case, open up a browser and visit http://localhost:3000, and you should see the Houston website. If you do — congratulations, you're all ready to hack on Houston!
