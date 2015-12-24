@@ -1,7 +1,13 @@
 # Houston
 **Prepare for liftoff.**
 
-AppHub developer dashboard and backend.
+The concept of Houston is to create a developer dashboard and backend for converting GitHub repos into Debian packages. Developers create a repo containing a `.apphub` file which is then shown on their dashboard. Houston reports the status of the repo here:
+
+* Needs Release: This repo needs a new git tag that is not already associated with a build and with a suitable changelog before it can be published
+* Publish: The repo has a git tag that doesn't already have an associated build
+* In Progress: The repo is currently being tested or built.
+* Failure: The repo was not succesfully published as a debian package due to build failure or test suite failure. At this stage, houston will file issues with more detail into the repo's GitHub issues tracker
+* Needs Review: The git repo was succesfully built into a debian package and requires a human to move it from the "testing" deb repo to the "stable" deb repo. After this task is completed, start over with "Needs Release" status.
 
 ## Architecture Overview
 * HTML/CSS/JS
