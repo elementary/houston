@@ -88,6 +88,9 @@ Vagrant.configure(2) do |config|
     # use nodemon for easy development
     sudo npm install -g nodemon
 
+    # update npm to latest version
+    sudo npm -g install npm
+
     # install packages
     cd /home/vagrant/houston
     npm install
