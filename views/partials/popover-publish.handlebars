@@ -3,13 +3,10 @@
         <div class="popover-container">
             <div class="popover-content">
                 <h2>Publish</h2>
-                <p>Click to submit {{name}} for review.</p>
+                <p>Click to submit {{name}} {{#lastElement releases}}{{version}}{{/lastElement}} for review.</p>
                 <p>Once it has been reviewed it will automatically be published in AppHub.</p>
-                <h2>Your latest release:</h2>
-                {{#lastElement releases}}
-                  <!-- TODO: Add some pretty to be released version info -->
-                  <pre>{{json this}}</pre>
-                {{/lastElement}}
+                <h3>Changelog:</h3>
+                <p>{{#lastElement releases}}{{items}}{{/lastElement}}</p>
             </div>
         </div>
     </i>
