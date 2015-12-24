@@ -8,10 +8,15 @@ if (CONFIG.JENKINS_ENABLED) {
 
 var Jenkins = {
   doBuild: function(params) {
-    return jenkins.job.build({
-      name: CONFIG.JENKINS_JOB,
-      parameters: params,
-    }).then(buildId => params);
+    if (CONFIG.JENKINS_ENABLED) {
+      return jenkins.job.build({
+        name: CONFIG.JENKINS_JOB,
+        parameters: params,
+      }).then(buildId => params);
+    } else {
+      console.log(params);
+      return params;
+    }
   },
 
   getLogs: function(build) {
