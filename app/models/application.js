@@ -63,6 +63,7 @@ ApplicationSchema.statics.fetchReleases = function(application) {
             items:      releases[i].body.split('\r\n'),
             status:     'NEW RELEASE',
             tag:        releases[i].tag_name,
+            body:       releases[i].body,
             builds:     [],
           });
           newReleases = true;
