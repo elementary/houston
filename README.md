@@ -72,6 +72,6 @@ If you do — congratulations, you're all ready to hack on Houston! Please take 
 
 ## Contributing
 
-We [lint](https://en.wikipedia.org/wiki/Lint_(software) our JavaScript code with [JSCS](http://jscs.info) to ensure our code is consistently styled and formatted.
+We [lint](https://en.wikipedia.org/wiki/Lint_(software)) our JavaScript code with [JSCS](http://jscs.info) to ensure our code is consistently styled and formatted.
 
 Please lint your code before submitting a pull request :)
