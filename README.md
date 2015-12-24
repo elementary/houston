@@ -68,7 +68,7 @@ We use [Vagrant](https://www.vagrantup.com/) to simplify management of our local
 
 You can also choose to develop without Vagrant.
 
-1. Install mongodb, node.js, and npm
+1. Install MongoDB, Node.js, and NPM
 
   ```sudo apt-get install mongodb nodejs-legacy npm```
   
