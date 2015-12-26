@@ -26,6 +26,7 @@
     "morgan": "~1.5.2",
     "passport": "~0.2.1",
     "passport-github": "~0.1.5",
+    "semver": "^5.1.0",
     "serve-favicon": "~2.2.0",
     "then-jenkins": "~0.7.1",
     "underscore": "~1.8.3"
