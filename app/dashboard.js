@@ -60,6 +60,7 @@ app.get('/dashboard', loggedIn, wrap(async (req, res, next) => {
         .then(Application.fetchAppIconIfPossible)
       )
       .then(Application.fetchReleases)
+      .then(Application.syncIssuesToGitHub)
       .then(application => application.save())
     })
     .value()

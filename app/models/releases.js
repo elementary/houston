@@ -78,4 +78,4 @@ ReleasesSchema.methods.updateBuild = function(buildId, data) {
   }
 }
 
-export { ReleasesSchema };
+export default ReleasesSchema;
