@@ -76,16 +76,6 @@ ApplicationSchema.statics.fetchReleases = function(application) {
   });
 }
 
-ApplicationSchema.statics.fetchAppHubFile = function(application) {
-  const fullName = application.github.fullName;
-  return Promise.resolve(gh.request(`GET /repos/${fullName}/contents/.apphub`, {
-    token: application.github.APItoken,
-  })).then(appHubFileResult => {
-    application.appHubFileResult = appHubFileResult;
-    return application;
-  });
-}
-
 ApplicationSchema.statics.parseAppHubFileIfPossible = function(application) {
   return Promise.try(() => {
     // Parse the .desktop file
