@@ -70,14 +70,14 @@ We use [Vagrant](https://www.vagrantup.com/) to simplify management of our local
 
 2. Run `vagrant up` from the root of the directory where you cloned this repository.
 
-    This will spin up an Ubuntu virtual machine as per our Vagrant file and [rsync](https://en.wikipedia.org/wiki/Rsync) the contents of the repository directory into the VM. If you'd like to connect to the VM and poke around, you can do so with `vagrant ssh`. The synced directory lives in `~/houston`.
+    This will spin up an Ubuntu virtual machine as per our Vagrant file and [rsync](https://en.wikipedia.org/wiki/Rsync) the contents of the repository directory into the VM. If you'd like to connect to the VM and poke around, you can do so with `vagrant ssh`. The synced directory lives in `~/houston`, and logs in `/var/log/houston.log`.
 
 You can also choose to develop without Vagrant.
 
 1. Install MongoDB, Node.js, and NPM
 
   ```sudo apt-get install mongodb nodejs-legacy npm```
-  
+
 2. run `npm install` to fetch needed dependencies.
 3. Start the server with `npm start`
 

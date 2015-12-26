@@ -67,33 +67,26 @@ Vagrant.configure(2) do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+  config.vm.provision "shell", privileged: true, inline: <<-SHELL
     # install packages
-    sudo apt-get update
+    apt-get update
 
-    curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
-    echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+    curl -sL https://deb.nodesource.com/setup_4.x | bash -
+    apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10
+    echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.0.list
 
-    sudo apt-get -y update
-    sudo apt-get install -y build-essential nodejs mongodb-org git
-
-    # start the database
-    sudo service mongod start
+    apt-get -y update
+    apt-get install -y build-essential nodejs mongodb-org git
 
     # setup log file
-    sudo touch /var/log/houston.log
-    sudo chmod 777 /var/log/houston.log
+    touch /var/log/houston.log
+    chmod 777 /var/log/houston.log
 
     # use nodemon for easy development
-    sudo npm install -g nodemon
+    npm i -g nodemon
 
     # update npm to latest version
-    sudo npm -g install npm
-
-    # install packages
-    cd /home/vagrant/houston
-    npm install
+    npm i -g npm
 
     # make an autorun file for reboots
     echo '# houston node server
@@ -119,9 +112,18 @@ end script
 pre-stop script
   rm /var/run/houston.pid
   echo "[`date`] houston stopping" >> /var/log/houston.log
-end script' | sudo tee /etc/init/houston.conf
+end script' | tee /etc/init/houston.conf
+  SHELL
+
+  config.vm.provision "shell", privileged: false, run: "always", inline: <<-SHELL
+    echo "Installing npm packages"
+    echo "Grab some coffee, this can take time"
+    # install packages
+    cd /home/vagrant/houston
+    npm install
 
     sudo service houston start
+    echo "Running houston server"
   SHELL
 
 end
