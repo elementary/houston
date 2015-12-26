@@ -1,10 +1,4 @@
-#!/usr/bin/env node
-
-/**
- * Module dependencies.
- */
-
-import app from './app';
+import app from '~/';
 var debug = require('debug')('houston:server');
 import http from 'http';
 

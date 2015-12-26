@@ -4,9 +4,9 @@ import Promise from 'bluebird';
 import ini from 'ini';
 import semver from 'semver';
 
-import app from 'houston/app';
-import Jenkins from 'houston/app/models/jenkins';
-import { ReleasesSchema } from 'houston/app/models/releases';
+import app from '~/';
+import Jenkins from '~/models/jenkins';
+import { ReleasesSchema } from '~/models/releases';
 
 // Create an instance of Hubkit
 var gh = new Hubkit();

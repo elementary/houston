@@ -1,4 +1,4 @@
-import app from 'houston/app';
+import app from '~/';
 
 
 /* GET home page. */
