@@ -4,7 +4,7 @@ import _ from 'underscore';
 import ini from 'ini';
 
 import app from '~/';
-import { loggedIn } from '~/auth';
+import { isBeta } from '~/auth';
 import { Application } from '~/models/application';
 
 // Create Hubkit with a static instance
@@ -27,7 +27,7 @@ function repoHasAppHubFile(repo, token) {
   });
 }
 
-app.get('/dashboard', loggedIn, wrap(async (req, res, next) => {
+app.get('/dashboard', isBeta, wrap(async (req, res, next) => {
   const repos = await gh.request('GET /user/repos', {
     type: 'public',
     token: req.user.github.accessToken,

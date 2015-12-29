@@ -34,7 +34,7 @@ app.use(passport.session());
 
 // Redirect to GitHub to login
 app.get('/auth/github',
-  passport.authenticate('github', { scope: 'repo' }),
+  passport.authenticate('github', { scope: 'repo read:org' }),
     function(req, res) {
       // Just a redirect, no actions here.
     });
@@ -58,4 +58,37 @@ export function loggedIn(req, res, next) {
     return next();
   }
   res.redirect('/auth/github');
+}
+
+export function isBeta(req, res, next) {
+  if (req.isAuthenticated() &&
+     (!CONFIG.RIGHTS_ENABLED ||
+      req.user.rights === 'beta')) {
+    return next();
+  }
+  return res.render('error', {
+    message: 'Houston is currently only available to beta testers',
+  });
+}
+
+export function isReviewer(req, res, next) {
+  if (req.isAuthenticated() &&
+     (!CONFIG.RIGHTS_ENABLED ||
+      req.user.rights === 'reviewer')) {
+    return next();
+  }
+  return res.render('error', {
+    message: 'Only app reviewers are allowed to do this',
+  });
+}
+
+export function isAdmin(req, res, next) {
+  if (req.isAuthenticated() &&
+     (!CONFIG.RIGHTS_ENABLED ||
+      req.user.rights === 'admin')) {
+    return next();
+  }
+  return res.render('error', {
+    message: 'Only admins are allowed to do this',
+  });
 }
