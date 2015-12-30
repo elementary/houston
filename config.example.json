@@ -7,5 +7,9 @@
   "JENKINS_ENABLED": false,
   "JENKINS_URL": "http://<jenkins username>:<jenkins user api token>@jenkins.elementaryos.org",
   "JENKINS_JOB": "deb-new-test",
-  "JENKINS_SECRET": "test"
+  "JENKINS_SECRET": "test",
+  "RIGHTS_ENABLED": false,
+  "RIGHTS_ADMIN": 213128,
+  "RIGHTS_REVIEWER": 1880652,
+  "RIGHTS_ORG": "elementary"
 }

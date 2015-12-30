@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Hubkit from 'hubkit';
 
 var UserSchema = mongoose.Schema({
   username:   String,
@@ -7,13 +8,15 @@ var UserSchema = mongoose.Schema({
   github:     {accessToken: String, refreshToken: String},
   joined:     Date,
   lastVisit:  Date,
-  active:     Boolean,
-  rights:     String,
+  rights:     {
+    type: String,
+    validate: v => { ['user', 'beta', 'reviewer', 'admin'].indexOf(v) >= 0 },
+  },
 });
 
 UserSchema.statics.updateOrCreate = function(accessToken, profile) {
   return this.findOne({
-    username: profile.username
+    username: profile.username,
   })
   .exec()
   .then(user => {
@@ -29,11 +32,34 @@ UserSchema.statics.updateOrCreate = function(accessToken, profile) {
         avatar:   profile._json['avatar_url'],
         github:   {accessToken: accessToken},
         joined:   Date.now(),
-        active:   true,
       });
     }
-  });
+  })
+  .then(getRights);
 };
+
+// Checks github organizations and teams for correct permissions
+function getRights(user) {
+  const gh = new Hubkit({ token: user.github.accessToken, boolean: true });
+
+  return Promise.all([
+    gh.request(`GET /orgs/${CONFIG.RIGHTS_ORG}/members/${user.username}`),
+    gh.request(`GET /teams/${CONFIG.RIGHTS_REVIEWER}/memberships/${user.username}`),
+    gh.request(`GET /teams/${CONFIG.RIGHTS_ADMIN}/memberships/${user.username}`),
+  ])
+  .then(([isBeta, isReviewer, isAdmin]) => {
+    if (isAdmin) {
+      user.rights = 'admin'
+    } else if (isReviewer) {
+      user.rights = 'reviewer'
+    } else if (isBeta) {
+      user.rights = 'beta'
+    } else {
+      user.rights = 'user'
+    }
+    return user.save();
+  });
+}
 
 var User = mongoose.model('user', UserSchema);
 

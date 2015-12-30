@@ -1,9 +1,9 @@
 import app from '~/';
 import { Application } from '~/models/application';
-import { loggedIn } from '~/auth';
+import { isBeta } from '~/auth';
 
 // Manually trigger a jenkins build job
-app.get('/project/gh/:org/:name/build', loggedIn, (req, res, next) => {
+app.get('/project/gh/:org/:name/build', isBeta, (req, res, next) => {
   Application.findOne({
     'github.owner': req.params.org,
     'github.name': req.params.name,
@@ -16,7 +16,7 @@ app.get('/project/gh/:org/:name/build', loggedIn, (req, res, next) => {
 });
 
 // Delete the project from houston
-app.get('/project/gh/:org/:name/delete', loggedIn, function(req, res) {
+app.get('/project/gh/:org/:name/delete', isBeta, function(req, res) {
   Application.findOne({
     'github.owner': req.params.org,
     'github.name': req.params.name,
