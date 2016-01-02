@@ -1,9 +1,16 @@
-*~
-node_modules
+# Houston files
+*.log
 config.js
-config.json
-.ftpconfig
+
+# Node files
+node_modules
 npm-debug.log
+
+# System files
+*~
 .DS_Store
+.ftpconfig
+
+# Vagrant files
 .vagrant
 .bundle

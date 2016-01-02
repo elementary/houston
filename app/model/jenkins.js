@@ -1,24 +1,24 @@
 import jenkinsClient from 'then-jenkins';
 
-if (CONFIG.JENKINS_ENABLED) {
-  var jenkins = jenkinsClient(CONFIG.JENKINS_URL);
+import app from '~/';
+
+if (app.config.jenkins.enabled) {
+  var jenkins = jenkinsClient(app.config.jenkins.url);
 }
 
 var Jenkins = {
   doBuild: function(params) {
-    if (CONFIG.JENKINS_ENABLED) {
+    if (app.config.jenkins.enabled) {
       return jenkins.job.build({
-        name: CONFIG.JENKINS_JOB,
+        name: app.config.jenkins.job,
         parameters: params,
       }).then(buildId => params);
     } else {
-      console.log(params);
       return params;
     }
   },
-
   getLogs: function(build) {
-    return jenkins.build.log(CONFIG.JENKINS_JOB, build);
+    return jenkins.build.log(app.config.jenkins.job, build);
   },
 };
 

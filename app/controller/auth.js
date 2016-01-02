@@ -2,7 +2,7 @@ import passport from 'passport';
 import { Strategy as GitHubStrategy } from 'passport-github';
 
 import app from '~/';
-import { User } from '~/models/user';
+import { User } from '~/model/user';
 
 // TODO: Serialize User for sessions
 passport.serializeUser(function(user, done) {
@@ -16,9 +16,9 @@ passport.deserializeUser(function(obj, done) {
 
 // Define GitHub Login Strategy
 passport.use(new GitHubStrategy({
-    clientID: CONFIG.GITHUB_CLIENT_ID,
-    clientSecret: CONFIG.GITHUB_CLIENT_SECRET,
-    callbackURL: CONFIG.GITHUB_CALLBACK,
+    clientID: app.config.github.clientID,
+    clientSecret: app.config.github.secret,
+    callbackURL: app.config.github.callback,
   }, (accessToken, refreshToken, profile, done) => {
     User.updateOrCreate(accessToken, profile)
       .then(user => {
@@ -57,12 +57,12 @@ export function loggedIn(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   }
-  res.redirect('/auth/github');
+  return res.redirect('/auth/github');
 }
 
 export function isBeta(req, res, next) {
   if (req.isAuthenticated() &&
-     (!CONFIG.RIGHTS_ENABLED ||
+     (!app.config.rights.enabled ||
       req.user.rights === 'beta')) {
     return next();
   }
@@ -73,7 +73,7 @@ export function isBeta(req, res, next) {
 
 export function isReviewer(req, res, next) {
   if (req.isAuthenticated() &&
-     (!CONFIG.RIGHTS_ENABLED ||
+     (!app.config.rights.enabled ||
       req.user.rights === 'reviewer')) {
     return next();
   }
@@ -84,7 +84,7 @@ export function isReviewer(req, res, next) {
 
 export function isAdmin(req, res, next) {
   if (req.isAuthenticated() &&
-     (!CONFIG.RIGHTS_ENABLED ||
+     (!app.config.rights.enabled ||
       req.user.rights === 'admin')) {
     return next();
   }

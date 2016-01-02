@@ -1,6 +1,6 @@
 import app from '~/';
-import { Application } from '~/models/application';
-import { isBeta } from '~/auth';
+import { Application } from '~/model/application';
+import { isBeta } from './auth';
 
 // Manually trigger a jenkins build job
 app.get('/project/gh/:org/:name/build', isBeta, (req, res, next) => {

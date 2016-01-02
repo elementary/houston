@@ -17,7 +17,7 @@ IssueSchema.methods.syncToGitHub = function() {
   const application = this.ownerDocument();
   const fullName = application.github.fullName;
   if (this.githubNumber) {
-    console.log('github number true');
+    app.log.silly('github number true');
     return gh.request(`GET /repos/${fullName}/issues/${this.githubNumber}`, {
       token: application.github.APItoken,
     })

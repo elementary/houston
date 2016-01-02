@@ -1,11 +1,11 @@
 import Hubkit from 'hubkit';
 import Promise from 'bluebird';
-import _ from 'underscore';
+import _ from 'lodash';
 import ini from 'ini';
 
 import app from '~/';
-import { isBeta } from '~/auth';
-import { Application } from '~/models/application';
+import { isBeta } from './auth';
+import { Application } from '~/model/application';
 
 // Create Hubkit with a static instance
 let gh = new Hubkit();
