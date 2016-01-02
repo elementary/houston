@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import Hubkit from 'hubkit';
 
+import app from '~/';
+
 var UserSchema = mongoose.Schema({
   username:   String,
   emails:     String,
@@ -10,7 +12,8 @@ var UserSchema = mongoose.Schema({
   lastVisit:  Date,
   rights:     {
     type: String,
-    validate: v => { ['user', 'beta', 'reviewer', 'admin'].indexOf(v) >= 0 },
+    default: 'user',
+    enum: ['user', 'beta', 'reviewer', 'admin'],
   },
 });
 
@@ -43,9 +46,9 @@ function getRights(user) {
   const gh = new Hubkit({ token: user.github.accessToken, boolean: true });
 
   return Promise.all([
-    gh.request(`GET /orgs/${CONFIG.RIGHTS_ORG}/members/${user.username}`),
-    gh.request(`GET /teams/${CONFIG.RIGHTS_REVIEWER}/memberships/${user.username}`),
-    gh.request(`GET /teams/${CONFIG.RIGHTS_ADMIN}/memberships/${user.username}`),
+    gh.request(`GET /orgs/${app.config.rights.org}/members/${user.username}`),
+    gh.request(`GET /teams/${app.config.rights.reviewer}/memberships/${user.username}`),
+    gh.request(`GET /teams/${app.config.rights.admin}/memberships/${user.username}`),
   ])
   .then(([isBeta, isReviewer, isAdmin]) => {
     if (isAdmin) {

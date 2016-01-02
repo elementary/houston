@@ -5,9 +5,9 @@ import ini from 'ini';
 import semver from 'semver';
 
 import app from '~/';
-import Jenkins from '~/models/jenkins';
-import ReleasesSchema from '~/models/releases';
-import IssueSchema from '~/models/issue';
+import Jenkins from './jenkins';
+import ReleasesSchema from './releases';
+import IssueSchema from './issue';
 
 // Create an instance of Hubkit
 var gh = new Hubkit();
@@ -41,7 +41,7 @@ ApplicationSchema.set('toJSON', { virtuals: true });
 
 ApplicationSchema.statics.fetchReleases = function(application) {
   const fullName = application.github.fullName;
-  console.log(`fetching releases for app with full name ${fullName}`);
+  app.log.silly(`fetching releases for app with full name ${fullName}`);
   return Promise.resolve(gh.request(`GET /repos/${fullName}/releases`, {
     token: application.github.APItoken,
   })).then(releases => {

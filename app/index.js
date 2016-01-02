@@ -1,61 +1,127 @@
-import express from 'express';
-import exphbs from 'express-handlebars';
-import path from 'path';
-import favicon from 'serve-favicon';
-import logger from 'morgan';
-import cookieParser from 'cookie-parser';
-import bodyParser from 'body-parser';
-import session from 'express-session';
-// TODO: Not sure how to express (ha, pun) this idiom with ES6 modules
-let MongoStore = require('connect-mongo')(session);
+#!/usr/bin/env node
+require('babel-register');
+require('babel-polyfill');
+var fs = require('fs');
+var express = require('express');
+var exphbs = require('express-handlebars');
+var path = require('path');
+var favicon = require('serve-favicon');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var session = require('express-session');
+var expressWinston = require('express-winston');
+var Winston = require('winston');
 
-import mongooseConnection from '~/mongodb';
+/**
+ * Start an app object
+ */
+var app = module.exports = express();
 
-// Initialize Application
-let app = express();
-export default app;
+/**
+ * Setup app configuration
+ */
+app.config = {}
 
-// Setup Handlebars Templates
-import * as HandlebarHelpers from './handlebars-helpers';
+try {
+  fs.statSync(path.join(__dirname, '../config.js'));
+} catch (err) {
+  throw new Error('It seems like you have not setup houston, we have a example config file for you, please set it up.');
+}
+
+app.config = require(path.join(__dirname, '../config.js'));
+
+app.config.env = process.env.NODE_ENV
+if (app.config.env == null) {
+  app.config.env = 'development'
+}
+
+/**
+ * Setup winston logging
+ */
+app.config.log.transports = [];
+
+if (app.config.log.console) {
+  app.config.log.transports.push(
+      new Winston.transports.Console({
+      prettyPrint: true,
+      colorize: true,
+      level: app.config.log.level,
+    })
+  )
+}
+
+if (app.config.log.files) {
+  app.config.log.transports.push(
+    new Winston.transports.File({
+      name: 'info-file',
+      filename: 'info.log',
+      level: 'info',
+    })
+  )
+  app.config.log.transports.push(
+    new Winston.transports.File({
+      name: 'error-file',
+      filename: 'error.log',
+      level: 'error',
+    })
+  )
+}
+
+app.log = new Winston.Logger({
+  transports: app.config.log.transports,
+});
+app.log.cli();
+
+/**
+ * Setup handlebars
+ */
+var hbsHelper = require(path.join(__dirname, '../views/helpers.js'));
 app.engine('handlebars', exphbs({
   defaultLayout: 'main',
-  helpers: HandlebarHelpers,
+  helpers: hbsHelper,
 }));
 app.set('view engine', 'handlebars');
 
-// Initialize Middleware
+/**
+ * Setup middleware
+ */
+app.set('port', app.config.server.port);
 app.use(favicon(path.join(__dirname, '../public/favicon.ico')));
-app.use(logger('dev'));
+app.use(expressWinston.logger({
+  transports: app.config.log.transports,
+  expressFormat: true,
+  meta: false,
+  level: 'silly',
+}));
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.use(session({
-  secret: CONFIG.SESSION_SECRET,
+  secret: app.config.server.secret,
   saveUninitialized: false, // Don't create session until something stored
   resave: false, // Don't save session if unmodified
-  store: new MongoStore({
-    mongooseConnection: mongooseConnection,
-  }),
 }));
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static('./public'));
 
-// Setup routes
-// TODO: Not sure how to idiomatically port this to ES6-modules;
-require.main.require('./app/home');
-require.main.require('./app/auth');
-require.main.require('./app/dashboard');
-require.main.require('./app/jenkins-hook');
-require.main.require('./app/project');
+/**
+ * Access all api files
+ */
+app.model = require('./model');
+app.controller = require('./controller');
 
-// Catch 404 Errors
+/**
+ * Catch 404 errors
+ */
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
-// Development error handler: will print stacktrace
-if (app.get('env') === 'development') {
+/**
+ * Setup 500 error pages
+ */
+if (app.config.env === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
@@ -65,7 +131,6 @@ if (app.get('env') === 'development') {
   });
 }
 
-// Production error handler: no stacktraces leaked to user
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {

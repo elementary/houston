@@ -26,9 +26,9 @@ We'd love your help hacking on Houston! Getting a local development environment 
 
 To get started working on Houston:
 
-1. You'll need to set up Houston's config file, `config.json`. Copy the config file template:
+1. You'll need to set up Houston's config file, `config.js`. Copy the config file template:
 
-  ```cp config.example.json config.json```
+  ```cp config.example.js config.js```
 
 2. Then, create a GitHub OAuth application for testing Houston: https://github.com/settings/applications/new.
 
@@ -42,24 +42,23 @@ To get started working on Houston:
 
    ![](https://i.imgur.com/PGKT7GC.png)
 
-3. Click Register application, and then copy and paste the newly created application's Client ID into `config.json` under `GITHUB_CLIENT_ID` and copy the Client Secret under `GITHUB_CLIENT_SECRET`.
+3. Click Register application, and then copy and paste the newly created application's Client ID into `config.js` under `github.clientID` and copy the Client Secret under `github.secret`.
 
    ![](https://i.imgur.com/D0VxJcX.png)
 
-   Your `config.json` should now look something like this:
+   Your `config.js` should now include a section that looks something like this:
 
-  ```json
-  {
-    "GITHUB_CLIENT_ID": "1e9ec151a7728abaa304",
-    "GITHUB_CLIENT_SECRET": "9ccde02a1633b27232ee07662b7a688c43018b1f",
-    "GITHUB_CALLBACK": "http://server2.elementaryos.org:3000/auth/github/callback",
-    "SESSION_SECRET": "testingsessions",
-    "MONGODB_URL": "mongodb://localhost/houston-dev",
-    "JENKINS_ENABLED": false,
-    "JENKINS_URL": "http://<jenkins username>:<jenkins user api token>@jenkins.elementaryos.org",
-    "JENKINS_JOB": "deb-new-test",
-    "JENKINS_SECRET": "test"
-  }
+  ```js
+  /**
+   * Github access
+   * https://github.com/settings/developers
+   */
+  github: {
+    clientID: '1e9ec151a7728abaa304',
+    secret: '9ccde02a1633b27232ee07662b7a688c43018b1f',
+    // Github authentication callback url. Don't change '/auth/github/callback'
+    callback: 'http://localhost:3000/auth/github/callback',
+  },
   ```
 
 We use [Vagrant](https://www.vagrantup.com/) to simplify management of our local development environments. Or you can skip the steps below to develop without Vagrant:
