@@ -14,26 +14,34 @@ var gh = new Hubkit();
 
 var ApplicationSchema = mongoose.Schema({
   github: {
-    owner:    String,   // Owner of the GitHub repository
-    name:     String,   // Github Repository name
-    repoUrl:  String,   // GitHub Git Repository url
-    APItoken: String,   // GitHub accessToken of the last user to access this app
+    owner:      String,   // Owner of the GitHub repository
+    name:       String,   // Github Repository name
+    repoUrl:    String,   // GitHub Git Repository url
+    APItoken:   String,   // GitHub accessToken of the last user to access this app
   },
   icon: {
-    name:     String,   // 'wingpanel'
-    data:     String,   // <base64-encoded image>
+    name:       String,   // 'wingpanel'
+    data:       String,   // <base64-encoded image>
   },
-  priceUSD:   Number,   // An integer, from appHubFileResult
-  name:       String,   // Applications actual name
-  package:    String,   // Debian Package Name
-  dists:      {type: [String], default: ['trusty-amd64', 'trusty-i386'] },
-  // Enabled Dists-Arch for builds eg. trusty-amd64, trusty-i386
-  status:     { type: String, default: 'STANDBY', enum: [
-    'REVIEWING', 'FAILED', 'BUILDING', 'NEW RELEASE', 'STANDBY',
-  ], },   // Status of the latest built
-  version:    String,                          // Currently published & reviewed version
-  releases: [ReleasesSchema],              // Changelog of all published versions with builds
-  issues: [IssueSchema],
+  priceUSD:     Number,   // An integer, from appHubFileResult
+  name:         String,   // Applications actual name
+  package:      String,   // Debian Package Name
+  dists: {                // Enabled Dists-Arch for builds eg. trusty-amd64, trusty-i386
+    type:      [String],
+    default:  ['trusty-amd64', 'trusty-i386'],
+  },
+  status: {               // Status of the latest built
+    type:       String,
+    default:   'STANDBY',
+    enum:     ['REVIEWING', 'FAILED', 'BUILDING', 'NEW RELEASE', 'STANDBY'],
+  },
+  version:      String,   // Currently published & reviewed version
+  releases:    [ReleasesSchema], // Changelog of all published versions with builds
+  issues:      [IssueSchema],
+  label: {                // Github issue label
+    type:       String,
+    default:   'AppHub',
+  },
 });
 
 // Make sure all virtual Properties show up in JSON
@@ -78,16 +86,19 @@ ApplicationSchema.statics.fetchReleases = function(application) {
   });
 }
 
-ApplicationSchema.statics.parseAppHubFileIfPossible = function(application) {
-  return Promise.try(() => {
-    // Parse the .desktop file
-    const appHubFileBuf = new Buffer(application.appHubFileResult.content, 'base64');
-    const appHubData = JSON.parse(appHubFileBuf.toString());
-    application.priceUSD = appHubData.priceUSD;
-    delete application.appHubFileResult;
-    return application;
+ApplicationSchema.statics.parseAppHubFile = function(application) {
+  const fullName = application.github.fullName;
+  return gh.request(`GET /repos/${fullName}/contents/.apphub`, {
+    token: application.github.APItoken,
   })
-  .catch(() => application);
+  .then(appHubFile => {
+    // Parse the .apphub file
+    const desktopFileBuf = new Buffer(appHubFile.content, 'base64');
+    const appHubFileJSON = JSON.parse(desktopFileBuf.toString())
+    application.priceUSD = appHubFileJSON.priceUSD
+    application.label = appHubFileJSON.issueLabel;
+    return application;
+  });
 }
 
 ApplicationSchema.statics.fetchDesktopFileIfPossible = function(application) {
@@ -183,6 +194,26 @@ ApplicationSchema.statics.syncIssuesToGitHub = function(application) {
   return Promise
     .all(application.issues.map(issue => issue.syncToGitHub()))
     .then(() => application);
+}
+
+ApplicationSchema.statics.createLabelIfNeeded = function(application) {
+  const fullName = application.github.fullName;
+  const label = application.label;
+  return gh.request(`GET /repos/${fullName}/labels/${label}`, {
+    token: application.github.APItoken,
+  })
+  .catch(err => {
+    if (err.status === 404) {
+      gh.request(`POST /repos/${fullName}/labels`, {
+        token: application.github.APItoken,
+        body: {
+          name: application.label,
+          color: '3A416F',
+        },
+      })
+    }
+  })
+  .then(() => application);
 }
 
 // Add some helper properties to make our lives easy
