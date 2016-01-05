@@ -55,11 +55,12 @@ app.get('/dashboard', isBeta, wrap(async (req, res, next) => {
             APItoken: req.user.github.accessToken,
           },
         }))
-        .then(Application.parseAppHubFileIfPossible)
+        .then(Application.parseAppHubFile)
         .then(Application.fetchDesktopFileIfPossible)
         .then(Application.fetchAppIconIfPossible)
       )
       .then(Application.fetchReleases)
+      .then(Application.createLabelIfNeeded)
       .then(Application.syncIssuesToGitHub)
       .then(application => application.save())
     })
