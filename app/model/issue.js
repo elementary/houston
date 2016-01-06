@@ -1,8 +1,8 @@
-import app from '~/'
-
 import mongoose from 'mongoose';
 import Promise from 'bluebird';
 import Hubkit from 'hubkit';
+
+import app from '~/'
 
 let gh = new Hubkit();
 
