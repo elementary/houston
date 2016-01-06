@@ -6,6 +6,8 @@ import semver from 'semver';
 import _ from 'lodash';
 
 import app from '~/';
+import Jenkins from './jenkins';
+import ReleaseSchema from './release';
 import IssueSchema from './issue';
 import Jenkins from './jenkins';
 import ReleaseSchema from './release';
@@ -109,6 +111,76 @@ ApplicationSchema.methods.releaseUpdateOrCreate = function(query, object) {
     }
 
     return Application.findOne({_id: application._id});
+  });
+}
+
+// Fetch all releases from Github
+// Returns saved application on success
+ApplicationSchema.methods.releaseFetchAll = function() {
+  const application = this;
+  const fullName = application.github.fullName;
+  app.log.silly(`application releaseFetchAll called for ${fullName}`);
+
+  const githubReleases =  gh.request(`GET /repos/${fullName}/releases`, {
+    token: application.github.APItoken,
+  })
+  .catch(error => {
+    return Promise.reject(`Received ${error.status} from github`);
+  });
+
+  return Promise.filter(githubReleases, release => {
+    return semver.valid(release.tag_name, true);
+  })
+  .map(release => {
+    return application.releaseUpdateOrCreate({
+      github: {
+        id:      release.id,
+      },
+    }, {
+      github: {
+        id:      release.id,
+        author:  release.author.login,
+        date:    release.published_at,
+        tag:     release.tag_name,
+      },
+      changelog: release.body.match(/.+/g),
+    });
+  })
+  .catch(error => {
+    return Promise.reject(error);
+  })
+  .then(applications => {
+    return Application.findOne({_id: application._id});
+  });
+}
+
+// Application methods
+// Helper function for application status
+// Returns a boolean always
+ApplicationSchema.methods.isStatus = function(query) {
+  return this.status === query;
+}
+
+// Pushes Github issue label to repository
+// Returns Promise with no data on success
+ApplicationSchema.methods.pushLabel = function() {
+  const application = this;
+  const fullName = application.github.fullName;
+  const label = application.github.label;
+  app.log.silly(`application pushLabel called for ${fullName}`);
+
+  return gh.request(`POST /repos/${fullName}/labels`, {
+    token: application.github.APItoken,
+    body: {
+      name: label,
+      color: '3A416F',
+    },
+  })
+  .catch(error => {
+    if (error.status === 422) { // Already created labels don't create errors
+      return Promise.resolve();
+    }
+    return Promise.reject(error);
   });
 }
 

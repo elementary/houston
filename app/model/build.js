@@ -1,8 +1,7 @@
-// Imports for packages
+
 import mongoose from 'mongoose';
 import Promise from 'bluebird';
 
-// Local imports
 import app from '~/';
 
 // Mongoose schema for builds

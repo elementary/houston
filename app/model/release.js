@@ -1,15 +1,12 @@
-// Imports for packages
 import mongoose from 'mongoose';
 import Promise from 'bluebird';
 import semver from 'semver';
 
-// Local imports
 import app from '~/'
 import Jenkins from './jenkins';
 import IssueSchema from './issue';
 import { BuildSchema } from './build';
 
-// Mongoose schema for releases
 const ReleaseSchema = mongoose.Schema({
   github: {                 // All Github communication data
     id:       Number,       // Id for Github API
