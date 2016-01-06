@@ -4,7 +4,7 @@ module.exports = {
   build: require('./build'),
   issue: require('./issue'),
   jenkins: require('./jenkins'),
-  releases: require('./releases'),
+  release: require('./release'),
   user: require('./user'),
 
 }

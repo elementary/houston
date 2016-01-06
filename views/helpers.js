@@ -1,10 +1,10 @@
 export function json(obj) {
-  if (obj.constructor.name === 'model') {
+  if (typeof obj.toJSON === 'function') {
     /* Make Mongoose Objects properly render JSON */
     return JSON.stringify(obj.toJSON(), null, 4);
-  } else {
-    return JSON.stringify(obj, null, 4);
   }
+
+  return JSON.stringify(obj, null, 4);
 }
 
 export function debianTime(date) {
@@ -31,4 +31,12 @@ export function eachReverse(context) {
 export function lastElement(context) {
   var options = arguments[arguments.length - 1];
   return options.fn(context[context.length - 1]);
+}
+
+export function is(t1, t2, data) {
+  if (t1 === t2) {
+    return data.fn(this);
+  }
+
+  return data.inverse(this);
 }
