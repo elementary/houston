@@ -4,6 +4,6 @@ module.exports = {
   dashboard: require('./dashboard'),
   home: require('./home'),
   jenkinsHook: require('./jenkins-hook'),
-  project: require('./project'),
+  project: require('./project')
 
 }

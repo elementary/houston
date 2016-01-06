@@ -5,6 +5,6 @@ module.exports = {
   issue: require('./issue'),
   jenkins: require('./jenkins'),
   releases: require('./releases'),
-  user: require('./user'),
+  user: require('./user')
 
 }
