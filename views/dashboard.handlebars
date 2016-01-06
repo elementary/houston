@@ -2,8 +2,8 @@
 
 <div class="row">
     {{#each applications}}
+      <!-- {{{json this}}} -->
       <div class="repo" href="/project/gh/{{github.fullName}}">
-        <!-- {{{json this}}} -->
         {{#if icon.data}}
           <img class="app-icon" src="data:image/svg+xml;base64,{{{icon.data}}}" />
         {{else}}
@@ -20,29 +20,29 @@
           </p>
         </div>
 
-        {{#if state.standby }}
-          {{> popover-needs-release}}
-        {{/if}}
+        {{#is status "STANDBY" }}
+          {{> status/needs-release}}
+        {{/is}}
 
-        {{#if state.new-release }}
-          {{> popover-publish}}
-        {{/if}}
+        {{#is status "NEW RELEASE" }}
+          {{> status/publish}}
+        {{/is}}
 
-        {{#if state.building }}
-          {{> popover-in-progress}}
-        {{/if}}
+        {{#is status "BUILDING" }}
+          {{> status/in-progress}}
+        {{/is}}
 
-        {{#if state.failed }}
-          {{> popover-failure}}
-        {{/if}}
+        {{#is status "REVIEWING" }}
+          {{> status/needs-review}}
+        {{/is}}
 
-        {{#if state.reviewing }}
-          {{> popover-needs-review}}
-        {{/if}}
+        {{#is status "FAILED" }}
+          {{> status/failure}}
+        {{/is}}
       </div>
     {{else}}
       <h3>No elementary apps found!</h3>
-      An empty <code>.apphub</code> in the root of the repo is how houston
+      An <code>.apphub</code> file in the root of the repo is how houston
       knows which apps to look at.
     {{/each}}
 </div>

@@ -5,9 +5,12 @@ import app from '~/';
 
 var UserSchema = mongoose.Schema({
   username:   String,
-  emails:     String,
+  email:      String,
   avatar:     String,
-  github:     {accessToken: String, refreshToken: String},
+  github: {
+    accessToken: String,
+    refreshToken: String,
+  },
   joined:     Date,
   lastVisit:  Date,
   rights:     {

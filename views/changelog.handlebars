@@ -1,7 +1,7 @@
 {{#eachReverse releases}}
 {{../package}} ({{version}}) {{../dist}}; urgency=low
-  {{#each items}}
+  {{#each changelog}}
     * {{{this}}}
   {{/each}}
- -- {{{author}}} <{{{author}}}@houston.elementary.io>  {{{debianTime date}}}
+ -- {{{github.author}}} <{{{github.author}}}@houston.elementary.io>  {{{debianTime github.date}}}
 {{/eachReverse}}

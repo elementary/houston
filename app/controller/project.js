@@ -8,11 +8,10 @@ app.get('/project/gh/:org/:name/build', isBeta, (req, res, next) => {
     'github.owner': req.params.org,
     'github.name': req.params.name,
   })
+  .then(application => application.release.latest.buildDo())
   .then(application => {
-    const iteration = application.releases[application.releases.length - 1];
-    return iteration.doBuild();
-  })
-  .then(build => res.redirect('/dashboard'), next);
+    res.redirect('/dashboard');
+  });
 });
 
 // Delete the project from houston
