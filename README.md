@@ -20,6 +20,14 @@ The concept of Houston is to create a developer dashboard and backend for conver
 * [Liftoff](https://github.com/elementary/liftoff) (Cody's build scripts, repo currently private)
 * **[Learn more](https://docs.google.com/document/d/1nHCnxNpaQI8G2VdJKFeri12krLpgtUQllMj8_PdZ7P8/edit)**
 
+Houston is the glue between GitHub and our repository system. Ideally when you first create a project on GitHub, you would go to houston and initialize the repository. This will setup houston to monitor the repository with GitHub hooks (eventually, for now it's manual with houston's web interface).
+
+When a release is created on GitHub, and you choose to publish that release through Houston, Houston will run some tests on it. These tests currently include automatically checking for an app icon, and some strings in the .desktop file. It will be expanded in the future. At the same time, the repository will be passed to Jenkins, which will build the repo into a deb package. After it's built, a person from elementary will install the application and test for a multitude of things including but not limited to performance, aesthetics, and nativeness.
+
+If the test fails, Houston will file an issue on GitHub explaining what the problem is, and some advice to fix it. If there are warnings, Houston will still file an issue, but will continue onto the next step.
+
+At this point, the approved deb file will be moved into the stable repo. We will be using [Freight](https://github.com/rcrowley/freight) behind nginx to host the Debian repository. Ultimately this repository will be the focus of [AppCenter](https://launchpad.net/appcenter) and the whole elementary OS 3rd party app ecosystem.
+
 ## Hacking on Houston (how-to)
 
 We'd love your help hacking on Houston! Getting a local development environment set up is easy, and we've prepared a short guide to walk you through step-by-step. Just follow along below, and if you have any issues, don't hesitate to [ask for help](https://github.com/elementary/houston/issues/new).
