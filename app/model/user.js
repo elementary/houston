@@ -1,54 +1,60 @@
-import mongoose from 'mongoose';
-import Hubkit from 'hubkit';
+import mongoose from 'mongoose'
+import Hubkit from 'hubkit'
 
-import app from '~/';
+import app from '~/'
 
 var UserSchema = mongoose.Schema({
-  username:   String,
-  emails:     String,
-  avatar:     String,
-  github:     {accessToken: String, refreshToken: String},
-  joined:     Date,
-  lastVisit:  Date,
-  rights:     {
+  username: String,
+  emails: String,
+  avatar: String,
+  github: {
+    accessToken: String,
+    refreshToken: String
+  },
+  joined: Date,
+  lastVisit: Date,
+  rights: {
     type: String,
     default: 'user',
-    enum: ['user', 'beta', 'reviewer', 'admin'],
-  },
-});
+    enum: ['user', 'beta', 'reviewer', 'admin']
+  }
+})
 
-UserSchema.statics.updateOrCreate = function(accessToken, profile) {
+UserSchema.statics.updateOrCreate = function (accessToken, profile) {
   return this.findOne({
-    username: profile.username,
+    username: profile.username
   })
   .exec()
   .then(user => {
     if (user) {
-      user.email = profile.emails[0].value;
-      user.avatar = profile._json['avatar_url'];
-      user.github = {accessToken: accessToken};
-      return user.save();
+      user.email = profile.emails[0].value
+      user.avatar = profile._json['avatar_url']
+      user.github = {accessToken: accessToken}
+
+      return user.save()
     } else {
       return this.create({
         username: profile.username,
-        email:    profile.emails[0].value,
-        avatar:   profile._json['avatar_url'],
-        github:   {accessToken: accessToken},
-        joined:   Date.now(),
-      });
+        email: profile.emails[0].value,
+        avatar: profile._json['avatar_url'],
+        github: {
+          accessToken: accessToken
+        },
+        joined: Date.now()
+      })
     }
   })
-  .then(getRights);
-};
+  .then(getRights)
+}
 
 // Checks github organizations and teams for correct permissions
-function getRights(user) {
-  const gh = new Hubkit({ token: user.github.accessToken, boolean: true });
+function getRights (user) {
+  const gh = new Hubkit({ token: user.github.accessToken, boolean: true })
 
   return Promise.all([
     gh.request(`GET /orgs/${app.config.rights.org}/members/${user.username}`),
     gh.request(`GET /teams/${app.config.rights.reviewer}/memberships/${user.username}`),
-    gh.request(`GET /teams/${app.config.rights.admin}/memberships/${user.username}`),
+    gh.request(`GET /teams/${app.config.rights.admin}/memberships/${user.username}`)
   ])
   .then(([isBeta, isReviewer, isAdmin]) => {
     if (isAdmin) {
@@ -60,10 +66,10 @@ function getRights(user) {
     } else {
       user.rights = 'user'
     }
-    return user.save();
-  });
+    return user.save()
+  })
 }
 
-var User = mongoose.model('user', UserSchema);
+var User = mongoose.model('user', UserSchema)
 
-export { UserSchema, User };
+export { UserSchema, User }

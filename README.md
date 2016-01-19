@@ -12,7 +12,7 @@ The concept of Houston is to create a developer dashboard and backend for conver
 ## Architecture Overview
 * HTML/CSS/JS
 * [Handlebars](http://handlebarsjs.com/) templates
-* [Node.js](https://nodejs.org/en/) backend ([ES2015 syntax](git.io/es6features) via [Babel](babeljs.io))
+* [Node.js](https://nodejs.org/en/) backend ([ES2015 syntax](https://git.io/es6features) via [Babel](https://babeljs.io))
 * [GitHub OAuth API](https://developer.github.com/v3/oauth/)
 * [Jenkins](https://jenkins-ci.org/)
 * [MongoDB](https://www.mongodb.org/)
@@ -95,6 +95,6 @@ Please take a look at the [open issues](https://github.com/elementary/houston/is
 
 ## Contributing
 
-We [lint](https://en.wikipedia.org/wiki/Lint_(software)) our JavaScript code with [JSCS](http://jscs.info) to ensure our code is consistently styled and formatted.
+We [lint](https://en.wikipedia.org/wiki/Lint_(software)) our JavaScript code with [standard](https://github.com/feross/standard) to ensure our code is consistently styled and formatted.
 
-Please lint your code before submitting a pull request :)
+Please run `npm test` before submitting a pull request :)
