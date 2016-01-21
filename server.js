@@ -21,6 +21,8 @@ mongoose.connection.once('open', function logConnection() {
   app.log.info('Connected to database');
 });
 
+mongoose.Promise = require('bluebird'); // Use bluebird for mongoose promises
+
 /**
  * Setup express server middleware
  */

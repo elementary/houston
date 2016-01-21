@@ -1,7 +1,18 @@
+import _ from 'lodash';
+
 export function json(obj) {
-  if (typeof obj.toJSON === 'function') {
-    /* Make Mongoose Objects properly render JSON */
-    return JSON.stringify(obj.toJSON(), null, 4);
+  if (obj == null) { // Catch for undefined objects
+    return obj;
+  }
+
+  if (typeof obj.toObject === 'function') { // Mongoose db object
+    let newObj = _.cloneDeep(obj.toObject()); // Clone to avoid overwriting actual data
+
+    if (typeof newObj.icon === 'string') { // Trip super long encoded data
+      newObj.icon = 'Trimmed icon data!';
+    }
+
+    return JSON.stringify(newObj, null, 4)
   }
 
   return JSON.stringify(obj, null, 4);
