@@ -1,4 +1,3 @@
-
 import mongoose from 'mongoose';
 import Promise from 'bluebird';
 import Hubkit from 'hubkit';
@@ -18,6 +17,10 @@ const IssueSchema = mongoose.Schema({
   isOpen: {
     type:       Boolean,
     default:    true,
+  },
+  problems: {
+    error:      Array,
+    warning:    Array,
   },
 });
 
