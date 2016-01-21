@@ -1,4 +1,3 @@
-// Imports for packages
 import mongoose from 'mongoose';
 import Hubkit from 'hubkit';
 import Promise from 'bluebird';
@@ -6,11 +5,11 @@ import ini from 'ini';
 import semver from 'semver';
 import _ from 'lodash';
 
-// Local Imports
 import app from '~/';
+import IssueSchema from './issue';
 import Jenkins from './jenkins';
 import ReleaseSchema from './release';
-import IssueSchema from './issue';
+import { update } from '~/test';
 
 const gh = new Hubkit();
 
@@ -29,28 +28,13 @@ const ApplicationSchema = mongoose.Schema({
   name:         String,          // Applications actual name
   package:      String,          // Debian Package Name
   version:      String,          // Currently published & reviewed version
-  priceUSD:     Number,          // An integer, from appHubFileResult
-  icon: {
-    name:       String,          // 'wingpanel'
-    data:       String,          // <base64-encoded image>
-  },
+  priceUSD:     Number,          // An integer, from .apphub file
+  icon:         String,          // Base64-encoded application icon
   dists: {                       // Dists-Arch for builds eg. trusty-amd64
     type:      [String],
     default:  ['trusty-amd64', 'trusty-i386'],
   },
   issue:        IssueSchema ,    // Current Github issue for application
-  problems: [{                   // All repository problems
-    type:       String,
-    enum: [
-      'missingDesktop',          // Missing desktop file
-      'unparsableDesktop',       // Unparsable desktop file
-      'missingApphub',           // Missing apphub file
-      'unparsableApphub',        // Unparsable apphub file
-      'missingIcon',             // Missing application icon
-      'invalidPrice',            // Price is not a float value
-      'invalidLabel',            // Label is not a string
-    ],
-  },],
   releases:    [ReleaseSchema],  // All releases for application
 });
 
@@ -175,22 +159,6 @@ ApplicationSchema.methods.isStatus = function(query) {
   return this.status === query;
 }
 
-// Helper function for application problems
-// Returns a boolean always
-ApplicationSchema.methods.hasProblem = function(query) {
-  return this.problems.indexOf(query) >= 0;
-}
-
-// Sets an application problem based on status or toggles if no status
-// Returns nothing
-ApplicationSchema.methods.setProblem = function(query, isSolved = !this.hasProblem(query)) {
-  if (isSolved && !this.hasProblem(query)) {
-    this.problems.push(query);
-  } else if (!isSolved && this.hasProblem(query)) {
-    this.problems = _.pull(this.problems, query);
-  }
-}
-
 // Pushes Github issue label to repository
 // Returns Promise with no data on success
 ApplicationSchema.methods.pushLabel = function() {
@@ -214,125 +182,6 @@ ApplicationSchema.methods.pushLabel = function() {
   });
 }
 
-// Fetches appHub file in repository
-// Returns promise of unsaved application object
-ApplicationSchema.methods.fetchApphub = function() {
-  let application = this;
-  const fullName = application.github.fullName;
-  app.log.silly(`application fetchApphub called for ${fullName}`);
-
-  return gh.request(`GET /repos/${fullName}/contents/.apphub`, {
-    token: application.github.APItoken,
-  })
-  .catch(error => {
-    if (error.status === 404) {
-      application.setProblem('missingApphub', true);
-      return Promise.resolve(application);
-    }
-    application.setProblem('missingApphub', false);
-    return Promise.reject(`Received ${error.status} from github`);
-  })
-  .then(apphubData => {
-    let apphubJSON = {};
-    try {
-      const apphubBase = new Buffer(apphubData.content, 'base64');
-      apphubJSON = JSON.parse(apphubBase.toString());
-    } catch (error) {
-      application.setProblem('unparsableApphub', true);
-      return Promise.resolve(application);
-    }
-    application.setProblem('unparsableApphub', false);
-
-    if (typeof apphubJSON.priceUSD === 'number') {
-      application.priceUSD = apphubJSON.priceUSD;
-      application.setProblem('invalidPrice', false);
-    } else if (typeof apphubJSON.priceUSD != 'undefined') {
-      application.setProblem('invalidPrice', true);
-    } else {
-      application.setProblem('invalidPrice', false);
-    }
-
-    if (typeof apphubJSON.issueLabel === 'string') {
-      application.github.label = apphubJSON.issueLabel;
-      application.setProblem('invalidLabel', false);
-    } else if (typeof apphubJSON.issueLabel != 'undefined') {
-      application.setProblem('invalidLabel', true);
-    } else {
-      application.setProblem('invalidLabel', false);
-    }
-
-    return application;
-  })
-}
-
-// Fetches .desktop file in repository
-// Returns promise of unsaved application object
-ApplicationSchema.methods.fetchDesktop = function() {
-  let application = this;
-  const repoName = application.github.name;
-  const fullName = application.github.fullName;
-  app.log.silly(`application fetchDesktop called for ${fullName}`);
-
-  return gh.request(`GET /repos/${fullName}/contents/data/${repoName}.desktop`, {
-    token: application.github.APItoken,
-  })
-  .catch(error => {
-    if (error.status === 404) {
-      application.setProblem('missingDesktop', true);
-      return Promise.resolve(application);
-    }
-    application.setProblem('missingDesktop', false);
-    return Promise.reject(`Received ${error.status} from github`);
-  })
-  .then(desktopData => {
-    let desktopIni = {};
-    try {
-      const desktopBase = new Buffer(desktopData.content, 'base64');
-      desktopIni = ini.parse(desktopBase.toString());
-    } catch (error) {
-      application.setProblem('unparsableDesktop', true);
-      return Promise.resolve(application);
-    }
-    application.setProblem('unparsableDesktop', false);
-
-    if (typeof desktopIni['Desktop Entry'].Name === 'string') {
-      application.name = desktopIni['Desktop Entry'].Name;
-    }
-
-    if (typeof desktopIni['Desktop Entry'].Icon === 'string') {
-      application.icon.name = desktopIni['Desktop Entry'].Icon;
-    }
-
-    return application;
-  })
-}
-
-// Fetches app icon in repository
-// Returns promise of unsaved application object
-ApplicationSchema.methods.fetchIcon = function() {
-  let application = this;
-  const repoName = application.github.name;
-  const fullName = application.github.fullName;
-  app.log.silly(`application fetchIcon called for ${fullName}`);
-
-  return gh.request(`GET /repos/${fullName}/contents/icons/64/${repoName}.svg`, {
-    token: application.github.APItoken,
-  })
-  .catch(error => {
-    if (error.status === 404) {
-      application.setProblem('missingIcon', true);
-      return Promise.resolve(application);
-    }
-    application.setProblem('missingIcon', false);
-    return Promise.reject(`Received ${error.status} from github`);
-  })
-  .then(iconData => {
-    application.icon.data = iconData.content;
-
-    return application;
-  });
-}
-
 // Github methods
 // Updates all database data from Github
 // Returns promise of saved application on success
@@ -343,9 +192,6 @@ ApplicationSchema.methods.fetchGithub = function() {
   app.log.silly(`application fetchGithub called for ${fullName}`);
 
   return application.releaseFetchAll()
-  .then(application => application.fetchApphub())
-  .then(application => application.fetchDesktop())
-  .then(application => application.fetchIcon())
   .then(application => application.save());
 }
 
@@ -437,6 +283,25 @@ ApplicationSchema.statics.updateBuild = function(data) {
     });
   });
 }
+
+ApplicationSchema.pre('save', next => {
+  console.log(this);
+
+//  if (this.isNew) {
+//    return update(this)
+//    .then(messages => {
+//      this.issue.problems = messages;
+//    }, err => {
+//      app.log.error(`A testing error occured with ${application.github.fullName}`);
+//      app.log.error(err);
+//    })
+//    .then(() => {
+//      return next();
+//    })
+//  }
+
+  return next();
+})
 
 // Application creation and exportation
 var Application = mongoose.model('application', ApplicationSchema);

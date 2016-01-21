@@ -25,14 +25,6 @@ export function update(application) {
   return gh.request(`GET /repos/${application.github.fullName}/contents/.apphub`, {
     token: application.github.APItoken,
   })
-  .catch(err => {
-    if (err.status === 404) {
-      data.warning.push(messages.missing);
-      return Promise.resolve(data) // End test here due to no apphub file
-    }
-
-    return Promise.reject(`Received ${err.status} from GitHub`);
-  })
   .then(apphubData => {
     let apphubJSON = {};
     try {
@@ -66,5 +58,12 @@ export function update(application) {
     .then(() => {
       return Promise.resolve(data);
     });
+  }, err => {
+    if (err.status === 404) {
+      data.warning.push(messages.missing);
+      return Promise.resolve(data) // End test here due to no apphub file
+    }
+
+    return Promise.reject(`Received ${err.status} from GitHub`);
   });
 }
