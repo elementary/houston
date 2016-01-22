@@ -4,10 +4,10 @@ import _ from 'lodash';
 import ini from 'ini';
 
 import app from '~/';
-import { isBeta } from './auth';
+import { hasRole } from './auth';
 import { Application } from '~/model/application';
 
-app.get('/dashboard', isBeta, (req, res, next) => {
+app.get('/dashboard', hasRole('beta'), (req, res, next) => {
   // Create a new Hubkit instance with user's token
   const token = req.user.github.accessToken
   const gh = new Hubkit({token});
