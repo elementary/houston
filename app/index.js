@@ -110,6 +110,19 @@ app.model = require('./model');
 app.controller = require('./controller');
 
 /**
+ * Log potentially unhandled promises
+ */
+// TODO: move over to testing suite
+if (app.config.env === 'development') {
+  process.on('unhandledRejection', function(reason, p) {
+    if (reason != null) {
+      app.log.warn('Possible unhandled promise rejection');
+      app.log.warn(reason);
+    }
+  });
+}
+
+/**
  * Catch 404 errors
  */
 app.use(function(req, res, next) {
