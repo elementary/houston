@@ -15,12 +15,6 @@ app.get('/dashboard', hasRole('beta'), (req, res, next) => {
   // Wrap Hubkit call in bluebird for extended promise support (filter & map)
   return Promise.all(gh.request('GET /user/repos', {
     type: 'public',
-  })
-  .catch(error => {
-    return res.render('error', {
-      message: 'Houston encountered a problem communicating with GitHub',
-      stack: error,
-    });
   }))
   .filter(repo => {
     return gh.request(`GET /repos/${repo.full_name}/contents/.apphub`)
@@ -46,9 +40,7 @@ app.get('/dashboard', hasRole('beta'), (req, res, next) => {
 
       return application;
     })
-    .then(application => {
-      return application.fetchGithub();
-    });
+    .then(application => application.fetchGithub());
   })
   .then(applications => {
     return res.render('dashboard', {
@@ -56,5 +48,8 @@ app.get('/dashboard', hasRole('beta'), (req, res, next) => {
       user: req.user,
       applications,
     });
+  })
+  .catch(err => {
+    return res.render('error', err);
   });
 });
