@@ -24,7 +24,6 @@ const ApplicationSchema = new mongoose.Schema({
     label: {                     // Github issue label
       type:     String,
       default: 'AppHub',
-      required: true,            // If updated to null, results in default value
     },
   },
   name:         String,          // Applications actual name
