@@ -95,6 +95,19 @@ Please take a look at the [open issues](https://github.com/elementary/houston/is
 
 ## Contributing
 
+Because we use a lot of new JavaScript code styles, it is strongly recommended to
+read up on promises, and [ES6 shorthand](https://github.com/lukehoban/es6features).
+
+Some things to keep note of while programming:
+* If you don't change a variable, declare it with `const` vs `var`.
+* Use arrows when you can. It keeps the code clean and easy to read.
+* If you can fit the function in one clean line, do so.
+  - `const notDotQuery = _.mapValues(dotQuery, value => ({ $ne: value }));`
+* Template strings are here to help. Use them.
+* Comments don't hurt.
+* Promises always return some value, error or not.
+* It is standard to return in promise with `return Promise.resolve(null)` vs `return null`.
+
 We [lint](https://en.wikipedia.org/wiki/Lint_(software)) our JavaScript code with [JSCS](http://jscs.info) to ensure our code is consistently styled and formatted.
 
 Please lint your code before submitting a pull request :)

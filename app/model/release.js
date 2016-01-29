@@ -7,7 +7,7 @@ import Jenkins from './jenkins';
 import IssueSchema from './issue';
 import { BuildSchema } from './build';
 
-const ReleaseSchema = mongoose.Schema({
+const ReleaseSchema = new mongoose.Schema({
   github: {                 // All Github communication data
     id:       Number,       // Id for Github API
     author:   String,       // Github user login
@@ -21,12 +21,6 @@ const ReleaseSchema = mongoose.Schema({
   },
   changelog: [String],      // List of changelog items for release
   issue:      IssueSchema , // Current Github issue for release
-  problems: [{              // All release problems
-    type:     String,
-    enum: [
-      'missingChangelog',   // Missing changelog in GitHub release
-    ],
-  },],
   builds:    [BuildSchema],
 });
 
@@ -46,30 +40,13 @@ ReleaseSchema.virtual('version').get(function() {
   return '0.0.0';
 });
 
-// Release methods
-// Helper function for release problems
-// Returns a boolean always
-ReleaseSchema.methods.hasProblem = function(query) {
-  return _.indexOf(this.problems, query) >= 0;
-}
-
-// Sets an release problem based on status or toggles if no status
-// Returns nothing
-ReleaseSchema.methods.setProblem = function(query, status = !this.hasProblem(query)) {
-  if (status && !this.hasProblem(query)) {
-    this.problems.push(query);
-  } else if (!status && this.hasProblem(query)) {
-    this.problems = _.pull(this.problems, query);
-  }
-}
-
 // TODO: refactor, add some changelog logic to buildDo function
 // Sends build information to Jenkins
 // Returns promise of saved application object
 ReleaseSchema.methods.buildDo = function() {
   const release = this;
   const application = release.ownerDocument();
-  app.log.silly(`release buildDo called for ${application.github.fullName}#${release.version}`);
+  app.log.silly(`Building ${application.github.fullName}#${release.version}`);
 
   let params = [];
   for (let i = 0; i < application.dists.length; i++) {
@@ -104,32 +81,6 @@ ReleaseSchema.methods.buildDo = function() {
   .then(builds => {
     release.status = 'BUILDING'; // Update release to 'BUILDING' status
     return application.save();
-  });
-}
-
-// Grabs release changelog from Github
-// Returns promise of unsaved release object
-ReleaseSchema.methods.changelogFetch = function() {
-  const release = this;
-  const application = release.ownerDocument();
-  app.log.silly(`release changelogFetch called for ${application.github.fullName}#${release.version}`);
-
-  return gh.request(`GET /repos/${application.github.fullName}/releases/${release.github.id}`, {
-    token: application.github.APItoken,
-  })
-  .catch(error => {
-    return Promise.reject(`Received ${error.status} from github`);
-  })
-  .then(githubRelease => {
-    let githubChangelog = githubRelease.body.match(/.+/g);
-
-    if (githubChangelog.length <= 0) {
-      this.setProblem('missingChangelog', true);
-    } else {
-      release.changelog = githubChangelog;
-    }
-
-    return release;
   });
 }
 
