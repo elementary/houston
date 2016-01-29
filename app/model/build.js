@@ -3,7 +3,7 @@ import Promise from 'bluebird';
 
 import app from '~/';
 
-const BuildSchema = mongoose.Schema({
+const BuildSchema = new mongoose.Schema({
   arch:       String,
   target:     String,
   version:    String,
@@ -41,7 +41,7 @@ BuildSchema.methods.nestSave = function() {
 // Returns promise of saved application
 BuildSchema.methods.update = function(data) {
   let build = this;
-  app.log.silly(`build update called for ${build._id}`);
+  app.log.silly(`Updating build._id#${build._id}`);
 
   if (data.status === 'FINALIZED') {
     build.status = data.status;
