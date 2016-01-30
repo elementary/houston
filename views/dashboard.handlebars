@@ -4,8 +4,8 @@
     {{#each applications}}
       <!-- {{{json this}}} -->
       <div class="repo" href="/project/gh/{{github.fullName}}">
-        {{#if icon.data}}
-          <img class="app-icon" src="data:image/svg+xml;base64,{{{icon.data}}}" />
+        {{#if icon}}
+          <img class="app-icon" src="data:image/svg+xml;base64,{{{icon}}}" />
         {{else}}
           <img class="app-icon" src="/images/application-default-icon.png"/>
         {{/if}}

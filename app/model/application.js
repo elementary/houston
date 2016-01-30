@@ -4,16 +4,18 @@ import Promise from 'bluebird';
 import ini from 'ini';
 import semver from 'semver';
 import _ from 'lodash';
+import dotize from 'dotize';
 
 import app from '~/';
 import Jenkins from './jenkins';
 import ReleaseSchema from './release';
 import IssueSchema from './issue';
+import appHook from '~/appHook';
 
 const gh = new Hubkit();
 
 // Mongoose schema for applications
-const ApplicationSchema = mongoose.Schema({
+const ApplicationSchema = new mongoose.Schema({
   github: {
     owner:      String,          // Owner of the GitHub repository
     name:       String,          // Github Repository name
@@ -27,28 +29,13 @@ const ApplicationSchema = mongoose.Schema({
   name:         String,          // Applications actual name
   package:      String,          // Debian Package Name
   version:      String,          // Currently published & reviewed version
-  priceUSD:     Number,          // An integer, from appHubFileResult
-  icon: {
-    name:       String,          // 'wingpanel'
-    data:       String,          // <base64-encoded image>
-  },
+  priceUSD:     Number,          // An integer, from .apphub file
+  icon:         String,          // Base64-encoded application icon
   dists: {                       // Dists-Arch for builds eg. trusty-amd64
     type:      [String],
     default:  ['trusty-amd64', 'trusty-i386'],
   },
-  issue:        IssueSchema ,    // Current Github issue for application
-  problems: [{                   // All repository problems
-    type:       String,
-    enum: [
-      'missingDesktop',          // Missing desktop file
-      'unparsableDesktop',       // Unparsable desktop file
-      'missingApphub',           // Missing apphub file
-      'unparsableApphub',        // Unparsable apphub file
-      'missingIcon',             // Missing application icon
-      'invalidPrice',            // Price is not a float value
-      'invalidLabel',            // Label is not a string
-    ],
-  },],
+  issue:       IssueSchema,      // Current Github issue for application
   releases:    [ReleaseSchema],  // All releases for application
 });
 
@@ -70,6 +57,10 @@ ApplicationSchema.virtual('release.latest').get(function() {
 });
 
 ApplicationSchema.virtual('status').get(function() {
+  if (this.issue.problems.error.length > 0) {
+    return 'FAILED';
+  }
+
   if (this.release.latest == null) {
     return 'STANDBY';
   }
@@ -77,74 +68,63 @@ ApplicationSchema.virtual('status').get(function() {
   return this.release.latest.status;
 });
 
-// Release methods
-// Finds an index of a release based on query
-// Returns a number on success (-1 on not found)
-ApplicationSchema.methods.releaseFindOneIndex = function(query) {
-  const application = this;
+// Cleans up application object to something easily loggable
+// Used for development only!
+ApplicationSchema.methods.toClean = function() {
+  let application = _.cloneDeep(this.toObject());
 
-  const i = _.findIndex(application.releases, function(iRelease) {
-    return _.isMatch(iRelease, query)
-  });
+  if (typeof application.icon === 'string') { // Trim super long encoded data
+    application.icon = 'Trimmed icon data!';
+  }
 
-  return i;
+  return application;
 }
 
 // Updates or creates a release based on query, updates with object
-// Returns promise of new application object
-ApplicationSchema.methods.releaseUpdateOrCreate = function(query, object) {
+// Returns mongoose update promise
+ApplicationSchema.methods.upsertRelease = function(query, object) {
   const application = this;
-  const i = application.releaseFindOneIndex(query);
 
-  if (i === -1) { // Create a new release
-    Application.update({_id: application._id}, {
-      $push: {
-        releases: object,
+  // Create an object from query using dot notation instead of objects ('releases.github.id')
+  const dotQuery = dotize.convert(query, 'releases');
+  // Create a new object of dotQuery, but with mongodb's not operator for value
+  const notDotQuery = _.mapValues(dotQuery, value => ({ $ne: value }));
+
+  return Promise.all([ // Return two promises (need mongodb $setOnUpdate for single function)
+    Application.update(_.extend({ // Find an application with same _id, and includes release query
+      _id: application._id,
+    }, dotQuery), { // Set release to new object
+      'releases.&': object,
+    }),
+    Application.update(_.extend({ // Find an application that has _id but does not include release
+      _id: application._id,
+    }, notDotQuery), {
+      $addToSet: {
+        releases: object, // Push new release into array
       },
-    }, (error, info) => {
-      if (error) {
-        return Promise.reject(error)
-      }
-
-      return Application.findOne({_id: application._id});
-    });
-  }
-
-  Application.update({ // Update already created release
-    _id: application._id,
-    releases: query,
-  }, {
-    $set: {
-      'releases.$': object,
-    },
-  }, (error, info) => {
-    if (error) {
-      return Promise.reject(error)
-    }
-
-    return Application.findOne({_id: application._id});
-  });
+    }),
+  ]);
 }
 
 // Fetch all releases from Github
-// Returns saved application on success
+// Returns promise of saved application
 ApplicationSchema.methods.releaseFetchAll = function() {
   const application = this;
   const fullName = application.github.fullName;
-  app.log.silly(`application releaseFetchAll called for ${fullName}`);
 
-  const githubReleases =  gh.request(`GET /repos/${fullName}/releases`, {
+  return Promise.all(gh.request(`GET /repos/${fullName}/releases`, {
     token: application.github.APItoken,
-  })
-  .catch(error => {
-    return Promise.reject(`Received ${error.status} from github`);
-  });
-
-  return Promise.filter(githubReleases, release => {
+  }))
+  .filter(release => {
     return semver.valid(release.tag_name, true);
   })
-  .map(release => {
-    return application.releaseUpdateOrCreate({
+  .then(releases => { // Log releases for easier development
+    const releaseString = (releases.length === 1) ? 'release' : 'releases';
+    app.log.silly(`${fullName} has ${releases.length} GitHub ${releaseString}`);
+    return releases;
+  })
+  .each(release => {
+    return application.upsertRelease({
       github: {
         id:      release.id,
       },
@@ -158,10 +138,7 @@ ApplicationSchema.methods.releaseFetchAll = function() {
       changelog: release.body.match(/.+/g),
     });
   })
-  .catch(error => {
-    return Promise.reject(error);
-  })
-  .then(applications => {
+  .then(data => {
     return Application.findOne({_id: application._id});
   });
 }
@@ -173,29 +150,29 @@ ApplicationSchema.methods.isStatus = function(query) {
   return this.status === query;
 }
 
-// Helper function for application problems
-// Returns a boolean always
-ApplicationSchema.methods.hasProblem = function(query) {
-  return this.problems.indexOf(query) >= 0;
-}
+// Runs update test for application
+// Returns Promise of null on success
+ApplicationSchema.methods.runHook = function(level = 'commit') {
+  const application = this;
 
-// Sets an application problem based on status or toggles if no status
-// Returns nothing
-ApplicationSchema.methods.setProblem = function(query, isSolved = !this.hasProblem(query)) {
-  if (isSolved && !this.hasProblem(query)) {
-    this.problems.push(query);
-  } else if (!isSolved && this.hasProblem(query)) {
-    this.problems = _.pull(this.problems, query);
-  }
+  return appHook.test(level, application)
+  .then(messages => {
+    return application.update({
+      'issue.problems.error': messages.error,
+      'issue.problems.warning': messages.warning,
+    });
+  })
+  .then(data => {
+    return Promise.resolve(null);
+  });
 }
 
 // Pushes Github issue label to repository
-// Returns Promise with no data on success
+// Returns Promise of null on success
 ApplicationSchema.methods.pushLabel = function() {
   const application = this;
   const fullName = application.github.fullName;
   const label = application.github.label;
-  app.log.silly(`application pushLabel called for ${fullName}`);
 
   return gh.request(`POST /repos/${fullName}/labels`, {
     token: application.github.APItoken,
@@ -204,130 +181,15 @@ ApplicationSchema.methods.pushLabel = function() {
       color: '3A416F',
     },
   })
+  .then(data => {
+    return Promise.resolve(null);
+  })
   .catch(error => {
     if (error.status === 422) { // Already created labels don't create errors
-      return Promise.resolve();
+      return Promise.resolve(null);
     }
+
     return Promise.reject(error);
-  });
-}
-
-// Fetches appHub file in repository
-// Returns promise of unsaved application object
-ApplicationSchema.methods.fetchApphub = function() {
-  let application = this;
-  const fullName = application.github.fullName;
-  app.log.silly(`application fetchApphub called for ${fullName}`);
-
-  return gh.request(`GET /repos/${fullName}/contents/.apphub`, {
-    token: application.github.APItoken,
-  })
-  .catch(error => {
-    if (error.status === 404) {
-      application.setProblem('missingApphub', true);
-      return Promise.resolve(application);
-    }
-    application.setProblem('missingApphub', false);
-    return Promise.reject(`Received ${error.status} from github`);
-  })
-  .then(apphubData => {
-    let apphubJSON = {};
-    try {
-      const apphubBase = new Buffer(apphubData.content, 'base64');
-      apphubJSON = JSON.parse(apphubBase.toString());
-    } catch (error) {
-      application.setProblem('unparsableApphub', true);
-      return Promise.resolve(application);
-    }
-    application.setProblem('unparsableApphub', false);
-
-    if (typeof apphubJSON.priceUSD === 'number') {
-      application.priceUSD = apphubJSON.priceUSD;
-      application.setProblem('invalidPrice', false);
-    } else if (typeof apphubJSON.priceUSD != 'undefined') {
-      application.setProblem('invalidPrice', true);
-    } else {
-      application.setProblem('invalidPrice', false);
-    }
-
-    if (typeof apphubJSON.issueLabel === 'string') {
-      application.github.label = apphubJSON.issueLabel;
-      application.setProblem('invalidLabel', false);
-    } else if (typeof apphubJSON.issueLabel != 'undefined') {
-      application.setProblem('invalidLabel', true);
-    } else {
-      application.setProblem('invalidLabel', false);
-    }
-
-    return application;
-  })
-}
-
-// Fetches .desktop file in repository
-// Returns promise of unsaved application object
-ApplicationSchema.methods.fetchDesktop = function() {
-  let application = this;
-  const repoName = application.github.name;
-  const fullName = application.github.fullName;
-  app.log.silly(`application fetchDesktop called for ${fullName}`);
-
-  return gh.request(`GET /repos/${fullName}/contents/data/${repoName}.desktop`, {
-    token: application.github.APItoken,
-  })
-  .catch(error => {
-    if (error.status === 404) {
-      application.setProblem('missingDesktop', true);
-      return Promise.resolve(application);
-    }
-    application.setProblem('missingDesktop', false);
-    return Promise.reject(`Received ${error.status} from github`);
-  })
-  .then(desktopData => {
-    let desktopIni = {};
-    try {
-      const desktopBase = new Buffer(desktopData.content, 'base64');
-      desktopIni = ini.parse(desktopBase.toString());
-    } catch (error) {
-      application.setProblem('unparsableDesktop', true);
-      return Promise.resolve(application);
-    }
-    application.setProblem('unparsableDesktop', false);
-
-    if (typeof desktopIni['Desktop Entry'].Name === 'string') {
-      application.name = desktopIni['Desktop Entry'].Name;
-    }
-
-    if (typeof desktopIni['Desktop Entry'].Icon === 'string') {
-      application.icon.name = desktopIni['Desktop Entry'].Icon;
-    }
-
-    return application;
-  })
-}
-
-// Fetches app icon in repository
-// Returns promise of unsaved application object
-ApplicationSchema.methods.fetchIcon = function() {
-  let application = this;
-  const repoName = application.github.name;
-  const fullName = application.github.fullName;
-  app.log.silly(`application fetchIcon called for ${fullName}`);
-
-  return gh.request(`GET /repos/${fullName}/contents/icons/64/${repoName}.svg`, {
-    token: application.github.APItoken,
-  })
-  .catch(error => {
-    if (error.status === 404) {
-      application.setProblem('missingIcon', true);
-      return Promise.resolve(application);
-    }
-    application.setProblem('missingIcon', false);
-    return Promise.reject(`Received ${error.status} from github`);
-  })
-  .then(iconData => {
-    application.icon.data = iconData.content;
-
-    return application;
   });
 }
 
@@ -336,24 +198,20 @@ ApplicationSchema.methods.fetchIcon = function() {
 // Returns promise of saved application on success
 ApplicationSchema.methods.fetchGithub = function() {
   let application = this;
-  const repoName = application.github.name;
-  const fullName = application.github.fullName;
-  app.log.silly(`application fetchGithub called for ${fullName}`);
 
-  return application.releaseFetchAll()
-  .then(application => application.fetchApphub())
-  .then(application => application.fetchDesktop())
-  .then(application => application.fetchIcon())
-  .then(application => application.save());
+  return Promise.all([
+    application.releaseFetchAll(),
+    application.runHook('commit'),
+  ])
+  .then(() => {
+    return Application.findOne({_id: application._id});
+  });
 }
 
 // Updates all Github data from database
 // Returns promise of same application on success
 ApplicationSchema.methods.pushGithub = function() {
   const application = this;
-  const repoName = application.github.name;
-  const fullName = application.github.fullName;
-  app.log.silly(`application pushGithub called for ${fullName}`);
 
   return application.pushLabel();
 }
@@ -362,9 +220,6 @@ ApplicationSchema.methods.pushGithub = function() {
 // Returns saved application including 'errors' always
 ApplicationSchema.methods.syncGithub = function() {
   let application = this;
-  const repoName = application.github.name;
-  const fullName = application.github.fullName;
-  app.log.silly(`application syncGithub called for ${fullName}`);
 
   return application.fetchGithub()
   .then(application => application.pushGithub()); // Push doesn't save anything
@@ -377,7 +232,6 @@ ApplicationSchema.methods.syncGithub = function() {
 ApplicationSchema.methods.changelog = function(params) {
   const application = this;
   const fullName = application.github.fullName;
-  app.log.silly(`application changelog called for ${fullName}`);
 
   let promises = [];
   for (let i = 0; i < params.length; i++) {
@@ -398,6 +252,11 @@ ApplicationSchema.methods.changelog = function(params) {
     }));
   }
 
+  // Nice messages are Nice
+  const distString = (promises.length === 1) ? 'changelog' : 'changelogs';
+  const releaseString = (application.releases.length === 1) ? 'release' : 'releases';
+  app.log.silly(`Generated ${promises.length} ${distString} for ${fullName}'s ${application.releases.length} ${releaseString}`);
+
   return promises;
 }
 
@@ -407,7 +266,6 @@ ApplicationSchema.methods.changelog = function(params) {
 ApplicationSchema.statics.updateBuild = function(data) {
   // Grab IDENTIFIER string in the form of application._id#release._id#build._id
   const [applicationId, releaseId, buildId] = data.IDENTIFIER.split('#');
-  app.log.silly(`application updateBuild called for ${data.IDENTIFIER}`);
 
   return Application.findOne({_id: applicationId})
   .then(application => {
@@ -430,13 +288,10 @@ ApplicationSchema.statics.updateBuild = function(data) {
     }
 
     return build.update(data)
-    .catch(error => {
-      return Promise.reject(error);
-    });
   });
 }
 
 // Application creation and exportation
-var Application = mongoose.model('application', ApplicationSchema);
+const Application = mongoose.model('application', ApplicationSchema);
 
 export { ApplicationSchema, Application };

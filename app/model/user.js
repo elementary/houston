@@ -3,7 +3,7 @@ import Hubkit from 'hubkit';
 
 import app from '~/';
 
-var UserSchema = mongoose.Schema({
+var UserSchema = new mongoose.Schema({
   username:   String,
   email:      String,
   avatar:     String,

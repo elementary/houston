@@ -1,7 +1,12 @@
+import _ from 'lodash';
+
 export function json(obj) {
-  if (typeof obj.toJSON === 'function') {
-    /* Make Mongoose Objects properly render JSON */
-    return JSON.stringify(obj.toJSON(), null, 4);
+  if (obj == null) { // Catch for undefined objects
+    return obj;
+  }
+
+  if (typeof obj.toClean === 'function') { // Mongoose db object
+    return JSON.stringify(obj.toClean(), null, 4);
   }
 
   return JSON.stringify(obj, null, 4);
