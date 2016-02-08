@@ -20,6 +20,10 @@
           </p>
         </div>
 
+        {{#is status "UNINITIALIZED" }}
+          {{> status/uninitalized}}
+        {{/is}}
+
         {{#is status "STANDBY" }}
           {{> status/needs-release}}
         {{/is}}

@@ -26,6 +26,10 @@ const ApplicationSchema = new mongoose.Schema({
       default: 'AppHub',
     },
   },
+  initalized: {                  // If the application is ready for houston
+    type:       Boolean,
+    default:    false,
+  },
   name:         String,          // Applications actual name
   package:      String,          // Debian Package Name
   version:      String,          // Currently published & reviewed version
@@ -57,6 +61,10 @@ ApplicationSchema.virtual('release.latest').get(function() {
 });
 
 ApplicationSchema.virtual('status').get(function() {
+  if (!this.initalized) {
+    return 'UNINITIALIZED'
+  }
+
   if (this.issue.problems.error.length > 0) {
     return 'FAILED';
   }
