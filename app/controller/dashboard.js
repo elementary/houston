@@ -39,8 +39,7 @@ app.get('/dashboard', hasRole('beta'), (req, res, next) => {
       }
 
       return application;
-    })
-    .then(application => application.fetchGithub());
+    });
   })
   .then(applications => {
     return res.render('dashboard', {
