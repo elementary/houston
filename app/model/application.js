@@ -26,7 +26,7 @@ const ApplicationSchema = new mongoose.Schema({
       default: 'AppHub',
     },
   },
-  initalized: {                  // If the application is ready for houston
+  initalized: {                  // If the application is ready for Houston
     type:       Boolean,
     default:    false,
   },
