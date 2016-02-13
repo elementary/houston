@@ -1,21 +1,21 @@
 #!/usr/bin/env node
-require('babel-register');
-require('babel-polyfill');
-var fs = require('fs');
-var express = require('express');
-var exphbs = require('express-handlebars');
-var path = require('path');
-var favicon = require('serve-favicon');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var session = require('express-session');
-var expressWinston = require('express-winston');
-var Winston = require('winston');
+import fs from 'fs';
+import express from 'express';
+import exphbs from 'express-handlebars';
+import path from 'path';
+import favicon from 'serve-favicon';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import expressWinston from 'express-winston';
+import Winston from 'winston';
+import mongoose from 'mongoose';
+import session from 'express-session';
+let MongoStore = require('connect-mongo')(session);
 
 /**
  * Start an app object
  */
-var app = module.exports = express();
+let app = module.exports = express();
 
 /**
  * Setup app configuration
@@ -30,10 +30,7 @@ try {
 
 app.config = require(path.join(__dirname, '../config.js'));
 
-app.config.env = process.env.NODE_ENV
-if (app.config.env == null) {
-  app.config.env = 'development'
-}
+app.config.env = process.env.NODE_ENV || 'development';
 
 /**
  * Setup winston logging
@@ -73,12 +70,24 @@ app.log = new Winston.Logger({
 app.log.cli();
 
 /**
+ * Initialize database connection
+ */
+mongoose.connect(app.config.database.url);
+
+mongoose.connection.on('error', msg => {
+  throw new Error(msg);
+});
+
+mongoose.connection.once('open', () => {
+  app.log.info('Connected to database');
+});
+
+/**
  * Setup handlebars
  */
-var hbsHelper = require(path.join(__dirname, '../views/helpers.js'));
 app.engine('handlebars', exphbs({
   defaultLayout: 'main',
-  helpers: hbsHelper,
+  helpers: require(path.join(__dirname, '../views/helpers.js')),
 }));
 app.set('view engine', 'handlebars');
 
@@ -100,6 +109,9 @@ app.use(session({
   secret: app.config.server.secret,
   saveUninitialized: false, // Don't create session until something stored
   resave: false, // Don't save session if unmodified
+  store: new MongoStore({
+    mongooseConnection: mongoose.connection,
+  }),
 }));
 app.use(express.static('./public'));
 
@@ -114,7 +126,7 @@ app.controller = require('./controller');
  */
 // TODO: move over to testing suite
 if (app.config.env === 'development') {
-  process.on('unhandledRejection', function(reason, p) {
+  process.on('unhandledRejection', (reason, p) => {
     if (reason != null) {
       app.log.warn('Possible unhandled promise rejection');
       app.log.warn(reason);
@@ -125,8 +137,8 @@ if (app.config.env === 'development') {
 /**
  * Catch 404 errors
  */
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
+app.use((req, res, next) => {
+  let err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
@@ -135,16 +147,16 @@ app.use(function(req, res, next) {
  * Setup 500 error pages
  */
 if (app.config.env === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
+  app.use((error, req, res, next) => {
+    res.status(error.status || 500);
     res.render('error', {
-      message: err.message,
-      error: err,
+      message: error.message,
+      error,
     });
   });
 }
 
-app.use(function(err, req, res, next) {
+app.use((err, req, res, next) => {
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,

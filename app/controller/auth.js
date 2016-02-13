@@ -5,14 +5,14 @@ import app from '~/';
 import { UserSchema, User } from '~/model/user';
 
 // Passport setup
-// TODO: Serialize User for sessions
 passport.serializeUser(function(user, done) {
-  done(null, user);
+  done(null, user._id);
 });
 
-// TODO: Deserialize User for sessions
-passport.deserializeUser(function(obj, done) {
-  done(null, obj);
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(error, user) {
+    done(error, user);
+  });
 });
 
 // Define GitHub Login Strategy
