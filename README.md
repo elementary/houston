@@ -106,7 +106,7 @@ Some things to keep note of while programming:
 * Template strings are here to help. Use them.
 * Comments don't hurt.
 * Promises always return some value, error or not.
-* It is standard to return in promise with `return Promise.resolve(null)` vs `return null`.
+* It is standard to return in promise with `return Promise.resolve()` vs `return null`.
 
 We [lint](https://en.wikipedia.org/wiki/Lint_(software)) our JavaScript code with [JSCS](http://jscs.info) to ensure our code is consistently styled and formatted.
 

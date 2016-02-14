@@ -20,7 +20,10 @@ const ReleaseSchema = new mongoose.Schema({
     enum:   ['NEW RELEASE', 'BUILDING', 'REVIEWING', 'SUCCESS', 'FAILED'],
   },
   changelog: [String],      // List of changelog items for release
-  issue:      IssueSchema , // Current Github issue for release
+  appHooks: {               // Storage of appHook GitHub issues
+    type:     Object,
+    default:  {},
+  },
   builds:    [BuildSchema],
 });
 

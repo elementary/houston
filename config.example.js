@@ -12,6 +12,8 @@ module.exports = {
     secret: '1234567891011121314151617181920212223242',
     // Github authentication callback url. Don't change '/auth/github/callback'
     callback: 'http://localhost:3000/auth/github/callback',
+    // Push data like labels and issues to GitHub? Useful to disable spam while testing.
+    push: true,
   },
 
   // Jenkins hook

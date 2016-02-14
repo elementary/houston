@@ -24,24 +24,32 @@
           {{> status/uninitalized}}
         {{/is}}
 
-        {{#is status "STANDBY" }}
+        {{#is status "UNRELEASED" }}
           {{> status/needs-release}}
         {{/is}}
 
-        {{#is status "NEW RELEASE" }}
+        {{#is status "STANDBY" }}
           {{> status/publish}}
+        {{/is}}
+
+        {{#is status "PREBUILD" }}
+          {{> status/in-progress}}
         {{/is}}
 
         {{#is status "BUILDING" }}
           {{> status/in-progress}}
         {{/is}}
 
-        {{#is status "REVIEWING" }}
-          {{> status/needs-review}}
+        {{#is status ("REVIEWING") }}
+          {{> status/reviewing}}
         {{/is}}
 
         {{#is status "FAILED" }}
           {{> status/failure}}
+        {{/is}}
+
+        {{#is status "PUBLISHED" }}
+          {{> status/published}}
         {{/is}}
       </div>
     {{else}}

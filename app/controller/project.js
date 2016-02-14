@@ -7,21 +7,16 @@ import { hasRole } from './auth';
 
 // Delete the project from houston
 app.get('/project/gh/:org/:name/initialize', hasRole('beta'), function(req, res) {
-  const gh = new Hubkit({token: req.user.github.accessToken});
-
   return Application.findOne({
     'github.owner': req.params.org,
     'github.name': req.params.name,
   })
   .then(application => {
     if (!application) {
-      return res.view('error', new Error('Application not found'));
+      return res.view('error', new Error('Unable to find application'));
     }
 
-    return application.update({
-      initalized: true,
-    })
-    .then(() => application.fetchGithub());
+    return application.fetchGithub();
   })
   .then(() => res.redirect('/dashboard'));
 });
