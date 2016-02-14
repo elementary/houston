@@ -16,6 +16,7 @@ var Winston = require('winston');
  * Start an app object
  */
 var app = module.exports = express();
+app.helper = require('./helpers');
 
 /**
  * Setup app configuration
@@ -75,11 +76,13 @@ app.log.cli();
 /**
  * Setup handlebars
  */
-var hbsHelper = require(path.join(__dirname, '../views/helpers.js'));
-app.engine('handlebars', exphbs({
+const hbsHelper = require(path.join(__dirname, '../views/helpers.js'));
+app.handlebars = exphbs.create({
   defaultLayout: 'main',
   helpers: hbsHelper,
-}));
+});
+
+app.engine('handlebars', app.handlebars.engine);
 app.set('view engine', 'handlebars');
 
 /**

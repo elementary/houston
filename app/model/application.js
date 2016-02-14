@@ -10,7 +10,7 @@ import app from '~/';
 import Jenkins from './jenkins';
 import ReleaseSchema from './release';
 import IssueSchema from './issue';
-import appHook from '~/appHook';
+import { run as appHook } from '~/appHooks/';
 
 const gh = new Hubkit();
 
@@ -26,9 +26,18 @@ const ApplicationSchema = new mongoose.Schema({
       default: 'AppHub',
     },
   },
-  initalized: {                  // If the application is ready for houston
-    type:       Boolean,
-    default:    false,
+  status: {                      // Application stage / status
+    type:       String,
+    default:   'UNINITIALIZED',
+    enum:     ['UNINITIALIZED',
+               'UNRELEASED',
+               'STANDBY',
+               'PREBUILD',
+               'BUILDING',
+               'REVIEWING',
+               'FAILED',
+               'PUBLISHED',
+              ],
   },
   name:         String,          // Applications actual name
   package:      String,          // Debian Package Name
@@ -39,7 +48,6 @@ const ApplicationSchema = new mongoose.Schema({
     type:      [String],
     default:  ['trusty-amd64', 'trusty-i386'],
   },
-  issue:       IssueSchema,      // Current Github issue for application
   releases:    [ReleaseSchema],  // All releases for application
 });
 
@@ -58,22 +66,6 @@ ApplicationSchema.virtual('release.latest').get(function() {
   });
 
   return this.releases[this.releases.length - 1];
-});
-
-ApplicationSchema.virtual('status').get(function() {
-  if (!this.initalized) {
-    return 'UNINITIALIZED'
-  }
-
-  if (this.issue.problems.error.length > 0) {
-    return 'FAILED';
-  }
-
-  if (this.release.latest == null) {
-    return 'STANDBY';
-  }
-
-  return this.release.latest.status;
 });
 
 // Cleans up application object to something easily loggable
@@ -126,10 +118,14 @@ ApplicationSchema.methods.releaseFetchAll = function() {
   .filter(release => {
     return semver.valid(release.tag_name, true);
   })
-  .then(releases => { // Log releases for easier development
+  .then(releases => {
     const releaseString = (releases.length === 1) ? 'release' : 'releases';
     app.log.silly(`${fullName} has ${releases.length} GitHub ${releaseString}`);
-    return releases;
+
+    return application.update({
+      status: (releases.length > 0) ? 'STANDBY' : 'UNRELEASED',
+    })
+    .then(() => releases);
   })
   .each(release => {
     return application.upsertRelease({
@@ -160,19 +156,14 @@ ApplicationSchema.methods.isStatus = function(query) {
 
 // Runs update test for application
 // Returns Promise of null on success
-ApplicationSchema.methods.runHook = function(level = 'commit') {
+ApplicationSchema.methods.runHook = function(level = 'prebuild') {
   const application = this;
 
-  return appHook.test(level, application)
-  .then(messages => {
-    return application.update({
-      'issue.problems.error': messages.error,
-      'issue.problems.warning': messages.warning,
-    });
-  })
-  .then(data => {
-    return Promise.resolve(null);
-  });
+  if (application.release.latest != null) {
+    return appHook(application.release.latest, level);
+  }
+
+  return Promise.resolve();
 }
 
 // Pushes Github issue label to repository
@@ -182,23 +173,29 @@ ApplicationSchema.methods.pushLabel = function() {
   const fullName = application.github.fullName;
   const label = application.github.label;
 
-  return gh.request(`POST /repos/${fullName}/labels`, {
-    token: application.github.APItoken,
-    body: {
-      name: label,
-      color: '3A416F',
-    },
-  })
-  .then(data => {
-    return Promise.resolve(null);
-  })
-  .catch(error => {
-    if (error.status === 422) { // Already created labels don't create errors
-      return Promise.resolve(null);
-    }
+  app.log.silly(`Sending label to ${fullName}`);
 
-    return Promise.reject(error);
-  });
+  if (app.config.github.push) {
+    return gh.request(`POST /repos/${fullName}/labels`, {
+      token: application.github.APItoken,
+      body: {
+        name: label,
+        color: '3A416F',
+      },
+    })
+    .then(data => {
+      return Promise.resolve(null);
+    })
+    .catch(error => {
+      if (error.status === 422) { // Already created labels don't create errors
+        return Promise.resolve(null);
+      }
+
+      return Promise.reject(error);
+    });
+  }
+
+  return Promise.resolve();
 }
 
 // Github methods
@@ -207,13 +204,9 @@ ApplicationSchema.methods.pushLabel = function() {
 ApplicationSchema.methods.fetchGithub = function() {
   let application = this;
 
-  return Promise.all([
-    application.releaseFetchAll(),
-    application.runHook('commit'),
-  ])
-  .then(() => {
-    return Application.findOne({_id: application._id});
-  });
+  return application.releaseFetchAll()
+  .then(application => application.runHook('prebuild'))
+  .then(() => Application.findOne({_id: application._id}));
 }
 
 // Updates all Github data from database
@@ -261,9 +254,7 @@ ApplicationSchema.methods.changelog = function(params) {
   }
 
   // Nice messages are Nice
-  const distString = (promises.length === 1) ? 'changelog' : 'changelogs';
-  const releaseString = (application.releases.length === 1) ? 'release' : 'releases';
-  app.log.silly(`Generated ${promises.length} ${distString} for ${fullName}'s ${application.releases.length} ${releaseString}`);
+  app.log.silly(`Generated ${app.helpers.nString('changelog', promises.length)} for ${fullName}'s ${app.helpers.nString('release', application.releases.length)}`);
 
   return promises;
 }

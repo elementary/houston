@@ -35,11 +35,32 @@ export function eachReverse(context) {
 
 export function lastElement(context) {
   var options = arguments[arguments.length - 1];
+
+  if (context == null) {
+    return null
+  }
+
   return options.fn(context[context.length - 1]);
 }
 
-export function is(t1, t2, data) {
-  if (t1 === t2) {
+export function is(first, second, data) {
+  if (_.isEqual(first, second)) {
+    return data.fn(this);
+  }
+
+  return data.inverse(this);
+}
+
+export function isLength(array, length, data) {
+  if (_.isArray(array) && array.length === length) {
+    return data.fn(this);
+  }
+
+  return data.inverse(this);
+}
+
+export function hasLength(array, data) {
+  if (_.isArray(array) && array.length > 0) {
     return data.fn(this);
   }
 
