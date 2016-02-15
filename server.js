@@ -4,34 +4,6 @@ require('babel-polyfill');
 var app = require('./app');
 var express = require('express');
 var http = require('http');
-var mongoose = require('mongoose');
-var session = require('express-session');
-var MongoStore = require('connect-mongo')(session);
-
-/**
- * Initialize database connection
- */
-mongoose.connect(app.config.database.url);
-
-mongoose.connection.on('error', function logError(msg) {
-  app.log.error(msg);
-});
-
-mongoose.connection.once('open', function logConnection() {
-  app.log.info('Connected to database');
-});
-
-/**
- * Setup express server middleware
- */
-app.use(session({
-  secret: app.config.server.secret,
-  saveUninitialized: false, // Don't create session until something stored
-  resave: false, // Don't save session if unmodified
-  store: new MongoStore({
-    mongooseConnection: mongoose.connection,
-  }),
-}));
 
 /**
  * Run server
