@@ -1,5 +1,5 @@
 # Houston
-**Prepare for liftoff.**
+**We have liftoff.**
 
 Houston is a developer dashboard and backend for converting GitHub repos into
 Debian packages. Developers create a repo containing a `.apphub` file which is
@@ -15,7 +15,6 @@ about the technical details.
 * HTML/CSS/JS
 * [Handlebars](http://handlebarsjs.com/) templates
 * [Node.js](https://nodejs.org/en/) backend
-  ([ES2015 syntax](https://git.io/es6features) via [Babel](https://babeljs.io))
 * [GitHub OAuth API](https://developer.github.com/v3/oauth/) via
   [Passport](https://github.com/jaredhanson/passport-github)
 * [MongoDB](https://www.mongodb.org/) with
@@ -87,16 +86,14 @@ hesitate to [ask for help](https://github.com/elementary/houston/issues/new).
    Your `config.js` should now include a section that looks something like this:
 
   ```js
-  /**
-   * Github access
-   * https://github.com/settings/developers
-   */
-  github: {
-    clientID: '1e9ec151a7728abaa304',
+  // https://github.com/settings/developers
+  export let github = {
+    client: '1e9ec151a7728abaa304',
     secret: '9ccde02a1633b27232ee07662b7a688c43018b1f',
-    // Github authentication callback url. Don't change '/auth/github/callback'
-    callback: 'http://localhost:3000/auth/github/callback',
-  },
+
+    // Post data to GitHub?
+    post: true
+  }
   ```
 
 
@@ -147,33 +144,5 @@ here's what you will need to do.
 #### Accessing
 
 In either case, open up a browser and visit http://localhost:3000, and you
-should see the Houston website. If you do — congratulations, you're all ready
-to hack on Houston!
-
-Please take this time to read the [contributing]($contributing) guidelines
-before working on [open issues](https://github.com/elementary/houston/issues)
-and submitting
-[pull requests](https://help.github.com/articles/creating-a-pull-request).
-
-
-## Contributing
-
-Because we use a lot of new JavaScript code styles, it is strongly recommended
-to read up on promises, and
-[ES6 shorthand](https://github.com/lukehoban/es6features).
-
-Some things to keep note of while programming:
-* If you don't change a variable, declare it with `const` vs `var`.
-* Use arrows when you can. It keeps the code clean and easy to read.
-* If you can fit the function in one clean line, do so.
-  - `const notDotQuery = _.mapValues(dotQuery, value => ({ $ne: value }));`
-* Template strings are here to help. Use them.
-* Comments don't hurt.
-* Promises always return some value, error or not.
-* It is standard to return in promise with `return Promise.resolve()` vs `return null`.
-
-We [lint](https://en.wikipedia.org/wiki/Lint_(software) our JavaScript code
-with [JSCS](http://jscs.info) to ensure our code is consistently styled and
-formatted. For simplicity you can run `npm test` to check for code consistency.
-
-Please lint your code before submitting a pull request :)
+should see the Houston website. Congradulations! Please take this time to read
+the [contributing](CONTRIBUTING.md) guidelines before submitting code or issues.
