@@ -26,19 +26,6 @@ const ApplicationSchema = new mongoose.Schema({
       default: 'AppHub',
     },
   },
-  status: {                      // Application stage / status
-    type:       String,
-    default:   'UNINITIALIZED',
-    enum:     ['UNINITIALIZED',
-               'UNRELEASED',
-               'STANDBY',
-               'PREBUILD',
-               'BUILDING',
-               'REVIEWING',
-               'FAILED',
-               'PUBLISHED',
-              ],
-  },
   name:         String,          // Applications actual name
   package:      String,          // Debian Package Name
   version:      String,          // Currently published & reviewed version

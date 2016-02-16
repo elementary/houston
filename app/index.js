@@ -26,7 +26,7 @@ app.config = {}
 try {
   fs.statSync(path.join(__dirname, '../config.js'));
 } catch (err) {
-  throw new Error('It seems like you have not setup houston, we have a example config file for you, please set it up.');
+  throw new Error('It seems like you have not setup Houston, we have a example config file for you, please set it up.');
 }
 
 app.config = require(path.join(__dirname, '../config.js'));

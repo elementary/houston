@@ -5,7 +5,7 @@ import app from '~/';
 import { Application } from '~/model/application';
 import { hasRole } from './auth';
 
-// Delete the project from houston
+// Delete the project from Houston
 app.get('/project/gh/:org/:name/initialize', hasRole('beta'), function(req, res) {
   return Application.findOne({
     'github.owner': req.params.org,
@@ -41,7 +41,7 @@ app.get('/project/gh/:org/:name/build', hasRole('beta'), (req, res, next) => {
   });
 });
 
-// Delete the project from houston
+// Delete the project from Houston
 app.get('/project/gh/:org/:name/delete', hasRole('beta'), function(req, res) {
   Application.findOne({
     'github.owner': req.params.org,
