@@ -19,6 +19,7 @@ const UserSchema = new Mongoose.Schema({
   avatar: String,
 
   github: {
+    id: String,                   // GitHub id for authentication
     access: String,               // GitHub token
     refresh: String               // Github token
   },
@@ -30,7 +31,10 @@ const UserSchema = new Mongoose.Schema({
   },
 
   date: {
-    joined: Date,
+    joined: {
+      type: Date,
+      default: new Date()
+    },
     visited: Date,
     left: Date
   },
@@ -110,4 +114,6 @@ UserSchema.post('remove', doc => {
   })
 })
 
-export default { UserSchema }
+const User = Mongoose.model('user', UserSchema)
+
+export default { User, UserSchema }

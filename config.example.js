@@ -47,7 +47,10 @@ export const database = 'mongodb://localhost/houston-dev'
 
 export const server = {
   port: 3000,
-  secret: 'LearntocodeCreatethefuture'
+  secret: 'LearntocodeCreatethefuture',
+
+  // Full route including port and protocol, without trailing slash
+  url: 'http://localhost:3000'
 }
 
 export const log = {

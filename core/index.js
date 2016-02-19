@@ -2,8 +2,9 @@
  * core/index.js
  * Handles core Houston objects
  *
- * @exports {Object} controller - Koa router objects
- * @exports {Object} model - Mongoose models and schemas
+ * @exports {Object} Controller - Koa router objects
+ * @exports {Object} Passport - All Passport objects
  */
 
 export * as Controller from './controller'
+export * as Passport from './passport'

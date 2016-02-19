@@ -12,6 +12,7 @@
 import Fs from 'fs'
 import Mongoose from 'mongoose'
 import Winston from 'winston'
+import Promise from 'bluebird'
 
 let app = {}
 
@@ -78,6 +79,7 @@ export const Log = app.log
 
 // Start mongoose database connection
 app.db = Mongoose.connect(app.config.database)
+app.db.Promise = Promise
 
 app.db.connection.on('error', function (msg) {
   throw new Error(msg)

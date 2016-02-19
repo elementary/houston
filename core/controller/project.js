@@ -14,18 +14,6 @@ let route = new Router({
   prefix: '/project/:owner/:name'
 })
 
-// TODO: Repo verification with database
-route.param('owner', (owner, ctx, next) => {
-  if (owner == null) return
-  return next()
-})
-
-// TODO: Repo verification with database
-route.param('name', (name, ctx, next) => {
-  if (name == null) return
-  return next()
-})
-
 route.get('*', async (ctx) => {
   let owner = ctx.owner
   let name = ctx.name
