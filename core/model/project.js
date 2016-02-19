@@ -10,10 +10,10 @@
 
 import Mongoose from 'mongoose'
 
-import CycleSchema from './cycle'
-import ReleaseSchema from './release'
+import { CycleSchema } from './cycle'
+import { ReleaseSchema } from './release'
 
-const projectSchema = new Mongoose.Schema({
+const ProjectSchema = new Mongoose.Schema({
   owner: String,
   name: String,
   type: {
@@ -25,6 +25,12 @@ const projectSchema = new Mongoose.Schema({
     name: String,
     icon: String,
     price: Number
+  },
+
+  _status: {
+    type: String,
+    default: 'NEW',
+    enum: ['NEW', 'STANDBY', 'PRE', 'BUILD', 'POST', 'FAIL', 'FINISH']
   },
 
   github: {
@@ -50,13 +56,27 @@ const projectSchema = new Mongoose.Schema({
   releases: [ReleaseSchema]
 })
 
-projectSchema.virtual('version').get(function () {
+ProjectSchema.virtual('version').get(function () {
   if (this.release !== null) return this.release.version
 
   return null
 })
 
-projectSchema.virtual('dist-arch').get(function () {
+ProjectSchema.virtual('status')
+.get(function () {
+  if (this.release != null) return this.release.status
+
+  return this._status
+})
+.set(function (_status) {
+  if (_status !== 'STANDBY') {
+    return Promise.reject("Unable to set status to anything other than 'STANDBY'")
+  }
+
+  return this.update({ _status }, { new: true })
+})
+
+ProjectSchema.virtual('dist-arch').get(function () {
   let results = []
   for (let dI in this.distributions) {
     for (let aI in this.architectures) {
@@ -66,6 +86,12 @@ projectSchema.virtual('dist-arch').get(function () {
   return results
 })
 
-const project = Mongoose.model('project', projectSchema)
+ProjectSchema.virtual('release').get(function () {
+  if (this.releases.length > 0) return this.releases[this.releases.length - 1]
 
-export default { project, projectSchema }
+  return null
+})
+
+const Project = Mongoose.model('project', ProjectSchema)
+
+export default { Project, ProjectSchema }

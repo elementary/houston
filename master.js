@@ -5,28 +5,51 @@
  * @exports {Object} Server
  */
 
-require('babel-register')
-require('babel-polyfill')
+import Koa from 'koa'
 
-var Koa = require('koa')
+import { Config, Helpers, Log } from './app'
+import { Controller } from './core'
 
-var Server = new Koa()
-var Config = require('./app').Config
-var Log = require('./app').Log
-var Helpers = require('./app').Helpers
-var Controller = require('./core/controller')
+let Server = new Koa()
 
 // Setup Server configuration
 Server.name = 'Houston'
 Server.env = Config.env
 
-// Load Houston core files
-var routes = Helpers.FlattenObject(Controller, { Route: 'object' })
+// Server logging
+Server.use(async (ctx, next) => {
+  let start = new Date()
+  await next()
+  let end = new Date()
+  Log.verbose(`${ctx.method} ${ctx.url} - ${end - start}ms`)
+})
 
-for (var key in routes) {
-  var router = routes[key].Route
-  var path = router.opts.prefix || '/'
-  Server.use(router.routes())
+// Error pages
+Server.use(async (ctx, next) => {
+  let error
+
+  try {
+    await next()
+  } catch (err) {
+    ctx.status = err.status || 500
+    error = err
+  }
+
+  if (error && ctx.status !== 404) {
+    ctx.body = 'Crash landed? Lost at sea? Who knows?'
+    ctx.app.emit('error', error, ctx)
+  } else if (ctx.status === 404) {
+    ctx.body = '404 No launchpad here'
+  }
+})
+
+// Load Houston core files
+let routes = Helpers.FlattenObject(Controller, { Route: 'object' })
+
+for (let key in routes) {
+  let router = routes[key].Route
+  let path = router.opts.prefix || '/'
+  Server.use(router.routes(), router.allowedMethods())
   Log.debug(`Loaded ${path} Router`)
 }
 
@@ -37,10 +60,13 @@ process.on('unhandledRejection', function (reason, p) {
   if (reason != null) Log.warn(reason)
 })
 
-Server.on('error', function (error, ctx) {
+Server.on('error', function (error, ctx, next) {
+  if (Server.env === 'test') return
+
   Log.error(error)
 })
 
+// Launching
 Server.listen(Config.server.port)
 Log.info(`Houston listening on ${Config.server.port}`)
 

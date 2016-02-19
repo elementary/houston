@@ -12,13 +12,12 @@ import Promise from 'bluebird'
 import Dotize from 'dotize'
 
 import { Config } from '~/app'
-import Application from './application'
 
 const jenkins = (Config.jenkins)
   ? require('then-jenkins')(Config.jenkins.url)
   : null
 
-const buildSchema = new Mongoose.Schema({
+const BuildSchema = new Mongoose.Schema({
   arch: {
     type: String,
     required: true
@@ -30,9 +29,9 @@ const buildSchema = new Mongoose.Schema({
 
   build: Number,
   log: String,
-  status: {
+  _status: {
     type: String,
-    default: 'QUEUED',
+    default: 'QUEUE',
     enum: ['QUEUE', 'BUILD', 'FAIL', 'FINISH']
   },
 
@@ -43,8 +42,27 @@ const buildSchema = new Mongoose.Schema({
   finished: Date
 })
 
-buildSchema.virtual('cycle').get(function () {
+BuildSchema.virtual('cycle').get(function () {
   return this.ownerDocument()
+})
+
+BuildSchema.virtual('status')
+.get(function () {
+  return this._status
+})
+.set(function (_status) {
+  let build = this
+  let actions = []
+  let update = { _status }
+
+  if (_status === 'FAIL') actions.push(this.getLog())
+
+  if (_status === 'FAIL' || _status === 'FINISH') {
+    update.finished = new Date()
+  }
+
+  return Promise.all(actions)
+  .then(build.update(update, { new: true }))
 })
 
 /**
@@ -53,40 +71,14 @@ buildSchema.virtual('cycle').get(function () {
  * @param {Object} Object of items to update
  * @return {Object} updated build object
  */
-buildSchema.methods.update = function (obj) {
-  let self = this
-  let update = Dotize.convert(obj, 'cycle.$.build.$')
+// FIXME: drunken coding results in mostly broken code TIL
+BuildSchema.methods.update = function (obj) {
+  let build = this
+  let update = Dotize.convert(obj, 'cycle.$')
 
-  return Application.findOneAndUpdate({
-    _id: self.cycle.application._id,
-    'cycle._id': self.cycle._id,
-    'cycle.build._id': self._id
-  }, { update }, { new: true })
-  .then(application => application.cycle.build.id(self._id))
-}
-
-/**
- * The most used build function
- * Sets status on build and runs the needed functions
- *
- * @param {String} requested status
- * @return {Object} updated build object
- */
-buildSchema.methods.status = function (status) {
-  let self = this
-
-  let updates = []
-
-  if (status === 'FAIL') {
-    updates.push(self.log())
-  }
-
-  if (status === 'FAIL' || status === 'FINISH') {
-    updates.push(self.update({ finished: new Date() }))
-  }
-
-  return Promise.all(updates)
-  .then(() => self.update({ status }))
+  return build.cycle.update({
+    'builds_id': build._id
+  }, update)
 }
 
 /**
@@ -94,14 +86,14 @@ buildSchema.methods.status = function (status) {
  *
  * @return {Object} updated build object
  */
-buildSchema.methods.build = function () {
+BuildSchema.methods.doBuild = function () {
   let self = this
 
   if (Config.jenkins) {
     return jenkins.job.build({
       name: Config.jenkins.job,
       parameters: {
-        PACKAGE: self.application.package.name,
+        PACKAGE: self.project.package.name,
         REPO: self.cycle.repo,
         VERSION: self.cycle.version,
         DIST: self.dist,
@@ -123,7 +115,7 @@ buildSchema.methods.build = function () {
  *
  * @return {Object} updated build object
  */
-buildSchema.methods.log = function () {
+BuildSchema.methods.getLog = function () {
   let self = this
 
   if (Config.jenkins) {
@@ -136,18 +128,18 @@ buildSchema.methods.log = function () {
 }
 
 // Mongoose lifecycle functions
-buildSchema.pre('save', function (next) {
+BuildSchema.pre('save', function (next) {
   this.wasNew = this.isNew
   next()
 })
 
-buildSchema.post('save', function (build, next) {
+BuildSchema.post('save', function (build, next) {
   if (build.wasNew) {
-    return build.build()
-    .then(() => next)
+    return build.doBuild()
+    .then(next)
   } else {
     next()
   }
 })
 
-export default { buildSchema }
+export default { BuildSchema }

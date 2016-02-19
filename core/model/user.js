@@ -13,7 +13,7 @@ import Hubkit from 'hubkit'
 
 import { Config, Log } from '~/app'
 
-const userSchema = new Mongoose.Schema({
+const UserSchema = new Mongoose.Schema({
   username: String,
   email: String,
   avatar: String,
@@ -46,7 +46,7 @@ const userSchema = new Mongoose.Schema({
  *
  * @return {Object} updated user object
  */
-userSchema.methods.getRights = async function () {
+UserSchema.methods.getRights = async function () {
   const user = this
   const github = new Hubkit({
     token: user.github.access
@@ -96,7 +96,7 @@ userSchema.methods.getRights = async function () {
 }
 
 // Mongoose lifecycle functions
-userSchema.post('remove', doc => {
+UserSchema.post('remove', doc => {
   let projects = []
 
   for (let i in doc.projects) {
@@ -110,4 +110,4 @@ userSchema.post('remove', doc => {
   })
 })
 
-export default { userSchema }
+export default { UserSchema }

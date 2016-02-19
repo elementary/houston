@@ -34,7 +34,7 @@
   },
   "scripts": {
     "lint": "standard",
-    "start": "node master.js"
+    "start": "node entry.js master"
   },
   "standard": {
     "parser": "babel-eslint"

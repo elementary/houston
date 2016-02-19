@@ -27,7 +27,7 @@ route.param('key', (key, ctx, next) => {
 // Logs failed hook and responds when GitHub config is disabled
 route.get('*', async (ctx, next) => {
   if (!Config.github.hook) {
-    Log.debug('GitHub is disabled but someone tried to access GitHub hook')
+    Log.info('GitHub is disabled but someone tried to access GitHub hook')
     ctx.status = 500
     ctx.body = 'no'
   } else {

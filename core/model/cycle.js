@@ -7,13 +7,17 @@
  * }
  */
 
+import Dotize from 'dotize'
 import Mongoose from 'mongoose'
 import Promise from 'bluebird'
 
-import BuildSchema from './build'
+import { BuildSchema } from './build'
 
-const cycleSchema = new Mongoose.Schema({
-  release: String,
+const CycleSchema = new Mongoose.Schema({
+  release: {
+    type: Mongoose.Schema.Types.ObjectId,
+    ref: 'release'
+  },
 
   repo: {
     type: String,
@@ -25,11 +29,12 @@ const cycleSchema = new Mongoose.Schema({
   },
 
   // Determines if we save, publish, and create issues
-  type: {
+  _type: {
     type: String,
+    default: 'ORPHAN',
     enum: ['ORPHAN', 'RELEASE']
   },
-  status: {
+  _status: {
     type: String,
     default: 'QUEUED',
     enum: ['QUEUE', 'PRE', 'BUILD', 'POST', 'FAIL', 'FINISH']
@@ -38,25 +43,34 @@ const cycleSchema = new Mongoose.Schema({
   build: [BuildSchema]
 })
 
-cycleSchema.virtual('application').get(function () {
+CycleSchema.virtual('project').get(function () {
   return this.ownerDocument()
 })
 
-cycleSchema.virtual('type').get(function () {
+CycleSchema.virtual('type')
+.get(function () {
   if (this.release != null) return 'RELEASE'
 
-  return this.type
+  return this._type
+})
+.set(function (_type) {
+  return this.update({ _type }, { new: true })
 })
 
-cycleSchema.virtual('version').get(function () {
+CycleSchema.virtual('version').get(function () {
   if (this.type === 'release') return this.release.version
+
+  return '0.0.0'
 })
 
-cycleSchema.virtual('tag').get(function () {
-  if (this.type === 'release') return this.release.tag
+CycleSchema.virtual('tag').get(function () {
+  if (this.type === 'release') return this.release.github.tag
+
+  return '0.0.0'
 })
 
-cycleSchema.virtual('status').get(function () {
+CycleSchema.virtual('status')
+.get(function () {
   let finish = true
   let fail = false
   let build = false
@@ -82,14 +96,34 @@ cycleSchema.virtual('status').get(function () {
     return this._status
   }
 })
+.set(function (_status) {
+  return this.update({ _status }, { new: true })
+})
+
+/**
+ * Updates build nested in cycle model
+ *
+ * @param {Object} Object of items to update
+ * @return {Object} updated build object
+ */
+CycleSchema.methods.update = function (obj) {
+  let build = this
+  if (obj[Object.keys(obj)[0]][0] !== '$') {
+    obj = Dotize.convert(obj, 'cycles.$')
+  }
+
+  return build.cycle.update({
+    'builds_id': build._id
+  }, obj)
+}
 
 // Mongoose lifecycle functions
-cycleSchema.pre('save', function (next) {
+CycleSchema.pre('save', function (next) {
   this.wasNew = this.isNew
   next()
 })
 
-cycleSchema.post('save', function (cycle, next) {
+CycleSchema.post('save', function (cycle, next) {
   if (cycle.wasNew) {
     let builds = []
 
@@ -106,4 +140,4 @@ cycleSchema.post('save', function (cycle, next) {
   }
 })
 
-export default { cycleSchema }
+export default { CycleSchema }

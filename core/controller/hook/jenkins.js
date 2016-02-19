@@ -27,7 +27,7 @@ route.param('key', (key, ctx, next) => {
 // Logs failed hook and responds when jenkins config is disabled
 route.get('*', async (ctx, next) => {
   if (!Config.jenkins) {
-    Log.debug('Jenkins is disabled but someone tried to access Jenkins hook')
+    Log.info('Jenkins is disabled but someone tried to access Jenkins hook')
     ctx.status = 500
     ctx.body = 'no'
     return
