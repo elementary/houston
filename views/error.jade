@@ -1,0 +1,8 @@
+extends /layout/main
+
+block body
+  div
+    h1= message
+    if error
+      h3= error.message
+      pre= error.stack

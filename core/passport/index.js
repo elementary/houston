@@ -12,6 +12,7 @@ import * as Github from './github'
 
 // Passport setup
 export function Setup (Server) {
+  // TODO: actually serialize users
   Passport.serializeUser((user, done) => {
     done(null, user)
   })
@@ -25,8 +26,8 @@ export function Setup (Server) {
   Server.use(Passport.initialize())
   Server.use(Passport.session())
 
-  Log.verbose('Github Passport loaded')
-  Log.debug('Passport Initalized')
+  Log.debug('Github Passport loaded')
+  Log.verbose('Passport Initalized')
 }
 
 let route = new Router({

@@ -1,0 +1,20 @@
+extends /layout/main
+
+block body
+  if projects.length < 1
+    div.row
+      h3 No elementary apps found!
+      p An 
+        code .apphub
+        |  file in the root of the repo is how Houston knows which apps to look at.
+  else
+    div.row
+      each project in projects
+        div.repo
+          if project.package != null && project.package.icon != null
+            img(src="data:image/svg+xml;base64," + project.package.icon).app-icon
+          else
+            img(src="/images/application-default-icon.png").app-icon
+          div.description
+            p= project.name
+            p.subtext: a(href="https://github.com/" + project.github.fullName)= project.github.fullName

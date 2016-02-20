@@ -13,6 +13,7 @@ import Fs from 'fs'
 import Mongoose from 'mongoose'
 import Winston from 'winston'
 import Promise from 'bluebird'
+import Super from 'superagent-bluebird-promise'
 
 let app = {}
 
@@ -90,3 +91,6 @@ app.db.connection.once('open', function () {
 })
 
 export const Db = app.db
+
+// Export an amazing request library
+export const Request = Super

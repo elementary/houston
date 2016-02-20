@@ -14,8 +14,12 @@ import { CycleSchema } from './cycle'
 import { ReleaseSchema } from './release'
 
 const ProjectSchema = new Mongoose.Schema({
-  owner: String,
-  name: String,
+  _name: String,
+  owner: {
+    type: Mongoose.Schema.Types.ObjectId,
+    ref: 'user',
+    required: true
+  },
   type: {
     type: String,
     default: 'Application'
@@ -34,7 +38,11 @@ const ProjectSchema = new Mongoose.Schema({
   },
 
   github: {
-    owner: String,                // Owner of the GitHub repository
+    id: {                         // GitHub API id
+      type: Number,
+      unique: true
+    },
+    owner: String,                // Owner of the GitHub repository login
     name: String,                 // Github Repository name
     APItoken: String,             // GitHub accessToken of the latest user
     label: {                      // Github issue label
@@ -56,8 +64,16 @@ const ProjectSchema = new Mongoose.Schema({
   releases: [ReleaseSchema]
 })
 
+ProjectSchema.virtual('name').get(function () {
+  if (this._name != null) return this._name
+  if (this.package.name != null) return this.package.name
+  if (this.github.name != null) return this.github.name
+
+  return 'Unknown Project'
+})
+
 ProjectSchema.virtual('version').get(function () {
-  if (this.release !== null) return this.release.version
+  if (this.release != null) return this.release.version
 
   return null
 })
@@ -76,11 +92,17 @@ ProjectSchema.virtual('status')
   return this.update({ _status }, { new: true })
 })
 
+ProjectSchema.virtual('github.fullName').get(function () {
+  return `${this.github.owner}/${this.github.name}`
+})
+
 ProjectSchema.virtual('dist-arch').get(function () {
+  let project = this
   let results = []
-  for (let dI in this.distributions) {
-    for (let aI in this.architectures) {
-      results.push(`${this.dists[dI]}-${this.arch[aI]}`)
+
+  for (let dI in project.distributions) {
+    for (let aI in project.architectures) {
+      results.push(`${project.distributions[dI]}-${project.architectures[aI]}`)
     }
   }
   return results

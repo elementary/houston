@@ -9,9 +9,9 @@
  */
 
 import Mongoose from 'mongoose'
-import Hubkit from 'hubkit'
 
-import { Config, Log } from '~/app'
+import { Config, Log, Request } from '~/app'
+import { Project } from './project'
 
 const UserSchema = new Mongoose.Schema({
   username: String,
@@ -26,8 +26,8 @@ const UserSchema = new Mongoose.Schema({
 
   right: {
     type: String,
-    default: 'user',
-    enum: ['user', 'beta', 'review', 'admin']
+    default: 'USER',
+    enum: ['USER', 'BETA', 'REVIEW', 'ADMIN']
   },
 
   date: {
@@ -46,68 +46,73 @@ const UserSchema = new Mongoose.Schema({
 })
 
 /**
+ * Gets all Projects that user ownes
+ *
+ * @return {Array} project documents
+ */
+UserSchema.methods.getProjects = function () {
+  return Project.find({ owner: this._id }).exec()
+}
+
+/**
  * Updates user with rights given by GitHub
  *
  * @return {Object} updated user object
  */
 UserSchema.methods.getRights = async function () {
   const user = this
-  const github = new Hubkit({
-    token: user.github.access
-  })
 
-  let boolMember = async function (member, username) {
+  let promiseMember = function (member, username) {
     let request = ''
     if (typeof member === 'number') {
-      request = `GET /teams/${member}/membership/${username}`
+      request = `https://api.github.com/teams/${member}/memberships/${username}`
     } else {
-      request = `GET /orgs/${member}/members/${username}`
+      request = `https://api.github.com/orgs/${member}/members/${username}`
     }
 
-    let body = await github.request(request)
-
-    console.log(body)
-
-    return true
+    return Request
+    .get(request)
+    .auth(user.github.access)
+    .then(data => {
+      if (data.body != null) return (data.body.state === 'active')
+      if (data.statusType === 2) return true
+      return false
+    })
+    .catch(() => false)
   }
 
   if (Config.rights) {
-    let right = 'user'
+    let right = 'USER'
 
-    if (boolMember(Config.rights.admin, user.username)) {
-      right = 'admin'
-    } else if (boolMember(Config.rights.review, user.username)) {
-      right = 'review'
-    } else if (boolMember(Config.rights.beta, user.username)) {
-      right = 'beta'
+    const beta = await promiseMember(Config.rights.beta, user.username)
+    const review = await promiseMember(Config.rights.review, user.username)
+    const admin = await promiseMember(Config.rights.admin, user.username)
+
+    if (admin) {
+      right = 'ADMIN'
+    } else if (review) {
+      right = 'REVIEW'
+    } else if (beta) {
+      right = 'BETA'
     }
 
-    if (user.right === right) {
-      return user
-    }
+    Log.verbose(`Giving new right of ${right} to ${user.username}`)
 
-    return user.update({ right }, { new: true })
+    return User.findByIdAndUpdate(user._id, { right }).exec()
   }
 
   Log.warn(`Rights are currently disabled. Giving unrestricted access to ${user.username}`)
   Log.warn('Clear database before setting up a production environment!')
 
-  if (user.right === 'admin') {
-    return user
-  }
-
-  return user.update({ right: 'admin' }, { new: true })
+  return User.findByIdAndUpdate(user._id, { right: 'ADMIN' }).exec()
 }
 
 // Mongoose lifecycle functions
 UserSchema.post('remove', doc => {
-  let projects = []
-
-  for (let i in doc.projects) {
-    projects.push(doc.projects[i].remove())
-  }
-
-  Promise.all(projects)
+  doc.getProjects()
+  .each(project => {
+    return project.remove()
+  })
   .catch(err => {
     Log.warn(`Error while removing all projects from ${doc.username}`)
     Log.error(err)

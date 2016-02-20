@@ -72,11 +72,19 @@ Server.use(async (ctx, next) => {
     error = err
   }
 
+  if (error && error.status[0] !== 4) ctx.app.emit('error', error, ctx)
+
+  if (Server.env !== 'production') error = null
+
   if (error && ctx.status !== 404) {
-    ctx.body = 'Crash landed? Lost at sea? Who knows?'
-    ctx.app.emit('error', error, ctx)
+    await ctx.render('error', {
+      error,
+      message: 'It seems we have crash landed sir'
+    })
   } else if (ctx.status === 404) {
-    ctx.body = '404 No launchpad here'
+    await ctx.render('error', {
+      message: 'We moved the launchpad sir'
+    })
   }
 })
 

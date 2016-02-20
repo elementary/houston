@@ -20,13 +20,16 @@ export const Strategy = new Github.Strategy({
 }, (access, refresh, profile, done) => {
   // TODO: move user right checking from model to here
   // TODO: code cleanup here. it's a mess
+  // FIXME: user needs to relogin for new permission
   User.findOne({ 'github.id': profile.id })
   .then(user => {
     if (user) {
       User.findByIdAndUpdate(user._id, {
         'github.access': access,
-        'github.refresh': refresh
+        'github.refresh': refresh,
+        'date.visited': new Date()
       })
+      .then(user => user.getRights())
       .then(user => done(null, user))
       .catch(done)
     } else {
@@ -36,8 +39,10 @@ export const Strategy = new Github.Strategy({
         avatar: profile.avatar_url,
         'github.id': profile.id,
         'github.access': access,
-        'github.refresh': refresh
+        'github.refresh': refresh,
+        'date.visited': new Date()
       })
+      .then(user => user.getRights)
       .then(user => done(null, user))
       .catch(done)
     }
@@ -50,13 +55,10 @@ let route = new Router({
 
 route.get('/', Passport.authenticate('github'))
 
-route.get('/bad', ctx => {
-  ctx.body = 'failed to login to github'
+route.get('/callback', Passport.authenticate('github'), (ctx, next) => {
+  let path = ctx.session.originalUrl || '/dashboard'
+  ctx.session.originalUrl = null
+  return ctx.redirect(path)
 })
-
-route.get('/callback', Passport.authenticate('github', {
-  successRedirect: '/',
-  failureRedirect: '/auth/github/bad'
-}))
 
 export const Route = route

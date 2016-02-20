@@ -1,0 +1,8 @@
+{
+  "plugins": [
+    "babel"
+  ],
+  "rules": {
+    "babel.arrow-parens": 0
+  }
+}

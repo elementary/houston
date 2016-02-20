@@ -5,6 +5,9 @@
  * @exports {Object} default - Houston configuration
  */
 
+// 'test' 'development' 'production'
+// export const env = 'development'
+
 // https://github.com/settings/developers
 export const github = {
   client: '12345679101112131415',
@@ -22,11 +25,11 @@ export const rights = false
 
 /*
 export const rights = {
-  beta: 'elementary',
 
   // https://developer.github.com/v3/orgs/teams/#get-team
+  beta: 'elementary',
   admin: 213128,
-  reviewer: 1880652
+  review: 1880652
 }
 */
 
