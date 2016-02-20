@@ -8,9 +8,12 @@
  * }
  */
 
+import _ from 'lodash'
+import Promise from 'bluebird'
 import Mongoose from 'mongoose'
+import Dotize from 'dotize'
+import Util from 'util'
 
-import { CycleSchema } from './cycle'
 import { ReleaseSchema } from './release'
 
 const ProjectSchema = new Mongoose.Schema({
@@ -31,10 +34,23 @@ const ProjectSchema = new Mongoose.Schema({
     price: Number
   },
 
+  repo: {
+    type: String,
+    required: true,
+    validate: {
+      validator: s => /.*\.git/.test(s),
+      message: `{VALUE} is not a valid git repository`
+    }
+  },
+  tag: {
+    type: String,
+    default: 'master'
+  },
+
   _status: {
     type: String,
     default: 'NEW',
-    enum: ['NEW', 'STANDBY', 'PRE', 'BUILD', 'POST', 'FAIL', 'FINISH']
+    enum: ['NEW', 'INIT']
   },
 
   github: {
@@ -60,9 +76,14 @@ const ProjectSchema = new Mongoose.Schema({
     default: ['amd64', 'armhf']
   },
 
-  cycles: [CycleSchema],
+  cycles: [{
+    type: Mongoose.Schema.Types.ObjectId,
+    ref: 'cycle'
+  }],
   releases: [ReleaseSchema]
 })
+
+ProjectSchema.set('toJSON', { virtuals: true })
 
 ProjectSchema.virtual('name').get(function () {
   if (this._name != null) return this._name
@@ -75,21 +96,7 @@ ProjectSchema.virtual('name').get(function () {
 ProjectSchema.virtual('version').get(function () {
   if (this.release != null) return this.release.version
 
-  return null
-})
-
-ProjectSchema.virtual('status')
-.get(function () {
-  if (this.release != null) return this.release.status
-
-  return this._status
-})
-.set(function (_status) {
-  if (_status !== 'STANDBY') {
-    return Promise.reject("Unable to set status to anything other than 'STANDBY'")
-  }
-
-  return this.update({ _status }, { new: true })
+  return '0.0.0'
 })
 
 ProjectSchema.virtual('github.fullName').get(function () {
@@ -105,14 +112,71 @@ ProjectSchema.virtual('dist-arch').get(function () {
       results.push(`${project.distributions[dI]}-${project.architectures[aI]}`)
     }
   }
+
   return results
 })
 
 ProjectSchema.virtual('release').get(function () {
-  if (this.releases.length > 0) return this.releases[this.releases.length - 1]
+  if (this.releases.length > 0) return this.releases[0]
 
   return null
 })
+
+ProjectSchema.methods.toSolid = async function () {
+  let project = this.toJSON()
+  project.status = await this.getStatus()
+
+  return project
+}
+
+ProjectSchema.methods.getStatus = async function () {
+  if (this.release == null) return this._status
+
+  return await this.release.getStatus()
+}
+
+ProjectSchema.methods.upsertRelease = function (fQuery, uQuery) {
+  const application = this
+  const dotQuery = Dotize.convert(fQuery, 'releases')
+  const notQuery = _.mapValues(dotQuery, v => ({ $ne: v }))
+
+  return Promise.all([
+    Project.findOneAndUpdate(_.extend({
+      _id: application._id
+    }, dotQuery), {
+      'releases.$': uQuery
+    }, { new: true }),
+    Project.findOneAndUpdate(_.extend({
+      _id: application._id
+    }, notQuery), {
+      $addToSet: { releases: uQuery }
+    }, { new: true })
+  ])
+  .then(([update, create]) => {
+    const project = (create != null) ? create : update
+    const release = project.releases[project.releases.length - 1]
+
+    // Execute any 'post save' release middleware
+    if (create != null) {
+      for (let i in saveReleaseMiddleware) {
+        saveReleaseMiddleware[i](release)
+      }
+    }
+
+    return release
+  })
+}
+
+// Find all save middleware in ReleaseSchema for custom calls that look native
+// TODO: Oh dear god, why do we need this mongoose?
+// FIXME: Cleanup on aisle project
+let saveReleaseMiddleware = []
+const releaseMiddle = _.fromPairs(ReleaseSchema.callQueue)
+if (releaseMiddle.on != null) {
+  saveReleaseMiddleware = _.filter(_.map(releaseMiddle.on, (v, i) => {
+    if (v === 'save') return releaseMiddle.on[i + 1]
+  }), v => typeof v === 'function')
+}
 
 const Project = Mongoose.model('project', ProjectSchema)
 

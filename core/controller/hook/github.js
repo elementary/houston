@@ -15,13 +15,13 @@ let route = new Router({
 })
 
 // TODO: GitHub key checking
-route.param('key', (key, ctx, next) => {
+route.param('key', async (key, ctx, next) => {
   if (key !== 'test') {
     ctx.status = 404
     return
   }
 
-  return next()
+  await next()
 })
 
 // Logs failed hook and responds when GitHub config is disabled
@@ -30,6 +30,7 @@ route.get('*', async (ctx, next) => {
     Log.info('GitHub is disabled but someone tried to access GitHub hook')
     ctx.status = 500
     ctx.body = 'no'
+    return
   } else {
     await next()
   }
@@ -37,10 +38,12 @@ route.get('*', async (ctx, next) => {
 
 route.get('/', ctx => {
   ctx.body = 'GitHub hook path'
+  return
 })
 
 route.get('/:key', ctx => {
   ctx.body = 'ok'
+  return
 })
 
 export const Route = route

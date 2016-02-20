@@ -34,11 +34,10 @@ export function IsRole (role) {
       return ctx.redirect('/auth/github')
     }
 
-    let userRole = possibilities.indexOf(ctx.state.user.right)
-    Log.silly(`${ctx.state.user.username} is level ${userRole} trying to access level ${role}`)
+    let userRole = possibilities.indexOf(ctx.user.right)
+    Log.silly(`${ctx.user.username} is level ${userRole} trying to access level ${role}`)
 
     if (!Config.rights) {
-      Log.silly(`It seems all the guards have left their posts`)
       return next()
     }
 
@@ -48,13 +47,13 @@ export function IsRole (role) {
     }
 
     if (role === possibilities.indexOf('BETA')) {
-      Log.silly(`${ctx.state.user.username} is not beta enough`)
+      Log.silly(`${ctx.user.username} is not beta enough`)
       return ctx.render('error', {
         message: 'Houston is currently only avalible to beta testers'
       })
     }
 
-    Log.silly(`${ctx.state.user.username} shall not pass`)
+    Log.silly(`${ctx.user.username} shall not pass`)
     return ctx.render('error', {
       message: 'You shall not pass!'
     })

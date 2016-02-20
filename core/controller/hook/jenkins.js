@@ -9,35 +9,25 @@ import Router from 'koa-router'
 
 import { Config, Log } from '~/app'
 
-// TODO: Jenkins hook integration
 let route = new Router({
-  prefix: '/hook/jenkins'
+  prefix: '/hook/jenkins/:key'
 })
 
-// TODO: Jenkins key checking
-route.param('key', (key, ctx, next) => {
-  if (key !== Config.jenkins.public) {
-    ctx.status = 404
-    return
-  }
-
-  return next()
-})
-
-// Logs failed hook and responds when jenkins config is disabled
-route.get('*', async (ctx, next) => {
+route.param('key', async (key, ctx, next) => {
   if (!Config.jenkins) {
-    Log.info('Jenkins is disabled but someone tried to access Jenkins hook')
-    ctx.status = 500
-    ctx.body = 'no'
-    return
-  } else {
-    await next()
+    Log.debug('Jenkins is disabled but someone tried to access Jenkins hook')
+    return ctx.throw('Jenkins is on vacation right now', 404)
+  } else if (key !== Config.jenkins.public) {
+    Log.debug('Someone tried to connect to Jenkins with an incorrect key')
+    return ctx.throw('Nobody can replace Mr. Jenkins', 404)
   }
+
+  await next()
 })
 
-route.get('/:key', ctx => {
-  ctx.body = 'ok'
+route.get('/', ctx => {
+  ctx.body = 'whoop'
+  return
 })
 
 export const Route = route

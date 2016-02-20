@@ -25,6 +25,9 @@ export const Strategy = new Github.Strategy({
   .then(user => {
     if (user) {
       User.findByIdAndUpdate(user._id, {
+        username: profile.username,
+        email: profile.emails[0].value,
+        avatar: profile.photos[0].value,
         'github.access': access,
         'github.refresh': refresh,
         'date.visited': new Date()
@@ -36,7 +39,7 @@ export const Strategy = new Github.Strategy({
       User.create({
         username: profile.username,
         email: profile.emails[0].value,
-        avatar: profile.avatar_url,
+        avatar: profile.photos[0].value,
         'github.id': profile.id,
         'github.access': access,
         'github.refresh': refresh,

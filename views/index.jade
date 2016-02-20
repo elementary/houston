@@ -4,8 +4,11 @@ block body
   section.hero.dark
     h1 AppHub: the new Wild West
     h4 An open, pay-what-you-want app store for indie developers
-    a(href='/dashboard').button.suggested-action#github-import Log In with GitHub 
-      i.fa.fa-github
+    if user
+      a(href="/dashboard").button.suggested-action Welcome back #{user.username}
+    else
+      a(href='/dashboard').button.suggested-action#github-import Log In with GitHub 
+        i.fa.fa-github
   section.row
     div.column.third
       a(href="https://elementary.io/docs/code", target="_blank")

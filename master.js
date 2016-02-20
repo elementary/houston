@@ -31,6 +31,20 @@ Server.use(async (ctx, next) => {
   Log.verbose(`${ctx.method} ${ctx.url} - ${end - start}ms`)
 })
 
+// Error pages
+Server.use(async (ctx, next) => {
+  try {
+    await next()
+  } catch (error) {
+    ctx.app.emit('error', error, ctx)
+    if (error.expose) {
+      await ctx.render('error', { message: error.message })
+    } else {
+      await ctx.render('error', { message: 'Houston, we have a problem' })
+    }
+  }
+})
+
 // Static 'public' folder serving
 Server.use(Convert(Static('public')))
 
@@ -42,7 +56,10 @@ Server.use(Convert(View('views', {
 
 Server.use(async (ctx, next) => {
   ctx.render = Co.wrap(ctx.render)
+
   ctx.state.basedir = Path.normalize(`${__dirname}/views`)
+  ctx.state.Config = Config
+
   ctx.state.title = 'Houston'
   await next()
 })
@@ -54,39 +71,7 @@ Server.use(Convert(Session(Server)))
 
 Passport.Setup(Server)
 
-Server.use(async (ctx, next) => {
-  ctx.state.user = (ctx.passport.user != null) ? ctx.passport.user : null
-  await next()
-})
-
 Server.use(Passport.Route.routes(), Passport.Route.allowedMethods())
-
-// Error pages
-Server.use(async (ctx, next) => {
-  let error
-
-  try {
-    await next()
-  } catch (err) {
-    ctx.status = err.status || 500
-    error = err
-  }
-
-  if (error && error.status[0] !== 4) ctx.app.emit('error', error, ctx)
-
-  if (Server.env !== 'production') error = null
-
-  if (error && ctx.status !== 404) {
-    await ctx.render('error', {
-      error,
-      message: 'It seems we have crash landed sir'
-    })
-  } else if (ctx.status === 404) {
-    await ctx.render('error', {
-      message: 'We moved the launchpad sir'
-    })
-  }
-})
 
 // Load Houston core files
 let routes = Helpers.FlattenObject(Controller, { Route: 'object' })
@@ -100,19 +85,25 @@ for (let key in routes) {
 
 Log.info(`Loaded ${Helpers.ArrayString('Controller', routes)}`)
 
+// 404 page
+Server.use(async (ctx, next) => {
+  await ctx.render('error', { message: 'It seems you stuck the landing. World not found.' })
+})
+
 // Error logging
 process.on('unhandledRejection', function (reason, p) {
-  if (reason != null) Log.warn(reason)
+  if (reason != null) Log.warn(`Unhandled Promise Rejection: ${reason}`)
 })
 
 Server.on('error', function (error, ctx, next) {
   if (Server.env === 'test') return
 
-  Log.error(error)
+  if (/4.*/.test(error.status)) return Log.verbose(`${error.status} ${ctx.url}`)
+  return Log.error(error)
 })
 
 // Launching
 Server.listen(Config.server.port)
-Log.info(`Houston listening on ${Config.server.port}`)
+Log.info(`Houston listening on ${Config.server.port} in ${Server.env} configuration`)
 
 module.exports = Server

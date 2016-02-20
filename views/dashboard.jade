@@ -11,6 +11,8 @@ block body
     div.row
       each project in projects
         div.repo
+          div.right
+            include /partials/status
           if project.package != null && project.package.icon != null
             img(src="data:image/svg+xml;base64," + project.package.icon).app-icon
           else
@@ -18,3 +20,6 @@ block body
           div.description
             p= project.name
             p.subtext: a(href="https://github.com/" + project.github.fullName)= project.github.fullName
+          //- TODO: We can remove this on release
+          if Config.env === 'development'
+            | <!-- !{JSON.stringify(project, 2, 4)} -->

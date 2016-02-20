@@ -10,8 +10,7 @@
 import Mongoose from 'mongoose'
 import Semver from 'semver'
 
-import { Log } from '~/app'
-import CycleSchema from './cycle'
+import { Cycle } from './cycle'
 
 const ReleaseSchema = new Mongoose.Schema({
   github: {
@@ -21,81 +20,69 @@ const ReleaseSchema = new Mongoose.Schema({
     tag: String              // Github uncleaned tag (v4.2.3)
   },
 
-  repo: {
-    type: String,
-    required: true,
-    validate: {
-      validator: s => s.endsWidth('.git'),
-      message: `{VALUE} is not a valid git repository`
-    }
-  },
+  changelog: [String],
 
-  _status: {
-    type: String,
-    default: 'NEW',
-    enum: ['NEW', 'QUEUE', 'PRE', 'BUILD', 'POST', 'FAIL', 'FINISH']
-  },
-
-  cycles: [CycleSchema]
+  cycles: [{
+    type: Mongoose.Schema.Types.ObjectId,
+    ref: 'cycle'
+  }]
 })
 
-ReleaseSchema.virtual('project').get(function () {
-  return this.ownerDocument()
-})
+ReleaseSchema.set('toJSON', { virtuals: true })
 
 ReleaseSchema.virtual('version').get(function () {
-  return Semver.clean(this.github.tag, true)
+  if (this.github.tag != null) return Semver.clean(this.github.tag, true)
+
+  return '0.0.0'
 })
 
-ReleaseSchema.virtual('status')
-.get(function () {
-  if (this.cycle != null) return this.cycle.status
-
-  return 'NEW'
-})
-.set(function (_status) {
-  return this.update({ _status }, { new: true })
-})
-
-ReleaseSchema.virtual('cycle').get(function () {
-  if (this.cycles.length > 0) return this.cycles[this.cycles.length - 1]
+ReleaseSchema.virtual('tag').get(function () {
+  if (this.github.tag != null) return this.github.tag
 
   return null
 })
 
-// TODO: create an update function for releases
+ReleaseSchema.methods.toSolid = async function () {
+  let release = this.toJSON()
+  release.status = await this.getStatus()
 
-/**
- * Creates a new cycle for release
- *
- * @return {Object} updated release object
- */
-// FIXME: this probably doesn't work
-ReleaseSchema.methods.createCycle = async function () {
-  let release = this
-
-  const cycle = await this.project.cycles.create({
-    project: release._id,
-    repo: release.repo
-  })
-
-  if (cycle == null) return Promise.reject('Unable to create cycle')
-
-  return release.update({ $push: { cycles: cycle._id } })
+  return this
 }
 
-// Mongoose lifecycle functions
-ReleaseSchema.post('delete', doc => {
-  let cycles = []
+ReleaseSchema.methods.getStatus = async function () {
+  const cycle = await this.getCycle()
 
-  for (let i in doc.cycles) {
-    cycles.push(doc.cycles[i].remove())
-  }
+  if (cycle == null) return 'STANDBY'
+  return await cycle.getStatus()
+}
 
-  Promise.all(cycles)
-  .catch(err => {
-    Log.warn(`Error while removing all cycles from ${doc.application.name}#${doc.version}`)
-    Log.error(err)
+ReleaseSchema.methods.getCycle = async function () {
+  const cycles = await this.getCycles()
+
+  if (cycles == null || cycles.length < 1) return null
+  return cycles[0]
+}
+
+ReleaseSchema.methods.getCycles = async function () {
+  return await Cycle.find({_id: { $in: this.cycles }})
+}
+
+ReleaseSchema.post('save', async release => {
+  const project = release.ownerDocument()
+
+  const cycle = await Cycle.create({
+    _tag: release.tag,
+    type: 'INIT'
+  })
+
+  await project.model('project').findOneAndUpdate({
+    _id: project._id,
+    'releases._id': release._id
+  }, {
+    $addToSet: {
+      cycles: cycle._id,
+      'releases.$.cycles': cycle._id
+    }
   })
 })
 

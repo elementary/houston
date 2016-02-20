@@ -3,141 +3,85 @@
  * Mongoose schema for cycles
  *
  * @exports {Object} default {
- *   {Object} cycleSchema - Mongoose schema for cycle model
+ *   {Object} Cycle - Mongoose model for cycle
+ *   {Object} CycleSchema - Mongoose schema for cycle model
  * }
  */
 
-import Dotize from 'dotize'
 import Mongoose from 'mongoose'
-import Promise from 'bluebird'
 
 import { BuildSchema } from './build'
 
 const CycleSchema = new Mongoose.Schema({
-  release: {
-    type: Mongoose.Schema.Types.ObjectId,
-    ref: 'release'
-  },
-
-  repo: {
+  _repo: {
     type: String,
-    required: true,
     validate: {
-      validator: s => s.endsWidth('.git'),
+      validator: s => /.*\.git/.test(s),
       message: `{VALUE} is not a valid git repository`
     }
   },
+  _tag: {
+    type: String
+  },
 
-  // Determines if we save, publish, and create issues
-  _type: {
+  // Determines what we do with the test results
+  type: {
     type: String,
-    default: 'ORPHAN',
-    enum: ['ORPHAN', 'RELEASE']
+    required: true,
+    enum: ['INIT', 'RELEASE']
   },
   _status: {
     type: String,
-    default: 'QUEUED',
-    enum: ['QUEUE', 'PRE', 'BUILD', 'POST', 'FAIL', 'FINISH']
+    default: 'QUEUE',
+    enum: ['QUEUE', 'PRE', 'POST', 'REVIEW', 'FAIL', 'FINISH']
   },
 
-  build: [BuildSchema]
+  builds: [BuildSchema]
 })
 
-CycleSchema.virtual('project').get(function () {
-  return this.ownerDocument()
-})
+CycleSchema.methods.getProject = async function () {
+  return await this.model('project').findOne({
+    cycles: this._id
+  })
+}
 
-CycleSchema.virtual('type')
-.get(function () {
-  if (this.release != null) return 'RELEASE'
+CycleSchema.methods.getRelease = async function () {
+  const project = await this.getProject
 
-  return this._type
-})
-.set(function (_type) {
-  return this.update({ _type }, { new: true })
-})
-
-CycleSchema.virtual('version').get(function () {
-  if (this.type === 'release') return this.release.version
-
-  return '0.0.0'
-})
-
-CycleSchema.virtual('tag').get(function () {
-  if (this.type === 'release') return this.release.github.tag
-
-  return '0.0.0'
-})
-
-CycleSchema.virtual('status')
-.get(function () {
-  let finish = true
-  let fail = false
-  let build = false
-
-  // Condances builds to a singular status (all FINISH, any FAIL, any BUILD)
-  for (let build in this.build) {
-    if (build.status !== 'FINISH') {
-      finish = false
-    } else if (build.status === 'FAIL') {
-      fail = true
-    } else if (build.status === 'BUILD') {
-      build = true
+  for (let i in project.releases) {
+    if (project.releases[i].cycles.indexOf(this._id) !== 0) {
+      return project.releases[i]
     }
   }
 
-  if (finish) {
-    return 'FINISH'
-  } else if (fail) {
-    return 'FAIL'
-  } else if (build) {
-    return 'BUILD'
-  } else {
-    return this._status
-  }
-})
-.set(function (_status) {
-  return this.update({ _status }, { new: true })
-})
+  return null
+}
 
-/**
- * Updates build nested in cycle model
- *
- * @param {Object} Object of items to update
- * @return {Object} updated build object
- */
-CycleSchema.methods.update = function (obj) {
-  let build = this
-  if (obj[Object.keys(obj)[0]][0] !== '$') {
-    obj = Dotize.convert(obj, 'cycles.$')
-  }
+CycleSchema.methods.getRepo = async function () {
+  if (this._repo != null) return this._repo
 
-  return build.cycle.update({
-    'builds_id': build._id
-  }, obj)
+  return this.getProject().then(project => project.repo)
+}
+
+CycleSchema.methods.getTag = async function () {
+  if (this._tag != null) return this._tag
+  const release = await this.getRelease()
+
+  if (release != null) return release.tag
+
+  return this.getProject().then(project => project.tag)
+}
+
+// TODO: Consolidate build status
+CycleSchema.methods.getStatus = async function () {
+  return 'QUEUE'
 }
 
 // Mongoose lifecycle functions
-CycleSchema.pre('save', function (next) {
-  this.wasNew = this.isNew
-  next()
+CycleSchema.post('save', async cycle => {
+  console.log(cycle)
 })
 
-CycleSchema.post('save', function (cycle, next) {
-  if (cycle.wasNew) {
-    let builds = []
+const Cycle = Mongoose.model('cycle', CycleSchema)
 
-    for (let arch in cycle.application.archs) {
-      for (let dist in cycle.application.dists) {
-        builds.push(this.update({ $push: { arch, dist } }))
-      }
-    }
-
-    return Promise.all(builds)
-    .then(() => next)
-  } else {
-    return next()
-  }
-})
-
-export default { CycleSchema }
+export default { Cycle, CycleSchema }

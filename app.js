@@ -35,6 +35,8 @@ app.config = require('./config.js')
 if (process.env.NODE_ENV != null) app.config.env = process.env.NODE_ENV
 if (process.env.PORT != null) app.config.server.port = process.env.PORT
 
+if (app.config.env == null) app.config.env = 'development'
+
 export const Config = app.config
 
 // Application package configuration

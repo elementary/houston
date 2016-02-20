@@ -195,6 +195,10 @@ section.hero .button.suggested-action{
     opacity: 1.0;
 }
 
+.repo .right {
+    float: right;
+}
+
 .repo i {
     display: inline-block;
     position: relative;

@@ -48,12 +48,14 @@ Firstly, you should be familiar with
 in our code, and expect all pull requests to use it.
 
 Some rule of thumbs for coding:
+
 * Never use `var`. Use `const` if it is only declared once, or `let`.
 * Use arrows when you can.
 * Compress code to a single line when it makes sense.
 * Use template strings
-* Single line comments go on a unique line with one blank line above
+* Single line comments go on a unique line
 * Comment what is hard or confusing to understand
+* If it's a function, it should return a promise
 
 **Lint your code**! This ensures everything stays legible, and easy to read.
 For simplicity, just run `npm run lint` before you `git commit`.
@@ -71,23 +73,51 @@ there hands dirty in the boring Houston core.
 
 ### Status relationships
 
-#### Application
-* Uninitialized** (boolean)
-* Needs Release (releases has no length)
-* (Give status of latest release)
+By far one of the hardest parts to understand about Houston core is how all of
+the statuses depend on each other. To help everyone understand, we made this:
 
-#### Release
-* Standby** (no builds yet)
-* Pre (running appHooks on release)
-* Building (one of the builds is building)
-* Post (all builds are finished and any build on Post)
-* Reviewing (all post are done and waiting to be failed or published)
-* Failed* (any build, review or test failed)
-* Published (all builds are published) -> send all current builds to repo
+```
+Project | NEW INIT STANDBY QUEUE PRE BUILD POST REVIEW FAIL FINISH
+Release |          STANDBY QUEUE PRE BUILD POST REVIEW FAIL FINISH
+Cycle   |                  QUEUE PRE BUILD POST REVIEW FAIL FINISH
+Build   |                  QUEUE     BUILD             FAIL FINISH
+```
 
-### Build
-* Queued** (yet to be building in Jenkins)
-* Building (started build in Jenkins)
-* Post (running appHooks on build)
-* Failed* (error in test or Jenkins build)
-* Finished (post finishes without errors) -> upload to testing repo
+These statuses propagate upwards depending on different conditions. For
+instance, if any build fails, the parent cycle will fail. If the cycle fails,
+then the release will fail etc. Obviously each child is created because multiple
+runs of the type can exist. For instance, a release could have multiple cycle
+tests ran, and a cycle could have multiple builds depending on architecture and
+distribution.
+
+Simple rundown of what the statuses actually mean in terms of Houston:
+
+* NEW - The project was discovered on GitHub, but no releases are imported
+* INIT - The project has been imported to Houston, but no release is available
+* STANDBY - The project has a release, and Houston is waiting to release it
+* QUEUE - The release started a new cycle, and the cycle is in line to be tested
+* PRE - appHooks are currently running pre-tests on the cycle
+* BUILD - the build is currently building
+* POST - appHooks are currently running post-tests on the cycle
+* REVIEW - the cycle is being reviewed by a human
+* FAIL - the cycle failed a appHook tests or failed a build
+* FINISHED - the current release is published for the world to see
+
+### Models
+
+Here are some things to keep in mind while working on Houston core models.
+
+* All items prefixed with `_` are dynamic. No function reads this value
+directly. While still settable when creating a document, functions may not use
+that value later on.
+* Many relationships change between methods prefixed with `get` like
+`getProject()` and virtuals like `project`. Make sure you keep track of what you
+want to call.
+* All model functions are sorted by type, then by the order they are defined in
+the schema.
+  - virtual relationships
+  - virtual
+  - method relationships
+  - methods
+  - statics
+  - middleware

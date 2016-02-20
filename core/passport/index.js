@@ -26,7 +26,12 @@ export function Setup (Server) {
   Server.use(Passport.initialize())
   Server.use(Passport.session())
 
-  Log.debug('Github Passport loaded')
+  Server.use(async (ctx, next) => {
+    ctx.state.user = (ctx.passport.user != null) ? ctx.passport.user : null
+    ctx.user = (ctx.passport.user != null) ? ctx.passport.user : null
+    await next()
+  })
+
   Log.verbose('Passport Initalized')
 }
 
