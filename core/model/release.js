@@ -50,9 +50,9 @@ ReleaseSchema.methods.toSolid = async function () {
 }
 
 ReleaseSchema.methods.getStatus = async function () {
-  const cycle = await this.getCycle()
+  if (this.cycles.length < 1) return 'STANDBY'
 
-  if (cycle == null) return 'STANDBY'
+  const cycle = await this.getCycle()
   return await cycle.getStatus()
 }
 
@@ -67,23 +67,20 @@ ReleaseSchema.methods.getCycles = async function () {
   return await Cycle.find({_id: { $in: this.cycles }})
 }
 
-ReleaseSchema.post('save', async release => {
+ReleaseSchema.methods.createCycle = async function (type) {
+  const release = this
   const project = release.ownerDocument()
 
-  const cycle = await Cycle.create({
+  return Cycle.create({
+    _project: project._id,
+    _release: release._id,
     _tag: release.tag,
-    type: 'INIT'
+    type: type
   })
+}
 
-  await project.model('project').findOneAndUpdate({
-    _id: project._id,
-    'releases._id': release._id
-  }, {
-    $addToSet: {
-      cycles: cycle._id,
-      'releases.$.cycles': cycle._id
-    }
-  })
+ReleaseSchema.post('save', release => {
+  release.createCycle('INIT')
 })
 
 export default { ReleaseSchema }

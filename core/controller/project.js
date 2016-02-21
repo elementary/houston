@@ -51,6 +51,15 @@ route.get('/init', async (ctx, next) => {
   return ctx.redirect('/dashboard')
 })
 
+route.get('/cycle', async (ctx, next) => {
+  if (ctx.project.release == null) {
+    return ctx.throw('The project has no releases to cycle', 400)
+  }
+
+  await ctx.project.release.createCycle('ORPHAN')
+  return ctx.redirect('/dashboard')
+})
+
 route.get('/launch', async (ctx, next) => {
   if (ctx.project.release == null) {
     return ctx.throw('The project has no releases to launch', 400)

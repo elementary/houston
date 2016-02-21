@@ -9,6 +9,7 @@ import Router from 'koa-router'
 import _ from 'lodash'
 
 import { Project } from '~/core/model/project'
+import { Cycle } from '~/core/model/cycle'
 import { IsRole } from '~/core/policy/isRole'
 import { GetProjects } from '~/core/service/github'
 
@@ -34,6 +35,11 @@ route.get('/dashboard', IsRole('USER'), async (ctx, next) => {
   })
 
   return ctx.render('dashboard', { title: 'Dashboard', projects })
+})
+
+route.get('/test', ctx => {
+  Cycle.findOne().then(cycle => cycle.spawn('INIT'))
+  ctx.body = 'ok'
 })
 
 export const Route = route

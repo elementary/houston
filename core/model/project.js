@@ -12,9 +12,11 @@ import _ from 'lodash'
 import Promise from 'bluebird'
 import Mongoose from 'mongoose'
 import Dotize from 'dotize'
-import Util from 'util'
 
 import { ReleaseSchema } from './release'
+
+// TODO: abstract services out of mondels
+import { SendIssue } from '~/core/service/github'
 
 const ProjectSchema = new Mongoose.Schema({
   _name: String,
@@ -60,7 +62,7 @@ const ProjectSchema = new Mongoose.Schema({
     },
     owner: String,                // Owner of the GitHub repository login
     name: String,                 // Github Repository name
-    APItoken: String,             // GitHub accessToken of the latest user
+    token: String,             // GitHub accessToken of the latest user
     label: {                      // Github issue label
       type: String,
       default: 'AppHub'
@@ -167,9 +169,16 @@ ProjectSchema.methods.upsertRelease = function (fQuery, uQuery) {
   })
 }
 
+ProjectSchema.methods.postIssue = async function (issue) {
+  if (typeof issue.title !== 'string') return Promise.reject('Issue needs a title')
+  if (typeof issue.body !== 'string') return Promise.reject('Issue needs a body')
+
+  await SendIssue(issue, this)
+}
+
 // Find all save middleware in ReleaseSchema for custom calls that look native
 // TODO: Oh dear god, why do we need this mongoose?
-// FIXME: Cleanup on aisle project
+// FIXME: Cleanup on aisle here
 let saveReleaseMiddleware = []
 const releaseMiddle = _.fromPairs(ReleaseSchema.callQueue)
 if (releaseMiddle.on != null) {

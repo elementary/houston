@@ -6,7 +6,7 @@
  * @exports {Function} GetProjects
  */
 
-import { Request } from '~/app'
+import { Config, Request, Log } from '~/app'
 
 export function GetReleases (owner, name, token) {
   return Request
@@ -46,8 +46,24 @@ export function GetProjects (token) {
         id: project.id,
         owner: project.owner.login,
         name: project.name,
-        APItoken: token
+        token: token
       }
     }
   })
+}
+
+export function SendIssue (issue, project) {
+  if (!Config.github.post) {
+    Log.verbose('GitHub config prohibits posting of issues')
+    return
+  }
+
+  return Request
+  .post(`https://api.github.com/repos/${project.github.fullName}/issues`)
+  .auth(project.github.token)
+  .send(JSON.stringify({
+    title: issue.title,
+    body: issue.body,
+    labels: [project.github.label]
+  }))
 }

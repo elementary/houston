@@ -38,8 +38,8 @@ export const jenkins = false
 /*
 export const jenkins = {
   url: 'http://john:1234@jenkins.elementaryos.org',
-  public: 'public',
-  secret: 'test',
+  public: 'ZPYYkQFAL7nShsnczM4uWGmjbVPLZCp7',
+  secret: 'ft2DH0i6zixHGpShlWt99vgCL7uBpqKT',
 
   // Job name for building deb files
   job: 'deb-new-test'
@@ -50,10 +50,15 @@ export const database = 'mongodb://localhost/houston-dev'
 
 export const server = {
   port: 3000,
-  secret: 'LearntocodeCreatethefuture',
+  secret: 'hiGvpfbJhSNlC15OXiCxXWcEUYVeKBqb',
 
   // Full route including port and protocol, without trailing slash
   url: 'http://localhost:3000'
+}
+
+export const socket = {
+  public: 'VcSpPL255upq4vF5nGJjmOWVUgbQGYcc',
+  private: 'KUfwXUo3HDVvErvAyVp113SLE3zcQLZm'
 }
 
 export const log = {

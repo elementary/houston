@@ -30,6 +30,7 @@
     "mongoose": "^4.4.4",
     "passport-github": "^1.1.0",
     "semver": "^5.1.0",
+    "socketio": "^1.0.0",
     "superagent": "^1.7.2",
     "superagent-bluebird-promise": "^3.0.0",
     "then-jenkins": "^0.7.1",
@@ -41,7 +42,9 @@
   },
   "scripts": {
     "lint": "standard",
-    "start": "node entry.js master"
+    "start": "node entry.js master",
+    "master": "node entry.js master",
+    "slave": "node entry.js slave"
   },
   "standard": {
     "parser": "babel-eslint"

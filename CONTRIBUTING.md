@@ -115,8 +115,9 @@ that value later on.
 want to call.
 * All model functions are sorted by type, then by the order they are defined in
 the schema.
-  - virtual relationships
   - virtual
+  - virtual relationships
+  - methods for schema values
   - method relationships
   - methods
   - statics

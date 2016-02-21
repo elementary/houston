@@ -9,14 +9,16 @@
 
 import _ from 'lodash'
 
-export function Pluralize (string, array) {
-  if (_.isArray(array) && array.length === 1) return string
+export function Pluralize (string, len) {
+  if (typeof len === 'number' && len === 1) return string
+  if (_.isArray(len) && len.length === 1) return string
 
   return `${string}s`
 }
 
-export function ArrayString (string, array) {
-  if (_.isArray(array)) return `${array.length} ${Pluralize(string, array)}`
+export function ArrayString (string, len) {
+  if (typeof len === 'number') return `${len} ${Pluralize(string, len)}`
+  if (_.isArray(len)) return `${len.length} ${Pluralize(string, len)}`
 
   return `${string}s`
 }

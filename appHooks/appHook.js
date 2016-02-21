@@ -1,145 +1,86 @@
 /**
- * Default appHook class definition
+ * appHooks/appHook.js
+ * Construction of all appHooks
+ *
+ * @exports {Object} default - an appHook
  */
-import _ from 'lodash';
-import Promise from 'bluebird';
-import Dotize from 'dotize';
-import Hubkit from 'hubkit';
 
-import app from '~/';
-import Application from '~/model/application';
+import _ from 'lodash'
+import Promise from 'bluebird'
 
-const gh = new Hubkit();
+import { Helpers, Log, Request } from '~/app'
 
-export default class {
-  constructor(name, path) {
-    this.name = name;
+let fs = Promise.promisifyAll(require('fs'))
 
-    this.issuePath = `${path}/issue.md`;
+class AppHook {
+  constructor (data, obj) {
+    this.data = data
 
-    this.errors = [];
-    this.warnings = [];
-    this.dump = [];
-    this.metadata = {};
-    this.information = {};
-    this.questions = [];
+    this.name = obj.name || 'appHook'
+    this.path = obj.path || `${__dirname}/${this.name}`
+    this.mark = obj.mark || 'issue.md'
+    this.post = obj.post || false
 
-    app.log.info(`Initalized "${this.name}" appHook`);
+    this.errors = []
+    this.warnings = []
+    this.information = {}
   }
 
-  error(name) {
-    this.errors.push(name);
+  test (data) {
+    Log.warn(`${this.name} does not have any test`)
+    return
   }
 
-  warn(name) {
-    this.warnings.push(name);
+  error (msg) {
+    this.errors.push(msg)
   }
 
-  dump(anything) {
-    this.dump.push(anything);
+  warn (msg) {
+    this.warnings.push(msg)
   }
 
-  meta(object) {
-    this.metadata = _.extend(this.metadata, object);
+  update (obj) {
+    this.information = _.extend(this.information, obj)
   }
 
-  update(object) {
-    this.information = _.extend(this.information, object);
+  // TODO: flatten data object
+  // TODO: base64 decode all files automaticly?
+  file (path) {
+    return Request
+    .get(`https://api.github.com/repos/${this.data.application.github.fullName}/contents/${path}?ref=${this.data.tag}`)
+    .auth(this.data.application.github.token)
+    .then(data => data.content)
+    .catch(() => false)
   }
 
-  question(fn) {
-    this.questions.push(fn);
-  }
-
-  // TODO: replace release with git clone path
-  run(release) {
-    const hook = this;
-    hook.errors = [];
-    hook.warnings = [];
-    hook.dump = [];
-    hook.metadata = {};
-    hook.information = {};
-
-    if (typeof release === 'undefined' || typeof release.ownerDocument === 'undefined') {
-      app.log.error(`"${hook.name}" appHook called with invalid release document`);
-      return Promise.reject(new Error(`"${hook.name}" appHook called with invalid release document`));
+  report () {
+    return {
+      errors: this.errors.length,
+      warnings: this.warnings.length,
+      information: this.information,
+      issue: (this.errors.length > 0 || this.warnings.length > 0) ? this.issue() : null
     }
+  }
 
-    const application = release.ownerDocument();
+  issue () {
+    // TODO: add a templating language
+    let template = fs.readFileSync(`${this.path}/${this.mark}`, 'utf8')
+    template = template.split('\n')
 
-    let qString = app.helper.nString('question', hook.questions);
-    app.log.debug(`Asking ${qString} for "${hook.name}"`);
+    let title = template[0]
+    template.splice(0, 2)
+    template = template.join('\n')
 
-    return application.update({
-      status: 'PREBUILD',
-    })
-    .then(() => {
-      return Promise.each(hook.questions, question => {
-        return question(release);
-      })
-      .catch(() => Promise.resolve()) // Testing errors are not actual errors
-    })
-    .then(() => {
-      let update = {};
+    return {
+      title: title,
+      body: template
+    }
+  }
 
-      _.extend(update, Dotize.convert(hook.information));
-
-      if (!_.isEmpty(hook.errors)) {
-        update.status = 'FAILED';
-      }
-
-      return application.update(update);
-    })
-    .then(() => {
-      if (app.config.github.push && (hook.errors.length > 0 || hook.errors.length > 0)) {
-        let req = `POST /repos/${application.github.fullName}/issues`;
-
-        if (release.appHooks[hook.name] != null) { // Already exists on GitHub
-          req = `PATCH /repos/${application.github.fullName}/issues/${release.appHooks[hook.name]}`;
-        }
-
-        let title = `${hook.name} has `;
-
-        if (hook.errors.length > 0) {
-          title += `${app.helper.nString('error', hook.errors)} `;
-        }
-
-        if (hook.warnings.length > 0 && hook.errors.length > 0) {
-          if (hook.errors.length > 0) {
-            title += 'and ';
-          }
-
-          title += `${app.helper.nString('warning', hook.warnings)} `;
-        }
-
-        title += `for [${release.github.tag}]`;
-
-        return app.handlebars.render(hook.issuePath, {hook, release, application})
-        .then(body => {
-          return gh.request(req, {
-            token: application.github.APItoken,
-            body: {
-              title,
-              body,
-              labels: [application.github.label],
-            },
-          })
-          .then(() => Promise.resolve());
-        });
-      }
-
-      if (!app.config.github.push && (hook.errors.length > 0 || hook.errors.length > 0)) {
-        app.log.debug(`Supressing issue pushing for ${application.github.fullName} "${hook.name}"`);
-      }
-
-      app.log.silly(hook.dump);
-
-      return Promise.resolve();
-    })
-    .then(() => {
-      app.log.debug(`Answered ${app.helper.nString('error', hook.errors)} and ${app.helper.nString('warning', hook.warnings)} for "${this.name}"`)
-
-      return Promise.resolve();
-    });
+  async run () {
+    await this.test()
+    return this.report()
   }
 }
+
+export default AppHook
