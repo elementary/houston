@@ -16,7 +16,7 @@ import Dotize from 'dotize'
 import { ReleaseSchema } from './release'
 
 // TODO: abstract services out of mondels
-import { SendIssue } from '~/core/service/github'
+import { SendLabel, SendIssue } from '~/core/service/github'
 
 const ProjectSchema = new Mongoose.Schema({
   _name: String,
@@ -169,11 +169,15 @@ ProjectSchema.methods.upsertRelease = function (fQuery, uQuery) {
   })
 }
 
-ProjectSchema.methods.postIssue = async function (issue) {
+ProjectSchema.methods.postLabel = function () {
+  SendLabel(this)
+}
+
+ProjectSchema.methods.postIssue = function (issue) {
   if (typeof issue.title !== 'string') return Promise.reject('Issue needs a title')
   if (typeof issue.body !== 'string') return Promise.reject('Issue needs a body')
 
-  await SendIssue(issue, this)
+  SendIssue(issue, this)
 }
 
 // Find all save middleware in ReleaseSchema for custom calls that look native

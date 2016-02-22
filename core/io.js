@@ -25,7 +25,7 @@ io.on('connection', socket => {
 
   socket.on('report', (message, data) => {
     if (message === 'received') Log.verbose(`Slave received cycle data for data ${data}`)
-    if (message === 'finished') Log.verbose(`Slave finished cycle work for ${data._id}`)
+    if (message === 'finished') Log.verbose(`Slave finished cycle work for ${data.cycle}`)
   })
 })
 

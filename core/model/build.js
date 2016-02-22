@@ -11,25 +11,26 @@ import Mongoose from 'mongoose'
 import Promise from 'bluebird'
 import Dotize from 'dotize'
 
-import { Config } from '~/app'
+import { Config, Log } from '~/app'
 
+// TODO: move jenkins to superagent
 const jenkins = (Config.jenkins)
   ? require('then-jenkins')(Config.jenkins.url)
   : null
 
 const BuildSchema = new Mongoose.Schema({
-  arch: {
+  dist: {
     type: String,
     required: true
   },
-  dist: {
+  arch: {
     type: String,
     required: true
   },
 
   build: Number,
   log: String,
-  _status: {
+  status: {
     type: String,
     default: 'QUEUE',
     enum: ['QUEUE', 'BUILD', 'FAIL', 'FINISH']
@@ -44,25 +45,6 @@ const BuildSchema = new Mongoose.Schema({
 
 BuildSchema.virtual('cycle').get(function () {
   return this.ownerDocument()
-})
-
-BuildSchema.virtual('status')
-.get(function () {
-  return this._status
-})
-.set(function (_status) {
-  let build = this
-  let actions = []
-  let update = { _status }
-
-  if (_status === 'FAIL') actions.push(this.getLog())
-
-  if (_status === 'FAIL' || _status === 'FINISH') {
-    update.finished = new Date()
-  }
-
-  return Promise.all(actions)
-  .then(build.update(update, { new: true }))
 })
 
 /**
@@ -81,40 +63,32 @@ BuildSchema.methods.update = function (obj) {
   }, update)
 }
 
-/**
- * Creates a build in jenkins
- *
- * @return {Object} updated build object
- */
-BuildSchema.methods.doBuild = function () {
+// TODO: no services in models!
+BuildSchema.methods.doBuild = async function () {
   let self = this
+  const project = await self.cycle.getProject()
 
   if (Config.jenkins) {
-    return jenkins.job.build({
+    jenkins.job.build({
       name: Config.jenkins.job,
       parameters: {
-        PACKAGE: self.project.package.name,
+        PACKAGE: project.package.name,
         REPO: self.cycle.repo,
         VERSION: self.cycle.version,
         DIST: self.dist,
         ARCH: self.arch,
         REFERENCE: self.cycle.tag,
-        IDENTIFIER: `${self.cycle._id}#${self.dist}-${self.arch}`
+        CYCLE: self.cycle._id
         // TODO: application changelog
       }
     })
     .then(build => self.update({ build }))
+    .catch(err => Log.error(err))
+  } else {
+    Log.info('Jenkins has been disabled in configuration file. No build is running')
   }
-
-  return Promise.resolve(0)
-  .then(build => self.update({ build }))
 }
 
-/**
- * Grabs log from jenkins
- *
- * @return {Object} updated build object
- */
 BuildSchema.methods.getLog = function () {
   let self = this
 
@@ -128,18 +102,8 @@ BuildSchema.methods.getLog = function () {
 }
 
 // Mongoose lifecycle functions
-BuildSchema.pre('save', function (next) {
-  this.wasNew = this.isNew
-  next()
-})
-
-BuildSchema.post('save', function (build, next) {
-  if (build.wasNew) {
-    return build.doBuild()
-    .then(next)
-  } else {
-    next()
-  }
+BuildSchema.post('save', build => {
+  build.doBuild()
 })
 
 export default { BuildSchema }

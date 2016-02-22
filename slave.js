@@ -19,13 +19,13 @@ io.on('disconnect', () => {
 })
 
 io.on('cycle', data => {
-  io.emit('report', 'received', data._id)
+  io.emit('received', data._id)
   Log.info(`Received cycle data for ${data._id}`)
   data.status = 'PRE'
 
   run(data)
   .then(pkg => {
-    io.emit('report', 'finished', pkg)
+    io.emit('finished', pkg)
     Log.info(`Sent cycle data for ${data._id}`)
   })
 })

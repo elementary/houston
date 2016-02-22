@@ -113,12 +113,3 @@ that value later on.
 * Many relationships change between methods prefixed with `get` like
 `getProject()` and virtuals like `project`. Make sure you keep track of what you
 want to call.
-* All model functions are sorted by type, then by the order they are defined in
-the schema.
-  - virtual
-  - virtual relationships
-  - methods for schema values
-  - method relationships
-  - methods
-  - statics
-  - middleware

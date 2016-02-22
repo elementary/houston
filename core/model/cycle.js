@@ -9,6 +9,8 @@
  */
 
 import Mongoose from 'mongoose'
+import Dotize from 'dotize'
+import _ from 'lodash'
 
 import { Log } from '~/app'
 import { BuildSchema } from './build'
@@ -98,6 +100,19 @@ CycleSchema.methods.getTag = async function () {
 
 // TODO: Consolidate build status
 CycleSchema.methods.getStatus = async function () {
+  let finish = true
+  let build = false
+  for (let i in this.builds) {
+    if (this.builds[i].status === 'FAIL') return 'FAIL'
+    if (this.builds[i].status !== 'FINISH') finish = false
+    if (this.builds[i].status !== 'BUILD') build = false
+  }
+
+  // If we have builds waiting to be built
+  if (this.builds.length > 0 && finish && !build) {
+    return 'QUEUE'
+  }
+
   return this._status
 }
 
@@ -106,32 +121,63 @@ CycleSchema.methods.spawn = async function () {
   io.emit('cycle', pkg)
 }
 
+CycleSchema.methods.build = async function () {
+  const cycle = this
+  const project = await cycle.getProject()
+
+  for (let dist in project.distributions) {
+    for (let arch in project.architectures) {
+      Cycle.findByIdAndUpdate(cycle._id, {$push: {builds: {
+        arch: project.architectures[arch],
+        dist: project.distributions[dist]
+      }}}, {new: true})
+      .then(cycle => {
+        for (let i in saveBuildMiddleware) {
+          saveBuildMiddleware[i](cycle.builds[cycle.builds.length - 1])
+        }
+      })
+    }
+  }
+}
+
 // io listeners
 // TODO: would this make more logic being in core/controller/hook/io?
 io.on('connection', socket => {
-  socket.on('report', async (message, data) => {
-    if (message === 'received') {
-      Cycle.findById(data).update({ _status: 'PRE' })
+  socket.on('received', data => {
+    Cycle.findById(data).update({ _status: 'PRE' })
+  })
+
+  socket.on('finished', async data => {
+    const cycle = await Cycle.findById(data.cycle)
+
+    let status = 'FINISH'
+    if (cycle.type === 'RELEASE') {
+      cycle.build()
+      status = 'BUILD'
     }
+    if (data.errors > 0) status = 'FAIL'
 
-    if (message === 'finished') {
-      const cycle = await Cycle.findById(data.cycle)
+    cycle.update({ '_status': status }).exec()
 
-      if (cycle.type === 'INIT') {
-        const project = await cycle.getProject()
-        let _status = 'FINISH'
-        if (data.errors > 0) _status = 'FAIL'
-
-        // TODO: update project information
-        cycle.update({ _status })
-
-        for (let i in data.issues) {
-          project.postIssue(data.issues[i])
-        }
-      }
+    // TODO: update project information
+    const project = await cycle.getProject()
+    for (let i in data.issues) {
+      project.postIssue(data.issues[i])
     }
   })
 })
+
+// Find all save middleware in ReleaseSchema for custom calls that look native
+// TODO: Oh dear god, why do we need this mongoose?
+// FIXME: Curriously enough, the only thing going through the developer's head was
+// 'Oh no. Not again.'
+let saveBuildMiddleware = []
+const buildMiddle = _.fromPairs(BuildSchema.callQueue)
+if (buildMiddle.on != null) {
+  saveBuildMiddleware = _.filter(_.map(buildMiddle.on, (v, i) => {
+    if (v === 'save') return buildMiddle.on[i + 1]
+  }), v => typeof v === 'function')
+}
 
 // Mongoose lifecycle functions
 // TODO: move me to a middleware before project and release get cleared
@@ -144,8 +190,7 @@ CycleSchema.pre('save', function (next) {
 
   this.model('project').update(query, {
     $addToSet: update
-  })
-  .then(() => next())
+  }).then(next())
 })
 
 CycleSchema.post('save', async (cycle) => {

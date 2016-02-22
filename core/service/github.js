@@ -52,6 +52,30 @@ export function GetProjects (token) {
   })
 }
 
+export function SendLabel (project) {
+  if (!Config.github.post) {
+    Log.verbose('GitHub config prohibits posting. Not posting label')
+    return
+  }
+
+  return Request
+  .post(`https://api.github.com/repos/${project.github.fullName}/labels`)
+  .auth(project.github.token)
+  .send(JSON.stringify({
+    name: project.github.label,
+    color: '3A416F'
+  }))
+  .then(data => {
+    return Promise.resolve()
+  }, err => {
+    if (err.status !== 422) {
+      Log.warn(err.message)
+    } else {
+      Log.debug(`Label already created in GitHub for ${project.github.fullName}`)
+    }
+  })
+}
+
 export function SendIssue (issue, project) {
   if (!Config.github.post) {
     Log.verbose('GitHub config prohibits posting of issues')
@@ -66,4 +90,7 @@ export function SendIssue (issue, project) {
     body: issue.body,
     labels: [project.github.label]
   }))
+  .then(data => {
+    Log.debug(`Sent issue to ${project.github.fullName} on GitHub`)
+  })
 }

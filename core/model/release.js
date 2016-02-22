@@ -46,14 +46,24 @@ ReleaseSchema.methods.toSolid = async function () {
   let release = this.toJSON()
   release.status = await this.getStatus()
 
-  return this
+  return release
 }
 
 ReleaseSchema.methods.getStatus = async function () {
   if (this.cycles.length < 1) return 'STANDBY'
 
-  const cycle = await this.getCycle()
-  return await cycle.getStatus()
+  let cycles = await this.getCycles()
+  cycles = cycles.reverse()
+
+  for (let i in cycles) {
+    if (cycles[i].type === 'RELEASE') return cycles[i].getStatus()
+    if (cycles[i].type === 'INIT') {
+      let status = await cycles[i].getStatus()
+      if (status !== 'FINISH') return status
+    }
+  }
+
+  return 'STANDBY'
 }
 
 ReleaseSchema.methods.getCycle = async function () {

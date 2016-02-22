@@ -36,6 +36,7 @@ route.get('/init', async (ctx, next) => {
     return ctx.throw('The project is already in standby', 400)
   }
 
+  ctx.project.postLabel()
   await GetReleases(ctx.project.github.owner, ctx.project.github.name, ctx.user.github.access)
   .each(release => {
     return ctx.project.upsertRelease({
@@ -46,8 +47,8 @@ route.get('/init', async (ctx, next) => {
     Log.error(err)
     return ctx.throw(`Unable to get GitHub releases for ${ctx.project.name}`, 500)
   })
-
   await ctx.project.update({ _status: 'INIT' })
+
   return ctx.redirect('/dashboard')
 })
 
@@ -56,7 +57,7 @@ route.get('/cycle', async (ctx, next) => {
     return ctx.throw('The project has no releases to cycle', 400)
   }
 
-  await ctx.project.release.createCycle('ORPHAN')
+  ctx.project.release.createCycle('RELEASE')
   return ctx.redirect('/dashboard')
 })
 
@@ -65,7 +66,7 @@ route.get('/launch', async (ctx, next) => {
     return ctx.throw('The project has no releases to launch', 400)
   }
 
-  await ctx.project.release.createCycle()
+  await ctx.project.release.createCycle('RELEASE')
   return ctx.redirect('/dashboard')
 })
 

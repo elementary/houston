@@ -337,10 +337,7 @@ section.hero .button.suggested-action{
     margin: 12px;
 }
 
-.repo i.fa-check {
-    background-color: #73d216;
-}
-
+.repo i.fa-check,
 .repo i.fa-arrow-up {
     background-color: #73d216;
 }
@@ -349,37 +346,18 @@ section.hero .button.suggested-action{
     background-color: #fbc02d;
 }
 
-.repo i.fa-user,
-.repo i.fa-refresh {
-    color: #777;
-    box-shadow: none;
-}
-
 .repo .fa-refresh:before {
-    -webkit-animation:spin 4s linear infinite;
-    -moz-animation:spin 4s linear infinite;
-    animation:spin 4s linear infinite;
-}
-
-@-webkit-keyframes spin {
-    from {
-        -webkit-transform: rotate(0deg);
-                transform: rotate(0deg);
-    }
-    to {
-        -webkit-transform: rotate(360deg);
-                transform: rotate(360deg);
-    }
+    animation: spin 4s linear infinite;
+    transform-origin: 49% 48.5%; /* less wabble */
+    display: block
 }
 
 @keyframes spin {
-    to {
-        -webkit-transform: rotate(0deg);
-                transform: rotate(0deg);
+    0% {
+        transform: rotate(0deg);
     }
-    to {
-        -webkit-transform: rotate(360deg);
-                transform: rotate(360deg);
+    100% {
+        transform: rotate(360deg);
     }
 }
 
