@@ -9,14 +9,13 @@ import Router from 'koa-router'
 import _ from 'lodash'
 
 import { Project } from '~/core/model/project'
-import { Cycle } from '~/core/model/cycle'
 import { IsRole } from '~/core/policy/isRole'
 import { GetProjects } from '~/core/service/github'
 
 let route = new Router()
 
 route.get('/', async (ctx) => {
-  return ctx.render('index', {})
+  return ctx.render('index', { hideUser: true })
 })
 
 route.get('/dashboard', IsRole('USER'), async (ctx, next) => {
@@ -31,15 +30,13 @@ route.get('/dashboard', IsRole('USER'), async (ctx, next) => {
     }, project))
   })
   .map(async project => {
-    return await project.toSolid()
+    project.status = await project.getStatus()
+    project.version = await project.getVersion()
+
+    return project
   })
 
   return ctx.render('dashboard', { title: 'Dashboard', projects })
-})
-
-route.get('/test', ctx => {
-  Cycle.findOne().then(cycle => cycle.spawn('INIT'))
-  ctx.body = 'ok'
 })
 
 export const Route = route

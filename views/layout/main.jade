@@ -24,7 +24,7 @@ html
         ul.right
           li: a(href="/") Developer
           li: a(href="https://elementary.io/get-involved") Get Involved
-    if user
+    if user && !hideUser
       div.dark#nav-secondary
         div.right
           a(href="/auth/logout")

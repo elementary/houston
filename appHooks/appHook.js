@@ -47,8 +47,8 @@ class AppHook {
   // TODO: base64 decode all files automaticly?
   file (path) {
     return Request
-    .get(`https://api.github.com/repos/${this.data.application.github.fullName}/contents/${path}?ref=${this.data.tag}`)
-    .auth(this.data.application.github.token)
+    .get(`https://api.github.com/repos/${this.data.project.github.fullName}/contents/${path}?ref=${this.data.tag}`)
+    .auth(this.data.project.github.token)
     .then(data => data.content)
     .catch(() => false)
   }

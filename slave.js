@@ -6,7 +6,7 @@
 import Socket from 'socket.io-client'
 
 import { run } from './appHooks'
-import { Config, Log } from './app'
+import { Helpers, Config, Log } from './app'
 
 const io = Socket.connect(Config.server.url)
 
@@ -26,6 +26,7 @@ io.on('cycle', data => {
   run(data)
   .then(pkg => {
     io.emit('finished', pkg)
-    Log.info(`Sent cycle data for ${data._id}`)
+    Log.debug(`Found ${Helpers.ArrayString('error', pkg.errors)} in ${data.cycle._id}`)
+    Log.info(`Sent cycle data for ${data.cycle._id}`)
   })
 })

@@ -8,12 +8,8 @@
  * }
  */
 
-import _ from 'lodash'
 import Promise from 'bluebird'
 import Mongoose from 'mongoose'
-import Dotize from 'dotize'
-
-import { ReleaseSchema } from './release'
 
 // TODO: abstract services out of mondels
 import { SendLabel, SendIssue } from '~/core/service/github'
@@ -82,7 +78,10 @@ const ProjectSchema = new Mongoose.Schema({
     type: Mongoose.Schema.Types.ObjectId,
     ref: 'cycle'
   }],
-  releases: [ReleaseSchema]
+  releases: [{
+    type: Mongoose.Schema.Types.ObjectId,
+    ref: 'release'
+  }]
 })
 
 ProjectSchema.set('toJSON', { virtuals: true })
@@ -93,12 +92,6 @@ ProjectSchema.virtual('name').get(function () {
   if (this.github.name != null) return this.github.name
 
   return 'Unknown Project'
-})
-
-ProjectSchema.virtual('version').get(function () {
-  if (this.release != null) return this.release.version
-
-  return '0.0.0'
 })
 
 ProjectSchema.virtual('github.fullName').get(function () {
@@ -118,77 +111,29 @@ ProjectSchema.virtual('dist-arch').get(function () {
   return results
 })
 
-ProjectSchema.virtual('release').get(function () {
-  if (this.releases.length > 0) return this.releases[0]
+ProjectSchema.methods.getStatus = function () {
+  if (this.releases.length < 1) return Promise.resolve(this._status)
 
-  return null
-})
-
-ProjectSchema.methods.toSolid = async function () {
-  let project = this.toJSON()
-  project.status = await this.getStatus()
-
-  return project
+  return this.model('release').findOne({_id: {$in: this.releases}})
+  .then(release => release.getStatus())
 }
 
-ProjectSchema.methods.getStatus = async function () {
-  if (this.release == null) return this._status
+ProjectSchema.methods.getVersion = function () {
+  if (this.releases.length < 1) return Promise.resolve('0.0.0')
 
-  return await this.release.getStatus()
-}
-
-ProjectSchema.methods.upsertRelease = function (fQuery, uQuery) {
-  const application = this
-  const dotQuery = Dotize.convert(fQuery, 'releases')
-  const notQuery = _.mapValues(dotQuery, v => ({ $ne: v }))
-
-  return Promise.all([
-    Project.findOneAndUpdate(_.extend({
-      _id: application._id
-    }, dotQuery), {
-      'releases.$': uQuery
-    }, { new: true }),
-    Project.findOneAndUpdate(_.extend({
-      _id: application._id
-    }, notQuery), {
-      $addToSet: { releases: uQuery }
-    }, { new: true })
-  ])
-  .then(([update, create]) => {
-    const project = (create != null) ? create : update
-    const release = project.releases[project.releases.length - 1]
-
-    // Execute any 'post save' release middleware
-    if (create != null) {
-      for (let i in saveReleaseMiddleware) {
-        saveReleaseMiddleware[i](release)
-      }
-    }
-
-    return release
-  })
+  return this.model('release').findOne({_id: {$in: this.releases}})
+  .then(release => release.version)
 }
 
 ProjectSchema.methods.postLabel = function () {
-  SendLabel(this)
+  return SendLabel(this)
 }
 
 ProjectSchema.methods.postIssue = function (issue) {
   if (typeof issue.title !== 'string') return Promise.reject('Issue needs a title')
   if (typeof issue.body !== 'string') return Promise.reject('Issue needs a body')
 
-  SendIssue(issue, this)
-}
-
-// Find all save middleware in ReleaseSchema for custom calls that look native
-// TODO: Oh dear god, why do we need this mongoose?
-// FIXME: Cleanup on aisle here
-let saveReleaseMiddleware = []
-const releaseMiddle = _.fromPairs(ReleaseSchema.callQueue)
-if (releaseMiddle.on != null) {
-  saveReleaseMiddleware = _.filter(_.map(releaseMiddle.on, (v, i) => {
-    if (v === 'save') return releaseMiddle.on[i + 1]
-  }), v => typeof v === 'function')
+  return SendIssue(issue, this)
 }
 
 const Project = Mongoose.model('project', ProjectSchema)

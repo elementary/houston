@@ -54,7 +54,7 @@ export async function run (data) {
   })
   .then(pkg => {
     return _.extend({
-      cycle: data._id,
+      cycle: data.cycle._id,
       project: data.project._id,
       release: (data.release != null) ? data.release._id : null
     }, pkg)

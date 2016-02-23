@@ -11,7 +11,6 @@
 import Mongoose from 'mongoose'
 
 import { Config, Log, Request } from '~/app'
-import { Project } from './project'
 
 const UserSchema = new Mongoose.Schema({
   username: String,
@@ -39,20 +38,11 @@ const UserSchema = new Mongoose.Schema({
     left: Date
   },
 
-  projects: {
+  projects: [{
     type: Mongoose.Schema.Types.ObjectId,
     ref: 'project'
-  }
+  }]
 })
-
-/**
- * Gets all Projects that user ownes
- *
- * @return {Array} project documents
- */
-UserSchema.methods.getProjects = function () {
-  return Project.find({ owner: this._id }).exec()
-}
 
 /**
  * Updates user with rights given by GitHub
@@ -106,18 +96,6 @@ UserSchema.methods.getRights = async function () {
 
   return User.findByIdAndUpdate(user._id, { right: 'ADMIN' }).exec()
 }
-
-// Mongoose lifecycle functions
-UserSchema.post('remove', doc => {
-  doc.getProjects()
-  .each(project => {
-    return project.remove()
-  })
-  .catch(err => {
-    Log.warn(`Error while removing all projects from ${doc.username}`)
-    Log.error(err)
-  })
-})
 
 const User = Mongoose.model('user', UserSchema)
 

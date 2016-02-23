@@ -9,7 +9,6 @@
 
 import Mongoose from 'mongoose'
 import Promise from 'bluebird'
-import Dotize from 'dotize'
 
 import { Config, Log } from '~/app'
 
@@ -43,62 +42,54 @@ const BuildSchema = new Mongoose.Schema({
   finished: Date
 })
 
-BuildSchema.virtual('cycle').get(function () {
-  return this.ownerDocument()
-})
+BuildSchema.methods.getCycle = function () {
+  return this.model('cycle').findOne({builds: this._id})
+}
 
-/**
- * Updates build nested in cycle model
- *
- * @param {Object} Object of items to update
- * @return {Object} updated build object
- */
-// FIXME: drunken coding results in mostly broken code TIL
-BuildSchema.methods.update = function (obj) {
-  let build = this
-  let update = Dotize.convert(obj, 'cycle.$')
+BuildSchema.methods.getProject = async function () {
+  const cycle = await this.getCycle()
 
-  return build.cycle.update({
-    'builds_id': build._id
-  }, update)
+  if (cycle == null) {
+    return Promise.reject("Unable to find build's cycle")
+  }
+
+  return cycle.getProject()
 }
 
 // TODO: no services in models!
 BuildSchema.methods.doBuild = async function () {
-  let self = this
-  const project = await self.cycle.getProject()
+  const cycle = await this.getCycle()
+  const project = await this.getProject()
 
   if (Config.jenkins) {
-    jenkins.job.build({
+    return jenkins.job.build({
       name: Config.jenkins.job,
       parameters: {
         PACKAGE: project.package.name,
-        REPO: self.cycle.repo,
-        VERSION: self.cycle.version,
-        DIST: self.dist,
-        ARCH: self.arch,
-        REFERENCE: self.cycle.tag,
-        CYCLE: self.cycle._id
+        REPO: cycle.getRepo(),
+        VERSION: cycle.getVersion(),
+        DIST: this.dist,
+        ARCH: this.arch,
+        REFERENCE: cycle.getTag(),
+        BUILD: this._id
         // TODO: application changelog
       }
     })
-    .then(build => self.update({ build }))
-    .catch(err => Log.error(err))
+    .then(build => this.update({ build }))
   } else {
     Log.info('Jenkins has been disabled in configuration file. No build is running')
+    return Promise.resolve()
   }
 }
 
 BuildSchema.methods.getLog = function () {
-  let self = this
-
   if (Config.jenkins) {
-    return jenkins.build.log(Config.jenkins.job, self.build)
-    .then(log => self.update({ log }))
+    return jenkins.build.log(Config.jenkins.job, this.build)
+    .then(log => this.update({ log }))
   }
 
   return Promise.resolve('Logs disabled in configuration file')
-  .then(log => self.update({ log }))
+  .then(log => this.update({ log }))
 }
 
 // Mongoose lifecycle functions
@@ -106,4 +97,10 @@ BuildSchema.post('save', build => {
   build.doBuild()
 })
 
-export default { BuildSchema }
+BuildSchema.post('update', build => {
+  if (build.status === 'FAIL') build.getLog()
+})
+
+const Build = Mongoose.model('build', BuildSchema)
+
+export default { Build, BuildSchema }

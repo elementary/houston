@@ -70,8 +70,10 @@ export function SendLabel (project) {
   }, err => {
     if (err.status !== 422) {
       Log.warn(err.message)
+      return Promise.reject(`Received error code ${err.status} from GitHub`)
     } else {
       Log.debug(`Label already created in GitHub for ${project.github.fullName}`)
+      return Promise.resolve()
     }
   })
 }

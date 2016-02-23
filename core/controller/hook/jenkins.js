@@ -8,7 +8,7 @@
 import Router from 'koa-router'
 
 import { Config, Log } from '~/app'
-import { Cycle } from '~/core/model/cycle'
+import { Build } from '~/core/model/build'
 
 let route = new Router({
   prefix: '/hook/jenkins/:key'
@@ -33,10 +33,10 @@ route.post('/', async ctx => {
   }
 
   const jenkins = ctx.request.body.build
-  const cycle = await Cycle.findById(jenkins.parameters.CYCLE)
+  const build = await Build.findById(jenkins.parameters.BUILD)
 
-  if (cycle == null) {
-    return ctx.throw('No Cycle found', 404)
+  if (build == null) {
+    return ctx.throw('No Build found', 404)
   }
 
   let status = 'QUEUE'
@@ -45,17 +45,13 @@ route.post('/', async ctx => {
   if (jenkins.phase === 'FAILED') status = 'FAIL'
   if (jenkins.phase === 'FINALIZED') status = 'FINISH'
 
-  return Cycle.findOneAndUpdate({
-    _id: jenkins.parameters.CYCLE,
-    builds: {
-      arch: jenkins.parameters.ARCH,
-      dist: jenkins.parameters.DIST
-    }
-  }, {
-    'builds.$.status': status
+  return build.update({ status })
+  .then(() => {
+    if (status === 'FAIL') return build.getLog()
   })
-  .then(d => {
+  .then(() => {
     ctx.status = 200
+    return
   })
 })
 

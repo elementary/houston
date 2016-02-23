@@ -1,6 +1,6 @@
 {
   "name": "Houston",
-  "version": "0.2.0",
+  "version": "0.1.8",
   "description": "Backend for AppHub",
   "main": "server.js",
   "dependencies": {
@@ -38,10 +38,12 @@
   },
   "devDependencies": {
     "babel-eslint": "^4.1.8",
+    "babel-node-debug": "^2.0.0",
     "standard": "^6.0.5"
   },
   "scripts": {
     "lint": "standard",
+    "debug": "babel-node-debug entry.js master --no-preload",
     "start": "node entry.js master",
     "master": "node entry.js master",
     "slave": "node entry.js slave"

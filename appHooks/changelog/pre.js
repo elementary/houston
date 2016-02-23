@@ -7,6 +7,8 @@
 
 import AppHook from '~/appHooks/appHook'
 
+import { Request } from '~/app'
+
 class Changelog extends AppHook {
   constructor (data) {
     super(data, {
@@ -16,13 +18,19 @@ class Changelog extends AppHook {
   }
 
   test () {
-    for (let i in this.data.project.releases) {
-      if (this.data.project.releases[i].changelog == null) {
-        this.error(this.data.project.releases[i].github.tag)
+    return Request
+    .get(`https://api.github.com/repos/${this.data.project.github.fullName}/releases`)
+    .auth(this.data.project.github.token)
+    .then(res => res.body)
+    .then(releases => {
+      for (let i in releases) {
+        const release = releases[i]
+        if (release.body === '') this.error(release.tag_name)
       }
-    }
-
-    return
+      return Promise.resolve()
+    }, err => {
+      return Promise.reject(err)
+    })
   }
 }
 

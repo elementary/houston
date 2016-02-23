@@ -7,8 +7,10 @@
 
 import Router from 'koa-router'
 
-import { Log } from '~/app'
 import { Project } from '~/core/model/project'
+import { Release } from '~/core/model/release'
+import { Cycle } from '~/core/model/cycle'
+import { Build } from '~/core/model/build'
 import { IsRole } from '~/core/policy/isRole'
 import { GetReleases } from '~/core/service/github'
 
@@ -32,42 +34,53 @@ route.get('/*', IsRole('BETA'), async (ctx, next) => {
 })
 
 route.get('/init', async (ctx, next) => {
-  if (await ctx.project.getStatus() !== 'NEW') {
-    return ctx.throw('The project is already in standby', 400)
-  }
+  const status = await ctx.project.getStatus()
+  .catch(err => ctx.throw({
+    message: 'Unable to get project status',
+    error: err
+  }, 500))
 
-  ctx.project.postLabel()
-  await GetReleases(ctx.project.github.owner, ctx.project.github.name, ctx.user.github.access)
-  .each(release => {
-    return ctx.project.upsertRelease({
-      'github.id': release.github.id
-    }, release)
-  })
-  .catch((err) => {
-    Log.error(err)
-    return ctx.throw(`Unable to get GitHub releases for ${ctx.project.name}`, 500)
-  })
-  await ctx.project.update({ _status: 'INIT' })
+  if (status !== 'NEW') return ctx.throw('The project is already in standby', 400)
+
+  const github = ctx.project.github
+
+  await Promise.all([
+    GetReleases(github.owner, github.name, github.token).each(release => {
+      return Release.create(release)
+      .then(release => ctx.project.update({$push: {releases: release._id}}))
+    }),
+    ctx.project.postLabel(),
+    ctx.project.update({ _status: 'INIT' })
+  ])
+  .catch(err => ctx.throw({
+    message: `Unable to setup ${ctx.project.name} with Houston`,
+    error: err
+  }, 500))
 
   return ctx.redirect('/dashboard')
 })
 
 route.get('/cycle', async (ctx, next) => {
-  if (ctx.project.release == null) {
+  if (ctx.project.releases.length < 1) {
     return ctx.throw('The project has no releases to cycle', 400)
   }
 
-  ctx.project.release.createCycle('RELEASE')
-  return ctx.redirect('/dashboard')
-})
+  const release = await Release.findOne({_id: {$in: ctx.project.releases}})
 
-route.get('/launch', async (ctx, next) => {
-  if (ctx.project.release == null) {
-    return ctx.throw('The project has no releases to launch', 400)
-  }
+  const cycle = new Cycle({
+    type: 'RELEASE'
+  })
 
-  await ctx.project.release.createCycle('RELEASE')
-  return ctx.redirect('/dashboard')
+  return Promise.all([
+    cycle.save(),
+    ctx.project.update({$push: {cycles: cycle._id}}),
+    release.update({$push: {cycles: cycle._id}})
+  ])
+  .then(ctx.redirect('/dashboard'))
+  .catch(err => ctx.throw({
+    message: 'An error occured while creating a new release cycle',
+    error: err
+  }, 500))
 })
 
 export const Route = route
