@@ -98,30 +98,27 @@ ProjectSchema.virtual('github.fullName').get(function () {
   return `${this.github.owner}/${this.github.name}`
 })
 
-ProjectSchema.virtual('dist-arch').get(function () {
-  let project = this
-  let results = []
-
-  for (let dI in project.distributions) {
-    for (let aI in project.architectures) {
-      results.push(`${project.distributions[dI]}-${project.architectures[aI]}`)
-    }
-  }
-
-  return results
-})
-
 ProjectSchema.methods.getStatus = function () {
   if (this.releases.length < 1) return Promise.resolve(this._status)
 
-  return this.model('release').findOne({_id: {$in: this.releases}})
-  .then(release => release.getStatus())
+  return this.model('cycle')
+  .findOne({
+    _id: {$in: this.cycles},
+    type: 'RELEASE'
+  })
+  .then(cycle => {
+    if (cycle != null) return cycle.getStatus()
+
+    return Promise.resolve('STANDBY')
+  })
 }
 
 ProjectSchema.methods.getVersion = function () {
   if (this.releases.length < 1) return Promise.resolve('0.0.0')
 
-  return this.model('release').findOne({_id: {$in: this.releases}})
+  return this.model('release')
+  .findOne({_id: {$in: this.releases}})
+  .sort({'github.date': -1})
   .then(release => release.version)
 }
 

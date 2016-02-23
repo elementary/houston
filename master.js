@@ -65,6 +65,7 @@ App.use(async (ctx, next) => {
 
   ctx.state.basedir = Path.normalize(`${__dirname}/views`)
   ctx.state.Config = Config
+  ctx.state.Helpers = Helpers
 
   ctx.state.title = 'Houston'
   await next()
@@ -97,10 +98,6 @@ App.use(async (ctx, next) => {
 })
 
 // Error logging
-process.on('unhandledRejection', function (reason, p) {
-  if (reason != null) Log.warn(`Unhandled Promise Rejection: ${reason}`)
-})
-
 App.on('error', function (error, ctx, next) {
   if (App.env === 'test') return
 

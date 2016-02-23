@@ -65,7 +65,9 @@ route.get('/cycle', async (ctx, next) => {
     return ctx.throw('The project has no releases to cycle', 400)
   }
 
-  const release = await Release.findOne({_id: {$in: ctx.project.releases}})
+  const release = await Release
+  .findOne({_id: {$in: ctx.project.releases}})
+  .sort({'_id': -1})
 
   const cycle = new Cycle({
     type: 'RELEASE'
@@ -81,6 +83,53 @@ route.get('/cycle', async (ctx, next) => {
     message: 'An error occured while creating a new release cycle',
     error: err
   }, 500))
+})
+
+route.get('/review/:fate', IsRole('REVIEW'), async (ctx, next) => {
+  if (ctx.project.releases.length < 1) {
+    return ctx.throw('The project has no releases', 400)
+  }
+
+  // All hail our lord and savior, GitHub release date sort
+  const release = await Release
+  .findOne({_id: {$in: ctx.project.releases}})
+  .sort({'github.date': -1})
+
+  if (release == null) {
+    return ctx.throw('Could not find release', 404)
+  }
+
+  const cycle = await Cycle
+  .findOne({_id: {$in: release.cycles}})
+  .sort({'_id': -1})
+
+  if (cycle == null) {
+    return ctx.throw('Release has no cycle', 404)
+  }
+
+  const status = await cycle.getStatus()
+
+  if (status !== 'REVIEW') {
+    return ctx.throw('Release is not awaiting review', 400)
+  }
+
+  let newStatus = 'REVIEW'
+  if (ctx.params.fate === 'yes') {
+    newStatus = 'FINISH'
+  } else if (ctx.params.fate === 'no') {
+    newStatus = 'FAIL'
+  } else {
+    return ctx.throw(`${ctx.project.name}'s fate is binary'`, 400)
+  }
+
+  return cycle.update({ _status: newStatus })
+  .then(ctx.redirect('/dashboard'))
+  .catch(err => {
+    ctx.throw({
+      message: `Unable to update cycle to status ${status}`,
+      error: err
+    })
+  })
 })
 
 export const Route = route

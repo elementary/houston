@@ -44,7 +44,8 @@ ReleaseSchema.virtual('tag').get(function () {
 ReleaseSchema.methods.getStatus = function () {
   if (this.cycles.length < 1) return Promise.resolve('STANDBY')
 
-  return this.model('cycle').findOne({_id: {$in: this.cycles}})
+  return this.model('cycle')
+  .findOne({_id: this.cycles[this.cycles.length - 1]})
   .then(cycle => cycle.getStatus())
 }
 

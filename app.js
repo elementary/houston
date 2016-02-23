@@ -48,6 +48,8 @@ app.config.log.transports = []
 if (app.config.log.console) {
   app.config.log.transports.push(
     new Winston.transports.Console({
+      humanReadableUnhandledException: true,
+      handleExceptions: true,
       prettyPrint: true,
       colorize: true,
       level: app.config.log.level
@@ -58,6 +60,7 @@ if (app.config.log.console) {
 if (app.config.log.files) {
   app.config.log.transports.push(
     new Winston.transports.File({
+      handleExceptions: false,
       name: 'info-file',
       filename: 'info.log',
       level: 'info'
@@ -65,6 +68,7 @@ if (app.config.log.files) {
   )
   app.config.log.transports.push(
     new Winston.transports.File({
+      handleExceptions: true,
       name: 'error-file',
       filename: 'error.log',
       level: 'error'
@@ -74,6 +78,10 @@ if (app.config.log.files) {
 
 app.log = new Winston.Logger({
   transports: app.config.log.transports
+})
+
+app.log.on('error', error => {
+  Log.error(error)
 })
 
 app.log.exitOnError = (app.config.env === 'development')

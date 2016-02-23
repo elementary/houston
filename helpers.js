@@ -10,10 +10,28 @@
 import _ from 'lodash'
 
 export function Pluralize (string, len) {
-  if (typeof len === 'number' && len === 1) return string
-  if (_.isArray(len) && len.length === 1) return string
+  let plural = true
+  if (typeof len === 'number' && len === 1) plural = false
+  if (_.isArray(len) && len.length === 1) plural = false
 
-  return `${string}s`
+  // Change tense of 'are' or 'is' based on length
+  if (/\s/.test(string)) {
+    string = string.split(' ')
+    for (let i in string) {
+      if (string[i] === 'are' || string[i] === 'is') {
+        string[i] = (plural) ? 'are' : 'is'
+      } else {
+        if (string[i].slice(-1) === 's') string[i] = string[i].splice(0, -1)
+        string[i] = (plural) ? `${string[i]}s` : string[i]
+      }
+    }
+    string = string.join(' ')
+  } else {
+    if (string.slice(-1) === 's') string = string.splice(0, -1)
+    string = (plural) ? `${string}s` : string
+  }
+
+  return string
 }
 
 export function ArrayString (string, len) {

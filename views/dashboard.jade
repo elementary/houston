@@ -23,3 +23,21 @@ block body
           //- TODO: We can remove this on release
           if Config.env === 'development'
             | <!-- !{JSON.stringify(project, 2, 4)} -->
+  if reviews.length > 0
+    div.row
+      h3 Reviews
+      h4 #{Helpers.ArrayString('review is', reviews)} pending
+      each cycle in reviews
+        div.repo
+          div.right
+            include /partials/review
+          if cycle.project.package != null && cycle.project.package.icon != null
+            img(src="data:image/svg+xml;base64," + cycle.project.package.icon).app-icon
+          else
+            img(src="/images/application-default-icon.png").app-icon
+          div.description
+            p #{cycle.project.name} @ #{cycle.release.version}
+            p.subtext: a(href="https://github.com/" + cycle.project.github.fullName)= cycle.project.github.fullName
+        //- TODO: We can remove this on release
+        if Config.env === 'development'
+          | <!-- !{JSON.stringify(cycle, 2, 4)} -->

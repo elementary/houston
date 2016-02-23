@@ -4,6 +4,8 @@
  *
  * @exports {Function} GetReleases
  * @exports {Function} GetProjects
+ * @exports {Function} SendLabel
+ * @exports {Function} SendIssue
  */
 
 import { Config, Request, Log } from '~/app'

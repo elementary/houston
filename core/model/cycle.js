@@ -111,7 +111,7 @@ CycleSchema.methods.getStatus = async function () {
   // Push the status to next step
   // TODO: fix the if statement OF DOOM
   if (builds.length > 0 && finish) {
-    if (['POST', 'REVIEW', 'FINISH'].indexOf(this._status) === -1) {
+    if (['POST', 'REVIEW', 'FAIL', 'FINISH'].indexOf(this._status) === -1) {
       if (this.type === 'RELEASE') {
         // TODO: add in the POST step
         return this.update({ _status: 'REVIEW' })

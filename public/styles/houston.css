@@ -208,7 +208,7 @@ section.hero .button.suggested-action{
     font-size: 24px;
 }
 
-.repo i .popover-container{
+.repo i .popover-container {
     position: absolute;
     right: 50%;
     bottom: 0;
@@ -263,6 +263,10 @@ section.hero .button.suggested-action{
     pointer-events: auto;
     opacity: 1;
     transition: opacity 250ms;
+}
+
+.repo i .popover-container .popover-content p {
+    text-align: center;
 }
 
 .repo i .popover-container .popover-content strong {
@@ -339,11 +343,15 @@ section.hero .button.suggested-action{
 
 .repo i.fa-check,
 .repo i.fa-arrow-up {
-    background-color: #73d216;
+    background-color: #93d844;
 }
 
 .repo i.fa-exclamation-triangle {
-    background-color: #fbc02d;
+    background-color: #fbd25d;
+}
+
+.repo i.fa-times {
+    background-color: #da4d45;
 }
 
 .repo .fa-refresh:before {

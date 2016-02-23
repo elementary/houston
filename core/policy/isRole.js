@@ -1,6 +1,6 @@
 /**
  * core/policy/isRole.js
- * Tests current user's right
+ * Tests current user's right for use in middleware
  *
  * @exports {Function} IsRole - Koa route middleware
  */
