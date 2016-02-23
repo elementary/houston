@@ -47,6 +47,7 @@ route.post('/', async ctx => {
 
   return build.update({ status })
   .then(() => {
+    // TODO: submit project issue with build log
     if (status === 'FAIL') return build.getLog()
   })
   .then(() => {

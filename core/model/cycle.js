@@ -108,6 +108,18 @@ CycleSchema.methods.getStatus = async function () {
     if (queue) return Promise.resolve('QUEUE')
   }
 
+  // Push the status to next step
+  // TODO: fix the if statement OF DOOM
+  if (builds.length > 0 && finish) {
+    if (['POST', 'REVIEW', 'FINISH'].indexOf(this._status) === -1) {
+      if (this.type === 'RELEASE') {
+        // TODO: add in the POST step
+        return this.update({ _status: 'REVIEW' })
+        .then(() => 'REVIEW')
+      }
+    }
+  }
+
   return Promise.resolve(this._status)
 }
 

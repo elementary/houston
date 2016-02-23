@@ -76,6 +76,7 @@ BuildSchema.methods.doBuild = async function () {
       }
     })
     .then(build => this.update({ build }))
+    .catch(err => Log.error(err))
   } else {
     Log.info('Jenkins has been disabled in configuration file. No build is running')
     return Promise.resolve()
@@ -95,10 +96,6 @@ BuildSchema.methods.getLog = function () {
 // Mongoose lifecycle functions
 BuildSchema.post('save', build => {
   build.doBuild()
-})
-
-BuildSchema.post('update', build => {
-  if (build.status === 'FAIL') build.getLog()
 })
 
 const Build = Mongoose.model('build', BuildSchema)
