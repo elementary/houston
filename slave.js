@@ -19,8 +19,8 @@ io.on('disconnect', () => {
 })
 
 io.on('cycle', data => {
-  io.emit('received', data._id)
-  Log.info(`Received cycle data for ${data._id}`)
+  io.emit('received', data.cycle._id)
+  Log.info(`Received cycle data for ${data.cycle._id}`)
   data.status = 'PRE'
 
   run(data)

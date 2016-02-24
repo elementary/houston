@@ -6,11 +6,14 @@
  */
 
 import _ from 'lodash'
+import Nunjucks from 'nunjucks'
 import Promise from 'bluebird'
 
-import { Helpers, Log, Request } from '~/app'
+import { Config, Pkg, Log, Request } from '~/app'
 
-let fs = Promise.promisifyAll(require('fs'))
+let issue = Nunjucks.configure(__dirname)
+issue.addGlobal('Config', Config)
+issue.addGlobal('Pkg', Pkg)
 
 class AppHook {
   constructor (data, obj) {
@@ -62,24 +65,25 @@ class AppHook {
     }
   }
 
+  // TODO: clean up whitespace removal code
   issue () {
-    // TODO: add a templating language
-    let template = fs.readFileSync(`${this.path}/${this.mark}`, 'utf8')
-    template = template.split('\n')
+    let template = issue.render(`${this.path}/${this.mark}`, this)
 
-    let title = template[0]
-    template.splice(0, 2)
+    template = template.split('\n')
+    let title = template.find(string => string !== '')
+
+    template.splice(0, template.indexOf(title) + 1)
+
     template = template.join('\n')
 
     return {
-      title: title,
+      title,
       body: template
     }
   }
 
-  async run () {
-    await this.test()
-    return this.report()
+  run () {
+    return this.test().then(() => this.report())
   }
 }
 
