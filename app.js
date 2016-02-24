@@ -26,7 +26,8 @@ try {
 } catch (err) {
   console.log('It seems like you have not taken the time to setup Houston yet.')
   console.log('Please use the example configuration file we have provided you')
-  console.log('to setup Houston.')
+  console.log("at 'config.example.js' to setup Houston. When you are done place")
+  console.log("at 'config.js'.")
   throw new Error('failed to setup Houston')
 }
 

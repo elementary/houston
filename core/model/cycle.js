@@ -9,7 +9,7 @@
  */
 
 import Mongoose from 'mongoose'
-import _ from 'lodash'
+import Promise from 'bluebird'
 
 import { io } from '~/core/io'
 import { Build } from './build'
@@ -149,18 +149,17 @@ CycleSchema.methods.build = async function () {
   if (project == null) return project.reject('Unable to find project')
 
   let builds = []
-  let ids = []
 
   for (let dist in project.distributions) {
     for (let arch in project.architectures) {
-      let build = new Build({
+      builds.push(new Build({
         dist: project.distributions[dist],
         arch: project.architectures[arch]
-      })
-      builds.push(build)
-      ids.push(build._id)
+      }))
     }
   }
+
+  const ids = builds.map(b => b._id)
 
   return Promise.all([
     cycle.update({$pushAll: {builds: ids}}).exec(),

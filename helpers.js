@@ -9,6 +9,14 @@
 
 import _ from 'lodash'
 
+/**
+ * Pluralize
+ * Gives a plural or singular string based on array length, includes length of array
+ *
+ * @param {String} string - String to be pluralized ('error')
+ * @param {Array/Number} len - What to base pluralization on
+ * @returns {String} - String based on length of array without length ('errors')
+ */
 export function Pluralize (string, len) {
   let plural = true
   if (typeof len === 'number' && len === 1) plural = false
@@ -34,6 +42,14 @@ export function Pluralize (string, len) {
   return string
 }
 
+/**
+ * ArrayString
+ * Gives a plural or singular string based on array length, includes length of array
+ *
+ * @param {String} string - String to be pluralized ('error')
+ * @param {Array/Number} len - What to base pluralization on
+ * @returns {String} - String based on length of array including length ('5 errors')
+ */
 export function ArrayString (string, len) {
   if (typeof len === 'number') return `${len} ${Pluralize(string, len)}`
   if (_.isArray(len)) return `${len.length} ${Pluralize(string, len)}`
@@ -42,6 +58,7 @@ export function ArrayString (string, len) {
 }
 
 /**
+ * FlattenObject
  * Flattens object into array
  *
  * @param {Object} obj - Object to be flattened

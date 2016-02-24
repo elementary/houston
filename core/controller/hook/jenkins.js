@@ -28,8 +28,8 @@ route.param('key', async (key, ctx, next) => {
 
 route.post('/', async ctx => {
   if (ctx.request.body === {}) {
-    Log.debug('Incorrect data was sent to Jenkins hook')
-    return ctx.throw('Incorrect data sent', 400)
+    Log.debug('An empty body was sent to Jenkins hook')
+    return ctx.throw('Empty body', 400)
   }
 
   const jenkins = ctx.request.body.build
@@ -40,7 +40,6 @@ route.post('/', async ctx => {
   }
 
   let status = 'QUEUE'
-  if (jenkins.phase === 'QUEUED') status = 'QUEUE'
   if (jenkins.phase === 'STARTED') status = 'BUILD'
   if (jenkins.phase === 'FAILED') status = 'FAIL'
   if (jenkins.phase === 'FINALIZED') status = 'FINISH'

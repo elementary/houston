@@ -13,7 +13,6 @@ about the technical details.
 ## Architecture Overview
 
 * HTML/CSS/JS
-* [Handlebars](http://handlebarsjs.com/) templates
 * [Node.js](https://nodejs.org/en/) backend
 * [GitHub OAuth API](https://developer.github.com/v3/oauth/) via
   [Passport](https://github.com/jaredhanson/passport-github)

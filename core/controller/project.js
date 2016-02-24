@@ -10,7 +10,6 @@ import Router from 'koa-router'
 import { Project } from '~/core/model/project'
 import { Release } from '~/core/model/release'
 import { Cycle } from '~/core/model/cycle'
-import { Build } from '~/core/model/build'
 import { IsRole } from '~/core/policy/isRole'
 import { GetReleases } from '~/core/service/github'
 
@@ -40,7 +39,7 @@ route.get('/init', async (ctx, next) => {
     error: err
   }, 500))
 
-  if (status !== 'NEW') return ctx.throw('The project is already in standby', 400)
+  if (status !== 'NEW') return ctx.throw('The project is already initalized', 400)
 
   const github = ctx.project.github
 
@@ -67,7 +66,7 @@ route.get('/cycle', async (ctx, next) => {
 
   const release = await Release
   .findOne({_id: {$in: ctx.project.releases}})
-  .sort({'_id': -1})
+  .sort({'github.date': -1})
 
   const cycle = new Cycle({
     type: 'RELEASE'

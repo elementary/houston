@@ -6,7 +6,6 @@
  */
 
 import Router from 'koa-router'
-import _ from 'lodash'
 
 import { Project } from '~/core/model/project'
 import { Cycle } from '~/core/model/cycle'
@@ -25,12 +24,12 @@ route.get('/dashboard', IsRole('USER'), async (ctx, next) => {
   const projects = await GetProjects(ctx.user.github.access)
   .map(async project => {
     Log.silly(`Upserting ${project.github.owner}/${project.github.name} project`)
-    let dbProject = await Project.findOne({ 'github.id': project.github.id })
+    const dbProject = await Project.findOne({ 'github.id': project.github.id })
     if (dbProject != null) return dbProject
 
     Log.silly(`Creating a new project for ${project.github.owner}/${project.github.name}`)
     // TODO: Verify only owners? of projects can create it
-    return Project.create(_.extend({
+    return Project.create(Object.assign({
       owner: ctx.user._id
     }, project))
   })

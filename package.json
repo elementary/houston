@@ -2,7 +2,7 @@
   "name": "Houston",
   "version": "0.1.8",
   "description": "Backend for AppHub",
-  "main": "server.js",
+  "main": "master.js",
   "dependencies": {
     "babel-plugin-add-module-exports": "^0.1.2",
     "babel-plugin-syntax-async-functions": "^6.5.0",
@@ -56,7 +56,6 @@
     "url": "git+https://github.com/elementary/houston.git"
   },
   "author": "elementary",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/elementary/houston/issues"
   },

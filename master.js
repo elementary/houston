@@ -31,9 +31,9 @@ InitIo(Server)
 
 // App logging
 App.use(async (ctx, next) => {
-  let start = new Date()
+  const start = new Date()
   await next()
-  let end = new Date()
+  const end = new Date()
   Log.verbose(`${ctx.method} ${ctx.url} - ${end - start}ms`)
 })
 
@@ -84,8 +84,8 @@ App.use(Passport.Route.routes(), Passport.Route.allowedMethods())
 let routes = Helpers.FlattenObject(Controller, { Route: 'object' })
 
 for (let key in routes) {
-  let router = routes[key].Route
-  let path = router.opts.prefix || '/'
+  const router = routes[key].Route
+  const path = router.opts.prefix || '/'
   App.use(router.routes(), router.allowedMethods())
   Log.debug(`Loaded ${path} Router`)
 }

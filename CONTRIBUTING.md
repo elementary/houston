@@ -1,10 +1,10 @@
 # Houston
 **Prepare for liftoff.**
 
-Firstly, thank you for taking the time to contribute to Houston :+1:
+Thank you for taking the time to contribute to Houston :+1:
 
 Houston would be but a glimmering dream if it were not for the astounding
-contributions make by third-party developers. To keep contribution as easy as
+contributions made by third-party developers. To keep contribution as easy as
 possible, and to keep Houston working as it should, we have put together a
 comprehensive document of things you should know when contributing to Houston.
 
