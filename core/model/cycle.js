@@ -57,11 +57,11 @@ CycleSchema.methods.getRelease = function () {
 }
 
 CycleSchema.methods.getVersion = async function () {
-  const release = this.getRelease()
+  const release = await this.getRelease()
 
   if (release != null) return release.version
 
-  const project = this.getProject()
+  const project = await this.getProject()
   return project.getVersion()
 }
 

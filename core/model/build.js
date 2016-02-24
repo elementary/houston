@@ -65,14 +65,14 @@ BuildSchema.methods.doBuild = async function () {
     return jenkins.job.build({
       name: Config.jenkins.job,
       parameters: {
-        PACKAGE: project.package.name,
-        REPO: cycle.getRepo(),
-        VERSION: cycle.getVersion(),
+        PACKAGE: project.name,
+        VERSION: await cycle.getVersion(),
+        REPO: await cycle.getRepo(),
         DIST: this.dist,
         ARCH: this.arch,
-        REFERENCE: cycle.getTag(),
+        CHANGELOG: await project.generateChangelog(this.dist, this.arch),
+        REFERENCE: await cycle.getTag(),
         BUILD: this._id
-        // TODO: application changelog
       }
     })
     .then(build => this.update({ build }))
