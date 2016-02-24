@@ -2,18 +2,17 @@
  * appHooks/appHook.js
  * Construction of all appHooks
  *
- * @exports {Object} default - an appHook
+ * @exports {Class} default - an appHook class to extend appon
  */
 
-import _ from 'lodash'
 import Nunjucks from 'nunjucks'
-import Promise from 'bluebird'
 
 import { Config, Pkg, Log, Request } from '~/app'
 
 let issue = Nunjucks.configure(__dirname)
 issue.addGlobal('Config', Config)
 issue.addGlobal('Pkg', Pkg)
+issue.addGlobal('issue', 'issue.md')
 
 class AppHook {
   constructor (data, obj) {
@@ -26,6 +25,7 @@ class AppHook {
 
     this.errors = []
     this.warnings = []
+    this.metadata = {}
     this.information = {}
   }
 
@@ -42,8 +42,12 @@ class AppHook {
     this.warnings.push(msg)
   }
 
+  meta (stuff) {
+    this.metadata = Object.assign(this.metadata, stuff)
+  }
+
   update (obj) {
-    this.information = _.extend(this.information, obj)
+    this.information = Object.assign(this.information, obj)
   }
 
   // TODO: flatten data object
@@ -52,8 +56,7 @@ class AppHook {
     return Request
     .get(`https://api.github.com/repos/${this.data.project.github.fullName}/contents/${path}?ref=${this.data.tag}`)
     .auth(this.data.project.github.token)
-    .then(data => data.content)
-    .catch(() => false)
+    .then(data => data.body.content, () => null)
   }
 
   report () {
@@ -82,8 +85,9 @@ class AppHook {
     }
   }
 
-  run () {
-    return this.test().then(() => this.report())
+  async run () {
+    await Promise.resolve(this.test())
+    return this.report()
   }
 }
 

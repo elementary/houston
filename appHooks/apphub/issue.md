@@ -1,35 +1,49 @@
+{% extends issue %}
+
+{% block title %}
+{% if errors.length is 1 %}
+`.apphub` has an issue
+{% elif errors.length > 1 %}
+`.apphub` has issues
+{% elif warnings.length > 0 %}
+`.apphub` has some concerns
+{% endif %}
+{% endblock %}
+
+{% block issue %}
+{% if errors.length > 0 %}
 # Invalid `.apphub` file
+{% else if warnings.length > 0 %}
+# Questionable `.apphub` file
+{% endif %}
 
 Houston requires a valid `.apphub` file to assure reviewing, and publishing works as you want them.
 
-{{#hasLength hook.errors}}
+{% if errors.length > 0 %}
 Here are some problems we ran into while testing your `.apphub` file.
-{{/hasLength}}
+{% endif %}
 
-{{#each hook.errors}}
-{{#is this 'parse'}}
+{% for error in errors %}
+{% if error == 'exist' %}
+- [ ] You don't have an `.apphub` file. Frankly this is really weird. You might want to check to see if someone removed it in a commit.
+{% elif error == 'parse' %}
 - [ ] We were unable to parse your `.apphub` file.
-{{/is}}
-{{/each}}
+{% endif %}
+{% endfor %}
 
-{{#hasLength hook.warnings}}
+{% if warnings.length > 0 %}
 While not show stopping, here are some questionable parts of your `.apphub` file.
-{{/hasLength}}
+{% endif %}
 
-{{#each hook.warnings}}
-{{#is this 'price'}}
+{% for warning in warnings %}
+{% if warning == 'price' %}
 - [ ] We were unable to identify your price. Please make sure it is a whole number.
-{{/is}}
-{{#is this 'label'}}
+{% elif warning == 'label' %}
 - [ ] We were unable to identify your label. Please make sure it is a string.
-{{/is}}
-{{/each}}
+{% endif %}
+{% endfor %}
 
-A valid `.apphub` file can be as simple as:
-```json
-{}
-```
-Or as sophisticated as:
+A valid `.apphub` file can be as simple as an empty file, or as sophisticated as:
 ```json
 {
   "priceUSD": 5,
@@ -37,11 +51,11 @@ Or as sophisticated as:
 }
 ```
 
-{{#hasLength hook.dump}}
+{% if metadata.dump %}
 Here is the obligatory code dump:
-{{#each hook.dump}}
 ```javascript
-{{this}}
+{{ metadata.dump }}
 ```
-{{/each}}
-{{/hasLength}}
+{% endif %}
+
+{% endblock %}

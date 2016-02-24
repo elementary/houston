@@ -1,4 +1,4 @@
-{% extends 'issue.md' %}
+{% extends issue %}
 
 {% block title %}
 Missing changelog

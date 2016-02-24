@@ -2,7 +2,7 @@
  * appHooks/changelog/pre.js
  * checks all releases have changelogs
  *
- * @exports {Object} run - run appHooks with given data
+ * @exports {Class}
  */
 
 import AppHook from '~/appHooks/appHook'
@@ -28,8 +28,6 @@ class Changelog extends AppHook {
         if (release.body === '') this.error(release.tag_name)
       }
       return Promise.resolve()
-    }, err => {
-      return Promise.reject(err)
     })
   }
 }
