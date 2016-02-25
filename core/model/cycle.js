@@ -167,6 +167,11 @@ CycleSchema.methods.build = async function () {
   ])
 }
 
+// TODO: aptly service release
+CycleSchema.methods.release = async function () {
+  console.log('pull the lever!')
+}
+
 // io listeners
 // TODO: would this make more logic being in core/controller/hook/io?
 io.on('connection', socket => {

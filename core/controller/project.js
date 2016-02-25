@@ -122,6 +122,9 @@ route.get('/review/:fate', IsRole('REVIEW'), async (ctx, next) => {
   }
 
   return cycle.update({ _status: newStatus })
+  .then(() => {
+    if (newStatus === 'FINISH') return cycle.release()
+  })
   .then(ctx.redirect('/dashboard'))
   .catch(err => {
     ctx.throw({

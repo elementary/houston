@@ -46,6 +46,18 @@ export const jenkins = {
 }
 */
 
+export const aptly = false
+
+/*
+export const aptly = {
+  url: 'http://localhost:8080/api',
+
+  // Repository names
+  review: 'testing',
+  stable: 'houston'
+}
+*/
+
 export const database = 'mongodb://localhost/houston-dev'
 
 export const server = {
