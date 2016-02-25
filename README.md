@@ -1,4 +1,6 @@
 # Houston
+
+[![Join the chat at https://gitter.im/elementary/houston](https://badges.gitter.im/elementary/houston.svg)](https://gitter.im/elementary/houston?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 **Prepare for liftoff.**
 
 The concept of Houston is to create a developer dashboard and backend for converting GitHub repos into Debian packages. Developers create a repo containing a `.apphub` file which is then shown on their dashboard. Houston reports the status of the repo here:
