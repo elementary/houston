@@ -13,6 +13,7 @@ import Promise from 'bluebird'
 
 import { io } from '~/core/io'
 import { Build } from './build'
+import { PublishReviewPackage } from '~/core/service/aptly'
 
 const CycleSchema = new Mongoose.Schema({
   _repo: {
@@ -167,9 +168,8 @@ CycleSchema.methods.build = async function () {
   ])
 }
 
-// TODO: aptly service release
 CycleSchema.methods.release = async function () {
-  console.log('pull the lever!')
+  return PublishReviewPackage(this)
 }
 
 // io listeners

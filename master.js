@@ -93,8 +93,8 @@ for (let key in routes) {
 Log.info(`Loaded ${Helpers.ArrayString('Controller', routes)}`)
 
 // 404 page
-App.use(async (ctx, next) => {
-  await ctx.render('error', { message: 'It seems you stuck the landing. World not found.' })
+App.use(ctx => {
+  return ctx.render('error', { message: 'It seems you stuck the landing. World not found.' })
 })
 
 // Error logging

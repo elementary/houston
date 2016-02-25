@@ -53,7 +53,7 @@ export const aptly = {
   url: 'http://localhost:8080/api',
 
   // Repository names
-  review: 'testing',
+  review: 'review',
   stable: 'houston'
 }
 */

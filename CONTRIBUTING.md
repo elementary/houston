@@ -15,6 +15,7 @@ Before we get started, please read the
 - [Coding](#Coding)
 - [appHooks](#appHooks)
 - [Houston](#Houston)
+- [Aptly](#Aptly)
 
 Unsure what needs to be done on Houston? Try looking at some of the
 [issues](https://github.com/elementary/houston/issues?q=is%3Aopen+is%3Aissue+label%3ABitesize)
@@ -113,3 +114,54 @@ that value later on.
 * Many relationships change between methods prefixed with `get` like
 `getProject()` and virtuals like `project`. Make sure you keep track of what you
 want to call.
+
+## Aptly
+
+While Houston itself does not host any repositories, it does tie into them to
+ensure released projects are available. [Aptly](http://www.aptly.info/) is the
+repository manager of choice for Houston and as such, it is important to have
+an able and working setup if you plan on utilizing the full power of Houston.
+
+### Setup
+
+This guide will not discuss installing Aptly. Please direct your attention to
+the [Aptly download page](http://www.aptly.info/download/) for details on
+installing and running.
+
+Houston's repository schema, while flexible, does make assumptions on your
+setup. First, we expect you to prefix all your repositories with distributions.
+For example, if you are having Houston build for Debian Sid, your review
+repository is called 'review', and your stable repository is called 'houston',
+then your full repository name should be 'sid-testing' and 'sid-houston'. By
+Houston default, you should have four repositories:
+
+* 'sid-review'
+* 'sid-houston'
+* 'xenial-review'
+* 'xenial-houston'
+
+On release of a new project, Houston will automatically update your published
+repository with a newly created snapshot. This means that your stable repo will
+never be directly published, but instead, an easily manageable snapshot will.
+As such, you will need a blank snapshot published for each distribution you
+you plan on releasing to. Firstly you will need to
+[create a blank snapshot](http://www.aptly.info/doc/aptly/snapshot/create/)
+for the distribution, and then
+[publish it](http://www.aptly.info/doc/aptly/publish/snapshot/).
+
+tl;dr: Run these commands on a local instance of Aptly after you get it setup
+and you _should_ have be all setup for Houston.
+```bash
+sudo aptly repo create sid-review
+sudo aptly repo create sid-houston
+sudo aptly repo create xenial-review
+sudo aptly repo create xenial-houston
+sudo aptly snapshot create sid-houston empty
+sudo aptly snapshot create xenial-houston empty
+sudo aptly publish snapshot -architectures=amd64 -distribution=sid sid-houston
+sudo aptly publish snapshot -architectures=amd64 -distribution=xenial xenial-houston
+```
+
+NOTE: Houston currently does not manage anything with the review repository.
+It does not move packages into it, nor does it publish it. This task has to be
+automated with your build system (Jenkins) or manually after build.
