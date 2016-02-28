@@ -1,6 +1,6 @@
 /**
  * slave.js
- * Child script for running appHooks
+ * Socketio slave to run appHooks
  */
 
 import Socket from 'socket.io-client'
