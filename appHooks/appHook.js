@@ -2,15 +2,17 @@
  * appHooks/appHook.js
  * Construction of all appHooks
  *
- * @exports {Object} default - an appHook
+ * @exports {Class} default - an appHook class to extend appon
  */
 
-import _ from 'lodash'
-import Promise from 'bluebird'
+import Nunjucks from 'nunjucks'
 
-import { Helpers, Log, Request } from '~/app'
+import { Config, Pkg, Log, Request } from '~/app'
 
-let fs = Promise.promisifyAll(require('fs'))
+let issue = Nunjucks.configure(__dirname)
+issue.addGlobal('Config', Config)
+issue.addGlobal('Pkg', Pkg)
+issue.addGlobal('issue', 'issue.md')
 
 class AppHook {
   constructor (data, obj) {
@@ -23,6 +25,7 @@ class AppHook {
 
     this.errors = []
     this.warnings = []
+    this.metadata = {}
     this.information = {}
   }
 
@@ -39,8 +42,12 @@ class AppHook {
     this.warnings.push(msg)
   }
 
+  meta (stuff) {
+    this.metadata = Object.assign(this.metadata, stuff)
+  }
+
   update (obj) {
-    this.information = _.extend(this.information, obj)
+    this.information = Object.assign(this.information, obj)
   }
 
   // TODO: flatten data object
@@ -49,8 +56,7 @@ class AppHook {
     return Request
     .get(`https://api.github.com/repos/${this.data.project.github.fullName}/contents/${path}?ref=${this.data.tag}`)
     .auth(this.data.project.github.token)
-    .then(data => data.content)
-    .catch(() => false)
+    .then(data => data.body.content, () => null)
   }
 
   report () {
@@ -62,23 +68,25 @@ class AppHook {
     }
   }
 
+  // TODO: clean up whitespace removal code
   issue () {
-    // TODO: add a templating language
-    let template = fs.readFileSync(`${this.path}/${this.mark}`, 'utf8')
-    template = template.split('\n')
+    let template = issue.render(`${this.path}/${this.mark}`, this)
 
-    let title = template[0]
-    template.splice(0, 2)
+    template = template.split('\n')
+    let title = template.find(string => string !== '')
+
+    template.splice(0, template.indexOf(title) + 1)
+
     template = template.join('\n')
 
     return {
-      title: title,
+      title,
       body: template
     }
   }
 
   async run () {
-    await this.test()
+    await Promise.resolve(this.test())
     return this.report()
   }
 }

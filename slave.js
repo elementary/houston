@@ -1,6 +1,6 @@
 /**
  * slave.js
- * Child script for running appHooks
+ * Socketio slave to run appHooks
  */
 
 import Socket from 'socket.io-client'
@@ -19,8 +19,8 @@ io.on('disconnect', () => {
 })
 
 io.on('cycle', data => {
-  io.emit('received', data._id)
-  Log.info(`Received cycle data for ${data._id}`)
+  io.emit('received', data.cycle._id)
+  Log.info(`Received cycle data for ${data.cycle._id}`)
   data.status = 'PRE'
 
   run(data)

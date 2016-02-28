@@ -82,7 +82,8 @@ export function SendLabel (project) {
 
 export function SendIssue (issue, project) {
   if (!Config.github.post) {
-    Log.verbose('GitHub config prohibits posting of issues')
+    Log.verbose('GitHub config prohibits posting. Not submitting issue')
+    Log.silly(issue.body)
     return
   }
 

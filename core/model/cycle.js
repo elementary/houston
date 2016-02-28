@@ -123,7 +123,6 @@ CycleSchema.methods.getStatus = async function () {
   return Promise.resolve(this._status)
 }
 
-// TODO: make a pkg to sent to slave script
 CycleSchema.methods.spawn = async function () {
   return Promise.all([
     this.getProject(),
