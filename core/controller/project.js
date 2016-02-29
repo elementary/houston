@@ -7,6 +7,7 @@
 
 import Router from 'koa-router'
 
+import { Log } from '~/app'
 import { Project } from '~/core/model/project'
 import { Release } from '~/core/model/release'
 import { Cycle } from '~/core/model/cycle'
@@ -34,7 +35,10 @@ route.get('/*', IsRole('BETA'), async (ctx, next) => {
 
 route.get('/init', async (ctx, next) => {
   const status = await ctx.project.getStatus()
-  .catch(ctx.throw('Unable to get project status', 500))
+  .catch(err => {
+    Log.error(err)
+    ctx.throw('Unable to get project status', 500)
+  })
 
   if (status !== 'NEW') return ctx.throw('The project is already initalized', 400)
 
@@ -48,7 +52,10 @@ route.get('/init', async (ctx, next) => {
     ctx.project.postLabel(),
     ctx.project.update({ _status: 'INIT' })
   ])
-  .catch(ctx.throw(`Unable to setup ${ctx.project.name} with Houston`, 500))
+  .catch(err => {
+    Log.warn(err)
+    ctx.throw(`Unable to setup ${ctx.project.name} with Houston`, 500)
+  })
 
   return ctx.redirect('/dashboard')
 })
@@ -72,7 +79,10 @@ route.get('/cycle', async (ctx, next) => {
     release.update({$push: {cycles: cycle._id}})
   ])
   .then(ctx.redirect('/dashboard'))
-  .catch(ctx.throw('An error occured while creating a new release cycle', 500))
+  .catch(err => {
+    Log.error(err)
+    ctx.throw('An error occured while creating a new release cycle', 500)
+  })
 })
 
 route.get('/review/:fate', IsRole('REVIEW'), async (ctx, next) => {

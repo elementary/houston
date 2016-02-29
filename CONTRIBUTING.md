@@ -131,14 +131,14 @@ installing and running.
 Houston's repository schema, while flexible, does make assumptions on your
 setup. First, we expect you to prefix all your repositories with distributions.
 For example, if you are having Houston build for Debian Sid, your review
-repository is called 'review', and your stable repository is called 'houston',
-then your full repository name should be 'sid-testing' and 'sid-houston'. By
+repository is called 'review', and your stable repository is called 'stable',
+then your full repository name should be 'sid-review' and 'sid-stable'. By
 Houston default, you should have four repositories:
 
 * 'sid-review'
-* 'sid-houston'
+* 'sid-stable'
 * 'xenial-review'
-* 'xenial-houston'
+* 'xenial-stable'
 
 On release of a new project, Houston will automatically update your published
 repository with a newly created snapshot. This means that your stable repo will
@@ -153,13 +153,13 @@ tl;dr: Run these commands on a local instance of Aptly after you get it setup
 and you _should_ have be all setup for Houston.
 ```bash
 sudo aptly repo create sid-review
-sudo aptly repo create sid-houston
+sudo aptly repo create sid-stable
 sudo aptly repo create xenial-review
-sudo aptly repo create xenial-houston
-sudo aptly snapshot create sid-houston empty
-sudo aptly snapshot create xenial-houston empty
-sudo aptly publish snapshot -architectures=amd64 -distribution=sid sid-houston
-sudo aptly publish snapshot -architectures=amd64 -distribution=xenial xenial-houston
+sudo aptly repo create xenial-stable
+sudo aptly snapshot create sid-stable empty
+sudo aptly snapshot create xenial-stable empty
+sudo aptly publish snapshot -architectures=amd64,armhf -distribution=sid sid-stable
+sudo aptly publish snapshot -architectures=amd64,armhf -distribution=xenial xenial-stable
 ```
 
 NOTE: Houston currently does not manage anything with the review repository.

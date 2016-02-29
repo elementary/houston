@@ -63,6 +63,38 @@ export async function PublishReviewPackage (cycle) {
     return Promise.reject('Trying to release a non release cycle. Failing')
   }
 
+  MoveToStable(cycle)
+  .then(PublishStable(cycle))
+  .catch(err => {
+    Log.error(`Failed to publish ${project.name}`)
+    Log.error(err)
+    return Promise.reject(`Failed to publish ${project.name}`)
+  })
+}
+
+/**
+ * MoveToStable
+ * Moves packages from review repository to stable repository. Here's the order:
+ * 1) Query for all packages in testing repo
+ * 2) Copy packages from testing repo to stable repo
+ * 3) Remove packages from testing repo
+ *
+ * @param {Object} cycle - Database cycle object
+ */
+export async function MoveToStable (cycle) {
+  if (!Config.aptly) {
+    Log.verbose('Aptly is disabled. Going to assume the move to stable was a success')
+    return Promise.resolve()
+  }
+
+  const project = await cycle.getProject()
+  const release = await cycle.getRelease()
+
+  if (release == null) {
+    Log.warn('Only release cycles will have builds. Preemptively failing')
+    return Promise.reject('Only release cycles will have builds. Preemptively failing')
+  }
+
   const version = await project.getVersion()
 
   return Promise.each(project.distributions, async dist => {
@@ -85,13 +117,47 @@ export async function PublishReviewPackage (cycle) {
         PackageRefs: packages
       }).promise()
     })
-    .then(() => {
-      return Request
-      .post(`${Config.aptly.url}/repos/${dist}-${Config.aptly.stable}/snapshots`)
-      .send({
-        Name: `${dist}-${project.name}-${version.replace('.', '-')}`
-      }).promise()
+    .catch(err => {
+      Log.error(err)
+      return Promise.reject(`Error occured while trying to move ${project.name} to stable`)
     })
+  })
+  .catch(err => {
+    Log.error(err)
+    return Promise.reject('Unable to contact repository')
+  })
+}
+
+/**
+ * PublishStable
+ * Replaces current published snapshot with newly created snapshot
+ * 1) Create a snapshot of the stable repo name like 'sid-vocal-2.1.0'
+ * 2) Update published repo with snapshot of stable
+ *
+ * @param {Object} cycle - Database cycle object
+ */
+export async function PublishStable (cycle) {
+  if (!Config.aptly) {
+    Log.verbose('Aptly is disabled. Going to assume the publish was a success')
+    return Promise.resolve()
+  }
+
+  const project = await cycle.getProject()
+  const release = await cycle.getRelease()
+
+  if (release == null) {
+    Log.warn('Only release cycles will have builds. Preemptively failing')
+    return Promise.reject('Only release cycles will have builds. Preemptively failing')
+  }
+
+  const version = await project.getVersion()
+
+  return Promise.each(project.distributions, async dist => {
+    return Request
+    .post(`${Config.aptly.url}/repos/${dist}-${Config.aptly.stable}/snapshots`)
+    .send({
+      Name: `${dist}-${project.name}-${version.replace('.', '-')}`
+    }).promise()
     .then(() => {
       return Request
       .put(`${Config.aptly.url}/publish//${dist}`)
@@ -104,7 +170,7 @@ export async function PublishReviewPackage (cycle) {
     })
     .catch(err => {
       Log.error(err)
-      return Promise.reject(`Error occured while trying to move ${project.name} to stable`)
+      return Promise.reject(`Error occured while trying to publish new snapshot`)
     })
   })
   .catch(err => {
