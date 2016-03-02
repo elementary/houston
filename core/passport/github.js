@@ -34,7 +34,6 @@ export const Strategy = new Github.Strategy({
       })
       .then(user => user.getRights())
       .then(user => done(null, user))
-      .catch(done)
     } else {
       User.create({
         username: profile.username,
@@ -45,9 +44,8 @@ export const Strategy = new Github.Strategy({
         'github.refresh': refresh,
         'date.visited': new Date()
       })
-      .then(user => user.getRights)
+      .then(user => user.getRights())
       .then(user => done(null, user))
-      .catch(done)
     }
   })
 })
