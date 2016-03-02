@@ -28,6 +28,7 @@
     "koa-views": "^4.0.1",
     "lodash": "^4.3.0",
     "mongoose": "^4.4.4",
+    "nunjucks": "^2.3.0",
     "passport-github": "^1.1.0",
     "semver": "^5.1.0",
     "socketio": "^1.0.0",

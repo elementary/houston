@@ -59,7 +59,7 @@ const ProjectSchema = new Mongoose.Schema({
     },
     owner: String,                // Owner of the GitHub repository login
     name: String,                 // Github Repository name
-    token: String,             // GitHub accessToken of the latest user
+    token: String,                // GitHub accessToken of the latest user
     label: {                      // Github issue label
       type: String,
       default: 'AppHub'
