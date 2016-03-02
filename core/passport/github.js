@@ -16,7 +16,7 @@ import { User } from '~/core/model/user'
 export const Strategy = new Github.Strategy({
   clientID: Config.github.client,
   clientSecret: Config.github.secret,
-  callbackURL: 'http://localhost:3000/auth/github/callback'
+  callbackURL: `${Config.server.url}/auth/github/callback`
 }, (access, refresh, profile, done) => {
   // TODO: move user right checking from model to here
   // TODO: code cleanup here. it's a mess
