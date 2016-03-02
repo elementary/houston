@@ -1,0 +1,33 @@
+doctype html
+html
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0")
+
+    link(rel="stylesheet", type="text/css", media="all", href="//fonts.googleapis.com/css?family=Open+Sans:400,600,300")
+    link(rel="stylesheet", type="text/css", media="all", href="//fonts.googleapis.com/css?family=Raleway:100")
+    link(rel="stylesheet", type="text/css", media="all", href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css")
+    link(rel="stylesheet", type="text/css", media="all", href="//elementary.io/styles/main.css")
+    link(rel="stylesheet", type="text/css", media="all", href="/styles/houston.css")
+    script(type="text/javascript", src="//cdn.jsdelivr.net/g/jquery")
+
+    title #{title} &sdot; elementary
+  body
+    nav.nav
+      div.nav-content
+        ul.left
+          li: a(href="https://elementary.io", class="logomark")
+            include /partials/svg-logomark
+          li: a(href="http://blog.elementary.io") Blog
+          li: a(href="https://elementary.io/support") Support
+          li: a(href="https://elementary.io/store") Store
+        ul.right
+          li: a(href="/") Developer
+          li: a(href="https://elementary.io/get-involved") Get Involved
+    if user && !hideUser
+      div.dark#nav-secondary
+        div.right
+          a(href="/auth/logout")
+            span Log Out
+            img(src= user.avatar).avatar
+    block body

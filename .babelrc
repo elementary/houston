@@ -1,10 +1,11 @@
 {
   "presets": ["es2015"],
   "plugins": [
+    "add-module-exports",
+    "babel-root-import",
     "syntax-async-functions",
-    "transform-regenerator",
-    ["babel-root-import", {
-      "rootPathSuffix": "app"
-    }]
+    "syntax-export-extensions",
+    "transform-export-extensions",
+    "transform-regenerator"
   ]
 }

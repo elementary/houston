@@ -1,38 +1,64 @@
 {
-  "name": "houston",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "start": "node server.js"
-  },
+  "name": "Houston",
+  "version": "0.1.8",
+  "description": "Backend for AppHub",
+  "main": "master.js",
   "dependencies": {
-    "babel-plugin-transform-async-to-generator": "^6.3.13",
-    "babel-plugin-transform-regenerator": "^6.3.26",
-    "babel-polyfill": "^6.3.14",
-    "babel-preset-es2015": "^6.3.13",
-    "babel-register": "^6.3.13",
+    "babel-plugin-add-module-exports": "^0.1.2",
+    "babel-plugin-syntax-async-functions": "^6.5.0",
+    "babel-plugin-syntax-export-extensions": "^6.5.0",
+    "babel-plugin-transform-export-extensions": "^6.5.0",
+    "babel-plugin-transform-regenerator": "^6.5.2",
+    "babel-polyfill": "^6.5.0",
+    "babel-preset-es2015": "^6.5.0",
+    "babel-register": "^6.5.2",
     "babel-root-import": "^3.1.0",
-    "bluebird": "^2.9.30",
-    "body-parser": "~1.12.3",
-    "connect-mongo": "^0.8.1",
-    "cookie-parser": "~1.3.4",
-    "debug": "~2.1.3",
+    "bluebird": "^3.2.2",
+    "co": "^4.6.0",
     "dotize": "^0.1.26",
-    "express": "~4.12.2",
-    "express-handlebars": "~3.0.0",
-    "express-session": "~1.11.1",
-    "express-winston": "^1.2.0",
-    "hubkit": "~0.1.31",
     "ini": "^1.3.4",
-    "kerberos": "0.0.18",
-    "lodash": "^3.10.1",
-    "mongoose": "~4.3.7",
-    "morgan": "~1.5.2",
-    "passport": "~0.2.1",
-    "passport-github": "~0.1.5",
+    "jade": "^1.11.0",
+    "koa": "^2.0.0-alpha.3",
+    "koa-bodyparser": "^3.0.0",
+    "koa-convert": "^1.2.0",
+    "koa-passport": "^2.0.1",
+    "koa-router": "^7.0.1",
+    "koa-session": "^3.3.1",
+    "koa-static-cache": "^3.1.4",
+    "koa-views": "^4.0.1",
+    "lodash": "^4.3.0",
+    "mongoose": "^4.4.4",
+    "nunjucks": "^2.3.0",
+    "passport-github": "^1.1.0",
     "semver": "^5.1.0",
-    "serve-favicon": "~2.2.0",
-    "then-jenkins": "~0.7.1",
+    "socketio": "^1.0.0",
+    "superagent": "^1.7.2",
+    "superagent-bluebird-promise": "^3.0.0",
+    "then-jenkins": "^0.7.1",
     "winston": "^2.1.1"
-  }
+  },
+  "devDependencies": {
+    "babel-eslint": "^4.1.8",
+    "babel-node-debug": "^2.0.0",
+    "standard": "^6.0.5"
+  },
+  "scripts": {
+    "lint": "standard",
+    "debug": "babel-node-debug entry.js master --no-preload",
+    "start": "node entry.js master",
+    "master": "node entry.js master",
+    "slave": "node entry.js slave"
+  },
+  "standard": {
+    "parser": "babel-eslint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elementary/houston.git"
+  },
+  "author": "elementary",
+  "bugs": {
+    "url": "https://github.com/elementary/houston/issues"
+  },
+  "homepage": "https://github.com/elementary/houston#readme"
 }
