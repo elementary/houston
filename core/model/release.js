@@ -35,6 +35,10 @@ ReleaseSchema.virtual('version').get(function () {
   return '0.0.0'
 })
 
+ReleaseSchema.virtual('github.debianDate').get(function () {
+  return this.github.date.toUTCString().replace('GMT', '+0000')
+})
+
 ReleaseSchema.virtual('tag').get(function () {
   if (this.github.tag != null) return this.github.tag
 

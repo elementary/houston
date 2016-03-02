@@ -7,6 +7,7 @@
 
 import Router from 'koa-router'
 
+import { Log } from '~/app'
 import { Project } from '~/core/model/project'
 import { Release } from '~/core/model/release'
 import { Cycle } from '~/core/model/cycle'
@@ -34,10 +35,10 @@ route.get('/*', IsRole('BETA'), async (ctx, next) => {
 
 route.get('/init', async (ctx, next) => {
   const status = await ctx.project.getStatus()
-  .catch(err => ctx.throw({
-    message: 'Unable to get project status',
-    error: err
-  }, 500))
+  .catch(err => {
+    Log.error(err)
+    ctx.throw('Unable to get project status', 500)
+  })
 
   if (status !== 'NEW') return ctx.throw('The project is already initalized', 400)
 
@@ -51,10 +52,10 @@ route.get('/init', async (ctx, next) => {
     ctx.project.postLabel(),
     ctx.project.update({ _status: 'INIT' })
   ])
-  .catch(err => ctx.throw({
-    message: `Unable to setup ${ctx.project.name} with Houston`,
-    error: err
-  }, 500))
+  .catch(err => {
+    Log.warn(err)
+    ctx.throw(`Unable to setup ${ctx.project.name} with Houston`, 500)
+  })
 
   return ctx.redirect('/dashboard')
 })
@@ -78,10 +79,10 @@ route.get('/cycle', async (ctx, next) => {
     release.update({$push: {cycles: cycle._id}})
   ])
   .then(ctx.redirect('/dashboard'))
-  .catch(err => ctx.throw({
-    message: 'An error occured while creating a new release cycle',
-    error: err
-  }, 500))
+  .catch(err => {
+    Log.error(err)
+    ctx.throw('An error occured while creating a new release cycle', 500)
+  })
 })
 
 route.get('/review/:fate', IsRole('REVIEW'), async (ctx, next) => {
@@ -112,23 +113,17 @@ route.get('/review/:fate', IsRole('REVIEW'), async (ctx, next) => {
     return ctx.throw('Release is not awaiting review', 400)
   }
 
-  let newStatus = 'REVIEW'
   if (ctx.params.fate === 'yes') {
-    newStatus = 'FINISH'
+    return cycle.release()
+    .then(() => {}, ctx.throw('Unable to push release to repository', 500))
+    .then(cycle.update({ _status: 'FINISH' }))
+    .then(ctx.redirect('/dashboard'))
   } else if (ctx.params.fate === 'no') {
-    newStatus = 'FAIL'
+    return cycle.update({ _status: 'FAIL' })
+    .then(ctx.redirect('/dashboard'))
   } else {
     return ctx.throw(`${ctx.project.name}'s fate is binary'`, 400)
   }
-
-  return cycle.update({ _status: newStatus })
-  .then(ctx.redirect('/dashboard'))
-  .catch(err => {
-    ctx.throw({
-      message: `Unable to update cycle to status ${status}`,
-      error: err
-    })
-  })
 })
 
 export const Route = route

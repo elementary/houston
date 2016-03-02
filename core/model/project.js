@@ -10,6 +10,7 @@
 
 import Promise from 'bluebird'
 import Mongoose from 'mongoose'
+import Nunjucks from 'nunjucks'
 
 // TODO: abstract services out of mondels
 import { SendLabel, SendIssue } from '~/core/service/github'
@@ -58,7 +59,7 @@ const ProjectSchema = new Mongoose.Schema({
     },
     owner: String,                // Owner of the GitHub repository login
     name: String,                 // Github Repository name
-    token: String,             // GitHub accessToken of the latest user
+    token: String,                // GitHub accessToken of the latest user
     label: {                      // Github issue label
       type: String,
       default: 'AppHub'
@@ -131,6 +132,23 @@ ProjectSchema.methods.postIssue = function (issue) {
   if (typeof issue.body !== 'string') return Promise.reject('Issue needs a body')
 
   return SendIssue(issue, this)
+}
+
+ProjectSchema.methods.generateChangelog = function (dist, arch) {
+  return this.model('release')
+  .find({_id: {$in: this.releases}})
+  .sort({'github.date': -1})
+  .then(releases => {
+    return releases.map(release => {
+      return Nunjucks.render(`views/changelog.nun`, {
+        dist,
+        arch,
+        release,
+        project: this
+      })
+    })
+  })
+  .then(releases => releases.join('\n'))
 }
 
 const Project = Mongoose.model('project', ProjectSchema)
