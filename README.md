@@ -86,45 +86,20 @@ hesitate to [ask for help](https://github.com/elementary/houston/issues/new).
 
   ```js
   // https://github.com/settings/developers
-  export let github = {
+  export const github = {
     client: '1e9ec151a7728abaa304',
     secret: '9ccde02a1633b27232ee07662b7a688c43018b1f',
 
     // Post data to GitHub?
-    post: true
+    post: false,
+
+    // Enable GitHub hooks?
+    hook: false
   }
   ```
 
 
-#### Vagrant
-
-We use [Vagrant](https://www.vagrantup.com/) to simplify management of our local
-development environments. This ensures you have the correct versions of all
-dependencies, and makes it easier to track down bugs. If you would like to
-develop without using Vagrant you can skip this step and continue to the
-[barebones](#barebones) instructions.
-
-1. Setting up Vagrant is super simple. Just download and install
-  [Vagrant](https://www.vagrantup.com/downloads.html) and
-  [VirtualBox](https://www.virtualbox.org/wiki/Downloads). If you're running
-  elementary OS or Ubuntu, you can run these commands in terminal:
-
-  `sudo apt-get install vagrant virtualbox`
-
-2. Run `vagrant up` from the root of the directory where you cloned this
-  repository.
-
-    This will spin up an Ubuntu virtual machine as per our Vagrant file and
-    [rsync](https://en.wikipedia.org/wiki/Rsync) the contents of the repository
-    directory into the VM. If you'd like to connect to the VM and poke around,
-    you can do so with `vagrant ssh`. The synced directory lives in `~/houston`,
-    and logs in `/var/log/houston.log`.
-
-
-#### Barebones
-
-Although we prefer using Vagrant for developing, if you wish to avoid it,
-here's what you will need to do.
+### Running
 
 1. Install MongoDB
 
@@ -137,11 +112,11 @@ here's what you will need to do.
     Houston requires node version `4.2.6` or above.
 
 2. run `npm install` to fetch needed dependencies.
-3. Start the server with `npm start`
+3. Start the server with `npm run master` and start the slave with `npm run slave`.
 
 
 #### Accessing
 
-In either case, open up a browser and visit http://localhost:3000, and you
-should see the Houston website. Congradulations! Please take this time to read
+Open up a browser and visit http://localhost:3000, and you should see the
+Houston website. Congratulations! Please take this time to read
 the [contributing](CONTRIBUTING.md) guidelines before submitting code or issues.

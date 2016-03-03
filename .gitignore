@@ -10,7 +10,3 @@ npm-debug.log
 *~
 .DS_Store
 .ftpconfig
-
-# Vagrant files
-.vagrant
-.bundle
