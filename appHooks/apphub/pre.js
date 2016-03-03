@@ -10,7 +10,7 @@ import AppHook from '~/appHooks/appHook'
 class AppHub extends AppHook {
   constructor (data) {
     super(data, {
-      name: 'changelog',
+      name: 'apphub',
       post: true
     })
   }
@@ -18,11 +18,16 @@ class AppHub extends AppHook {
   async test () {
     const apphub = await this.file('.apphub')
 
-    if (apphub == null) return
+    if (apphub == null) {
+      this.error('exist')
+      return
+    }
 
     let data = {}
     try {
-      data = JSON.parse((new Buffer(apphub, 'base64')).toString())
+      const buffer = new Buffer(apphub, 'base64').toString()
+      if (!/\S/.test(buffer)) return
+      data = JSON.parse(buffer)
     } catch (error) {
       this.meta({ dump: error })
       this.error('parse')
@@ -35,7 +40,7 @@ class AppHub extends AppHook {
       this.update({application: {package: {price: data.priceUSD}}})
     }
 
-    if (typeof data.issueLabel !== 'undefined' && typeof data.issueLabel !== 'number') {
+    if (typeof data.issueLabel !== 'undefined' && typeof data.issueLabel !== 'string') {
       this.warn('label')
     } else if (data.issueLabel != null) {
       this.update({application: {'github.label': data.issueLabel}})
