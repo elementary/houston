@@ -33,7 +33,7 @@ route.post('/', async ctx => {
   }
 
   const jenkins = ctx.request.body.build
-  const build = await Build.findById(jenkins.parameters.BUILD)
+  const build = await Build.findById(jenkins.parameters.IDENTIFIER)
 
   if (build == null) {
     return ctx.throw('No Build found', 404)
