@@ -41,13 +41,15 @@ route.post('/', async ctx => {
 
   let status = 'QUEUE'
   if (jenkins.phase === 'STARTED') status = 'BUILD'
-  if (jenkins.phase === 'FAILED') status = 'FAIL'
-  if (jenkins.phase === 'FINALIZED') status = 'FINISH'
+  if (jenkins.phase === 'FINALIZED') status = 'FAIL'
+  if (jenkins.phase === 'FINALIZED' && jenkins.status === 'SUCCESS') status = 'FINISH'
 
   return build.update({ status })
   .then(() => {
     // TODO: submit project issue with build log
-    if (status === 'FAIL') return build.getLog()
+    if (status === 'FAIL') build.getLog()
+
+    return
   })
   .then(() => {
     ctx.status = 200
