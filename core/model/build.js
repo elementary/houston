@@ -61,6 +61,10 @@ BuildSchema.methods.doBuild = async function () {
   const cycle = await this.getCycle()
   const project = await this.getProject()
 
+  const changelog = await project.generateChangelog(this.dist, this.arch)
+  Log.silly(`Generated changelog for ${project.github.fullName}`)
+  Log.silly('\n' + changelog)
+
   if (Config.jenkins) {
     return jenkins.job.build({
       name: Config.jenkins.job,
@@ -70,7 +74,7 @@ BuildSchema.methods.doBuild = async function () {
         REPO: await cycle.getRepo(),
         DIST: this.dist,
         ARCH: this.arch,
-        CHANGELOG: await project.generateChangelog(this.dist, this.arch),
+        CHANGELOG: changelog,
         REFERENCE: await cycle.getTag(),
         BUILD: this._id
       }

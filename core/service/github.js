@@ -8,6 +8,8 @@
  * @exports {Function} SendIssue
  */
 
+import Semver from 'semver'
+
 import { Config, Request, Log } from '~/app'
 
 export function GetReleases (owner, name, token) {
@@ -15,6 +17,7 @@ export function GetReleases (owner, name, token) {
   .get(`https://api.github.com/repos/${owner}/${name}/releases`)
   .auth(token)
   .then(res => res.body)
+  .filter(release => Semver.valid(release.tag_name))
   .map(release => {
     return {
       github: {

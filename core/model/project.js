@@ -11,6 +11,7 @@
 import Promise from 'bluebird'
 import Mongoose from 'mongoose'
 import Nunjucks from 'nunjucks'
+import Semver from 'semver'
 
 // TODO: abstract services out of mondels
 import { SendLabel, SendIssue } from '~/core/service/github'
@@ -137,8 +138,9 @@ ProjectSchema.methods.postIssue = function (issue) {
 ProjectSchema.methods.generateChangelog = function (dist, arch) {
   return this.model('release')
   .find({_id: {$in: this.releases}})
-  .sort({'github.date': -1})
   .then(releases => {
+    releases.sort((a, b) => Semver.rcompare(a.version, b.version))
+
     return releases.map(release => {
       return Nunjucks.render(`views/changelog.nun`, {
         dist,
