@@ -76,7 +76,7 @@ BuildSchema.methods.doBuild = async function () {
         ARCH: this.arch,
         CHANGELOG: changelog,
         REFERENCE: await cycle.getTag(),
-        IDENTIFIER: this._id
+        IDENTIFIER: this._id.toString()
       }
     })
     .then(build => this.update({ build }))
