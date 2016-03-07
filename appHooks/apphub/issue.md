@@ -1,11 +1,11 @@
 {% extends issue %}
 
 {% block title %}
-{% if errors.length is 1 %}
+{% if errors.length == 1 %}
 `.apphub` has an issue
 {% elif errors.length > 1 %}
 `.apphub` has issues
-{% elif warnings.length > 0 %}
+{% else %}
 `.apphub` has some concerns
 {% endif %}
 {% endblock %}
@@ -13,7 +13,7 @@
 {% block issue %}
 {% if errors.length > 0 %}
 # Invalid `.apphub` file
-{% else if warnings.length > 0 %}
+{% else %}
 # Questionable `.apphub` file
 {% endif %}
 
@@ -28,6 +28,8 @@ Here are some problems we ran into while testing your `.apphub` file.
 - [ ] You don't have an `.apphub` file. Frankly this is really weird. You might want to check to see if someone removed it in a commit.
 {% elif error == 'parse' %}
 - [ ] We were unable to parse your `.apphub` file.
+{% else %}
+- [ ] {{ error }}
 {% endif %}
 {% endfor %}
 
@@ -40,6 +42,8 @@ While not show stopping, here are some questionable parts of your `.apphub` file
 - [ ] We were unable to identify your price. Please make sure it is a whole number.
 {% elif warning == 'label' %}
 - [ ] We were unable to identify your label. Please make sure it is a string.
+{% else %}
+- [ ] {{ warning }}
 {% endif %}
 {% endfor %}
 
