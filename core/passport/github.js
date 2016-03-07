@@ -14,36 +14,45 @@ import { Config, Log, Request } from '~/app'
 import { User } from '~/core/model/user'
 
 /**
- * Updates user with rights given by GitHub
+ * getMembership
+ * Returns a bool indicitive of membership in GitHub team or organization
  *
- * @param {Object} user - user database object
- * @return {Object} updated user object
+ * @param {String} member - organization name or team number
+ * @param {Object} user - user's db object to test
+ * @return {Boolean} - Indication of active membership to organization or team
  */
-const getRights = async function (user) {
-  const promiseMember = function (member, username) {
-    let request = ''
-    if (typeof member === 'number') {
-      request = `https://api.github.com/teams/${member}/memberships/${username}`
-    } else {
-      request = `https://api.github.com/orgs/${member}/members/${username}`
-    }
-
-    return Request
-    .get(request)
-    .auth(user.github.access)
-    .then(data => {
-      if (data.body != null) return (data.body.state === 'active')
-      if (data.statusType === 2) return true
-      return false
-    }, () => false)
+const getMembership = function (member, user) {
+  let request = ''
+  if (typeof member === 'number') {
+    request = `https://api.github.com/teams/${member}/memberships/${user.username}`
+  } else {
+    request = `https://api.github.com/orgs/${member}/members/${user.username}`
   }
 
+  return Request
+  .get(request)
+  .auth(user.github.access)
+  .then(data => {
+    if (data.body != null) return (data.body.state === 'active')
+    if (data.statusType === 2) return true
+    return false
+  }, () => false)
+}
+
+/**
+ * getRights
+ * Updates user with latest GitHub rights
+ *
+ * @param {Object} user - user database object
+ * @return {Object} - updated user object
+ */
+const getRights = async function (user) {
   if (Config.rights) {
     let right = 'USER'
 
-    const beta = await promiseMember(Config.rights.beta, user.username)
-    const review = await promiseMember(Config.rights.review, user.username)
-    const admin = await promiseMember(Config.rights.admin, user.username)
+    const beta = await getMembership(Config.rights.beta, user)
+    const review = await getMembership(Config.rights.review, user)
+    const admin = await getMembership(Config.rights.admin, user)
 
     if (admin) {
       right = 'ADMIN'
