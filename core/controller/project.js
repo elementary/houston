@@ -14,7 +14,6 @@ import { Cycle } from '~/core/model/cycle'
 import { IsRole } from '~/core/policy/isRole'
 import { GetReleases } from '~/core/service/github'
 
-// TODO: GitHub hook integration
 let route = new Router({
   prefix: '/project/:owner/:name'
 })
