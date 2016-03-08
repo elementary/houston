@@ -6,6 +6,8 @@
 require('babel-register')
 require('babel-polyfill')
 
+var Path = require('path')
+
 var currentIndex = process.argv.indexOf(__filename)
 
 if (currentIndex === -1) {
@@ -21,7 +23,7 @@ if (script == null) {
 }
 
 if (script[0] !== '/') {
-  script = __dirname + '/' + script
+  script = Path.join(__dirname, '/', script)
 }
 
 require(script)

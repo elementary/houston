@@ -61,7 +61,6 @@ export const aptly = {
 export const database = 'mongodb://localhost/houston-dev'
 
 export const server = {
-  port: 3000,
   secret: 'hiGvpfbJhSNlC15OXiCxXWcEUYVeKBqb',
 
   // Full route including port and protocol, without trailing slash

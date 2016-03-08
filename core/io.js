@@ -8,19 +8,15 @@ import Socket from 'socket.io'
 
 import { Helpers, Log } from '~/app'
 
-let io = new Socket()
-
-const InitIo = Server => {
-  io.listen(Server)
-}
+let Io = new Socket()
 
 // TODO: handshake and security stuff
-io.on('connection', socket => {
+Io.on('connection', socket => {
   socket.emit('connection')
-  Log.info(`Now controlling ${Helpers.ArrayString('slave', io.engine.clientsCount)}.`)
+  Log.info(`Now controlling ${Helpers.ArrayString('slave', Io.engine.clientsCount)}.`)
 
   socket.on('disconnect', socket => {
-    Log.info(`Now controlling ${Helpers.ArrayString('slave', io.engine.clientsCount)}.`)
+    Log.info(`Now controlling ${Helpers.ArrayString('slave', Io.engine.clientsCount)}.`)
   })
 
   socket.on('report', (message, data) => {
@@ -29,4 +25,4 @@ io.on('connection', socket => {
   })
 })
 
-export default { io, InitIo }
+export default { Io }

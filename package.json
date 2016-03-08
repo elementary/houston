@@ -40,17 +40,32 @@
   "devDependencies": {
     "babel-eslint": "^4.1.8",
     "babel-node-debug": "^2.0.0",
-    "standard": "^6.0.5"
+    "mocha": "^2.4.5",
+    "proxyquire": "^1.7.4",
+    "should": "^8.2.2",
+    "snazzy": "^3.0.0",
+    "standard": "^6.0.5",
+    "supertest": "^1.2.0"
   },
   "scripts": {
-    "lint": "standard",
-    "debug": "babel-node-debug entry.js master --no-preload",
-    "start": "node entry.js master",
+    "lint": "standard | snazzy",
+    "test": "mocha tests --compilers js:babel-register --require should --timeout 4000",
+    "debug": "babel-node-debug npm start --no-preload",
+    "start": "npm run master & npm run slave",
     "master": "node entry.js master",
     "slave": "node entry.js slave"
   },
   "standard": {
-    "parser": "babel-eslint"
+    "parser": "babel-eslint",
+    "env": {
+      "node": true,
+      "mocha": true,
+      "es6": true,
+      "jquery": true
+    },
+    "rules": {
+      "arrow-parens": 0
+    }
   },
   "repository": {
     "type": "git",

@@ -33,7 +33,7 @@ export function GetReleases (owner, name, token) {
 
 export function GetProjects (token) {
   return Request
-  .get(`https://api.github.com/user/repos?visibility=public`)
+  .get('https://api.github.com/user/repos?visibility=public')
   .auth(token)
   .then(res => res.body)
   .filter(githubProject => {

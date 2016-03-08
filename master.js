@@ -2,7 +2,8 @@
  * master.js
  * Starts Houston's Web Interface
  *
- * @exports {Object} App
+ * @exports {Object} App - Koa server object
+ * @exports {Object} Server - Http instance of koa server with io listener
  */
 
 import Co from 'co'
@@ -15,9 +16,9 @@ import Session from 'koa-session'
 import Static from 'koa-static-cache'
 import View from 'koa-views'
 
-import { Config, Helpers, Log } from './app'
+import { Config, Db, Helpers, Log } from './app'
 import { Controller, Passport } from './core'
-import { InitIo } from './core/io'
+import { Io } from './core/io'
 
 let App = new Koa()
 
@@ -27,7 +28,7 @@ App.env = Config.env
 
 // Socket installation
 const Server = Http.createServer(App.callback())
-InitIo(Server)
+Io.listen(Server)
 
 // App logging
 App.use(async (ctx, next) => {
@@ -109,4 +110,9 @@ App.on('error', function (error, ctx, next) {
 Server.listen(Config.server.port)
 Log.info(`Houston listening on ${Config.server.port} in ${App.env} configuration`)
 
-export default { App }
+Server.on('close', () => {
+  Db.disconnect()
+  Log.info('And now my watch has ended')
+})
+
+export default { App, Server }

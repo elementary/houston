@@ -33,6 +33,8 @@ try {
 
 app.config = require('./config.js')
 
+app.config.server.port = app.config.server.url.split(':')[2]
+
 if (process.env.NODE_ENV != null) app.config.env = process.env.NODE_ENV
 if (process.env.PORT != null) app.config.server.port = process.env.PORT
 
@@ -93,12 +95,16 @@ export const Log = app.log
 app.db = Mongoose.connect(app.config.database)
 app.db.Promise = Promise
 
-app.db.connection.on('error', function (msg) {
-  throw new Error(msg)
+app.db.connection.on('error', (msg) => {
+  app.log.error(msg)
 })
 
-app.db.connection.once('open', function () {
+app.db.connection.once('open', () => {
   app.log.info('Connected to database')
+})
+
+app.db.connection.once('close', () => {
+  app.log.info('Disconnected to database')
 })
 
 export const Db = app.db
