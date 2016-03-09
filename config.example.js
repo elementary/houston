@@ -10,8 +10,11 @@
 
 // https://github.com/settings/developers
 export const github = {
-  client: '12345679101112131415',
-  secret: '1234567891011121314151617181920212223242',
+  client: '78zx9c4vb8xc4v5647ar',
+  secret: '4ra56dsv489asd4r56b456a489sd7ft89a75s4b8',
+
+  // User access token for submitting issues
+  access: 'ar4sd56v456as4edr564s5dv6a45sr156we48zxw',
 
   // Post data to GitHub?
   post: false,
@@ -61,7 +64,6 @@ export const aptly = {
 export const database = 'mongodb://localhost/houston-dev'
 
 export const server = {
-  port: 3000,
   secret: 'hiGvpfbJhSNlC15OXiCxXWcEUYVeKBqb',
 
   // Full route including port and protocol, without trailing slash
