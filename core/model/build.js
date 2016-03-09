@@ -90,11 +90,11 @@ BuildSchema.methods.doBuild = async function () {
 BuildSchema.methods.getLog = function () {
   if (Config.jenkins) {
     return jenkins.build.log(Config.jenkins.job, this.build)
-    .then(log => this.update({ log }))
+    .then(log => this.model('build').findByIdAndUpdate(this._id, { log }))
   }
 
   return Promise.resolve('Logs disabled in configuration file')
-  .then(log => this.update({ log }))
+  .then(log => this.model('build').findByIdAndUpdate(this._id, { log }))
 }
 
 // Mongoose lifecycle functions

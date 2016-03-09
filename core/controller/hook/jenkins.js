@@ -9,6 +9,7 @@ import Router from 'koa-router'
 
 import { Config, Log } from '~/app'
 import { Build } from '~/core/model/build'
+import { SendIssue } from '~/core/service/github'
 
 let route = new Router({
   prefix: '/hook/jenkins/:key'
@@ -44,16 +45,31 @@ route.post('/', async ctx => {
   if (jenkins.phase === 'FINALIZED') status = 'FAIL'
   if (jenkins.phase === 'FINALIZED' && jenkins.status === 'SUCCESS') status = 'FINISH'
 
-  return build.update({ status })
-  .then(() => {
-    // TODO: submit project issue with build log
-    if (status === 'FAIL') build.getLog()
+  return Build.findByIdAndUpdate(build._id, { status })
+  .then((build) => {
+    if (status === 'FAIL') return build.getLog()
+    return build
+  })
+  .then(async (build) => {
+    if (build.status === 'FAIL') {
+      const project = await build.getProject()
 
-    return
+      return SendIssue({
+        title: `Building failed on ${build.dist} ${build.arch}`,
+        body: '```\n' + build.log + '\n```'
+      }, project)
+    }
+
+    return build
   })
   .then(() => {
     ctx.status = 200
+    ctx.body = 'OK'
     return
+  })
+  .catch((err) => {
+    Log.error(err)
+    return ctx.throw(500, err)
   })
 })
 
