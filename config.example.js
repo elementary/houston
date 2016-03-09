@@ -65,6 +65,7 @@ export const server = {
 
   // Full route including port and protocol, without trailing slash
   url: 'http://localhost:3000'
+  // port: 3000
 }
 
 export const socket = {

@@ -81,6 +81,7 @@ export const Strategy = new Github.Strategy({
 }, (access, refresh, profile, done) => {
   let mappedUser = {
     username: profile.username,
+    'github.id': profile.id,
     'github.access': access,
     'github.refresh': refresh,
     'date.visited': new Date()
@@ -90,7 +91,7 @@ export const Strategy = new Github.Strategy({
   if (profile.photos != null) mappedUser.avatar = profile.photos[0].value
 
   User.findOneAndUpdate({
-    username: profile.username
+    username: mappedUser.username
   }, mappedUser, {
     upsert: true,
     new: true,
@@ -98,6 +99,7 @@ export const Strategy = new Github.Strategy({
   })
   .then(user => getRights(user))
   .then(user => done(null, user))
+  .catch(err => done(err))
 })
 
 // Koa server routes used for authentication

@@ -33,7 +33,14 @@ try {
 
 app.config = require('./config.js')
 
-app.config.server.port = app.config.server.url.split(':')[2]
+if (typeof app.config.server.port === 'undefined') {
+  const split = app.config.server.url.split(':')
+  if (typeof split[2] !== 'undefined') {
+    app.config.server.port = split[2]
+  } else {
+    app.config.server.port = 80
+  }
+}
 
 if (process.env.NODE_ENV != null) app.config.env = process.env.NODE_ENV
 if (process.env.PORT != null) app.config.server.port = process.env.PORT

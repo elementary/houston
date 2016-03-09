@@ -6,7 +6,7 @@
 require('babel-register')
 require('babel-polyfill')
 
-describe('project', () => {
+describe('project', function () {
   it('lints', require('mocha-standard'))
 })
 
