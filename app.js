@@ -90,18 +90,18 @@ app.log.exitOnError = (app.config.env === 'development')
 export const Log = app.log
 
 // Start mongoose database connection
-app.db = Mongoose.connect(app.config.database)
-app.db.Promise = Promise
+Mongoose.connect(app.config.database)
+Mongoose.Promise = Promise
 
-app.db.connection.on('error', function (msg) {
+Mongoose.connection.on('error', function (msg) {
   throw new Error(msg)
 })
 
-app.db.connection.once('open', function () {
+Mongoose.connection.once('open', function () {
   app.log.info('Connected to database')
 })
 
-export const Db = app.db
+export const Db = Mongoose
 
 // Export an amazing request library
 export const Request = Super

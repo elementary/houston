@@ -7,9 +7,10 @@
  * }
  */
 
-import Mongoose from 'mongoose'
 import Promise from 'bluebird'
 import Semver from 'semver'
+
+import { Db as Mongoose } from '~/app'
 
 const ReleaseSchema = new Mongoose.Schema({
   github: {
