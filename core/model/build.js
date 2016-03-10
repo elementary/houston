@@ -7,10 +7,9 @@
  * }
  */
 
-import Mongoose from 'mongoose'
 import Promise from 'bluebird'
 
-import { Config, Log } from '~/app'
+import { Config, Db as Mongoose, Log } from '~/app'
 
 // TODO: move jenkins to superagent
 const jenkins = (Config.jenkins)
