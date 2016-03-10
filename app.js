@@ -1,6 +1,6 @@
 /**
  * app.js
- * Consolidates all of Houston to a single file
+ * Consolidates all of Houston's needs into a single file
  *
  * @exports {Object} Helpers
  * @exports {Object} Config
@@ -32,6 +32,29 @@ try {
 }
 
 app.config = require('./config.js')
+
+let exampleExists = true
+try {
+  require('./config.example.js')
+} catch (err) {
+  exampleExists = false
+}
+
+if (exampleExists) {
+  const example = require('./config.example.js')
+
+  for (let k in app.config) {
+    if (!app.config[k]) continue
+    if (!example[k]) continue
+    if (Object.keys(app.config[k]).length < Object.keys(example[k]).length) {
+      console.log(`You are missing ${k} configuration settings`)
+      console.log("Please check 'config.example.js' for new settings")
+      throw new Error('Missing configuration')
+    }
+  }
+}
+
+app.config.server.port = app.config.server.url.split(':')[2]
 
 if (process.env.NODE_ENV != null) app.config.env = process.env.NODE_ENV
 if (process.env.PORT != null) app.config.server.port = process.env.PORT
@@ -93,12 +116,16 @@ export const Log = app.log
 Mongoose.connect(app.config.database)
 Mongoose.Promise = Promise
 
-Mongoose.connection.on('error', function (msg) {
-  throw new Error(msg)
+Mongoose.connection.on('error', (msg) => {
+  app.log.error(msg)
 })
 
-Mongoose.connection.once('open', function () {
+Mongoose.connection.once('open', () => {
   app.log.info('Connected to database')
+})
+
+Mongoose.connection.once('close', () => {
+  app.log.info('Disconnected to database')
 })
 
 export const Db = Mongoose
