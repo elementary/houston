@@ -28,7 +28,7 @@ route.param('key', async (key, ctx, next) => {
 })
 
 route.post('/', async ctx => {
-  if (ctx.request.body === {}) {
+  if (Object.keys(ctx.request.body).length < 1) {
     Log.debug('An empty body was sent to Jenkins hook')
     return ctx.throw('Empty body', 400)
   }

@@ -9,9 +9,10 @@
  */
 
 import Promise from 'bluebird'
-import Mongoose from 'mongoose'
 import Nunjucks from 'nunjucks'
 import Semver from 'semver'
+
+import { Db as Mongoose } from '~/app'
 
 // TODO: abstract services out of mondels
 import { SendLabel, SendIssue } from '~/core/service/github'
@@ -73,7 +74,7 @@ const ProjectSchema = new Mongoose.Schema({
   },
   architectures: {                // Architect for Builds
     type: [String],
-    default: ['amd64', 'armhf']
+    default: ['amd64']
   },
 
   cycles: [{

@@ -2,11 +2,11 @@
 
 {% block title %}
 {% if errors.length == 1 %}
-`.apphub` has an issue
+.apphub has an issue
 {% elif errors.length > 1 %}
-`.apphub` has issues
+.apphub has issues
 {% else %}
-`.apphub` has some concerns
+.apphub has some concerns
 {% endif %}
 {% endblock %}
 

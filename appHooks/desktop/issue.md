@@ -1,7 +1,7 @@
 {% extends issue %}
 
 {% block title %}
-`{{ data.project.name }}.desktop` has a problem
+{{ data.project.name }}.desktop has a problem
 {% endblock %}
 
 {% block issue %}

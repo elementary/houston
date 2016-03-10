@@ -17,10 +17,10 @@ const InitIo = Server => {
 // TODO: handshake and security stuff
 io.on('connection', socket => {
   socket.emit('connection')
-  Log.info(`Now controlling ${Helpers.ArrayString('slave', io.engine.clientsCount)}.`)
+  Log.info(`Now controlling ${Helpers.ArrayString('slave', io.engine.clientsCount)}`)
 
   socket.on('disconnect', socket => {
-    Log.info(`Now controlling ${Helpers.ArrayString('slave', io.engine.clientsCount)}.`)
+    Log.info(`Now controlling ${Helpers.ArrayString('slave', io.engine.clientsCount)}`)
   })
 
   socket.on('report', (message, data) => {
