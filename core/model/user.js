@@ -8,7 +8,7 @@
  * }
  */
 
-import Mongoose from 'mongoose'
+import { Db as Mongoose } from '~/app'
 
 const UserSchema = new Mongoose.Schema({
   username: String,

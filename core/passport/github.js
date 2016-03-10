@@ -37,6 +37,7 @@ const getMembership = function (member, user) {
     if (data.statusType === 2) return true
     return false
   }, () => false)
+  .catch(false)
 }
 
 /**
@@ -64,13 +65,13 @@ const getRights = async function (user) {
 
     Log.verbose(`Giving new right of ${right} to ${user.username}`)
 
-    return User.findByIdAndUpdate(user._id, { right }, { new: true }).exec()
+    return User.findByIdAndUpdate(user._id, { right }, { new: true })
   }
 
   Log.warn(`Rights are currently disabled. Giving unrestricted access to ${user.username}`)
   Log.warn('Clear database before setting up a production environment!')
 
-  return User.findByIdAndUpdate(user._id, { right: 'ADMIN' }, { new: true }).exec()
+  return User.findByIdAndUpdate(user._id, { right: 'ADMIN' }, { new: true })
 }
 
 // Passport strategy to cover all aspects of GitHub user management
@@ -96,8 +97,9 @@ export const Strategy = new Github.Strategy({
     new: true,
     setDefaultsOnInsert: true
   })
-  .then(user => getRights(user))
-  .then(user => done(null, user))
+  .then((user) => getRights(user))
+  .then((user) => done(null, user))
+  .catch((error) => done(error))
 })
 
 // Koa server routes used for authentication
@@ -105,7 +107,9 @@ let route = new Router({
   prefix: '/github'
 })
 
-route.get('/', Passport.authenticate('github'))
+route.get('/', Passport.authenticate('github', {
+  scope: 'repo read:org'
+}))
 
 route.get('/callback', Passport.authenticate('github'), (ctx, next) => {
   let path = ctx.session.originalUrl || '/dashboard'
