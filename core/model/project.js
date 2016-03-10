@@ -74,7 +74,7 @@ const ProjectSchema = new Mongoose.Schema({
   },
   architectures: {                // Architect for Builds
     type: [String],
-    default: ['amd64', 'armhf']
+    default: ['amd64']
   },
 
   cycles: [{
