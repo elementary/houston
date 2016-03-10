@@ -99,22 +99,22 @@ app.log.exitOnError = (app.config.env === 'development')
 export const Log = app.log
 
 // Start mongoose database connection
-app.db = Mongoose.connect(app.config.database)
-app.db.Promise = Promise
+Mongoose.connect(app.config.database)
+Mongoose.Promise = Promise
 
-app.db.connection.on('error', (msg) => {
+Mongoose.connection.on('error', (msg) => {
   app.log.error(msg)
 })
 
-app.db.connection.once('open', () => {
+Mongoose.connection.once('open', () => {
   app.log.info('Connected to database')
 })
 
-app.db.connection.once('close', () => {
+Mongoose.connection.once('close', () => {
   app.log.info('Disconnected to database')
 })
 
-export const Db = app.db
+export const Db = Mongoose
 
 // Export an amazing request library
 export const Request = Super

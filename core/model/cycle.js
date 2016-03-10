@@ -8,9 +8,9 @@
  * }
  */
 
-import Mongoose from 'mongoose'
 import Promise from 'bluebird'
 
+import { Db as Mongoose } from '~/app'
 import { Io } from '~/core/io'
 import { Build } from './build'
 import { PublishReviewPackage } from '~/core/service/aptly'
