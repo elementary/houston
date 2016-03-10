@@ -26,12 +26,16 @@ const BuildSchema = new Mongoose.Schema({
     required: true
   },
 
-  build: Number,
   log: String,
   status: {
     type: String,
     default: 'QUEUE',
     enum: ['QUEUE', 'BUILD', 'FAIL', 'FINISH']
+  },
+
+  jenkins: {
+    build: Number,
+    queue: Number
   },
 
   started: {
@@ -78,7 +82,7 @@ BuildSchema.methods.doBuild = async function () {
         IDENTIFIER: this._id.toString()
       }
     })
-    .then(build => this.update({ build }))
+    .then(queue => this.update({ 'jenkins.queue': queue }))
     .catch(err => Log.error(err))
   } else {
     Log.info('Jenkins has been disabled in configuration file. No build is running')
@@ -88,7 +92,7 @@ BuildSchema.methods.doBuild = async function () {
 
 BuildSchema.methods.getLog = function () {
   if (Config.jenkins) {
-    return jenkins.build.log(Config.jenkins.job, this.build)
+    return jenkins.build.log(Config.jenkins.job, this.jenkins.build)
     .then(log => this.model('build').findByIdAndUpdate(this._id, { log }))
   }
 
