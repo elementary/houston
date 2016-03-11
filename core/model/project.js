@@ -40,7 +40,7 @@ const ProjectSchema = new Mongoose.Schema({
     required: true,
     validate: {
       validator: s => /.*\.git/.test(s),
-      message: `{VALUE} is not a valid git repository`
+      message: '{VALUE} is not a valid git repository'
     }
   },
   tag: {
@@ -143,7 +143,7 @@ ProjectSchema.methods.generateChangelog = function (dist, arch) {
     releases.sort((a, b) => Semver.rcompare(a.version, b.version))
 
     return releases.map(release => {
-      return Nunjucks.render(`views/changelog.nun`, {
+      return Nunjucks.render('views/changelog.nun', {
         dist,
         arch,
         release,

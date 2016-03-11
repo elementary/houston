@@ -11,7 +11,7 @@
 import Promise from 'bluebird'
 
 import { Db as Mongoose } from '~/app'
-import { io } from '~/core/io'
+import { Io } from '~/core/io'
 import { Build } from './build'
 import { PublishReviewPackage } from '~/core/service/aptly'
 
@@ -20,7 +20,7 @@ const CycleSchema = new Mongoose.Schema({
     type: String,
     validate: {
       validator: s => /.*\.git/.test(s),
-      message: `{VALUE} is not a valid git repository`
+      message: '{VALUE} is not a valid git repository'
     }
   },
   _tag: {
@@ -132,7 +132,7 @@ CycleSchema.methods.spawn = async function () {
     this.getTag()
   ])
   .then(([project, release, repo, tag]) => {
-    io.emit('cycle', {
+    Io.emit('cycle', {
       repo,
       tag,
       project,
@@ -173,7 +173,7 @@ CycleSchema.methods.release = async function () {
 
 // io listeners
 // TODO: would this make more logic being in core/controller/hook/io?
-io.on('connection', socket => {
+Io.on('connection', socket => {
   socket.on('received', data => {
     Cycle.findById(data).update({ _status: 'PRE' })
   })

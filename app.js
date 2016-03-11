@@ -54,7 +54,14 @@ if (exampleExists) {
   }
 }
 
-app.config.server.port = app.config.server.url.split(':')[2]
+if (typeof app.config.server.port === 'undefined') {
+  const split = app.config.server.url.split(':')
+  if (typeof split[2] !== 'undefined') {
+    app.config.server.port = split[2]
+  } else {
+    app.config.server.port = 80
+  }
+}
 
 if (process.env.NODE_ENV != null) app.config.env = process.env.NODE_ENV
 if (process.env.PORT != null) app.config.server.port = process.env.PORT
@@ -72,8 +79,6 @@ app.config.log.transports = []
 if (app.config.log.console) {
   app.config.log.transports.push(
     new Winston.transports.Console({
-      humanReadableUnhandledException: true,
-      handleExceptions: true,
       prettyPrint: true,
       colorize: true,
       level: app.config.log.level
@@ -104,10 +109,6 @@ app.log = new Winston.Logger({
   transports: app.config.log.transports
 })
 
-app.log.on('error', error => {
-  Log.error(error)
-})
-
 app.log.exitOnError = (app.config.env === 'development')
 
 export const Log = app.log
@@ -116,17 +117,11 @@ export const Log = app.log
 Mongoose.connect(app.config.database)
 Mongoose.Promise = Promise
 
-Mongoose.connection.on('error', (msg) => {
-  app.log.error(msg)
-})
+Mongoose.connection.on('error', (msg) => app.log.error(msg))
 
-Mongoose.connection.once('open', () => {
-  app.log.info('Connected to database')
-})
+Mongoose.connection.once('open', () => app.log.info('Connected to database'))
 
-Mongoose.connection.once('close', () => {
-  app.log.info('Disconnected to database')
-})
+Mongoose.connection.once('close', () => app.log.info('Disconnected to database'))
 
 export const Db = Mongoose
 

@@ -170,7 +170,7 @@ export async function PublishStable (cycle) {
     })
     .catch(err => {
       Log.error(err)
-      return Promise.reject(`Error occured while trying to publish new snapshot`)
+      return Promise.reject('Error occured while trying to publish new snapshot')
     })
   })
   .catch(err => {
