@@ -44,10 +44,26 @@ App.use(async (ctx, next) => {
     await next()
   } catch (error) {
     ctx.app.emit('error', error, ctx)
-    if (error.expose) {
-      await ctx.render('error', { message: error.message })
+
+    const htmlRespond = (ctx.accepts(['json', 'html']) === 'html')
+    ctx.status = error.status
+
+    if (error.expose && htmlRespond) {
+      return ctx.render('error', { message: error.message })
+    } else if (error.expose) {
+      return ctx.body = { errors: [{
+        status: error.status,
+        title: error.title,
+        detail: error.message
+      }]}
+    } else if (htmlRespond) {
+      return ctx.render('error', { message: 'Houston, we have a problem' })
     } else {
-      await ctx.render('error', { message: 'Houston, we have a problem' })
+      return ctx.body = { errors: [{
+        status: error.status,
+        title: 'Internal Server Error',
+        detail: 'An internal server error occured while proccessing your request'
+      }]}
     }
   }
 })
@@ -95,7 +111,16 @@ Log.info(`Loaded ${Helpers.ArrayString('Controller', routes)}`)
 
 // 404 page
 App.use(ctx => {
-  return ctx.render('error', { message: 'It seems you stuck the landing. World not found.' })
+  if (ctx.accepts(['json', 'html']) === 'html') {
+    return ctx.render('error', { message: 'It seems you stuck the landing. World not found.' })
+  } else {
+    ctx.status = 404
+    return ctx.body = { errors: [{
+      status: 404,
+      title: 'Page Not Found',
+      detail: 'The page you are looking found can not be found'
+    }]}
+  }
 })
 
 // Error logging

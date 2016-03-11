@@ -165,3 +165,14 @@ sudo aptly publish snapshot -architectures=amd64,armhf -distribution=xenial xeni
 NOTE: Houston currently does not manage anything with the review repository.
 It does not move packages into it, nor does it publish it. This task has to be
 automated with your build system (Jenkins) or manually after build.
+
+
+## Responses
+
+Most of the time you will want to respond with a simple view by using
+`ctx.view('page', { data })`, but on the off chance that you respond with JSON,
+it must conform to the [JSON API spec](http://jsonapi.org/).
+
+All `ctx.throw` returns will automatically take content type into account,
+returning JSON or HTML based on the client. All other returns **DO NOT** take
+this into account.

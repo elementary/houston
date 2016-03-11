@@ -13,10 +13,11 @@ let Io = new Socket()
 // TODO: handshake and security stuff
 Io.on('connection', socket => {
   socket.emit('connection')
-  Log.info(`Now controlling ${Helpers.ArrayString('slave', Io.engine.clientsCount)}.`)
+
+  Log.info(`Now controlling ${Helpers.ArrayString('slave', Io.engine.clientsCount)}`)
 
   socket.on('disconnect', socket => {
-    Log.info(`Now controlling ${Helpers.ArrayString('slave', Io.engine.clientsCount)}.`)
+    Log.info(`Now controlling ${Helpers.ArrayString('slave', Io.engine.clientsCount)}`)
   })
 
   socket.on('report', (message, data) => {
