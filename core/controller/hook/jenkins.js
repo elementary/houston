@@ -47,9 +47,9 @@ route.post('/', async ctx => {
   if (jenkins.phase === 'FINALIZED') status = 'FAIL'
   if (jenkins.phase === 'FINALIZED' && jenkins.status === 'SUCCESS') status = 'FINISH'
 
-  return Build.findByIdAndUpdate(build._id, { status })
+  return Build.findByIdAndUpdate(build._id, { 'status': status }, { new: true })
   .then((build) => {
-    if (status === 'FAIL') return build.getLog()
+    if (build.status === 'FAIL') return build.getLog()
     return build
   })
   .then(async (build) => {
