@@ -10,6 +10,7 @@ import Router from 'koa-router'
 import { Config, Log } from '~/app'
 import { Build } from '~/core/model/build'
 import { SendIssue } from '~/core/service/github'
+import { Review } from '~/core/service/aptly'
 
 let route = new Router({
   prefix: '/hook/jenkins/:key'
@@ -53,7 +54,16 @@ route.post('/', async ctx => {
     return build
   })
   .then(async (build) => {
-    if (build.status === 'FAIL') {
+    if (build.status === 'FINISH') {
+      const project = await build.getProject()
+      const cycle = await build.getCycle()
+      const version = await cycle.getVersion()
+
+      const keys = await Review(project.name, version, project.distributions)
+
+      return cycle.update({$pushAll: { packages: keys }})
+      .then(() => build)
+    } else if (build.status === 'FAIL') {
       const project = await build.getProject()
 
       return SendIssue({
@@ -64,7 +74,7 @@ route.post('/', async ctx => {
 
     return build
   })
-  .then(() => {
+  .then((build) => {
     ctx.status = 200
     ctx.body = 'OK'
     return

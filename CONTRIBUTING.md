@@ -129,43 +129,28 @@ the [Aptly download page](http://www.aptly.info/download/) for details on
 installing and running.
 
 Houston's repository schema, while flexible, does make assumptions on your
-setup. First, we expect you to prefix all your repositories with distributions.
-For example, if you are having Houston build for Debian Sid, your review
-repository is called 'review', and your stable repository is called 'stable',
-then your full repository name should be 'sid-review' and 'sid-stable'. By
-Houston default, you should have four repositories:
-
-* 'sid-review'
-* 'sid-stable'
-* 'xenial-review'
-* 'xenial-stable'
+setup. First, you will need two repositories. By default they should be named
+'review' and 'houston'.
 
 On release of a new project, Houston will automatically update your published
 repository with a newly created snapshot. This means that your stable repo will
 never be directly published, but instead, an easily manageable snapshot will.
-As such, you will need a blank snapshot published for each distribution you
-you plan on releasing to. Firstly you will need to
-[create a blank snapshot](http://www.aptly.info/doc/aptly/snapshot/create/)
-for the distribution, and then
-[publish it](http://www.aptly.info/doc/aptly/publish/snapshot/).
+As such, you will need a
+[blank snapshot](http://www.aptly.info/doc/aptly/snapshot/create/) for both
+repositories. After that you will want to
+[publish](http://www.aptly.info/doc/aptly/publish/snapshot/) the blank snapshots
+as a placeholder.
 
 tl;dr: Run these commands on a local instance of Aptly after you get it setup
 and you _should_ have be all setup for Houston.
 ```bash
-sudo aptly repo create sid-review
-sudo aptly repo create sid-stable
-sudo aptly repo create xenial-review
-sudo aptly repo create xenial-stable
-sudo aptly snapshot create sid-stable empty
-sudo aptly snapshot create xenial-stable empty
-sudo aptly publish snapshot -architectures=amd64,armhf -distribution=sid sid-stable
-sudo aptly publish snapshot -architectures=amd64,armhf -distribution=xenial xenial-stable
+sudo aptly repo create review
+sudo aptly repo create houston
+sudo aptly snapshot create review empty
+sudo aptly snapshot create houston empty
+sudo aptly publish snapshot -architectures=amd64,armhf -distribution=xenial review
+sudo aptly publish snapshot -architectures=amd64,armhf -distribution=xenial houston
 ```
-
-NOTE: Houston currently does not manage anything with the review repository.
-It does not move packages into it, nor does it publish it. This task has to be
-automated with your build system (Jenkins) or manually after build.
-
 
 ## Responses
 
