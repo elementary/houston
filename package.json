@@ -51,8 +51,8 @@
   },
   "scripts": {
     "lint": "standard | snazzy",
-    "test": "mocha tests --compilers js:babel-register --timeout 8000",
-    "debug": "babel-node-debug npm start --no-preload",
+    "test": "NODE_ENV=test mocha tests --compilers js:babel-register --timeout 8000",
+    "debug": "NODE_ENV=development babel-node-debug npm start --no-preload",
     "start": "npm run master & npm run slave",
     "master": "node entry.js master",
     "slave": "node entry.js slave"
