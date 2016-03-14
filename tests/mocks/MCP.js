@@ -11,6 +11,7 @@ export const env = 'test'
 export const github = {
   client: '123456789yoloswagomg',
   secret: 'butwait%20letmetakeaselfeshutthefrackup!',
+  access: 'secretrobotmanthevegivenyouauuid',
   post: false,
   hook: false
 }

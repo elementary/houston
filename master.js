@@ -51,19 +51,21 @@ App.use(async (ctx, next) => {
     if (error.expose && htmlRespond) {
       return ctx.render('error', { message: error.message })
     } else if (error.expose) {
-      return ctx.body = { errors: [{
+      ctx.body = { errors: [{
         status: error.status,
         title: error.title,
         detail: error.message
       }]}
+      return
     } else if (htmlRespond) {
       return ctx.render('error', { message: 'Houston, we have a problem' })
     } else {
-      return ctx.body = { errors: [{
+      ctx.body = { errors: [{
         status: error.status,
         title: 'Internal Server Error',
         detail: 'An internal server error occured while proccessing your request'
       }]}
+      return
     }
   }
 })
@@ -115,11 +117,12 @@ App.use(ctx => {
     return ctx.render('error', { message: 'It seems you stuck the landing. World not found.' })
   } else {
     ctx.status = 404
-    return ctx.body = { errors: [{
+    ctx.body = { errors: [{
       status: 404,
       title: 'Page Not Found',
       detail: 'The page you are looking found can not be found'
     }]}
+    return
   }
 })
 
