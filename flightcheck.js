@@ -12,7 +12,7 @@ atc.init('client', Config.server.url)
 atc.on('cycle:start', (data) => {
   Log.debug(`Starting flightcheck on ${data.project.name}`)
 
-  checks(data)
+  checks(data, 'pre')
   .then((pkg) => {
     atc.send('cycle:finished', pkg)
 

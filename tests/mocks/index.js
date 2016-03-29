@@ -3,4 +3,6 @@
  * Handles all mock request data
  */
 
-require('./github')
+import Mock from 'mock-require'
+
+Mock('../../config.js', require('./MCP.js'))

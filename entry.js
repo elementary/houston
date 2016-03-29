@@ -6,9 +6,12 @@
 require('babel-register')
 require('babel-polyfill')
 
+// The code forced me to overwrite native functions. I'm sorry
+global.Promise = require('bluebird')
+
 var Path = require('path')
 
-var currentIndex = process.argv.indexOf(__filename)
+var currentIndex = process.argv.indexOf(Path.basename(__filename))
 
 if (currentIndex === -1) {
   console.log("You probably forgot to run entry with the file ending 'entry.js'")

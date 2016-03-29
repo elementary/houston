@@ -5,23 +5,46 @@
  * @exports {Object} run - run appHooks with given data
  */
 
-import Promise from 'bluebird'
-
 import { Log } from '~/app'
 
-const fs = Promise.promisifyAll(require('fs'))
+let fs = Promise.promisifyAll(require('fs'))
+
+/**
+ * getHooks
+ * A Convenience function for going through file tree and finding hooks
+ *
+ * @param {String} lvl - level of hook 'pre' 'post' 'build' etc
+ * @returns {Array} - Array of required appHook classes
+ */
+function getHooks (lvl) {
+  const level = lvl.toLowerCase()
+  return fs.readdirAsync(__dirname)
+  .filter(path => {
+    return fs.statAsync(`${__dirname}/${path}`)
+    .then(stat => stat.isDirectory())
+  })
+  .filter(dir => {
+    return fs.statAsync(`${__dirname}/${dir}/${level}.js`)
+    .then(stat => stat.isFile())
+    .catch(() => false)
+  })
+  .map(dir => {
+    return require(`${__dirname}/${dir}/${level}.js`)
+  })
+}
 
 /**
  * Runs hook with given package of data and returns compressed information
  *
- * @param {Object} data -{
+ * @param {Object} data - {
  *   {String} repo - git repo 'git@github.com:elementary/houston.git'
  *   {String} tag - git tag for given repo 'master'
  *   {Object} project - database document of a project
  *   {Object} release - database document of a release
  *   {Object} cycle - database document of a cycle
  * }
- * @returns {Object} {
+ * @param {String} test - type of test to be ran ("pre")
+ * @returns {Object} - {
  *   {String} cycle - database id for cycle
  *   {String} project - database id for project
  *   {String} release - database id for release
@@ -31,19 +54,10 @@ const fs = Promise.promisifyAll(require('fs'))
  *   {Array} issues - generated issues for GitHub with title and body
  * }
  */
-export default async function (data) {
-  const tests = await fs.readdirAsync(__dirname)
-  .filter(path => {
-    return fs.statAsync(`${__dirname}/${path}`)
-    .then(stat => stat.isDirectory())
-  })
-  .filter(dir => {
-    return fs.statAsync(`${__dirname}/${dir}/test.js`)
-    .then(stat => stat.isFile())
-    .catch(() => false)
-  })
-  .map(dir => {
-    return require(`${__dirname}/${dir}/test.js`).run()
+export default async function (data, test) {
+  const hooks = await getHooks(test.toLowerCase())
+  const tests = hooks.map(Hook => {
+    return new Hook(data).run()
   })
 
   return Promise.all(tests)

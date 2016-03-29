@@ -5,7 +5,7 @@
  * @exports {Class}
  */
 
-import AppHook from '~/appHooks/appHook'
+import AppHook from '~/flightcheck/appHook'
 
 class AppHub extends AppHook {
   constructor (data) {

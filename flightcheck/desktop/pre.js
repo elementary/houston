@@ -7,7 +7,7 @@
 
 import Ini from 'ini'
 
-import AppHook from '~/appHooks/appHook'
+import AppHook from '~/flightcheck/appHook'
 
 class Desktop extends AppHook {
   constructor (data) {

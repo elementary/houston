@@ -11,7 +11,7 @@ import Chai from 'chai'
 Mock('../../config.js', require('../mocks/MCP.js'))
 
 const config = require('../../config.js')
-const server = require('../../master.js').Server
+const server = require('../../houston.js').Server
 const expect = Chai.expect
 const request = Request(config.server.url)
 

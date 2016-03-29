@@ -5,7 +5,7 @@
  * @exports {Class}
  */
 
-import AppHook from '~/appHooks/appHook'
+import AppHook from '~/flightcheck/appHook'
 
 import { Request } from '~/app'
 
