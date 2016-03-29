@@ -13,12 +13,12 @@ import Koa from 'koa'
 import Parser from 'koa-bodyparser'
 import Path from 'path'
 import Session from 'koa-session'
-import Static from 'koa-static-cache'
+import Static from 'koa-static'
 import View from 'koa-views'
 
 import { Config, Db, Helpers, Log } from './app'
 import { Controller, Passport } from './core'
-import { Io } from './core/io'
+import atc from './lib/atc'
 
 let App = new Koa()
 
@@ -28,7 +28,7 @@ App.env = Config.env
 
 // Socket installation
 const Server = Http.createServer(App.callback())
-Io.listen(Server)
+atc.init('server', Server)
 
 // App logging
 App.use(async (ctx, next) => {
@@ -71,7 +71,7 @@ App.use(async (ctx, next) => {
 })
 
 // Static 'public' folder serving
-App.use(Convert(Static('public')))
+App.use(Static(Path.join(__dirname, '/public')))
 
 // Setup server rendering
 App.use(Convert(View('views', {

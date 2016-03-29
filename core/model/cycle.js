@@ -11,7 +11,7 @@
 import Promise from 'bluebird'
 
 import { Db as Mongoose } from '~/app'
-import { Io } from '~/core/io'
+import atc from '~/lib/atc'
 import { Build } from './build'
 import { PublishReviewPackage } from '~/core/service/aptly'
 
@@ -132,12 +132,14 @@ CycleSchema.methods.spawn = async function () {
     this.getTag()
   ])
   .then(([project, release, repo, tag]) => {
-    Io.emit('cycle', {
+    atc.send('cycle:start', {
       repo,
       tag,
       project,
       release,
       cycle: this
+    }, () => {
+      this.update({ _status: 'PRE' })
     })
   })
 }
@@ -173,29 +175,23 @@ CycleSchema.methods.release = async function () {
 
 // io listeners
 // TODO: would this make more logic being in core/controller/hook/io?
-Io.on('connection', socket => {
-  socket.on('received', data => {
-    Cycle.findById(data).update({ _status: 'PRE' })
-  })
+atc.on('cycle:finished', async (data) => {
+  const cycle = await Cycle.findById(data.cycle)
 
-  socket.on('finished', async data => {
-    const cycle = await Cycle.findById(data.cycle)
+  let status = 'FINISH'
+  if (data.errors > 0) status = 'FAIL'
+  if (cycle.type === 'RELEASE' && status !== 'FAIL') {
+    cycle.build()
+    status = 'BUILD'
+  }
 
-    let status = 'FINISH'
-    if (data.errors > 0) status = 'FAIL'
-    if (cycle.type === 'RELEASE' && status !== 'FAIL') {
-      cycle.build()
-      status = 'BUILD'
-    }
+  cycle.update({ '_status': status }).exec()
 
-    cycle.update({ '_status': status }).exec()
-
-    // TODO: update project information
-    const project = await cycle.getProject()
-    for (let i in data.issues) {
-      project.postIssue(data.issues[i])
-    }
-  })
+  // TODO: update project information
+  const project = await cycle.getProject()
+  for (let i in data.issues) {
+    project.postIssue(data.issues[i])
+  }
 })
 
 // TODO: figure out a way to detect mass import so we don't spam tests

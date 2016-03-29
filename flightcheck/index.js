@@ -9,34 +9,9 @@ import Promise from 'bluebird'
 
 import { Log } from '~/app'
 
-let fs = Promise.promisifyAll(require('fs'))
+const fs = Promise.promisifyAll(require('fs'))
 
 /**
- * getHooks
- * A Convenience function for going through file tree and finding hooks
- *
- * @param {String} lvl - level of hook 'pre' 'post' 'build' etc
- * @returns {Array} - Array of required appHook classes
- */
-function getHooks (lvl) {
-  const level = lvl.toLowerCase()
-  return fs.readdirAsync(__dirname)
-  .filter(path => {
-    return fs.statAsync(`${__dirname}/${path}`)
-    .then(stat => stat.isDirectory())
-  })
-  .filter(dir => {
-    return fs.statAsync(`${__dirname}/${dir}/${level}.js`)
-    .then(stat => stat.isFile())
-    .catch(() => false)
-  })
-  .map(dir => {
-    return require(`${__dirname}/${dir}/${level}.js`)
-  })
-}
-
-/**
- * run
  * Runs hook with given package of data and returns compressed information
  *
  * @param {Object} data -{
@@ -56,10 +31,19 @@ function getHooks (lvl) {
  *   {Array} issues - generated issues for GitHub with title and body
  * }
  */
-export async function run (data) {
-  const hooks = await getHooks(data.status)
-  const tests = hooks.map(Hook => {
-    return new Hook(data).run()
+export default async function (data) {
+  const tests = await fs.readdirAsync(__dirname)
+  .filter(path => {
+    return fs.statAsync(`${__dirname}/${path}`)
+    .then(stat => stat.isDirectory())
+  })
+  .filter(dir => {
+    return fs.statAsync(`${__dirname}/${dir}/test.js`)
+    .then(stat => stat.isFile())
+    .catch(() => false)
+  })
+  .map(dir => {
+    return require(`${__dirname}/${dir}/test.js`).run()
   })
 
   return Promise.all(tests)
