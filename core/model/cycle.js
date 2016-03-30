@@ -13,7 +13,7 @@ import Promise from 'bluebird'
 import { Db as Mongoose } from '~/app'
 import { Io } from '~/core/io'
 import { Build } from './build'
-import { Stable } from '~/core/service/aptly'
+import { StableRepo } from '~/core/service/aptly'
 
 const CycleSchema = new Mongoose.Schema({
   _repo: {
@@ -171,7 +171,7 @@ CycleSchema.methods.build = async function () {
 CycleSchema.methods.release = async function () {
   const project = await this.getProject()
 
-  return Stable(this.packages, project.distributions)
+  return StableRepo(this.packages, project.distributions)
 }
 
 // io listeners

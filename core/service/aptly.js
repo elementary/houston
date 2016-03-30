@@ -26,10 +26,7 @@ export function Upload (pkg, version) {
 
   return Request
   .post(`${Config.aptly.url}/repos/${Config.aptly.review}/file/${pkg}-${version}`)
-  .then((data) => {
-    // data.body.Report.Added
-    return ['Pamd64 debian-test-package 0.0.0.1 b5750edf1a9ef97f']
-  })
+  .then((data) => data.body.Report.Added)
 }
 
 /**
@@ -127,13 +124,17 @@ export function Publish (repo, dist) {
       Snapshots: [{
         Component: 'main',
         Name: name
-      }]
+      }],
+      Signing: {
+        Batch: true,
+        Passphrase: Config.aptly.passphrase
+      }
     })
   }))
 }
 
 /**
- * Review
+ * ReviewRepo
  * 1) Uploads package to aptly
  * 2) Adds packages to review repository
  * 3) Publishes review repository
@@ -143,7 +144,7 @@ export function Publish (repo, dist) {
  * @param {Array} dist - Distributions to publish to
  * @returns {Array} - Package keys successfully moved
  */
-export function Review (pkg, version, dist) {
+export function ReviewRepo (pkg, version, dist) {
   if (!Config.aptly) {
     Log.verbose(`Aptly is disabled. Not publishing '${pkg} - ${version}' in review`)
     return Promise.resolve()
@@ -151,14 +152,13 @@ export function Review (pkg, version, dist) {
 
   return Upload(pkg, version)
   .then((keys) => {
-    return Add(keys, Config.aptly.review)
-    .then(Publish(Config.aptly.review, dist))
+    return Publish(Config.aptly.review, dist)
     .then(() => keys)
   })
 }
 
 /**
- * Stable
+ * StableRepo
  * 1) Move package from review to stable
  * 2) Publishes stable repository
  *
@@ -166,7 +166,7 @@ export function Review (pkg, version, dist) {
  * @param {Array} dist - Distributions to publish to
  * @returns {Promise} - Empty promise of success
  */
-export function Stable (pkg, dist) {
+export function StableRepo (pkg, dist) {
   if (!Config.aptly) {
     Log.verbose(`Aptly is disabled. Not publishing ${pkg[0]} in stable`)
     return Promise.resolve()

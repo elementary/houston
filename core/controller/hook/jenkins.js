@@ -10,7 +10,7 @@ import Router from 'koa-router'
 import { Config, Log } from '~/app'
 import { Build } from '~/core/model/build'
 import { SendIssue } from '~/core/service/github'
-import { Review } from '~/core/service/aptly'
+import { ReviewRepo } from '~/core/service/aptly'
 
 let route = new Router({
   prefix: '/hook/jenkins/:key'
@@ -59,7 +59,7 @@ route.post('/', async ctx => {
       const cycle = await build.getCycle()
       const version = await cycle.getVersion()
 
-      const keys = await Review(project.name, version, project.distributions)
+      const keys = await ReviewRepo(project.name, version, project.distributions)
 
       return cycle.update({$pushAll: { packages: keys }})
       .then(() => build)
