@@ -39,7 +39,7 @@
     "winston": "^2.2.0"
   },
   "devDependencies": {
-    "babel-eslint": "^4.1.8",
+    "babel-eslint": "^6.0.0",
     "babel-node-debug": "^2.0.0",
     "chai": "^3.5.0",
     "mocha": "^2.4.5",

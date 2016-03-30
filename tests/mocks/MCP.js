@@ -39,7 +39,7 @@ export const database = 'mongodb://localhost/houston-test'
 
 export const server = {
   secret: 'ermagerditsasecretsodonttellanyone',
-  url: 'http://localhost:10001'
+  url: 'http://localhost:3500'
 }
 
 export const socket = {

@@ -3,4 +3,10 @@
  * Entry for handling all Houston library tests
  */
 
-require('./atc')
+describe('lib', () => {
+  require('./helpers')
+
+  // TODO: Fix atc unit test connection problem
+  // require('./atc')
+  require('./config')
+})

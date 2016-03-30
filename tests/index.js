@@ -9,4 +9,3 @@ describe('project', function () {
 
 require('./mocks')
 require('./lib')
-require('./core')

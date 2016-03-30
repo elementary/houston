@@ -1,6 +1,6 @@
 # Houston files
 *.log
-config.js
+/config.js
 
 # Node files
 node_modules

@@ -9,11 +9,18 @@ require('babel-polyfill')
 // The code forced me to overwrite native functions. I'm sorry
 global.Promise = require('bluebird')
 
+// Find the script we want run
 var Path = require('path')
 
-var currentIndex = process.argv.indexOf(Path.basename(__filename))
+var currentIndex = -1
+for (var i = 0; i < process.argv.length; i++) {
+  var stringI = process.argv[i].indexOf(Path.basename(__filename))
+  if (stringI >= 0) {
+    currentIndex = i
+  }
+}
 
-if (currentIndex === -1) {
+if (currentIndex < 0) {
   console.log("You probably forgot to run entry with the file ending 'entry.js'")
   throw new Error('could not find entry.js')
 }
