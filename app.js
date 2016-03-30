@@ -21,14 +21,17 @@ let app = {}
 export const Helpers = require('./helpers')
 
 // Application configuration loading from config.js
-try {
-  Fs.statSync('./config.js')
-} catch (err) {
-  console.log('It seems like you have not taken the time to setup Houston yet.')
-  console.log('Please use the example configuration file we have provided you')
-  console.log("at 'config.example.js' to setup Houston. When you are done place")
-  console.log("at 'config.js'.")
-  throw new Error('failed to setup Houston')
+// But only if we are not in automated testing
+if (process.env.NODE_ENV !== 'test') {
+  try {
+    Fs.statSync('./config.js')
+  } catch (err) {
+    console.log('It seems like you have not taken the time to setup Houston yet.')
+    console.log('Please use the example configuration file we have provided you')
+    console.log("at 'config.example.js' to setup Houston. When you are done place")
+    console.log("at 'config.js'.")
+    throw new Error('failed to setup Houston')
+  }
 }
 
 app.config = require('./config.js')
