@@ -31,6 +31,7 @@ export const jenkins = {
 
 export const aptly = {
   url: 'http://localhost:10002',
+  passphrase: 'testing',
   review: 'review',
   stable: 'houston'
 }

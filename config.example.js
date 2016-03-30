@@ -54,6 +54,7 @@ export const aptly = false
 /*
 export const aptly = {
   url: 'http://localhost:8080/api',
+  passphrase: 'gpgkeyphrase',
 
   // Repository names
   review: 'review',

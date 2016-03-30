@@ -113,10 +113,10 @@ Log.info(`Loaded ${Helpers.ArrayString('Controller', routes)}`)
 
 // 404 page
 App.use(ctx => {
+  ctx.status = 404
   if (ctx.accepts(['json', 'html']) === 'html') {
     return ctx.render('error', { message: 'It seems you stuck the landing. World not found.' })
   } else {
-    ctx.status = 404
     ctx.body = { errors: [{
       status: 404,
       title: 'Page Not Found',
