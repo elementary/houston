@@ -7,5 +7,4 @@ describe('project', function () {
   it('lints', require('mocha-standard'))
 })
 
-require('./mocks')
 require('./lib')

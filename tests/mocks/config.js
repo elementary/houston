@@ -1,8 +1,7 @@
 /**
- * tests/mocks/MCP.js
+ * tests/mocks/config.js
  * Mock configuration for Houston testing
  *
- * @see TRON
  * @exports {Object} default - Houston configuration
  */
 
