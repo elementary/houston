@@ -13,7 +13,7 @@ import Promise from 'bluebird'
 import { Db as Mongoose } from '~/app'
 import atc from '~/lib/atc'
 import { Build } from './build'
-import { PublishReviewPackage } from '~/core/service/aptly'
+import { StableRepo } from '~/core/service/aptly'
 
 const CycleSchema = new Mongoose.Schema({
   _repo: {
@@ -42,7 +42,8 @@ const CycleSchema = new Mongoose.Schema({
   builds: [{
     type: Mongoose.Schema.Types.ObjectId,
     ref: 'build'
-  }]
+  }],
+  packages: [String]
 })
 
 CycleSchema.methods.getProject = function () {
@@ -170,7 +171,9 @@ CycleSchema.methods.build = async function () {
 }
 
 CycleSchema.methods.release = async function () {
-  return PublishReviewPackage(this)
+  const project = await this.getProject()
+
+  return StableRepo(this.packages, project.distributions)
 }
 
 // io listeners

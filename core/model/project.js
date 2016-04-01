@@ -70,7 +70,7 @@ const ProjectSchema = new Mongoose.Schema({
 
   distributions: {                // Distribution for Builds
     type: [String],
-    default: ['sid', 'xenial']
+    default: ['xenial']
   },
   architectures: {                // Architect for Builds
     type: [String],
