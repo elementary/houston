@@ -9,28 +9,20 @@ import mock from 'mock-require'
 const assert = chai.assert
 
 describe('config', () => {
-  afterEach((done) => {
-    Object.keys(require.cache).forEach((key) => {
-      delete require.cache[key]
-    })
-
-    mock.stopAll()
-    done()
-  })
-
   it('loads configuration file', (done) => {
     mock('../../config', require('../mocks/config'))
     const config = require('../../lib/config').default
 
     assert.isObject(config, 'returns an object')
-    assert.lengthOf(Object.keys(config), 9, 'has correct length')
+    assert.lengthOf(Object.keys(config), 10, 'has correct length')
     assert.propertyVal(config, 'database', 'mongodb://localhost/houston-test', 'correct database')
     assert.deepPropertyVal(config, 'server.secret', 'ermagerditsasecretsodonttellanyone', 'correct server secret')
+    assert.deepProperty(config, 'houston.version', 'has package version')
     done()
   })
 
   it('uses environment settings if set', (done) => {
-    mock('../../config.js', require('../mocks/config'))
+    mock('../../config', require('../mocks/config'))
     process.env.HOUSTON_SERVER_SECRET = 'testing'
     const config = require('../../lib/config').default
 

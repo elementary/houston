@@ -9,4 +9,6 @@ describe('lib', () => {
   // TODO: Fix atc unit test connection problem
   // require('./atc')
   require('./config')
+  require('./database')
+  require('./render')
 })
