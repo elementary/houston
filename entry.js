@@ -6,15 +6,15 @@
 require('babel-register')
 require('babel-polyfill')
 
+var path = require('path')
+
 // The code forced me to overwrite native functions. I'm sorry
 global.Promise = require('bluebird')
 
 // Find the script we want run
-var Path = require('path')
-
 var currentIndex = -1
 for (var i = 0; i < process.argv.length; i++) {
-  var stringI = process.argv[i].indexOf(Path.basename(__filename))
+  var stringI = process.argv[i].indexOf(path.basename(__filename))
   if (stringI >= 0) {
     currentIndex = i
   }
@@ -35,7 +35,7 @@ if (script == null) {
 }
 
 if (script[0] !== '/') {
-  script = Path.join(__dirname, '/', script)
+  script = path.join(__dirname, '/', script)
 }
 
 require(script)

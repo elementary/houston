@@ -7,7 +7,7 @@
 
 import { Log } from '~/app'
 
-let fs = Promise.promisifyAll(require('fs'))
+const fs = Promise.promisifyAll(require('fs'))
 
 /**
  * getHooks

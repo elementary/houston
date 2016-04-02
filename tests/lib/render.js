@@ -5,45 +5,19 @@
 
 import chai from 'chai'
 
-import * as markdown from '~/lib/render'
+import render from '~/lib/render'
 
 const assert = chai.assert
 
 describe('markdown', () => {
-  it('uses correct variables', (done) => {
-    const output = markdown.gatherVariables({
-      testing: 'thing'
-    })
-
-    assert.propertyVal(output, 'testing', 'thing', 'has local variable')
-    assert.deepProperty(output, 'dotNotation', 'has helpers')
-    done()
-  })
-
-  it('finds correct file', (done) => {
-    markdown.getTemplate('tests/mocks/markdown.md')
-    .then(done())
-    .catch((err) => done(err))
-  })
-
-  it('interpolates correctly', (done) => {
-    const out = markdown.interpolate('${ variable } 3', { variable: 'number' })
-
-    assert.strictEqual(out, 'number 3', 'outputs correctly')
-    done()
-  })
-
   it('templates correctly', (done) => {
-    markdown.render('tests/mocks/markdown.md', {
+    const file = render('tests/mocks/markdown.md', {
       trueStatement: true,
       variable: 'testing'
     })
-    .then((file) => {
-      assert.isString(file, 'returns a string')
-      assert.include(file, 'variable = testing', 'replaces variables')
-      assert.include(file, 'good work', 'abides if statement')
-      done()
-    })
-    .catch((error) => done(error))
+
+    assert.strictEqual(file.title, '# this is a markdown file', 'has correct title')
+    assert.strictEqual(file.body, '### used for testing markdown functions\n\nvariable = testing\n\ngood stuff', 'has correct body')
+    done()
   })
 })

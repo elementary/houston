@@ -4,22 +4,25 @@
  */
 
 import mock from 'mock-require'
+import path from 'path'
 
 // Required for any imports not in a mocha test
-mock('../config', require('./mocks/config'))
+mock(path.resolve(__dirname, '../config'), require('./mocks/config'))
+
+Promise.onPossiblyUnhandledRejection((error) => {
+  // eslint-disable-next-line no-console
+  console.log(error)
+})
 
 it('lints', require('mocha-standard'))
 
 beforeEach(() => {
-  mock('../config', require('./mocks/config'))
+  mock(path.resolve(__dirname, '../config'), require('./mocks/config'))
 })
 
 afterEach(() => {
-  Object.keys(require.cache).forEach((key) => {
-    delete require.cache[key]
-  })
-
   mock.stopAll()
 })
 
 require('./lib')
+require('./flightcheck')

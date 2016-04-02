@@ -3,4 +3,4 @@
 
 variable = {{ variable }}
 
-{{ (trueStatement) ? 'good work' : 'bad mojo' }}
+{% if trueStatement %}good stuff{% else %}bad mojo{% endif %}

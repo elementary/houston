@@ -1,6 +1,3 @@
-{% extends issue %}
-
-{% block title %}
 {% if errors.length == 1 %}
 .apphub has an issue
 {% elif errors.length > 1 %}
@@ -8,9 +5,7 @@
 {% else %}
 .apphub has some concerns
 {% endif %}
-{% endblock %}
 
-{% block issue %}
 {% if errors.length > 0 %}
 # Invalid `.apphub` file
 {% else %}
@@ -61,5 +56,3 @@ Here is the obligatory code dump:
 {{ metadata.dump }}
 ```
 {% endif %}
-
-{% endblock %}

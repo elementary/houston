@@ -1,25 +1,23 @@
 /**
- * appHooks/appHook.js
+ * flightcheck/appHook.js
  * Construction of all appHooks
  *
- * @exports {Class} default - an appHook class to extend appon
+ * @exports {Class} - an appHook class to extend appon
  */
 
-import Nunjucks from 'nunjucks'
+import path from 'path'
 
-import { Config, Pkg, Log, Request } from '~/app'
-
-let issue = Nunjucks.configure(__dirname)
-issue.addGlobal('Config', Config)
-issue.addGlobal('Pkg', Pkg)
-issue.addGlobal('issue', 'issue.md')
+import render from '~/lib/render'
+import config from '~/lib/config'
+import log from '~/lib/log'
+// import request from '~/lib/request'
 
 class AppHook {
   constructor (data, obj) {
     this.data = data
 
     this.name = obj.name || 'appHook'
-    this.path = obj.path || `${__dirname}/${this.name}`
+    this.path = obj.path || path.join(__dirname, this.name)
     this.mark = obj.mark || 'issue.md'
     this.post = obj.post || false
 
@@ -30,7 +28,7 @@ class AppHook {
   }
 
   test (data) {
-    Log.warn(`${this.name} does not have any test`)
+    log.warn(`${this.name} does not have any test`)
     return
   }
 
@@ -53,7 +51,7 @@ class AppHook {
   // TODO: flatten data object
   // TODO: base64 decode all files automaticly?
   file (path) {
-    return Request
+    return request
     .get(`https://api.github.com/repos/${this.data.project.github.fullName}/contents/${path}?ref=${this.data.tag}`)
     .auth(this.data.project.github.token)
     .then(data => data.body.content, () => null)
@@ -68,20 +66,14 @@ class AppHook {
     }
   }
 
-  // TODO: clean up whitespace removal code
   issue () {
-    let template = issue.render(`${this.path}/${this.mark}`, this)
+    const template = render(path.join(this.path, this.mark), this)
 
-    template = template.split('\n')
-    let title = template.find(string => string !== '')
-
-    template.splice(0, template.indexOf(title) + 1)
-
-    template = template.join('\n')
+    template.body += `\n<!-- Houston version ${config.houston.version} in ${config.env} environment -->`
 
     return {
-      title,
-      body: template
+      title: template.title,
+      body: template.body
     }
   }
 

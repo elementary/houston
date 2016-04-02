@@ -9,6 +9,15 @@ import mock from 'mock-require'
 const assert = chai.assert
 
 describe('config', () => {
+  afterEach((done) => {
+    delete require.cache[require.resolve('../mocks/config')]
+    delete require.cache[require.resolve('../../config')]
+    delete require.cache[require.resolve('../../config.example.js')]
+    delete require.cache[require.resolve('../../lib/config')]
+
+    done()
+  })
+
   it('loads configuration file', (done) => {
     mock('../../config', require('../mocks/config'))
     const config = require('../../lib/config').default

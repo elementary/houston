@@ -1,10 +1,5 @@
-{% extends issue %}
-
-{% block title %}
 Missing changelog
-{% endblock %}
 
-{% block issue %}
 # Missing changelog
 
 Houston requires a changelog for each individual release.
@@ -15,4 +10,3 @@ You are currently missing changelogs for:
 {% endfor %}
 
 Please edit these GitHub releases with body text to include changes made.
-{% endblock %}

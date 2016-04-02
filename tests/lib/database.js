@@ -16,19 +16,17 @@ describe('database', () => {
     done()
   })
 
-/*
- * TODO: Mongoose is throwing an Object prototype error
-  it('has correct plugins setup', (done) => {
+  it('has correct promise functions', (done) => {
     const mochaSchema = new db.Schema({
-      name: String
+      name: String,
+      age: Number
     })
     const mochaModel = db.model('mocha', mochaSchema)
-    const dbPromise = mochaModel.find().exec()
 
-    assert.isFunction(dbPromise.then, 'queries are a promise')
-    assert.isFunction(dbPromise.map, 'queries have a map function')
-    assert.isFunction(dbPromise.catch, 'queries have catch function')
-    done()
+    return mochaModel.find()
+    .then((data) => data)
+    .map((data) => data)
+    .then(done())
+    .catch((error) => done(error))
   })
-  */
 })

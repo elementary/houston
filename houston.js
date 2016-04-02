@@ -16,9 +16,10 @@ import Session from 'koa-session'
 import Static from 'koa-static'
 import View from 'koa-views'
 
-import { Config, Db, Helpers, Log } from './app'
+import { Config, Db, Log } from './app'
 import { Controller, Passport } from './core'
 import atc from './lib/atc'
+import * as helper from './lib/helpers'
 
 let App = new Koa()
 
@@ -83,8 +84,8 @@ App.use(async (ctx, next) => {
   ctx.render = Co.wrap(ctx.render)
 
   ctx.state.basedir = Path.normalize(`${__dirname}/views`)
-  ctx.state.Config = Config
-  ctx.state.Helpers = Helpers
+  ctx.state.config = config
+  ctx.state.helper = helper
 
   ctx.state.title = 'Houston'
   await next()
@@ -100,7 +101,9 @@ Passport.Setup(App)
 App.use(Passport.Route.routes(), Passport.Route.allowedMethods())
 
 // Load Houston core files
-let routes = Helpers.FlattenObject(Controller, { Route: 'object' })
+let routes = helper.structure.flatten(Controller, (object) => {
+  return typeof object['Route'] === 'object'
+})
 
 for (let key in routes) {
   const router = routes[key].Route
@@ -109,7 +112,7 @@ for (let key in routes) {
   Log.debug(`Loaded ${path} Router`)
 }
 
-Log.info(`Loaded ${Helpers.ArrayString('Controller', routes)}`)
+Log.info(`Loaded ${helper.lang.s('Controller', routes)}`)
 
 // 404 page
 App.use(ctx => {

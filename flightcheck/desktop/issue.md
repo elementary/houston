@@ -1,10 +1,5 @@
-{% extends issue %}
-
-{% block title %}
 {{ data.project.name }}.desktop has a problem
-{% endblock %}
 
-{% block issue %}
 # `{{ data.project.name }}.desktop` has a problem
 
 Houston requires a valid `.desktop` file for proper desktop integration.
@@ -31,5 +26,3 @@ Here is the obligatory code dump:
 {{ meta.dump }}
 ```
 {% endif %}
-
-{% endblock %}
