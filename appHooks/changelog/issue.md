@@ -5,7 +5,6 @@ Missing changelog
 {% endblock %}
 
 {% block issue %}
-# Missing changelog
 
 Houston requires a changelog for each individual release.
 You are currently missing changelogs for:
