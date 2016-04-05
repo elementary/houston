@@ -11,12 +11,6 @@
 {% endblock %}
 
 {% block issue %}
-{% if errors.length > 0 %}
-# Invalid `.apphub` file
-{% else %}
-# Questionable `.apphub` file
-{% endif %}
-
 Houston requires a valid `.apphub` file to assure reviewing, and publishing works as you want them.
 
 {% if errors.length > 0 %}
