@@ -7,15 +7,7 @@ import chai from 'chai'
 
 import db from '~/lib/database'
 
-const assert = chai.assert
-
 describe('database', () => {
-  it('has a correct database install', (done) => {
-    assert.isAbove(db.connection.readyState, 0, 'can connect to database')
-
-    done()
-  })
-
   it('has correct promise functions', (done) => {
     const mochaSchema = new db.Schema({
       name: String,

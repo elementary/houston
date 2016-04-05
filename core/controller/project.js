@@ -114,7 +114,6 @@ route.get('/review/:fate', IsRole('REVIEW'), async (ctx, next) => {
 
   if (ctx.params.fate === 'yes') {
     return cycle.release()
-    .then(() => {}, ctx.throw('Unable to push release to repository', 500))
     .then(cycle.update({ _status: 'FINISH' }))
     .then(ctx.redirect('/dashboard'))
   } else if (ctx.params.fate === 'no') {

@@ -117,20 +117,22 @@ export function Publish (repo, dist) {
     Name: name,
     Description: 'Automated Houston publish'
   })
-  .then(Promise.each(dist, d => {
-    return Request
-    .put(`${Config.aptly.url}/publish/${repo}/${d}`)
-    .send({
-      Snapshots: [{
-        Component: 'main',
-        Name: name
-      }],
-      Signing: {
-        Batch: true,
-        Passphrase: Config.aptly.passphrase
-      }
+  .then(() => {
+    return Promise.each(dist, d => {
+      return Request
+      .put(`${Config.aptly.url}/publish/${repo}/${d}`)
+      .send({
+        Snapshots: [{
+          Component: 'main',
+          Name: name
+        }],
+        Signing: {
+          Batch: true,
+          Passphrase: Config.aptly.passphrase
+        }
+      })
     })
-  }))
+  })
 }
 
 /**

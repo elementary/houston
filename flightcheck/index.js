@@ -1,39 +1,16 @@
 /**
- * appHooks/index.js
- * script for conducting appHooks
- *
- * @exports {Object} run - run appHooks with given data
+ * flightcheck/index.js
+ * Client for running appHooks
  */
 
-import { Log } from '~/app'
-
-const fs = Promise.promisifyAll(require('fs'))
-
-/**
- * getHooks
- * A Convenience function for going through file tree and finding hooks
- *
- * @param {String} lvl - level of hook 'pre' 'post' 'build' etc
- * @returns {Array} - Array of required appHook classes
- */
-function getHooks (lvl) {
-  const level = lvl.toLowerCase()
-  return fs.readdirAsync(__dirname)
-  .filter(path => {
-    return fs.statAsync(`${__dirname}/${path}`)
-    .then(stat => stat.isDirectory())
-  })
-  .filter(dir => {
-    return fs.statAsync(`${__dirname}/${dir}/${level}.js`)
-    .then(stat => stat.isFile())
-    .catch(() => false)
-  })
-  .map(dir => {
-    return require(`${__dirname}/${dir}/${level}.js`)
-  })
-}
+import * as fsHelper from '~/lib/helpers/fs'
+import appHooks from './flightcheck/'
+import atc from './lib/atc'
+import config from '~/lib/config'
+import log from '~/lib/log'
 
 /**
+ * runHooks
  * Runs hook with given package of data and returns compressed information
  *
  * @param {Object} data - {
@@ -54,14 +31,15 @@ function getHooks (lvl) {
  *   {Array} issues - generated issues for GitHub with title and body
  * }
  */
-export default async function (data, test) {
-  const hooks = await getHooks(test.toLowerCase())
+const runHooks = (data, test) => {
+  const hooks = await fsHelper.walk('flightcheck', (path) => path.indexOf(`${test.toLowerCase()}.js`) !== 0)
+  console.log(hooks)
   const tests = hooks.map(Hook => {
     return new Hook(data).run()
   })
 
   return Promise.all(tests)
-  .catch(err => Log.error(err))
+  .catch(err => log.error(err))
   .then(pkg => {
     let obj = {errors: 0, warnings: 0, information: {}, issues: []}
 
@@ -82,3 +60,16 @@ export default async function (data, test) {
     }, pkg)
   })
 }
+
+atc.init('client', config.server.url)
+
+atc.on('cycle:start', (data) => {
+  log.debug(`Starting flightcheck on ${data.project.name}`)
+
+  checks(data, 'pre')
+  .then((pkg) => {
+    atc.send('cycle:finished', pkg)
+
+    log.debug(`Found ${log.lang.s('error', pkg.errors)} in ${data.project.name}`)
+  })
+})
