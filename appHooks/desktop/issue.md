@@ -5,7 +5,6 @@
 {% endblock %}
 
 {% block issue %}
-# `{{ data.project.name }}.desktop` has a problem
 
 Houston requires a valid `.desktop` file for proper desktop integration.
 

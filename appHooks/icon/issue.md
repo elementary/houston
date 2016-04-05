@@ -1,7 +1,7 @@
 {% extends issue %}
 
 {% block title %}
-# Missing icon
+Missing icon
 {% endblock %}
 
 {% block issue %}
