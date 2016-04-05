@@ -49,7 +49,7 @@ export function IsRole (role) {
     if (role === possibilities.indexOf('BETA')) {
       Log.silly(`${ctx.user.username} is not beta enough`)
       return ctx.render('error', {
-        message: 'Houston is currently only avalible to beta testers'
+        message: 'Houston is currently only available to beta testers'
       })
     }
 
