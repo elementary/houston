@@ -1,4 +1,4 @@
-# Missing icon
+Missing icon
 
 You are currently missing icons in the following sizes:
 {% for error in errors %}

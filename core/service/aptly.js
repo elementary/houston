@@ -26,7 +26,14 @@ export function Upload (pkg, version) {
 
   return Request
   .post(`${Config.aptly.url}/repos/${Config.aptly.review}/file/${pkg}-${version}`)
-  .then((data) => data.body.Report.Added)
+  .then((data) => {
+    Log.silly(`Added ${data.body.Report.Added.length} packages`)
+
+    return Request
+    .get(`${Config.aptly.url}/repos/${Config.aptly.review}/packages`)
+    .query({ q: `${pkg} (= ${version})` })
+    .then((data) => data.body)
+  })
 }
 
 /**
@@ -92,7 +99,7 @@ export function Move (pkg, repoFrom, repoTo) {
   }
 
   return Add(pkg, repoTo)
-  .then(Remove(pkg, repoFrom))
+  .then(() => Remove(pkg, repoFrom))
 }
 
 /**
@@ -117,22 +124,20 @@ export function Publish (repo, dist) {
     Name: name,
     Description: 'Automated Houston publish'
   })
-  .then(() => {
-    return Promise.each(dist, d => {
-      return Request
-      .put(`${Config.aptly.url}/publish/${repo}/${d}`)
-      .send({
-        Snapshots: [{
-          Component: 'main',
-          Name: name
-        }],
-        Signing: {
-          Batch: true,
-          Passphrase: Config.aptly.passphrase
-        }
-      })
+  .then(() => Promise.each(dist, d => {
+    return Request
+    .put(`${Config.aptly.url}/publish/${repo}/${d}`)
+    .send({
+      Snapshots: [{
+        Component: 'main',
+        Name: name
+      }],
+      Signing: {
+        Batch: true,
+        Passphrase: Config.aptly.passphrase
+      }
     })
-  })
+  }))
 }
 
 /**
@@ -175,5 +180,5 @@ export function StableRepo (pkg, dist) {
   }
 
   return Move(pkg, Config.aptly.review, Config.aptly.stable)
-  .then(Publish(Config.aptly.stable, dist))
+  .then(() => Publish(Config.aptly.stable, dist))
 }

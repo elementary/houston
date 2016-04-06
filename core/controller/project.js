@@ -114,11 +114,11 @@ route.get('/review/:fate', IsRole('REVIEW'), async (ctx, next) => {
 
   if (ctx.params.fate === 'yes') {
     return cycle.release()
-    .then(cycle.update({ _status: 'FINISH' }))
-    .then(ctx.redirect('/dashboard'))
+    .then(() => cycle.update({ _status: 'FINISH' }))
+    .then(() => ctx.redirect('/dashboard'))
   } else if (ctx.params.fate === 'no') {
     return cycle.update({ _status: 'FAIL' })
-    .then(ctx.redirect('/dashboard'))
+    .then(() => ctx.redirect('/dashboard'))
   } else {
     return ctx.throw(`${ctx.project.name}'s fate is binary'`, 400)
   }

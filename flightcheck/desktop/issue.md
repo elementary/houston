@@ -1,6 +1,4 @@
-{{ data.project.name }}.desktop has a problem
-
-# `{{ data.project.name }}.desktop` has a problem
+`{{ data.project.name }}.desktop` has a problem
 
 Houston requires a valid `.desktop` file for proper desktop integration.
 
