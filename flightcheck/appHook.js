@@ -7,10 +7,10 @@
 
 import path from 'path'
 
-import render from '~/lib/render'
 import config from '~/lib/config'
 import log from '~/lib/log'
-// import request from '~/lib/request'
+import render from '~/lib/render'
+import request from '~/lib/request'
 
 class AppHook {
   constructor (data, obj) {

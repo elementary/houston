@@ -9,13 +9,13 @@ import config from '~/lib/config'
 import render from '~/lib/render'
 import * as fsHelp from '~/lib/helpers/fs'
 
+const flightchecks = fsHelp.walk('flightcheck', (wPath) => {
+  return path.extname(path.join(config.houston.root, wPath)) === '.md'
+})
+
 describe('issues', () => {
   it('can be rendered', (done) => {
-    const files = fsHelp.walk('flightcheck', (wPath) => {
-      return path.extname(path.join(config.houston.root, wPath)) === '.md'
-    })
-
-    files.forEach((file) => {
+    flightchecks.forEach((file) => {
       try {
         render(file)
       } catch (error) {

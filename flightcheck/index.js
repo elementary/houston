@@ -4,8 +4,7 @@
  */
 
 import * as fsHelper from '~/lib/helpers/fs'
-import appHooks from './flightcheck/'
-import atc from './lib/atc'
+import atc from '~/lib/atc'
 import config from '~/lib/config'
 import log from '~/lib/log'
 
@@ -31,7 +30,7 @@ import log from '~/lib/log'
  *   {Array} issues - generated issues for GitHub with title and body
  * }
  */
-const runHooks = (data, test) => {
+const runHooks = async (data, test) => {
   const hooks = await fsHelper.walk('flightcheck', (path) => path.indexOf(`${test.toLowerCase()}.js`) !== 0)
   console.log(hooks)
   const tests = hooks.map(Hook => {
@@ -61,12 +60,13 @@ const runHooks = (data, test) => {
   })
 }
 
+// Starts atc communication
 atc.init('client', config.server.url)
 
 atc.on('cycle:start', (data) => {
   log.debug(`Starting flightcheck on ${data.project.name}`)
 
-  checks(data, 'pre')
+  runHooks(data, 'pre')
   .then((pkg) => {
     atc.send('cycle:finished', pkg)
 
