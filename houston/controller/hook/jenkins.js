@@ -1,16 +1,17 @@
 /**
- * core/controller/hook/jenkins.js
+ * houston/controller/hook/jenkins.js
  * Handles all Jenkins inputs
  *
- * @exports {Object} default - Koa router
+ * @exports {Object} - Koa router
  */
 
 import Router from 'koa-router'
 
-import { Config, Log } from '~/app'
-import { Build } from '~/core/model/build'
-import { SendIssue } from '~/core/service/github'
-import { ReviewRepo } from '~/core/service/aptly'
+import * as aptly from '~/houston/service/aptly'
+import * as github from '~/houston/service/github'
+import build from '~/houston/model/build'
+import config from '~/lib/config'
+import log from '~/lib/log'
 
 let route = new Router({
   prefix: '/hook/jenkins/:key'

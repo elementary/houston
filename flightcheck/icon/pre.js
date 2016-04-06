@@ -1,8 +1,8 @@
 /**
- * appHooks/icon/pre.js
- * checks for icon sizes
+ * flightcheck/icon/pre.js
+ * Checks for icon sizes
  *
- * @exports {Class}
+ * @exports {Class} - AppHook class for chacking icon sizes
  */
 
 import AppHook from '~/flightcheck/appHook'

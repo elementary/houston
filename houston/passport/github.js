@@ -118,4 +118,4 @@ route.get('/callback', Passport.authenticate('github'), (ctx, next) => {
   return ctx.redirect(path)
 })
 
-export const Route = route
+export default route

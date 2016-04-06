@@ -3,8 +3,6 @@
  * Test for database connection and bluebird promises
  */
 
-import chai from 'chai'
-
 import db from '~/lib/database'
 
 describe('database', () => {

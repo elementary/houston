@@ -1,17 +1,18 @@
 /**
- * core/controller/hook/github.js
+ * houston/controller/hook/github.js
  * Handles all GitHub inputs
  *
- * @exports {Object} default - Koa router
+ * @exports {Object} - Koa router
  */
 
 import Router from 'koa-router'
 
-import { Config, Log } from '~/app'
+import config from '~/lib/config'
+import log from '~/lib/log'
 
 // TODO: GitHub hook integration
-let route = new Router({
-  prefix: '/hook/github'
+const route = new Router({
+  prefix: '/github'
 })
 
 // TODO: GitHub key checking
@@ -26,8 +27,8 @@ route.param('key', async (key, ctx, next) => {
 
 // Logs failed hook and responds when GitHub config is disabled
 route.get('*', async (ctx, next) => {
-  if (!Config.github.hook) {
-    Log.info('GitHub is disabled but someone tried to access GitHub hook')
+  if (!config.github.hook) {
+    log.info('GitHub is disabled but someone tried to access GitHub hook')
     ctx.status = 500
     ctx.body = 'no'
     return
@@ -36,14 +37,14 @@ route.get('*', async (ctx, next) => {
   }
 })
 
-route.get('/', ctx => {
+route.get('/', (ctx) => {
   ctx.body = 'GitHub hook path'
   return
 })
 
-route.get('/:key', ctx => {
+route.get('/:key', (ctx) => {
   ctx.body = 'ok'
   return
 })
 
-export const Route = route
+export default route

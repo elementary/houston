@@ -32,7 +32,6 @@ import log from '~/lib/log'
  */
 const runHooks = async (data, test) => {
   const hooks = await fsHelper.walk('flightcheck', (path) => path.indexOf(`${test.toLowerCase()}.js`) !== 0)
-  console.log(hooks)
   const tests = hooks.map(Hook => {
     return new Hook(data).run()
   })
@@ -71,5 +70,10 @@ atc.on('cycle:start', (data) => {
     atc.send('cycle:finished', pkg)
 
     log.debug(`Found ${log.lang.s('error', pkg.errors)} in ${data.project.name}`)
+  })
+  .catch((error) => {
+    // TODO: send back falure on test
+    log.warn(`Error running tests for ${data.project.name}`)
+    log.warn(error)
   })
 })

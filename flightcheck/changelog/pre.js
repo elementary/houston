@@ -1,8 +1,8 @@
 /**
- * appHooks/changelog/pre.js
- * checks all releases have changelogs
+ * flightcheck/changelog/pre.js
+ * Checks all releases have changelogs
  *
- * @exports {Class}
+ * @exports {Class} - AppHook class for checking all GitHub releases have a body
  */
 
 import AppHook from '~/flightcheck/appHook'

@@ -1,9 +1,20 @@
 /**
- * core/controller/hook/index.js
- * Handles all hook routes
+ * houston/controller/hook/index.js
+ * Handles all outside service inputs
  *
- * @exports {Object} - Koa router objects
+ * @exports {Object} - Koa router
  */
 
-export * as Github from './github'
-export * as Jenkins from './jenkins'
+import Router from 'koa-router'
+
+import * as github from './github'
+import * as jenkins from './jenkins'
+
+const route = new Router({
+  prefix: '/hook'
+})
+
+route.use(github.routes(), github.allowedMethods())
+route.use(jenkins.routes(), jenkins.allowedMethods())
+
+export default route

@@ -1,8 +1,8 @@
 {
   "name": "Houston",
-  "version": "0.1.8",
+  "version": "0.2.1",
   "description": "Backend for AppHub",
-  "main": "master.js",
+  "main": "houston/index.js",
   "dependencies": {
     "babel-plugin-syntax-async-functions": "^6.5.0",
     "babel-plugin-syntax-export-extensions": "^6.5.0",
@@ -24,8 +24,8 @@
     "koa-session": "^3.3.1",
     "koa-static": "^3.0.0",
     "koa-views": "^4.1.0",
-    "lodash": "^4.6.1",
-    "mongoose": "^4.4.10",
+    "lodash": "^4.8.2",
+    "mongoose": "^4.4.11",
     "nunjucks": "^2.4.1",
     "passport-github": "^1.1.0",
     "pluralize": "^1.2.1",
@@ -46,8 +46,7 @@
     "mock-require": "^1.2.1",
     "nock": "^7.7.2",
     "snazzy": "^3.0.0",
-    "standard": "^6.0.8",
-    "supertest": "^1.2.0"
+    "standard": "^6.0.8"
   },
   "scripts": {
     "lint": "snazzy",

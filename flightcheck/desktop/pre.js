@@ -1,8 +1,8 @@
 /**
- * appHooks/changelog/pre.js
- * checks .desktop file for name and icon
+ * flightcheck/changelog/pre.js
+ * Checks .desktop file for name and icon
  *
- * @exports {Class}
+ * @exports {Class} - AppHook class for checking .desktop file compatibility
  */
 
 import Ini from 'ini'

@@ -1,8 +1,8 @@
 /**
  * appHooks/apphub/pre.js
- * checks for a valid apphub file
+ * Checks for a valid apphub file
  *
- * @exports {Class}
+ * @exports {Class} - AppHook class for checking a valid apphub file
  */
 
 import AppHook from '~/flightcheck/appHook'

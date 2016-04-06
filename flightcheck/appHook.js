@@ -54,7 +54,8 @@ class AppHook {
     return request
     .get(`https://api.github.com/repos/${this.data.project.github.fullName}/contents/${path}?ref=${this.data.tag}`)
     .auth(this.data.project.github.token)
-    .then(data => data.body.content, () => null)
+    .then((data) => data.body.content)
+    .catch(() => null)
   }
 
   report () {
@@ -78,8 +79,8 @@ class AppHook {
   }
 
   async run () {
-    await Promise.resolve(this.test())
-    return this.report()
+    this.test()
+    .then(() => this.report())
   }
 }
 

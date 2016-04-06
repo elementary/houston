@@ -9,9 +9,11 @@ import path from 'path'
 // Required for any imports not in a mocha test
 mock(path.resolve(__dirname, '../config'), require('./mocks/config'))
 
-Promise.onPossiblyUnhandledRejection((error) => {
-  // eslint-disable-next-line no-console
-  console.log(error)
+process.on('unhandledRejection', (reason, promise) => {
+  /* eslint-disable no-console */
+  console.log(`Unhandled Rejection at: ${promise}`)
+  console.log(reason)
+  /* eslint-enable no-console */
 })
 
 it('lints', require('mocha-standard'))
@@ -26,3 +28,4 @@ afterEach(() => {
 
 require('./lib')
 require('./flightcheck')
+require('./houston')
