@@ -21,9 +21,9 @@ class Changelog extends AppHook {
     return Request
     .get(`https://api.github.com/repos/${this.data.project.github.fullName}/releases`)
     .auth(this.data.project.github.token)
-    .then(res => res.body)
-    .then(releases => {
-      for (let i in releases) {
+    .then((res) => res.body)
+    .then((releases) => {
+      for (const i in releases) {
         const release = releases[i]
         if (release.body === '') this.error(release.tag_name)
       }

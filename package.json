@@ -39,10 +39,8 @@
     "winston": "^2.2.0"
   },
   "devDependencies": {
-    "a-standard": "^1.0.0",
-    "babel-eslint": "^6.0.0",
+    "a-standard": "^1.0.4",
     "chai": "^3.5.0",
-    "mocha-standard": "^1.0.0",
     "mocha": "^2.4.5",
     "mock-require": "^1.2.1",
     "nock": "^7.7.2"
@@ -54,8 +52,7 @@
     "start": "npm run houston & npm run flightcheck",
     "test": "NODE_ENV=test mocha entry.js tests --timeout 8000"
   },
-  "standard": {
-    "parser": "babel-eslint",
+  "a-standard": {
     "env": {
       "jquery": true,
       "mocha": true

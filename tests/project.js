@@ -17,12 +17,12 @@ describe('project', () => {
       if (err) return done(err)
       if (res.errorCount === 0 && res.warningCount === 0) return done()
 
-      let result = new Error(`${lang.s('error', res.errorCount)} and ${lang.s('warning', res.warningCount)} found`)
+      const result = new Error(`${lang.s('error', res.errorCount)} and ${lang.s('warning', res.warningCount)} found`)
       result.stack = res.results.map((result) => {
         const filePath = result.filePath.replace(path.join(config.houston.root, '/'), '')
 
         return result.messages.map((message) => {
-          return `\n${filePath}:${message.line}:${message.column} ${message.message}`
+          return `\n${filePath}:${message.line}:${message.column} ${message.message} (${message.ruleId})`
         })
       })
       .splice(0, maxRules)

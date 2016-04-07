@@ -6,7 +6,6 @@
 import chai from 'chai'
 import path from 'path'
 
-import config from '~/lib/config'
 import * as fs from '~/lib/helpers/fs'
 
 const assert = chai.assert
@@ -25,21 +24,21 @@ describe('fs', () => {
     done()
   })
 
-  it('walks a directory', (done) => {
-    const thisDirectory = fs.walk(fs.smartPath('../'))
+  it('walks a directory', async (done) => {
+    const tests = await fs.walk(__dirname)
 
-    assert.isArray(thisDirectory, 'returns an array')
-    assert.include(thisDirectory, __filename.replace(path.join(config.houston.root, '/'), ''), 'includes this file')
+    assert.isArray(tests, 'returns an array')
+    assert.include(tests, path.basename(__filename), 'includes this file')
     done()
   })
 
-  it('walks a directory with filter function', (done) => {
-    const thisDirectory = fs.walk(fs.smartPath('../'), (path) => {
+  it('walks a directory with filter function', async (done) => {
+    const tests = await fs.walk(fs.smartPath('../../../'), (path) => {
       return path.indexOf('fs.js') !== -1
     })
 
-    assert.isArray(thisDirectory, 'returns an array')
-    assert.strictEqual(thisDirectory.length, 1, 'filters files')
+    assert.isArray(tests, 'returns an array')
+    assert.strictEqual(tests.length, 1, 'filters files')
     done()
   })
 })

@@ -32,16 +32,16 @@ import log from '~/lib/log'
  */
 const runHooks = async (data, test) => {
   const hooks = await fsHelper.walk('flightcheck', (path) => path.indexOf(`${test.toLowerCase()}.js`) !== 0)
-  const tests = hooks.map(Hook => {
+  const tests = hooks.map((Hook) => {
     return new Hook(data).run()
   })
 
   return Promise.all(tests)
-  .catch(err => log.error(err))
-  .then(pkg => {
-    let obj = {errors: 0, warnings: 0, information: {}, issues: []}
+  .catch((err) => log.error(err))
+  .then((pkg) => {
+    const obj = {errors: 0, warnings: 0, information: {}, issues: []}
 
-    for (let i in pkg) {
+    for (const i in pkg) {
       obj.errors = pkg[i].errors + obj.errors
       obj.warnings = pkg[i].warnings + obj.warnings
       obj.information = Object.assign(obj.information, pkg[i].information)
@@ -50,7 +50,7 @@ const runHooks = async (data, test) => {
 
     return obj
   })
-  .then(pkg => {
+  .then((pkg) => {
     return Object.assign({
       cycle: data.cycle._id,
       project: data.project._id,

@@ -1,5 +1,5 @@
 /**
- * appHooks/apphub/pre.js
+ * flightcheck/apphub/pre.js
  * Checks for a valid apphub file
  *
  * @exports {Class} - AppHook class for checking a valid apphub file
