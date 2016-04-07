@@ -149,7 +149,7 @@ const publish = (repo, dist) => {
 
     throw new Mistake(500, error)
   })
-  .then(() => Promise.each(dist, d => {
+  .then(() => Promise.each(dist, (d) => {
     return request
     .put(`${config.aptly.url}/publish/${repo}/${d}`)
     .send({

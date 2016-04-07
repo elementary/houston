@@ -16,8 +16,6 @@ process.on('unhandledRejection', (reason, promise) => {
   /* eslint-enable no-console */
 })
 
-it('lints', require('mocha-standard'))
-
 beforeEach(() => {
   mock(path.resolve(__dirname, '../config'), require('./mocks/config'))
 })
@@ -26,6 +24,7 @@ afterEach(() => {
   mock.stopAll()
 })
 
+require('./project')
 require('./lib')
 require('./flightcheck')
 require('./houston')

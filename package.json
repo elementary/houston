@@ -39,39 +39,26 @@
     "winston": "^2.2.0"
   },
   "devDependencies": {
+    "a-standard": "^1.0.0",
     "babel-eslint": "^6.0.0",
     "chai": "^3.5.0",
-    "mocha": "^2.4.5",
     "mocha-standard": "^1.0.0",
+    "mocha": "^2.4.5",
     "mock-require": "^1.2.1",
-    "nock": "^7.7.2",
-    "snazzy": "^3.0.0",
-    "standard": "^6.0.8"
+    "nock": "^7.7.2"
   },
   "scripts": {
-    "lint": "snazzy",
-    "test": "NODE_ENV=test mocha entry.js tests --timeout 8000",
-    "start": "npm run houston & npm run flightcheck",
+    "flightcheck": "node entry.js flightcheck",
     "houston": "node entry.js houston",
-    "flightcheck": "node entry.js flightcheck"
+    "lint": "a-standard",
+    "start": "npm run houston & npm run flightcheck",
+    "test": "NODE_ENV=test mocha entry.js tests --timeout 8000"
   },
   "standard": {
     "parser": "babel-eslint",
     "env": {
-      "node": true,
-      "mocha": true,
-      "es6": true,
-      "jquery": true
-    },
-    "rules": {
-      "arrow-parens": 0,
-      "no-console": 1,
-      "valid-jsdoc": [
-        1,
-        {
-          "requireReturn": false
-        }
-      ]
+      "jquery": true,
+      "mocha": true
     }
   },
   "repository": {
