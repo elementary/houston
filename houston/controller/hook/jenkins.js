@@ -9,39 +9,47 @@ import Router from 'koa-router'
 
 import * as aptly from '~/houston/service/aptly'
 import * as github from '~/houston/service/github'
-import build from '~/houston/model/build'
+import builds from '~/houston/model/build'
 import config from '~/lib/config'
 import log from '~/lib/log'
+import render from '~/lib/render'
 
 let route = new Router({
   prefix: '/hook/jenkins/:key'
 })
 
 route.param('key', async (key, ctx, next) => {
-  if (!Config.jenkins) {
-    Log.debug('Jenkins is disabled but someone tried to access Jenkins hook')
-    return ctx.throw('Jenkins is on vacation right now', 404)
-  } else if (key !== Config.jenkins.public) {
-    Log.debug('Someone tried to connect to Jenkins with an incorrect key')
-    return ctx.throw('Nobody can replace Mr. Jenkins', 404)
+  if (key !== config.jenkins.public) {
+    throw new ctx.Mistake(401)
   }
 
   await next()
 })
 
+route.get('*', async (ctx, next) => {
+  if (!config.github.hook) {
+    throw new ctx.Mistake(503)
+  }
+
+  await next()
+})
+
+// TODO: redo this whole handler, it's messy and unoptimized, plus I think it secretly hates Linux
 route.post('/', async ctx => {
   if (Object.keys(ctx.request.body).length < 1) {
-    Log.debug('An empty body was sent to Jenkins hook')
-    return ctx.throw('Empty body', 400)
+    throw new ctx.Mistake(400, 'Empty body')
   }
 
   const jenkins = ctx.request.body.build
-  const build = await Build.findByIdAndUpdate(jenkins.parameters.IDENTIFIER, {
+  const build = await builds.findByIdAndUpdate(jenkins.parameters.IDENTIFIER, {
     'jenkins.build': jenkins.number
   }, { new: true })
+  .catch((error) => {
+    throw new ctx.Mistake(500, error)
+  })
 
   if (build == null) {
-    return ctx.throw('No Build found', 404)
+    throw new ctx.Mistake(404, 'Build not found')
   }
 
   let status = 'QUEUE'
@@ -49,7 +57,7 @@ route.post('/', async ctx => {
   if (jenkins.phase === 'FINALIZED') status = 'FAIL'
   if (jenkins.phase === 'FINALIZED' && jenkins.status === 'SUCCESS') status = 'FINISH'
 
-  return Build.findByIdAndUpdate(build._id, { 'status': status }, { new: true })
+  return builds.findByIdAndUpdate(build._id, { 'status': status }, { new: true })
   .then((build) => {
     if (build.status === 'FAIL') return build.getLog()
     return build
@@ -60,29 +68,30 @@ route.post('/', async ctx => {
       const cycle = await build.getCycle()
       const version = await cycle.getVersion()
 
-      const keys = await ReviewRepo(project.name, version, project.distributions)
+      const keys = await aptly.review(project.name, version, project.distributions)
 
       return cycle.update({$pushAll: { packages: keys }})
       .then(() => build)
     } else if (build.status === 'FAIL') {
       const project = await build.getProject()
 
-      return SendIssue({
-        title: `Building failed on ${build.dist} ${build.arch}`,
-        body: '```\n' + build.log + '\n```'
-      }, project)
+      return github.sendIssue(
+        project.github.owner,
+        project.github.name,
+        project.github.token,
+        render('houston/views/build.md', { build }),
+        project.github.label
+      )
     }
 
     return build
   })
   .then((build) => {
-    ctx.status = 200
-    ctx.body = 'OK'
+    ctx.status = 204
     return
   })
   .catch((err) => {
-    Log.error(err)
-    return ctx.throw(500, err)
+    throw new ctx.Mistake(500, 'Unable to update build from Jenkins', err)
   })
 })
 

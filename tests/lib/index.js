@@ -10,5 +10,6 @@ describe('lib', () => {
   // require('./atc')
   require('./config')
   require('./database')
+  require('./mistake')
   require('./render')
 })

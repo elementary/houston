@@ -8,6 +8,7 @@
 
 import config from '~/lib/config'
 import log from '~/lib/log'
+import Mistake from '~/lib/mistake'
 import request from '~/lib/request'
 
 /**
@@ -20,7 +21,7 @@ import request from '~/lib/request'
  */
 const upload = (pkg, version) => {
   if (!config.aptly) {
-    throw new Error('Aptly is disabled. Not uploading package')
+    throw new Mistake(503, 'Aptly is currently disabled')
   }
 
   return request
@@ -32,6 +33,13 @@ const upload = (pkg, version) => {
     .get(`${config.aptly.url}/repos/${config.aptly.review}/packages`)
     .query({ q: `${pkg} (= ${version})` })
     .then((data) => data.body)
+  })
+  .catch((error) => {
+    if (error.statusCode === 404) {
+      throw new Mistake(500, 'Repository does not exist in aptly')
+    }
+
+    throw new Mistake(500, error)
   })
 }
 
@@ -45,13 +53,22 @@ const upload = (pkg, version) => {
  */
 const add = (pkg, repo) => {
   if (!config.aptly) {
-    throw new Error('Aptly is disabled. Not adding package')
+    throw new Mistake(503, 'Aptly is currently disabled')
   }
 
   return request
   .post(`${config.aptly.url}/repos/${repo}/packages`)
   .send({
     PackageRefs: pkg
+  })
+  .catch((error) => {
+    if (error.statusCode === 400) {
+      throw new Mistake(500, 'Package conflicts with existing package in aptly')
+    } else if (error.statusCode === 404) {
+      throw new Mistake(500, 'Repository or key does not exist in aptly')
+    }
+
+    throw new Mistake(500, error)
   })
 }
 
@@ -65,13 +82,20 @@ const add = (pkg, repo) => {
  */
 const remove = (pkg, repo) => {
   if (!config.aptly) {
-    throw new Error('Aptly is disabled. Not removing package')
+    throw new Mistake(503, 'Aptly is currently disabled')
   }
 
   return request
   .delete(`${config.aptly.url}/repos/${repo}/packages`)
   .send({
     PackageRefs: pkg
+  })
+  .catch((error) => {
+    if (error.statusCode === 404) {
+      throw new Mistake(500, 'Repository does not exist in aptly')
+    }
+
+    throw new Mistake(500, error)
   })
 }
 
@@ -88,7 +112,7 @@ const remove = (pkg, repo) => {
  */
 const move = (pkg, repoFrom, repoTo) => {
   if (!config.aptly) {
-    throw new Error('Aptly is disabled. Not moving package')
+    throw new Mistake(503, 'Aptly is currently disabled')
   }
 
   return add(pkg, repoTo)
@@ -105,7 +129,7 @@ const move = (pkg, repoFrom, repoTo) => {
  */
 const publish = (repo, dist) => {
   if (!config.aptly) {
-    throw new Error('Aptly is disabled. Not publishing package')
+    throw new Mistake(503, 'Aptly is currently disabled')
   }
 
   const name = new Date().getTime().toString()
@@ -115,6 +139,15 @@ const publish = (repo, dist) => {
   .send({
     Name: name,
     Description: 'Automated Houston publish'
+  })
+  .catch((error) => {
+    if (error.statusCode === 400) {
+      throw new Mistake(500, 'Snapshot already exists in aptly')
+    } else if (error.statusCode === 404) {
+      throw new Mistake(500, 'Repository does not exist in aptly')
+    }
+
+    throw new Mistake(500, error)
   })
   .then(() => Promise.each(dist, d => {
     return request
@@ -145,7 +178,7 @@ const publish = (repo, dist) => {
  */
 export function review (pkg, version, dist) {
   if (!config.aptly) {
-    throw new Error('Aptly is disabled. Not publishing packages in review')
+    throw new Mistake(503, 'Aptly is currently disabled')
   }
 
   return upload(pkg, version)
@@ -166,7 +199,7 @@ export function review (pkg, version, dist) {
  */
 export function stable (pkg, dist) {
   if (!config.aptly) {
-    throw new Error('Aptly is disabled. Not publishing packages in stable')
+    throw new Mistake(503, 'Aptly is currently disabled')
   }
 
   return move(pkg, config.aptly.review, config.aptly.stable)

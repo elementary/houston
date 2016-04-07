@@ -3,27 +3,19 @@
  * Tests aptly for accurate route sending
  */
 
-import chai from 'chai'
 import nock from 'nock'
 
 import * as aptly from '~/houston/service/aptly'
 import config from '~/lib/config'
 
-const assert = chai.assert
-
+// TODO: Get a better way to mock requests. Maybe a full aptly mock server?
+// TODO: More restrictive mock server, test for get and post values
 describe('aptly', () => {
-  beforeEach(() => {
-    const nBack = nock.back
-    nBack.fixtures = './fix'
-    nBack.setMode('record')
-  })
-
   afterEach(() => {
     nock.cleanAll()
   })
 
-  it('can review pacakge', (done) => {
-    // TODO: Get a better way to mock requests. Maybe a full aptly mock server?
+  it('can push package to review', (done) => {
     nock(config.aptly.url)
     .post((uri) => {
       return uri.indexOf(`/repos/${config.aptly.review}/file/`) !== -1
@@ -46,4 +38,6 @@ describe('aptly', () => {
     .then(() => done())
     .catch((error) => done(error))
   })
+
+  // TODO: aptly stable testing
 })

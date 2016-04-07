@@ -8,18 +8,16 @@
 import Router from 'koa-router'
 
 import config from '~/lib/config'
-import log from '~/lib/log'
 
 // TODO: GitHub hook integration
 const route = new Router({
-  prefix: '/github'
+  prefix: '/github/:key'
 })
 
 // TODO: GitHub key checking
 route.param('key', async (key, ctx, next) => {
   if (key !== 'test') {
-    ctx.status = 404
-    return
+    throw new ctx.Mistake(404)
   }
 
   await next()
@@ -28,10 +26,7 @@ route.param('key', async (key, ctx, next) => {
 // Logs failed hook and responds when GitHub config is disabled
 route.get('*', async (ctx, next) => {
   if (!config.github.hook) {
-    log.info('GitHub is disabled but someone tried to access GitHub hook')
-    ctx.status = 500
-    ctx.body = 'no'
-    return
+    throw new ctx.Mistake(503)
   } else {
     await next()
   }
@@ -39,11 +34,6 @@ route.get('*', async (ctx, next) => {
 
 route.get('/', (ctx) => {
   ctx.body = 'GitHub hook path'
-  return
-})
-
-route.get('/:key', (ctx) => {
-  ctx.body = 'ok'
   return
 })
 

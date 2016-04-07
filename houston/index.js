@@ -22,6 +22,7 @@ import atc from '~/lib/atc'
 import config from '~/lib/config'
 import db from '~/lib/database'
 import log from '~/lib/log'
+import Mistake from '~/lib/mistake'
 import passport from './passport'
 
 let app = new Koa()
@@ -39,7 +40,7 @@ app.use(async (ctx, next) => {
   const start = new Date()
   await next()
   const end = new Date()
-  log.verbose(`${ctx.method} ${ctx.url} - ${end - start}ms`)
+  log.verbose(`${ctx.method} ${ctx.status} ${ctx.url} => ${end - start}ms`)
 })
 
 // Error pages
@@ -50,25 +51,26 @@ app.use(async (ctx, next) => {
     ctx.app.emit('error', error, ctx)
 
     const htmlRespond = (ctx.accepts(['json', 'html']) === 'html')
-    ctx.status = error.status
 
-    if (error.expose && htmlRespond) {
-      return ctx.render('error', error)
-    } else if (error.expose) {
-      ctx.body = { errors: [{
-        status: error.status,
-        title: error.title,
-        detail: error.message
-      }]}
-      return
-    } else if (htmlRespond) {
-      return ctx.render('error', { message: 'Houston, we have a problem' })
+    let pkg = {
+      status: error.status
+    }
+
+    if (app.env === 'development') {
+      pkg.detail = error.stack
+    }
+
+    if (error.expose) {
+      pkg.title = error.message || 'Houston has encountered an error'
     } else {
-      ctx.body = { errors: [{
-        status: error.status,
-        title: 'Internal Server Error',
-        detail: 'An internal server error occured while proccessing your request'
-      }]}
+      pkg.title = 'Houston has encountered an error'
+    }
+
+    ctx.status = pkg.status
+    if (htmlRespond) {
+      return ctx.render('error', { error: pkg })
+    } else {
+      ctx.body = { errors: [ pkg ] }
       return
     }
   }
@@ -85,6 +87,7 @@ app.use(convert(view(path.join(__dirname, 'views'), {
 
 app.use(async (ctx, next) => {
   ctx.render = co.wrap(ctx.render)
+  ctx.Mistake = Mistake
 
   // ctx.state.basedir = Path.normalize(`${__dirname}/views`)
   ctx.state.config = config
@@ -118,13 +121,15 @@ routes.forEach((route) => {
 log.info(`Loaded ${log.lang.s('Controller', routes)}`)
 
 // 404 page
-app.use(ctx => {
+app.use((ctx) => {
   ctx.status = 404
 
   if (ctx.accepts(['json', 'html']) === 'html') {
-    return ctx.render('error', {
-      message: 'It seems you stuck the landing. World not found.'
-    })
+    return ctx.render('error', { error: {
+      status: 404,
+      title: 'Page not found',
+      detail: ''
+    }})
   } else {
     ctx.body = { errors: [{
       status: 404,
@@ -136,15 +141,16 @@ app.use(ctx => {
 })
 
 // Error logging
-app.on('error', function (error, ctx, next) {
+app.on('error', async (error, ctx, next) => {
   if (app.env === 'test') return
 
   if (/4.*/.test(error.status)) {
-    log.verbose(`${error.status} ${ctx.url}`)
-    log.verbose(error.stack)
+    log.verbose(`${ctx.method} ${ctx.status} ${ctx.url} => ${error.message}`)
   } else {
     log.error(error)
   }
+
+  await next()
 })
 
 // Launching server

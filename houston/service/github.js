@@ -12,6 +12,7 @@ import semver from 'semver'
 
 import config from '~/lib/config'
 import log from '~/lib/log'
+import Mistake from '~/lib/mistake'
 import request from '~/lib/request'
 
 /**
@@ -24,6 +25,10 @@ import request from '~/lib/request'
  * @returns {Array} - Mapped releases
  */
 export function getReleases (owner, name, token) {
+  if (!config.aptly) {
+    throw new Mistake(503, 'Github is currently disabled')
+  }
+
   return request
   .get(`https://api.github.com/repos/${owner}/${name}/releases`)
   .auth(token)
@@ -39,6 +44,9 @@ export function getReleases (owner, name, token) {
       },
       changelog: release.body.match(/.+/g)
     }
+  })
+  .catch((error) => {
+    throw new Mistake(500, 'Houston had a problem getting releases on GitHub', error)
   })
 }
 
@@ -73,6 +81,9 @@ export function getProjects (token) {
       }
     }
   })
+  .catch((error) => {
+    throw new Mistake(500, 'Houston had a problem getting projects on GitHub', error)
+  })
 }
 
 /**
@@ -102,7 +113,7 @@ export function sendLabel (owner, name, token, label) {
   .catch((error) => {
     if (error.status === 422) return
 
-    return error
+    throw new Mistake(500, 'Houston had a problem creating a label on GitHub', error)
   })
 }
 
@@ -138,5 +149,8 @@ export function sendIssue (owner, name, token, issue, label) {
     .send({
       labels: [ label ]
     })
+  })
+  .catch((error) => {
+    throw new Mistake(500, 'Houston had a problem creating an issue on GitHub', error)
   })
 }
