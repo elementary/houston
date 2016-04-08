@@ -1,17 +1,19 @@
 /**
- * core/passport/github.js
- * Setup Github Passport object
+ * houston/passport/github.js
+ * Setup GitHub passport object
  *
- * @exports {Class} Strategy - Passport class for GitHub login
- * @exports {Object} Route - Koa router object for GitHub authentication
+ * @exports {Class} strategy - Passport class for GitHub login
+ * @exports {Object} - Koa router object for GitHub authentication
  */
 
-import Passport from 'koa-passport'
-import Github from 'passport-github'
+import github from 'passport-github'
+import passport from 'koa-passport'
 import Router from 'koa-router'
 
-import { Config, Log, Request } from '~/app'
-import { User } from '~/core/model/user'
+import config from '~/lib/config'
+import log from '~/lib/log'
+import request from '~/lib/request'
+import User from '~/houston/model/user'
 
 /**
  * getMembership
@@ -22,21 +24,20 @@ import { User } from '~/core/model/user'
  * @return {Boolean} - Indication of active membership to organization or team
  */
 const getMembership = function (member, user) {
-  let request = ''
+  let url = `https://api.github.com/orgs/${member}/members/${user.username}`
+
   if (typeof member === 'number') {
-    request = `https://api.github.com/teams/${member}/memberships/${user.username}`
-  } else {
-    request = `https://api.github.com/orgs/${member}/members/${user.username}`
+    url = `https://api.github.com/teams/${member}/memberships/${user.username}`
   }
 
-  return Request
-  .get(request)
+  return request
+  .get(url)
   .auth(user.github.access)
-  .then(data => {
+  .then((data) => {
     if (data.body != null) return (data.body.state === 'active')
     if (data.statusType === 2) return true
     return false
-  }, () => false)
+  })
   .catch(false)
 }
 
@@ -48,12 +49,12 @@ const getMembership = function (member, user) {
  * @return {Object} - updated user object
  */
 const getRights = async function (user) {
-  if (Config.rights) {
+  if (config.rights) {
     let right = 'USER'
 
-    const beta = await getMembership(Config.rights.beta, user)
-    const review = await getMembership(Config.rights.review, user)
-    const admin = await getMembership(Config.rights.admin, user)
+    const beta = await getMembership(config.rights.beta, user)
+    const review = await getMembership(config.rights.review, user)
+    const admin = await getMembership(config.rights.admin, user)
 
     if (admin) {
       right = 'ADMIN'
@@ -63,24 +64,27 @@ const getRights = async function (user) {
       right = 'BETA'
     }
 
-    Log.verbose(`Giving new right of ${right} to ${user.username}`)
+    log.verbose(`Giving new right of ${right} to ${user.username}`)
 
     return User.findByIdAndUpdate(user._id, { right }, { new: true })
   }
 
-  Log.warn(`Rights are currently disabled. Giving unrestricted access to ${user.username}`)
-  Log.warn('Clear database before setting up a production environment!')
+  log.warn(`Rights are currently disabled. Giving unrestricted access to ${user.username}`)
+  log.warn('Clear database before setting up a production environment!')
 
   return User.findByIdAndUpdate(user._id, { right: 'ADMIN' }, { new: true })
 }
 
-// Passport strategy to cover all aspects of GitHub user management
-export const Strategy = new Github.Strategy({
-  clientID: Config.github.client,
-  clientSecret: Config.github.secret,
-  callbackURL: `${Config.server.url}/auth/github/callback`
+/**
+ * strategy
+ * Passport configuration for GitHub
+ */
+export const strategy = new github.Strategy({
+  clientID: config.github.client,
+  clientSecret: config.github.secret,
+  callbackURL: `${config.server.url}/auth/github/callback`
 }, (access, refresh, profile, done) => {
-  let mappedUser = {
+  const mappedUser = {
     username: profile.username,
     'github.id': profile.id,
     'github.access': access,
@@ -104,16 +108,16 @@ export const Strategy = new Github.Strategy({
 })
 
 // Koa server routes used for authentication
-let route = new Router({
+const route = new Router({
   prefix: '/github'
 })
 
-route.get('/', Passport.authenticate('github', {
+route.get('/', passport.authenticate('github', {
   scope: 'repo read:org'
 }))
 
-route.get('/callback', Passport.authenticate('github'), (ctx, next) => {
-  let path = ctx.session.originalUrl || '/dashboard'
+route.get('/callback', passport.authenticate('github'), (ctx, next) => {
+  const path = ctx.session.originalUrl || '/dashboard'
   ctx.session.originalUrl = null
   return ctx.redirect(path)
 })

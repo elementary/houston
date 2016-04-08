@@ -1,24 +1,22 @@
 /**
- * core/model/user.js
+ * houston/model/user.js
  * Mongoose modal and schema for user accounts
  *
- * @exports {Object} default {
- *   {Object} user - Mongoose user model
- *   {Object} userSchema - Mongoose schema for user model
- * }
+ * @exports {Object} - user database model
+ * @exports {Object} schema - user database schema
  */
 
-import { Db as Mongoose } from '~/app'
+import db from '~/lib/database'
 
-const UserSchema = new Mongoose.Schema({
+export const schema = new db.Schema({
   username: String,
   email: String,
   avatar: String,
 
   github: {
-    id: String,                   // GitHub id for authentication
-    access: String,               // GitHub token
-    refresh: String               // Github token
+    id: String,        // GitHub id for authentication
+    access: String,    // GitHub token
+    refresh: String    // Github token
   },
 
   right: {
@@ -37,11 +35,9 @@ const UserSchema = new Mongoose.Schema({
   },
 
   projects: [{
-    type: Mongoose.Schema.Types.ObjectId,
+    type: db.Schema.Types.ObjectId,
     ref: 'project'
   }]
 })
 
-const User = Mongoose.model('user', UserSchema)
-
-export default { User, UserSchema }
+export default db.model('user', schema)

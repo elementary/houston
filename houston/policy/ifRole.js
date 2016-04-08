@@ -1,35 +1,44 @@
 /**
- * core/policy/ifRole.js
+ * houston/policy/ifRole.js
  * Tests current user's right for use in if statement
  *
- * @exports {Function} IfRole - Bool returning function
+ * @exports {Function} - Checks user rights
  */
 
-import { Config, Log } from '~/app'
-import { UserSchema } from '~/core/model/user'
+import { schema } from '~/houston/model/user'
+import config from '~/lib/config'
+import log from '~/lib/log'
+import Mistake from '~/lib/mistake'
 
-export function IfRole (user, role) {
-  let possibilities = UserSchema.tree.right.enum
+/**
+ * Checks user rights
+ *
+ * @param {Object} user - user model from database
+ * @param {String|Number} role - role to check against
+ * @returns {Boolean} - does the user have or is greater than requested role
+ */
+export default (user, role) => {
+  const possibilities = schema.tree.right.enum
+  const userRole = possibilities.indexOf(user.right)
 
-  // TODO: Database lookup?
   if (typeof role === 'string') {
-    role = possibilities.indexOf(role)
+    role = possibilities.indexOf(role.toUpperCase())
   }
 
   if (role > possibilities.length || role < 0) {
-    Log.error(`Invalid IsRole policy of ${role} detected`)
-
-    return (ctx, next) => {
-      return ctx.throw(500, `Invalid IsRole policy of ${role} at ${ctx.path}`)
-    }
+    throw new Mistake(500, `Invalid isRole policy of ${role}`)
   }
 
-  // TODO: Don't make this GitHub specific
-  let userRole = possibilities.indexOf(user.right)
+  if (!config.rights) {
+    log.silly(`User rights disabled, letting ${user.username} access "${possibilities[role]}" section`)
+    return true
+  }
 
-  if (!Config.rights) return true
+  if (userRole >= role) {
+    log.silly(`${user.username} is a "${possibilities[userRole]}", allowing access to "${possibilities[role]}" section`)
+    return true
+  }
 
-  if (userRole >= role) return true
-
+  log.silly(`${user.username} is a "${possibilities[userRole]}", denying access to "${possibilities[role]}" section`)
   return false
 }

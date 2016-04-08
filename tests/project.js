@@ -32,7 +32,7 @@ describe('project', () => {
         result.stack += `\nOnly showing first ${maxRules}`
       }
 
-      done(result)
+      return done(result)
     })
   })
 })

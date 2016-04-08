@@ -1,32 +1,31 @@
 /**
- * core/controller/project.js
+ * houston/controller/project.js
  * Simple project handling (until official API is set)
  *
- * @exports {Object} default - Koa router
+ * @exports {Object} - Koa router
  */
 
 import Router from 'koa-router'
 
-import { Log } from '~/app'
-import { Project } from '~/core/model/project'
-import { Release } from '~/core/model/release'
-import { Cycle } from '~/core/model/cycle'
-import { IsRole } from '~/core/policy/isRole'
-import { GetReleases } from '~/core/service/github'
+import * as github from '~/houston/service/github'
+import * as policy from '~/houston/policy'
+import Cycle from '~/houston/model/cycle'
+import Project from '~/houston/model/project'
+import Release from '~/houston/model/release'
 
-let route = new Router({
+const route = new Router({
   prefix: '/project/:owner/:name'
 })
 
 // TODO: we should probably do some data checks here. for 'security' and stuff
-route.get('/*', IsRole('BETA'), async (ctx, next) => {
+route.get('/*', policy.isRole('beta'), async (ctx, next) => {
   ctx.project = await Project.findOne({
     'github.owner': ctx.params.owner,
     'github.name': ctx.params.name
   })
 
   if (ctx.project == null) {
-    return ctx.throw('The project you are looking for has been lost in space', 404)
+    throw new ctx.Mistake(404, 'Project not found')
   }
 
   await next()
@@ -34,26 +33,21 @@ route.get('/*', IsRole('BETA'), async (ctx, next) => {
 
 route.get('/init', async (ctx, next) => {
   const status = await ctx.project.getStatus()
-  .catch(err => {
-    Log.error(err)
-    ctx.throw('Unable to get project status', 500)
-  })
 
-  if (status !== 'NEW') return ctx.throw('The project is already initalized', 400)
+  if (status !== 'NEW') throw new ctx.Mistake(400, 'The project is already initalized')
 
-  const github = ctx.project.github
+  const gh = ctx.project.github
 
   await Promise.all([
-    GetReleases(github.owner, github.name, github.token).each(release => {
+    github.getReleases(gh.owner, gh.name, gh.token).each((release) => {
       return Release.create(release)
-      .then(release => ctx.project.update({$push: {releases: release._id}}))
+      .then((release) => ctx.project.update({$push: {releases: release._id}}))
     }),
     ctx.project.postLabel(),
     ctx.project.update({ _status: 'INIT' })
   ])
-  .catch(err => {
-    Log.warn(err)
-    ctx.throw(`Unable to setup ${ctx.project.name} with Houston`, 500)
+  .catch((err) => {
+    throw new ctx.Mistake(500, `Unable to setup ${ctx.project.name} with Houston`, err)
   })
 
   return ctx.redirect('/dashboard')
@@ -61,7 +55,7 @@ route.get('/init', async (ctx, next) => {
 
 route.get('/cycle', async (ctx, next) => {
   if (ctx.project.releases.length < 1) {
-    return ctx.throw('The project has no releases to cycle', 400)
+    throw new ctx.Mistake(400, 'The project has no releases to cycle')
   }
 
   const release = await Release
@@ -77,16 +71,15 @@ route.get('/cycle', async (ctx, next) => {
     ctx.project.update({$push: {cycles: cycle._id}}),
     release.update({$push: {cycles: cycle._id}})
   ])
-  .then(ctx.redirect('/dashboard'))
-  .catch(err => {
-    Log.error(err)
-    ctx.throw('An error occured while creating a new release cycle', 500)
+  .then(() => ctx.redirect('/dashboard'))
+  .catch((err) => {
+    throw new ctx.Mistake(500, 'An error occured while creating a new release cycle', err)
   })
 })
 
-route.get('/review/:fate', IsRole('REVIEW'), async (ctx, next) => {
+route.get('/review/:fate', policy.isRole('review'), async (ctx, next) => {
   if (ctx.project.releases.length < 1) {
-    return ctx.throw('The project has no releases', 400)
+    throw new ctx.Mistake(400, 'The project has no releases')
   }
 
   // All hail our lord and savior, GitHub release date sort
@@ -95,7 +88,7 @@ route.get('/review/:fate', IsRole('REVIEW'), async (ctx, next) => {
   .sort({'github.date': -1})
 
   if (release == null) {
-    return ctx.throw('Could not find release', 404)
+    throw new ctx.Mistake(404, 'Could not find release')
   }
 
   const cycle = await Cycle
@@ -103,13 +96,13 @@ route.get('/review/:fate', IsRole('REVIEW'), async (ctx, next) => {
   .sort({'_id': -1})
 
   if (cycle == null) {
-    return ctx.throw('Release has no cycle', 404)
+    throw new ctx.Mistake(404, 'Release has no cycle')
   }
 
   const status = await cycle.getStatus()
 
   if (status !== 'REVIEW') {
-    return ctx.throw('Release is not awaiting review', 400)
+    throw new ctx.Mistake(400, 'Release is not awaiting review')
   }
 
   if (ctx.params.fate === 'yes') {
@@ -120,8 +113,8 @@ route.get('/review/:fate', IsRole('REVIEW'), async (ctx, next) => {
     return cycle.update({ _status: 'FAIL' })
     .then(() => ctx.redirect('/dashboard'))
   } else {
-    return ctx.throw(`${ctx.project.name}'s fate is binary'`, 400)
+    throw new ctx.Mistake(400, `${ctx.project.name}'s fate is binary'`)
   }
 })
 
-export const Route = route
+export default route

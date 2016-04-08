@@ -9,12 +9,11 @@ import Router from 'koa-router'
 
 import * as aptly from '~/houston/service/aptly'
 import * as github from '~/houston/service/github'
-import builds from '~/houston/model/build'
+import Build from '~/houston/model/build'
 import config from '~/lib/config'
-import log from '~/lib/log'
 import render from '~/lib/render'
 
-let route = new Router({
+const route = new Router({
   prefix: '/hook/jenkins/:key'
 })
 
@@ -35,13 +34,13 @@ route.get('*', async (ctx, next) => {
 })
 
 // TODO: redo this whole handler, it's messy and unoptimized, plus I think it secretly hates Linux
-route.post('/', async ctx => {
+route.post('/', async (ctx) => {
   if (Object.keys(ctx.request.body).length < 1) {
     throw new ctx.Mistake(400, 'Empty body')
   }
 
   const jenkins = ctx.request.body.build
-  const build = await builds.findByIdAndUpdate(jenkins.parameters.IDENTIFIER, {
+  const build = await Build.findByIdAndUpdate(jenkins.parameters.IDENTIFIER, {
     'jenkins.build': jenkins.number
   }, { new: true })
   .catch((error) => {
@@ -57,7 +56,7 @@ route.post('/', async ctx => {
   if (jenkins.phase === 'FINALIZED') status = 'FAIL'
   if (jenkins.phase === 'FINALIZED' && jenkins.status === 'SUCCESS') status = 'FINISH'
 
-  return builds.findByIdAndUpdate(build._id, { 'status': status }, { new: true })
+  return Build.findByIdAndUpdate(build._id, { status }, { new: true })
   .then((build) => {
     if (build.status === 'FAIL') return build.getLog()
     return build
@@ -95,4 +94,4 @@ route.post('/', async ctx => {
   })
 })
 
-export const Route = route
+export default route

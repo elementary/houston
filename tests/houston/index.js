@@ -4,5 +4,6 @@
  */
 
 describe('houston', () => {
+  require('./policy')
   require('./service')
 })

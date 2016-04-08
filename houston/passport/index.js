@@ -1,49 +1,56 @@
 /**
- * core/passport/index.js
+ * houston/passport/index.js
  * Sets up Passport authentication
+ *
+ * @exports {Function} setup - sets up passport with server
+ * @exports {Object} - Koa router objects
  */
 
-import Passport from 'koa-passport'
+import passport from 'koa-passport'
 import Router from 'koa-router'
 
-import { Log } from '~/app'
+import * as github from './github'
+import log from '~/lib/log'
 
-import * as Github from './github'
-
-// Passport setup
-export function Setup (Server) {
+/**
+ * setup
+ * Sets up passport with server
+ *
+ * @param {Object} server - server to attach passport to
+ */
+export function setup (server) {
   // TODO: actually serialize users
-  Passport.serializeUser((user, done) => {
+  passport.serializeUser((user, done) => {
     done(null, user)
   })
 
-  Passport.deserializeUser((user, done) => {
+  passport.deserializeUser((user, done) => {
     done(null, user)
   })
 
-  Passport.use(Github.Strategy)
+  passport.use(github.strategy)
 
-  Server.use(Passport.initialize())
-  Server.use(Passport.session())
+  server.use(passport.initialize())
+  server.use(passport.session())
 
-  Server.use(async (ctx, next) => {
+  server.use(async (ctx, next) => {
     ctx.state.user = (ctx.passport.user != null) ? ctx.passport.user : null
     ctx.user = (ctx.passport.user != null) ? ctx.passport.user : null
     await next()
   })
 
-  Log.verbose('Passport Initalized')
+  log.silly('Passport setup complete')
 }
 
-let route = new Router({
+const route = new Router({
   prefix: '/auth'
 })
 
-route.get('/logout', ctx => {
+route.get('/logout', (ctx) => {
   ctx.logout()
   ctx.redirect('/')
 })
 
-route.use(Github.Route.routes(), Github.Route.allowedMethods())
+route.use(github.Route.routes(), github.Route.allowedMethods())
 
-export const Route = route
+export default route

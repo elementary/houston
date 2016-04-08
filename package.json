@@ -53,6 +53,17 @@
     "test": "NODE_ENV=test mocha entry.js tests --timeout 8000"
   },
   "a-standard": {
+    "rules": {
+      "require-jsdoc": [
+        2,
+        {
+          "require": {
+            "FunctionDeclaration": true,
+            "ClassDeclaration": true
+          }
+        }
+      ]
+    },
     "env": {
       "jquery": true,
       "mocha": true

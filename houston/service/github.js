@@ -77,7 +77,7 @@ export function getProjects (token) {
         id: project.id,
         owner: project.owner.login,
         name: project.name,
-        token: token
+        token
       }
     }
   })
@@ -147,7 +147,7 @@ export function sendIssue (owner, name, token, issue, label) {
     .patch(`https://api.github.com/repos/${owner}/${name}/issues/${res.number}`)
     .auth(token)
     .send({
-      labels: [ label ]
+      labels: [label]
     })
   })
   .catch((error) => {

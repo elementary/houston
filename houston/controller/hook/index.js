@@ -7,8 +7,8 @@
 
 import Router from 'koa-router'
 
-import * as github from './github'
-import * as jenkins from './jenkins'
+import github from './github'
+import jenkins from './jenkins'
 
 const route = new Router({
   prefix: '/hook'
