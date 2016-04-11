@@ -7,8 +7,8 @@
 
 import Router from 'koa-router'
 
-import * as github from '~/core/service/github'
-import * as policy from '~/core/policy'
+import * as github from '~/houston/service/github'
+import * as policy from '~/houston/policy'
 import Cycle from '~/houston/model/cycle'
 import log from '~/lib/log'
 import Project from '~/houston/model/project'

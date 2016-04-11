@@ -1,18 +1,16 @@
 /**
- * core/model/release.js
+ * houston/model/release.js
  * Mongoose schema for cycles
  *
- * @exports {Object} default {
- *   {Object} releaseSchema - Mongoose schema for release model
- * }
+ * @exports {Object} - Houston database model
+ * @exports {Object} schema - Houston database schema
  */
 
-import Promise from 'bluebird'
-import Semver from 'semver'
+import semver from 'semver'
 
-import { Db as Mongoose } from '~/app'
+import db from '~/lib/database'
 
-const ReleaseSchema = new Mongoose.Schema({
+export const schema = new db.Schema({
   github: {
     id: Number,              // Id for Github API
     author: String,          // Github user login
@@ -23,37 +21,35 @@ const ReleaseSchema = new Mongoose.Schema({
   changelog: [String],
 
   cycles: [{
-    type: Mongoose.Schema.Types.ObjectId,
+    type: db.Schema.Types.ObjectId,
     ref: 'cycle'
   }]
 })
 
-ReleaseSchema.set('toJSON', { virtuals: true })
+schema.set('toJSON', { virtuals: true })
 
-ReleaseSchema.virtual('version').get(function () {
-  if (this.github.tag != null) return Semver.clean(this.github.tag, true)
+schema.virtual('version').get(function () {
+  if (this.github.tag != null) return semver.clean(this.github.tag, true)
 
   return '0.0.0'
 })
 
-ReleaseSchema.virtual('github.debianDate').get(function () {
+schema.virtual('github.debianDate').get(function () {
   return this.github.date.toUTCString().replace('GMT', '+0000')
 })
 
-ReleaseSchema.virtual('tag').get(function () {
+schema.virtual('tag').get(function () {
   if (this.github.tag != null) return this.github.tag
 
   return this.version
 })
 
-ReleaseSchema.methods.getStatus = function () {
+schema.methods.getStatus = function () {
   if (this.cycles.length < 1) return Promise.resolve('STANDBY')
 
   return this.model('cycle')
   .findOne({_id: this.cycles[this.cycles.length - 1]})
-  .then(cycle => cycle.getStatus())
+  .then((cycle) => cycle.getStatus())
 }
 
-const Release = Mongoose.model('release', ReleaseSchema)
-
-export default { Release, ReleaseSchema }
+export default db.model('release', schema)

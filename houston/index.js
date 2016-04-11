@@ -16,16 +16,16 @@ import path from 'path'
 import session from 'koa-session'
 import view from 'koa-views'
 
-import * as controllers from './controller'
 import * as helpers from '~/lib/helpers'
+import * as passport from './passport'
 import atc from '~/lib/atc'
 import config from '~/lib/config'
+import controllers from './controller'
 import db from '~/lib/database'
 import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
-import passport from './passport'
 
-let app = new Koa()
+const app = new Koa()
 
 // Setup App configuration
 app.name = 'Houston'
@@ -44,6 +44,7 @@ app.use(async (ctx, next) => {
 })
 
 // Error pages
+// eslint-disable-next-line consistent-return
 app.use(async (ctx, next) => {
   try {
     await next()
@@ -52,7 +53,7 @@ app.use(async (ctx, next) => {
 
     const htmlRespond = (ctx.accepts(['json', 'html']) === 'html')
 
-    let pkg = {
+    const pkg = {
       status: error.status
     }
 
@@ -70,8 +71,8 @@ app.use(async (ctx, next) => {
     if (htmlRespond) {
       return ctx.render('error', { error: pkg })
     } else {
-      ctx.body = { errors: [ pkg ] }
-      return
+      ctx.body = { errors: [pkg] }
+      return null
     }
   }
 })
@@ -89,7 +90,7 @@ app.use(async (ctx, next) => {
   ctx.render = co.wrap(ctx.render)
   ctx.Mistake = Mistake
 
-  // ctx.state.basedir = Path.normalize(`${__dirname}/views`)
+  ctx.state.basedir = path.normalize(`${__dirname}/views`)
   ctx.state.config = config
   ctx.state.helper = helpers
 
@@ -99,26 +100,15 @@ app.use(async (ctx, next) => {
 
 // Start Passport
 app.use(parser())
-app.keys = [ config.server.secret ]
+app.keys = [config.server.secret]
 app.use(convert(session(app)))
 
-require('./passport').setup(app)
+passport.setup(app)
 
-app.use(passport.routes.routes(), passport.routes.allowedMethods())
+app.use(passport.router.routes(), passport.router.allowedMethods())
 
 // Load Houston core files
-const routes = helpers.structure.flatten(controllers, (object) => {
-  return typeof object['Route'] === 'object'
-})
-
-routes.forEach((route) => {
-  const router = route.Route
-  const path = router.opts.prefix || '/'
-  app.use(router.routes(), router.allowedMethods())
-  log.debug(`Loaded ${path} Router`)
-})
-
-log.info(`Loaded ${log.lang.s('Controller', routes)}`)
+app.use(controllers.routes(), controllers.allowedMethods())
 
 // 404 page
 app.use((ctx) => {
@@ -136,7 +126,7 @@ app.use((ctx) => {
       title: 'Page Not Found',
       detail: 'The page you are looking found can not be found'
     }]}
-    return
+    return null
   }
 })
 

@@ -7,4 +7,5 @@ describe('helpers', () => {
   require('./dotNotation')
   require('./fs')
   require('./lang')
+  require('./structure')
 })

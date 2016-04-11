@@ -12,7 +12,14 @@ import log from '~/lib/log'
 import render from '~/lib/render'
 import request from '~/lib/request'
 
-class AppHook {
+/**
+ * AppHook
+ * an appHook class to extend appon
+ *
+ * @param {Object} data - Includes project, cycle, and release (if applicible)
+ * @param {Object} obj - Extended data for AppHook, including name and path
+ */
+export default class AppHook {
   constructor (data, obj) {
     this.data = data
 
@@ -48,8 +55,6 @@ class AppHook {
     this.information = Object.assign(this.information, obj)
   }
 
-  // TODO: flatten data object
-  // TODO: base64 decode all files automaticly?
   file (path) {
     return request
     .get(`https://api.github.com/repos/${this.data.project.github.fullName}/contents/${path}?ref=${this.data.tag}`)
@@ -83,5 +88,3 @@ class AppHook {
     .then(() => this.report())
   }
 }
-
-export default AppHook

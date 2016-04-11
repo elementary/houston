@@ -1,25 +1,21 @@
 /**
- * core/model/cycle.js
+ * houston/model/cycle.js
  * Mongoose schema for cycles
  *
- * @exports {Object} default {
- *   {Object} Cycle - Mongoose model for cycle
- *   {Object} CycleSchema - Mongoose schema for cycle model
- * }
+ * @exports {Object} - cycle database model
+ * @exports {Object} schema - cycle database schema
  */
 
-import Promise from 'bluebird'
-
-import { Db as Mongoose } from '~/app'
+import db from '~/lib/database'
 import atc from '~/lib/atc'
-import { Build } from './build'
-import { StableRepo } from '~/core/service/aptly'
+import Build from './build'
+import * as aptly from '~/houston/service/aptly'
 
-const CycleSchema = new Mongoose.Schema({
+export const schema = new db.Schema({
   _repo: {
     type: String,
     validate: {
-      validator: s => /.*\.git/.test(s),
+      validator: (s) => /.*\.git/.test(s),
       message: '{VALUE} is not a valid git repository'
     }
   },
@@ -40,25 +36,25 @@ const CycleSchema = new Mongoose.Schema({
   },
 
   builds: [{
-    type: Mongoose.Schema.Types.ObjectId,
+    type: db.Schema.Types.ObjectId,
     ref: 'build'
   }],
   packages: [String]
 })
 
-CycleSchema.methods.getProject = function () {
+schema.methods.getProject = function () {
   return this.model('project').findOne({
     cycles: this._id
   })
 }
 
-CycleSchema.methods.getRelease = function () {
+schema.methods.getRelease = function () {
   return this.model('release').findOne({
     cycles: this._id
   })
 }
 
-CycleSchema.methods.getVersion = async function () {
+schema.methods.getVersion = async function () {
   const release = await this.getRelease()
 
   if (release != null) return release.version
@@ -67,7 +63,7 @@ CycleSchema.methods.getVersion = async function () {
   return project.getVersion()
 }
 
-CycleSchema.methods.getRepo = async function () {
+schema.methods.getRepo = async function () {
   if (this._repo != null) return Promise.resolve(this._repo)
 
   const project = await this.getProject()
@@ -76,7 +72,7 @@ CycleSchema.methods.getRepo = async function () {
   return null
 }
 
-CycleSchema.methods.getTag = async function () {
+schema.methods.getTag = async function () {
   if (this._tag != null) return this._tag
 
   const release = await this.getRelease()
@@ -89,14 +85,14 @@ CycleSchema.methods.getTag = async function () {
 }
 
 // TODO: Consolidate build status
-CycleSchema.methods.getStatus = async function () {
+schema.methods.getStatus = async function () {
   const builds = await this.model('build').find({_id: {$in: this.builds}})
 
   let queue = false
   let build = false
   let fail = false
   let finish = true
-  for (let i in builds) {
+  for (const i in builds) {
     if (builds[i].status !== 'QUEUE') queue = true
     if (builds[i].status === 'BUILD') build = true
     if (builds[i].status === 'FAIL') fail = true
@@ -125,7 +121,7 @@ CycleSchema.methods.getStatus = async function () {
   return Promise.resolve(this._status)
 }
 
-CycleSchema.methods.spawn = async function () {
+schema.methods.spawn = async function () {
   return Promise.all([
     this.getProject(),
     this.getRelease(),
@@ -145,16 +141,16 @@ CycleSchema.methods.spawn = async function () {
   })
 }
 
-CycleSchema.methods.build = async function () {
+schema.methods.build = async function () {
   const cycle = this
   const project = await cycle.getProject()
 
   if (project == null) return project.reject('Unable to find project')
 
-  let builds = []
+  const builds = []
 
-  for (let dist in project.distributions) {
-    for (let arch in project.architectures) {
+  for (const dist in project.distributions) {
+    for (const arch in project.architectures) {
       builds.push(new Build({
         dist: project.distributions[dist],
         arch: project.architectures[arch]
@@ -162,7 +158,7 @@ CycleSchema.methods.build = async function () {
     }
   }
 
-  const ids = builds.map(b => b._id)
+  const ids = builds.map((b) => b._id)
 
   return Promise.all([
     cycle.update({$pushAll: {builds: ids}}).exec(),
@@ -170,16 +166,16 @@ CycleSchema.methods.build = async function () {
   ])
 }
 
-CycleSchema.methods.release = async function () {
+schema.methods.release = async function () {
   const project = await this.getProject()
 
-  return StableRepo(this.packages, project.distributions)
+  return aptly.stable(this.packages, project.distributions)
 }
 
 // io listeners
-// TODO: would this make more logic being in core/controller/hook/io?
+// TODO: would this make more logic being in houston/controller/hook/io?
 atc.on('cycle:finished', async (data) => {
-  const cycle = await Cycle.findById(data.cycle)
+  const cycle = await cycle.findById(data.cycle)
 
   let status = 'FINISH'
   if (data.errors > 0) status = 'FAIL'
@@ -192,16 +188,14 @@ atc.on('cycle:finished', async (data) => {
 
   // TODO: update project information
   const project = await cycle.getProject()
-  for (let i in data.issues) {
+  for (const i in data.issues) {
     project.postIssue(data.issues[i])
   }
 })
 
 // TODO: figure out a way to detect mass import so we don't spam tests
-CycleSchema.post('save', async cycle => {
+schema.post('save', async (cycle) => {
   cycle.spawn()
 })
 
-const Cycle = Mongoose.model('cycle', CycleSchema)
-
-export default { Cycle, CycleSchema }
+export default db.model('cycle', schema)

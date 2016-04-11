@@ -2,12 +2,18 @@
  * flightcheck/apphub/pre.js
  * Checks for a valid apphub file
  *
- * @exports {Class} - AppHook class for checking a valid apphub file
+ * @exports {Class} - checks for a valid apphub file
  */
 
 import AppHook from '~/flightcheck/appHook'
 
-class AppHub extends AppHook {
+/**
+ * AppHub
+ * checks for a valid apphub file
+ *
+ * @param {Object} data - Includes project, cycle, and release (if applicible)
+ */
+export default class AppHub extends AppHook {
   constructor (data) {
     super(data, {
       name: 'apphub',
@@ -49,5 +55,3 @@ class AppHub extends AppHook {
     return
   }
 }
-
-export default AppHub

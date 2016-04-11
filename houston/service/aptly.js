@@ -132,7 +132,9 @@ const publish = (repo, dist) => {
     throw new Mistake(503, 'Aptly is currently disabled')
   }
 
-  const name = new Date().getTime().toString()
+  const name = new Date()
+  .getTime()
+  .toString()
 
   return request
   .post(`${config.aptly.url}/repos/${repo}/snapshots`)

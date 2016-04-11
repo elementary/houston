@@ -108,18 +108,16 @@ export const strategy = new github.Strategy({
 })
 
 // Koa server routes used for authentication
-const route = new Router({
+export const router = new Router({
   prefix: '/github'
 })
 
-route.get('/', passport.authenticate('github', {
+router.get('/', passport.authenticate('github', {
   scope: 'repo read:org'
 }))
 
-route.get('/callback', passport.authenticate('github'), (ctx, next) => {
+router.get('/callback', passport.authenticate('github'), (ctx, next) => {
   const path = ctx.session.originalUrl || '/dashboard'
   ctx.session.originalUrl = null
   return ctx.redirect(path)
 })
-
-export default route

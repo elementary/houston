@@ -2,14 +2,20 @@
  * flightcheck/changelog/pre.js
  * Checks .desktop file for name and icon
  *
- * @exports {Class} - AppHook class for checking .desktop file compatibility
+ * @exports {Class} - checks .desktop file compatibility
  */
 
-import Ini from 'ini'
+import ini from 'ini'
 
 import AppHook from '~/flightcheck/appHook'
 
-class Desktop extends AppHook {
+/**
+ * Desktop
+ * checks .desktop file compatibility
+ *
+ * @param {Object} data - Includes project, cycle, and release (if applicible)
+ */
+export default class Desktop extends AppHook {
   constructor (data) {
     super(data, {
       name: 'desktop',
@@ -27,7 +33,7 @@ class Desktop extends AppHook {
 
     let data = {}
     try {
-      data = Ini.parse((new Buffer(desktop, 'base64')).toString())
+      data = ini.parse((new Buffer(desktop, 'base64')).toString())
     } catch (err) {
       this.meta({ dump: err })
       this.error('parse')
@@ -50,5 +56,3 @@ class Desktop extends AppHook {
     return
   }
 }
-
-export default Desktop

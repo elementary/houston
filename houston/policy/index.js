@@ -6,5 +6,5 @@
  * @exports {Function} isRole - Koa policy for user permissions
  */
 
-export * as ifRole from './ifRole'
-export * as isRole from './isRole'
+export ifRole from './ifRole'
+export isRole from './isRole'

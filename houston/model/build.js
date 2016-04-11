@@ -1,22 +1,22 @@
 /**
- * core/model/build.js
+ * houston/model/build.js
  * Mongoose schema for builds
  *
- * @exports {Object} default {
- *   {Object} buildSchema - Mongoose schema for build model
- * }
+ * @exports {Object} - build database model
+ * @exports {Object} schema - build database schema
  */
 
-import Promise from 'bluebird'
-
-import { Config, Db as Mongoose, Log } from '~/app'
+import config from '~/lib/config'
+import db from '~/lib/database'
+import log from '~/lib/log'
+import Mistake from '~/lib/mistake'
 
 // TODO: move jenkins to superagent
-const jenkins = (Config.jenkins)
-  ? require('then-jenkins')(Config.jenkins.url)
+const jenkins = (config.jenkins)
+  ? require('then-jenkins')(config.jenkins.url)
   : null
 
-const BuildSchema = new Mongoose.Schema({
+export const schema = new db.Schema({
   dist: {
     type: String,
     required: true
@@ -45,11 +45,11 @@ const BuildSchema = new Mongoose.Schema({
   finished: Date
 })
 
-BuildSchema.methods.getCycle = function () {
+schema.methods.getCycle = function () {
   return this.model('cycle').findOne({builds: this._id})
 }
 
-BuildSchema.methods.getProject = async function () {
+schema.methods.getProject = async function () {
   const cycle = await this.getCycle()
 
   if (cycle == null) {
@@ -60,17 +60,16 @@ BuildSchema.methods.getProject = async function () {
 }
 
 // TODO: no services in models!
-BuildSchema.methods.doBuild = async function () {
+schema.methods.doBuild = async function () {
   const cycle = await this.getCycle()
   const project = await this.getProject()
 
   const changelog = await project.generateChangelog(this.dist, this.arch)
-  Log.silly(`Generated changelog for ${project.github.fullName}`)
-  Log.silly('\n' + changelog)
+  log.silly(`Generated changelog for ${project.github.fullName}\n${changelog}`)
 
-  if (Config.jenkins) {
+  if (config.jenkins) {
     return jenkins.job.build({
-      name: Config.jenkins.job,
+      name: config.jenkins.job,
       parameters: {
         PACKAGE: project.name,
         VERSION: await cycle.getVersion(),
@@ -82,29 +81,29 @@ BuildSchema.methods.doBuild = async function () {
         IDENTIFIER: this._id.toString()
       }
     })
-    .then(queue => this.update({ 'jenkins.queue': queue }))
-    .catch(err => Log.error(err))
+    .then((queue) => this.update({ 'jenkins.queue': queue }))
+    .catch((err) => {
+      throw new Mistake(500, `Houston was unable to start a build for ${project.name}`, err)
+    })
   } else {
-    Log.info('Jenkins has been disabled in configuration file. No build is running')
+    log.info('Jenkins has been disabled in configuration file. No build is running')
     return Promise.resolve()
   }
 }
 
-BuildSchema.methods.getLog = function () {
-  if (Config.jenkins) {
-    return jenkins.build.log(Config.jenkins.job, this.jenkins.build)
-    .then(log => this.model('build').findByIdAndUpdate(this._id, { log }, { new: true }))
+schema.methods.getLog = function () {
+  if (config.jenkins) {
+    return jenkins.build.log(config.jenkins.job, this.jenkins.build)
+    .then((log) => this.model('build').findByIdAndUpdate(this._id, { log }, { new: true }))
   }
 
   return Promise.resolve('Logs disabled in configuration file')
-  .then(log => this.model('build').findByIdAndUpdate(this._id, { log }, { new: true }))
+  .then((log) => this.model('build').findByIdAndUpdate(this._id, { log }, { new: true }))
 }
 
 // Mongoose lifecycle functions
-BuildSchema.post('save', build => {
+schema.post('save', (build) => {
   build.doBuild()
 })
 
-const Build = Mongoose.model('build', BuildSchema)
-
-export default { Build, BuildSchema }
+export default db.model('build', schema)

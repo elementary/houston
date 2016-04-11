@@ -42,15 +42,13 @@ export function setup (server) {
   log.silly('Passport setup complete')
 }
 
-const route = new Router({
+export const router = new Router({
   prefix: '/auth'
 })
 
-route.get('/logout', (ctx) => {
+router.get('/logout', (ctx) => {
   ctx.logout()
   ctx.redirect('/')
 })
 
-route.use(github.Route.routes(), github.Route.allowedMethods())
-
-export default route
+router.use(github.router.routes(), github.router.allowedMethods())

@@ -99,7 +99,7 @@ export function getProjects (token) {
 export function sendLabel (owner, name, token, label) {
   if (!config.github.post) {
     log.verbose('GitHub config prohibits posting. Not posting label')
-    return
+    return Promise.resolve()
   }
 
   return request
@@ -134,7 +134,7 @@ export function sendLabel (owner, name, token, label) {
 export function sendIssue (owner, name, token, issue, label) {
   if (!config.github.post) {
     log.verbose('GitHub config prohibits posting. Not submitting issue')
-    return
+    return Promise.resolve()
   }
 
   return request

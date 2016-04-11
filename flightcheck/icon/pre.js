@@ -2,12 +2,18 @@
  * flightcheck/icon/pre.js
  * Checks for icon sizes
  *
- * @exports {Class} - AppHook class for chacking icon sizes
+ * @exports {Class} - checks icon sizes
  */
 
 import AppHook from '~/flightcheck/appHook'
 
-class Icon extends AppHook {
+/**
+ * Icon
+ * checks icon sizes
+ *
+ * @param {Object} data - Includes project, cycle, and release (if applicible)
+ */
+export default class Icon extends AppHook {
   constructor (data) {
     super(data, {
       name: 'icon',
@@ -29,5 +35,3 @@ class Icon extends AppHook {
   }
 
 }
-
-export default Icon

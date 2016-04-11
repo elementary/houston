@@ -2,14 +2,20 @@
  * flightcheck/changelog/pre.js
  * Checks all releases have changelogs
  *
- * @exports {Class} - AppHook class for checking all GitHub releases have a body
+ * @exports {Class} - checks that all GitHub releases have a body
  */
 
 import AppHook from '~/flightcheck/appHook'
 
-import { Request } from '~/app'
+import request from '~/lib/request'
 
-class Changelog extends AppHook {
+/**
+ * Changelog
+ * checks that all GitHub releases have a body
+ *
+ * @param {Object} data - Includes project, cycle, and release (if applicible)
+ */
+export default class Changelog extends AppHook {
   constructor (data) {
     super(data, {
       name: 'changelog',
@@ -18,18 +24,12 @@ class Changelog extends AppHook {
   }
 
   test () {
-    return Request
+    return request
     .get(`https://api.github.com/repos/${this.data.project.github.fullName}/releases`)
     .auth(this.data.project.github.token)
     .then((res) => res.body)
-    .then((releases) => {
-      for (const i in releases) {
-        const release = releases[i]
-        if (release.body === '') this.error(release.tag_name)
-      }
-      return Promise.resolve()
+    .each((release) => {
+      if (release.body === '') this.error(release.tag_name)
     })
   }
 }
-
-export default Changelog
