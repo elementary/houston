@@ -21,7 +21,7 @@ block body
             p= project.name
             p.subtext: a(href="https://github.com/" + project.github.fullName)= project.github.fullName
           //- TODO: We can remove this on release
-          if Config.env === 'development'
+          if config.env === 'development'
             | <!-- !{JSON.stringify(project, 2, 4)} -->
   if reviews.length > 0
     div.row
@@ -39,5 +39,5 @@ block body
             p #{cycle.project.name} @ #{cycle.release.version}
             p.subtext: a(href="https://github.com/" + cycle.project.github.fullName)= cycle.project.github.fullName
         //- TODO: We can remove this on release
-        if Config.env === 'development'
+        if config.env === 'development'
           | <!-- !{JSON.stringify(cycle, 2, 4)} -->

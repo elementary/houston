@@ -387,3 +387,17 @@ section.hero .button.suggested-action{
     text-align: center;
     display: block;
 }
+
+/*************
+* Error Page *
+*************/
+
+section.error {
+    text-align: center;
+    padding: 10% 0;
+    max-width: 100%;
+}
+
+section.error .button.suggested-action{
+    max-width: 100%;
+}

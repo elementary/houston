@@ -15,7 +15,7 @@ import Project from '~/houston/model/project'
 
 const route = new Router()
 
-route.get('/', (ctx) => {
+route.get('', (ctx) => {
   return ctx.render('index', { hideUser: true })
 })
 
@@ -46,6 +46,7 @@ route.get('/dashboard', policy.isRole('user'), async (ctx, next) => {
       type: 'RELEASE',
       _status: 'REVIEW'
     })
+    .exec()
     .map(async (cycle) => {
       cycle.project = await cycle.getProject()
       cycle.release = await cycle.getRelease()

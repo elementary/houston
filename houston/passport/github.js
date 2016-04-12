@@ -34,11 +34,11 @@ const getMembership = function (member, user) {
   .get(url)
   .auth(user.github.access)
   .then((data) => {
-    if (data.body != null) return (data.body.state === 'active')
-    if (data.statusType === 2) return true
-    return false
+    if (data.statusType !== 2) return false
+    if (data.status === 204) return true
+    return (data.body.state === 'active')
   })
-  .catch(false)
+  .catch(() => false)
 }
 
 /**

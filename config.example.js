@@ -22,8 +22,6 @@ export const github = {
 
 // GitHub identifiers for admin, reviewer, and beta groups
 export const rights = {
-
-  // https://developer.github.com/v3/orgs/teams/#get-team
   beta: 'elementary',
   admin: 213128,
   review: 1880652

@@ -43,6 +43,27 @@ app.use(async (ctx, next) => {
   log.verbose(`${ctx.method} ${ctx.status} ${ctx.url} => ${end - start}ms`)
 })
 
+// Static 'public' folder serving
+app.use(koaStatic(path.join(__dirname, 'public')))
+
+// Setup server rendering
+app.use(convert(view(path.join(__dirname, 'views'), {
+  extension: 'jade',
+  cache: (app.env === 'production')
+})))
+
+app.use(async (ctx, next) => {
+  ctx.render = co.wrap(ctx.render)
+  ctx.Mistake = Mistake
+
+  ctx.state.basedir = path.normalize(`${__dirname}/views`)
+  ctx.state.config = config
+  ctx.state.helper = helpers
+
+  ctx.state.title = 'Houston'
+  await next()
+})
+
 // Error pages
 // eslint-disable-next-line consistent-return
 app.use(async (ctx, next) => {
@@ -54,7 +75,7 @@ app.use(async (ctx, next) => {
     const htmlRespond = (ctx.accepts(['json', 'html']) === 'html')
 
     const pkg = {
-      status: error.status
+      status: error.status || 500
     }
 
     if (app.env === 'development') {
@@ -75,27 +96,6 @@ app.use(async (ctx, next) => {
       return null
     }
   }
-})
-
-// Static 'public' folder serving
-app.use(koaStatic(path.join(__dirname, 'public')))
-
-// Setup server rendering
-app.use(convert(view(path.join(__dirname, 'views'), {
-  extension: 'jade',
-  cache: (app.env === 'production')
-})))
-
-app.use(async (ctx, next) => {
-  ctx.render = co.wrap(ctx.render)
-  ctx.Mistake = Mistake
-
-  ctx.state.basedir = path.normalize(`${__dirname}/views`)
-  ctx.state.config = config
-  ctx.state.helper = helpers
-
-  ctx.state.title = 'Houston'
-  await next()
 })
 
 // Start Passport
@@ -135,12 +135,20 @@ app.on('error', async (error, ctx, next) => {
   if (app.env === 'test') return
 
   if (/4.*/.test(error.status)) {
-    log.verbose(`${ctx.method} ${ctx.status} ${ctx.url} => ${error.message}`)
+    log.verbose(`${ctx.method} ${ctx.status} ${ctx.url} |> ${error.message}`)
   } else {
     log.error(error)
   }
 
-  await next()
+  try {
+    await next()
+  } catch (err) {
+    ctx.status = 500
+
+    // TODO: add server monkey email address for emergency dispatching
+    ctx.body = "Houston has failed epically. But don't worry, our server monkey has been dispatched"
+    return
+  }
 })
 
 // Launching server

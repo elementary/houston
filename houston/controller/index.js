@@ -11,12 +11,11 @@ import dash from './dash'
 import hooks from './hook'
 import project from './project'
 
-const route = new Router({
-  prefix: '/'
-})
+const route = new Router()
+
+route.use(hooks.routes(), hooks.allowedMethods())
 
 route.use(dash.routes(), dash.allowedMethods())
-route.use(hooks.routes(), hooks.allowedMethods())
 route.use(project.routes(), project.allowedMethods())
 
 export default route
