@@ -25,7 +25,7 @@ import request from '~/lib/request'
  * @returns {Array} - Mapped releases
  */
 export function getReleases (owner, name, token) {
-  if (!config.aptly) {
+  if (!config.github) {
     throw new Mistake(503, 'Github is currently disabled')
   }
 
@@ -58,6 +58,10 @@ export function getReleases (owner, name, token) {
  * @returns {Array} - Mapped projects
  */
 export function getProjects (token) {
+  if (!config.github) {
+    throw new Mistake(503, 'Github is currently disabled')
+  }
+
   return request
   .get('https://api.github.com/user/repos?visibility=public')
   .auth(token)

@@ -401,3 +401,7 @@ section.error {
 section.error .button.suggested-action{
     max-width: 100%;
 }
+
+section.error pre {
+    text-align: left;
+}

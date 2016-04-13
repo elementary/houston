@@ -28,7 +28,7 @@ export const rights = {
 }
 
 export const jenkins = {
-  url: 'http://john:1234@jenkins.elementaryos.org',
+  url: 'http://localhost:3001',
   public: 'ZPYYkQFAL7nShsnczM4uWGmjbVPLZCp7',
   secret: 'ft2DH0i6zixHGpShlWt99vgCL7uBpqKT',
 
@@ -52,11 +52,6 @@ export const server = {
 
   // Full route including port and protocol, without trailing slash
   url: 'http://localhost:3000'
-}
-
-export const socket = {
-  public: 'VcSpPL255upq4vF5nGJjmOWVUgbQGYcc',
-  private: 'KUfwXUo3HDVvErvAyVp113SLE3zcQLZm'
 }
 
 export const log = {

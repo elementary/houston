@@ -19,11 +19,20 @@ describe('project', () => {
 
       const result = new Error(`${lang.s('error', res.errorCount)} and ${lang.s('warning', res.warningCount)} found`)
       result.stack = res.results.map((result) => {
-        const filePath = result.filePath.replace(path.join(config.houston.root, '/'), '')
+        if (result.messages.length <= 0) {
+          return ''
+        }
 
-        return result.messages.map((message) => {
-          return `\n${filePath}:${message.line}:${message.column} ${message.message} (${message.ruleId})`
+        let rtn = `\n    ${result.filePath.replace(path.join(config.houston.root, '/'), '')}`
+
+        rtn += result.messages.map((message) => {
+          let rtn = '\n      '
+          rtn += `${message.line}:${message.column}${' '.repeat(7 - (message.line.toString().length + message.column.toString().length))}`
+          rtn += `${message.message} (${message.ruleId})`
+          return rtn
         })
+
+        return rtn
       })
       .splice(0, maxRules)
       .join('')

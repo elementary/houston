@@ -4,7 +4,7 @@
  */
 
 import * as fsHelper from '~/lib/helpers/fs'
-import atc from '~/lib/atc'
+import Atc from '~/lib/atc'
 import config from '~/lib/config'
 import log from '~/lib/log'
 
@@ -31,7 +31,11 @@ import log from '~/lib/log'
  * }
  */
 const runHooks = async (data, test) => {
-  const hooks = await fsHelper.walk('flightcheck', (path) => path.indexOf(`${test.toLowerCase()}.js`) !== 0)
+  const hooks = await fsHelper.walk('flightcheck', (path) => {
+    if (path.indexOf('/') === -1) return false
+    return path.indexOf(`${test.toLowerCase()}.js`) !== 0
+  })
+  console.log(hooks)
   const tests = hooks.map((Hook) => {
     return new Hook(data).run()
   })
@@ -59,15 +63,18 @@ const runHooks = async (data, test) => {
   })
 }
 
-// Starts atc communication
-atc.init('client', config.server.url)
+// Start a new atc connection
+const connection = new Atc('flightcheck')
+connection.connect(config.server.url)
 
-atc.on('cycle:start', (data) => {
+log.info('Flightcheck running')
+
+connection.on('cycle:start', (data) => {
   log.debug(`Starting flightcheck on ${data.project.name}`)
 
   runHooks(data, 'pre')
   .then((pkg) => {
-    atc.send('cycle:finished', pkg)
+    connection.send('houston', 'cycle:finished', pkg)
 
     log.debug(`Found ${log.lang.s('error', pkg.errors)} in ${data.project.name}`)
   })

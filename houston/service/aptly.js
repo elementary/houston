@@ -27,7 +27,7 @@ const upload = (pkg, version) => {
   return request
   .post(`${config.aptly.url}/repos/${config.aptly.review}/file/${pkg}-${version}`)
   .then((data) => {
-    log.silly(`Added ${log.lang.s('package', data.body.Report.Added)}`)
+    log.debug(`Added ${log.lang.s('package', data.body.Report.Added)}`)
 
     return request
     .get(`${config.aptly.url}/repos/${config.aptly.review}/packages`)

@@ -7,7 +7,7 @@
  */
 
 import db from '~/lib/database'
-import atc from '~/lib/atc'
+import atc from '~/houston/service/atc'
 import Build from './build'
 import * as aptly from '~/houston/service/aptly'
 
@@ -129,7 +129,7 @@ schema.methods.spawn = async function () {
     this.getTag()
   ])
   .then(([project, release, repo, tag]) => {
-    atc.send('cycle:start', {
+    atc.send('flightcheck', 'cycle:start', {
       repo,
       tag,
       project,
@@ -158,12 +158,11 @@ schema.methods.build = async function () {
     }
   }
 
-  const ids = builds.map((b) => b._id)
-
-  return Promise.all([
-    cycle.update({$pushAll: {builds: ids}}).exec(),
-    Build.create(builds)
-  ])
+  return Promise.each(builds, (build) => {
+    return cycle.update({$push: {builds: build.id}})
+    .then(() => Build.create(build))
+    .then((build) => build.doBuild())
+  })
 }
 
 schema.methods.release = async function () {
@@ -171,27 +170,6 @@ schema.methods.release = async function () {
 
   return aptly.stable(this.packages, project.distributions)
 }
-
-// io listeners
-// TODO: would this make more logic being in houston/controller/hook/io?
-atc.on('cycle:finished', async (data) => {
-  const cycle = await cycle.findById(data.cycle)
-
-  let status = 'FINISH'
-  if (data.errors > 0) status = 'FAIL'
-  if (cycle.type === 'RELEASE' && status !== 'FAIL') {
-    cycle.build()
-    status = 'BUILD'
-  }
-
-  cycle.update({ '_status': status }).exec()
-
-  // TODO: update project information
-  const project = await cycle.getProject()
-  for (const i in data.issues) {
-    project.postIssue(data.issues[i])
-  }
-})
 
 // TODO: figure out a way to detect mass import so we don't spam tests
 schema.post('save', async (cycle) => {

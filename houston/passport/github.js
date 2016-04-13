@@ -64,7 +64,7 @@ const getRights = async function (user) {
       right = 'BETA'
     }
 
-    log.verbose(`Giving new right of ${right} to ${user.username}`)
+    log.debug(`Giving new right of ${right} to ${user.username}`)
 
     return User.findByIdAndUpdate(user._id, { right }, { new: true })
   }

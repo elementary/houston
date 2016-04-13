@@ -3,53 +3,85 @@
  * Test atc library for socket connection
  */
 
-import Chai from 'chai'
-import Koa from 'koa'
-import Http from 'http'
-import _ from 'lodash'
+import chai from 'chai'
+import http from 'http'
 
-import { Config } from '~/app'
+import config from '~/lib/config'
+import Atc from '~/lib/atc'
 
-const expect = Chai.expect
+const assert = chai.assert
 
-let koaServer
 let httpServer
-let server
-let client
+let io
 
-describe('lib/atc', () => {
-  beforeEach(function (done) {
-    koaServer = new Koa()
-    httpServer = Http.createServer(koaServer.callback())
+describe('atc', () => {
+  beforeEach((done) => {
+    httpServer = http.createServer((req, res) => {
+      res.send('ok')
+    })
 
-    server = _.cloneDeep(require('../../lib/atc'))
-    server.init('server', httpServer)
+    io = require('socket.io')(httpServer)
 
-    delete require.cache[require.resolve('../../lib/atc')]
-
-    client = _.cloneDeep(require('../../lib/atc'))
-
-    httpServer.listen(Config.server.port + 1, () => {
-      client.init('client', Config.server.port + 1)
+    httpServer.listen(config.server.port, () => {
       done()
     })
   })
 
-  afterEach(function (done) {
+  afterEach((done) => {
     httpServer.close()
-    koaServer = null
     httpServer = null
-    server = null
-    client = null
+    io = null
     done()
   })
 
-  it('sends messages', function (done) {
-    client.on('msg:test', (msg) => {
-      expect(msg).is('works')
+  it('can connect to socket session', (done) => {
+    io.on('connection', (socket) => {
       done()
     })
 
-    server.send('msg:test', 'works')
+    const con = new Atc('flightcheck')
+    con.connect(config.server.url)
+  })
+
+  it('will establish a connection and send type', (done) => {
+    io.on('connection', (socket) => {
+      socket.on('atc:type', (type) => {
+        assert.equal(type, 'flightcheck', 'has correct atc type on connect')
+        done()
+      })
+    })
+
+    const con = new Atc('flightcheck')
+    con.connect(config.server.url)
+  })
+
+  it('will send a message', (done) => {
+    io.on('connection', (socket) => {
+      socket.on('msg:send', (subject, message) => {
+        assert.equal(subject, 'testing', 'has correct subject')
+        assert.equal(message, 'a testing message to test from', 'has correct message')
+        done()
+      })
+    })
+
+    const con = new Atc('flightcheck')
+    con.connect(config.server.url)
+    con.send('houston', 'testing', 'a testing message to test from')
+    .catch(done)
+  })
+
+  it('will queue a message and send when connected', (done) => {
+    io.on('connection', (socket) => {
+      socket.on('msg:send', (subject, message) => {
+        assert.equal(subject, 'testing', 'has correct subject')
+        assert.equal(message, 'a testing message to test from', 'has correct message')
+        done()
+      })
+    })
+
+    const con = new Atc('flightcheck')
+    con.send('houston', 'testing', 'a testing message to test from')
+    .then(() => con.connect(config.server.url))
+    .catch(done)
   })
 })

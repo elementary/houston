@@ -35,7 +35,6 @@
     "superagent": "^1.8.3",
     "superagent-promise-plugin": "^3.1.0",
     "superagent-use": "0.0.1",
-    "then-jenkins": "^0.7.1",
     "winston": "^2.2.0"
   },
   "devDependencies": {
@@ -50,7 +49,7 @@
     "houston": "node entry.js houston",
     "lint": "a-standard",
     "start": "npm run houston & npm run flightcheck",
-    "test": "NODE_ENV=test mocha entry.js tests --timeout 8000"
+    "test": "NODE_ENV=test mocha entry.js tests --timeout 3000"
   },
   "a-standard": {
     "rules": {

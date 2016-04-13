@@ -30,15 +30,15 @@ export default (user, role) => {
   }
 
   if (!config.rights) {
-    log.silly(`User rights disabled, letting ${user.username} access "${possibilities[role]}" section`)
+    log.debug(`User rights disabled, letting ${user.username} access "${possibilities[role]}" section`)
     return true
   }
 
   if (userRole >= role) {
-    log.silly(`${user.username} is a "${possibilities[userRole]}", allowing access to "${possibilities[role]}" section`)
+    log.debug(`${user.username} is a "${possibilities[userRole]}", allowing access to "${possibilities[role]}" section`)
     return true
   }
 
-  log.silly(`${user.username} is a "${possibilities[userRole]}", denying access to "${possibilities[role]}" section`)
+  log.debug(`${user.username} is a "${possibilities[userRole]}", denying access to "${possibilities[role]}" section`)
   return false
 }

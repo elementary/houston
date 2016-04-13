@@ -6,15 +6,11 @@
  * @exports {Object} schema - build database schema
  */
 
+import * as jenkins from '~/houston/service/jenkins'
 import config from '~/lib/config'
 import db from '~/lib/database'
 import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
-
-// TODO: move jenkins to superagent
-const jenkins = (config.jenkins)
-  ? require('then-jenkins')(config.jenkins.url)
-  : null
 
 export const schema = new db.Schema({
   dist: {
@@ -65,21 +61,18 @@ schema.methods.doBuild = async function () {
   const project = await this.getProject()
 
   const changelog = await project.generateChangelog(this.dist, this.arch)
-  log.silly(`Generated changelog for ${project.github.fullName}\n${changelog}`)
+  log.debug(`Generated changelog for ${project.github.fullName}\n${changelog}`)
 
   if (config.jenkins) {
-    return jenkins.job.build({
-      name: config.jenkins.job,
-      parameters: {
-        PACKAGE: project.name,
-        VERSION: await cycle.getVersion(),
-        REPO: await cycle.getRepo(),
-        DIST: this.dist,
-        ARCH: this.arch,
-        CHANGELOG: changelog,
-        REFERENCE: await cycle.getTag(),
-        IDENTIFIER: this._id.toString()
-      }
+    return jenkins.build({
+      PACKAGE: project.name,
+      VERSION: await cycle.getVersion(),
+      REPO: await cycle.getRepo(),
+      DIST: this.dist,
+      ARCH: this.arch,
+      CHANGELOG: changelog,
+      REFERENCE: await cycle.getTag(),
+      IDENTIFIER: this._id.toString()
     })
     .then((queue) => this.update({ 'jenkins.queue': queue }))
     .catch((err) => {
@@ -93,17 +86,12 @@ schema.methods.doBuild = async function () {
 
 schema.methods.getLog = function () {
   if (config.jenkins) {
-    return jenkins.build.log(config.jenkins.job, this.jenkins.build)
+    return jenkins.log(this.jenkins.build)
     .then((log) => this.model('build').findByIdAndUpdate(this._id, { log }, { new: true }))
   }
 
   return Promise.resolve('Logs disabled in configuration file')
   .then((log) => this.model('build').findByIdAndUpdate(this._id, { log }, { new: true }))
 }
-
-// Mongoose lifecycle functions
-schema.post('save', (build) => {
-  build.doBuild()
-})
 
 export default db.model('build', schema)

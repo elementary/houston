@@ -39,7 +39,7 @@ export function setup (server) {
     await next()
   })
 
-  log.silly('Passport setup complete')
+  log.debug('Passport setup complete')
 }
 
 export const router = new Router({

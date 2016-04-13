@@ -19,13 +19,13 @@ route.get('', (ctx) => {
   return ctx.render('index', { hideUser: true })
 })
 
-route.get('/dashboard', policy.isRole('user'), async (ctx, next) => {
+route.get('/dashboard', policy.isRole('beta'), async (ctx, next) => {
   const projects = await github.getProjects(ctx.user.github.access)
   .map(async (repo) => {
     const db = await Project.findOne({ 'github.id': repo.github.id })
     if (db != null) return db
 
-    log.silly(`Creating a new project for ${repo.github.owner}/${repo.github.name}`)
+    log.debug(`Creating a new project for ${repo.github.owner}/${repo.github.name}`)
     return Project.create(Object.assign({
       owner: ctx.user._id
     }, repo))
@@ -40,7 +40,7 @@ route.get('/dashboard', policy.isRole('user'), async (ctx, next) => {
   // TODO: Get some design input on this, and possibly a unique page
   let reviews = []
   if (policy.ifRole(ctx.user, 'review')) {
-    log.silly('Grabbing projects waiting to be reviewed')
+    log.debug('Grabbing projects waiting to be reviewed')
 
     reviews = await Cycle.find({
       type: 'RELEASE',

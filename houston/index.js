@@ -3,7 +3,7 @@
  * Starts Houston's Web Interface
  *
  * @exports {Object} app - Koa server object
- * @exports {Object} server - Http instance of koa server with atc listener
+ * @exports {Object} server - Running Http server
  */
 
 import co from 'co'
@@ -18,7 +18,7 @@ import view from 'koa-views'
 
 import * as helpers from '~/lib/helpers'
 import * as passport from './passport'
-import atc from '~/lib/atc'
+import atc from './service/atc'
 import config from '~/lib/config'
 import controllers from './controller'
 import db from '~/lib/database'
@@ -33,7 +33,7 @@ app.env = config.env
 
 // Socket installation
 const server = http.createServer(app.callback())
-atc.init('server', server)
+atc.connect(server)
 
 // App logging
 app.use(async (ctx, next) => {

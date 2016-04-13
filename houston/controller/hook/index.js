@@ -17,4 +17,7 @@ const route = new Router({
 route.use(github.routes(), github.allowedMethods())
 route.use(jenkins.routes(), jenkins.allowedMethods())
 
+// Use event hook listeners as well
+require('./atc')
+
 export default route
