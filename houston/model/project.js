@@ -134,19 +134,16 @@ schema.methods.postIssue = function (issue) {
 schema.methods.generateChangelog = function (dist, arch) {
   return this.model('release')
   .find({_id: {$in: this.releases}})
-  .then((releases) => {
-    releases.sort((a, b) => semver.rcompare(a.version, b.version))
-
-    return releases.map((release) => {
-      return render('houston/views/changelog.nun', {
-        dist,
-        arch,
-        release,
-        project: this
-      }, false)
-    })
+  .then((releases) => releases.sort((a, b) => semver.rcompare(a.version, b.version)))
+  .map((release) => {
+    return render('houston/views/changelog.nun', {
+      dist,
+      arch,
+      release,
+      project: this
+    }, false).body
   })
-  .then((releases) => releases.join('\n'))
+  .then((releases) => releases.join('\n\n'))
 }
 
 export default db.model('project', schema)

@@ -35,7 +35,6 @@ const runHooks = async (data, test) => {
     if (path.indexOf('/') === -1) return false
     return path.indexOf(`${test.toLowerCase()}.js`) !== 0
   })
-  console.log(hooks)
   const tests = hooks.map((Hook) => {
     return new Hook(data).run()
   })

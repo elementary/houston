@@ -1,4 +1,6 @@
 {{ project.name }} ({{ release.version }}) {{ dist }}; urgency=low
+
 {% for changelog in release.changelog %}  * {{ changelog }}
-{% endfor -%}
+{% endfor %}
+
 {{ " " }}-- {{ release.github.author }} <{{ release.github.author }}@houston.elementary.io>  {{ release.github.debianDate }}

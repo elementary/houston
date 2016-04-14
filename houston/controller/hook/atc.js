@@ -9,14 +9,12 @@ import Cycle from '~/houston/model/cycle'
 atc.on('cycle:finished', async (data) => {
   const cycle = await Cycle.findById(data.cycle)
 
-  let status = 'FINISH'
-  if (data.errors > 0) status = 'FAIL'
-  if (cycle.type === 'RELEASE' && status !== 'FAIL') {
+  if (data.errors > 0) {
+    cycle.update({ '_status': 'FAIL' })
+  } else if (cycle.type === 'RELEASE') {
     cycle.build()
-    status = 'BUILD'
+    .then(() => cycle.update({ '_status': 'BUILD' }))
   }
-
-  cycle.update({ '_status': status }).exec()
 
   // TODO: update project information
   const project = await cycle.getProject()
