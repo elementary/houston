@@ -14,7 +14,7 @@ import config from '~/lib/config'
 import render from '~/lib/render'
 
 const route = new Router({
-  prefix: '/hook/jenkins/:key'
+  prefix: '/jenkins/:key'
 })
 
 route.param('key', async (key, ctx, next) => {
@@ -43,6 +43,7 @@ route.post('/', async (ctx) => {
   const build = await Build.findByIdAndUpdate(jenkins.parameters.IDENTIFIER, {
     'jenkins.build': jenkins.number
   }, { new: true })
+  .exec()
   .catch((error) => {
     throw new ctx.Mistake(500, error)
   })
@@ -81,11 +82,11 @@ route.post('/', async (ctx) => {
         render('houston/views/build.md', { build }),
         project.github.label
       )
+    } else {
+      return build
     }
-
-    return build
   })
-  .then((build) => {
+  .then(() => {
     ctx.status = 204
     return
   })

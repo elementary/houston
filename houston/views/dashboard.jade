@@ -26,7 +26,7 @@ block body
   if reviews.length > 0
     div.row
       h3 Reviews
-      h4 #{Helpers.ArrayString('review is', reviews)} pending
+      h4 #{helper.lang.s('review is', reviews)} pending
       each cycle in reviews
         div.repo
           div.right

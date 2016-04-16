@@ -27,7 +27,7 @@ const upload = (pkg, version) => {
   return request
   .post(`${config.aptly.url}/repos/${config.aptly.review}/file/${pkg}-${version}`)
   .then((data) => {
-    log.debug(`Added ${log.lang.s('package', data.body.Report.Added)}`)
+    log.debug(`Added ${log.lang.s('package', data.body.Report.Added)} of ${pkg}`)
 
     return request
     .get(`${config.aptly.url}/repos/${config.aptly.review}/packages`)
@@ -61,7 +61,7 @@ const add = (pkg, repo) => {
   .send({
     PackageRefs: pkg
   })
-  .catch((error) => {
+  .then((d) => d, (error) => {
     if (error.statusCode === 400) {
       throw new Mistake(500, 'Package conflicts with existing package in aptly')
     } else if (error.statusCode === 404) {
@@ -90,7 +90,7 @@ const remove = (pkg, repo) => {
   .send({
     PackageRefs: pkg
   })
-  .catch((error) => {
+  .then((d) => d, (error) => {
     if (error.statusCode === 404) {
       throw new Mistake(500, 'Repository does not exist in aptly')
     }
@@ -127,7 +127,7 @@ const move = (pkg, repoFrom, repoTo) => {
  * @param {Array} dist - Distributions to publish
  * @returns {Promise} - Empty promise of success
  */
-const publish = (repo, dist) => {
+const publish = async (repo, dist) => {
   if (!config.aptly) {
     throw new Mistake(503, 'Aptly is currently disabled')
   }
@@ -136,20 +136,11 @@ const publish = (repo, dist) => {
   .getTime()
   .toString()
 
-  return request
+  await request
   .post(`${config.aptly.url}/repos/${repo}/snapshots`)
   .send({
     Name: name,
     Description: 'Automated Houston publish'
-  })
-  .catch((error) => {
-    if (error.statusCode === 400) {
-      throw new Mistake(500, 'Snapshot already exists in aptly')
-    } else if (error.statusCode === 404) {
-      throw new Mistake(500, 'Repository does not exist in aptly')
-    }
-
-    throw new Mistake(500, error)
   })
   .then(() => Promise.each(dist, (d) => {
     return request
@@ -164,7 +155,18 @@ const publish = (repo, dist) => {
         Passphrase: config.aptly.passphrase
       }
     })
-  }))
+    .then((d) => d, (error) => {
+      throw new Mistake(500, error)
+    })
+  }), (error) => {
+    if (error.statusCode === 400) {
+      throw new Mistake(500, 'Snapshot already exists in aptly', error)
+    } else if (error.statusCode === 404) {
+      throw new Mistake(500, 'Repository does not exist in aptly', error)
+    }
+
+    throw new Mistake(500, error)
+  })
 }
 
 /**
