@@ -10,10 +10,17 @@ const assert = chai.assert
 
 describe('config', () => {
   afterEach((done) => {
-    delete require.cache[require.resolve('../mocks/config')]
-    delete require.cache[require.resolve('../../config')]
-    delete require.cache[require.resolve('../../config.example.js')]
-    delete require.cache[require.resolve('../../lib/config')]
+    const files = [
+      require.resolve('../mocks/config'),
+      require.resolve('../../config.example.js'),
+      require.resolve('../../lib/config')
+    ]
+
+    files.forEach((file) => {
+      if (require.cache[file] != null) {
+        delete require.cache[file]
+      }
+    })
 
     done()
   })
