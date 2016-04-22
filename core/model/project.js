@@ -120,9 +120,28 @@ ProjectSchema.methods.getVersion = function () {
   if (this.releases.length < 1) return Promise.resolve('0.0.0')
 
   return this.model('release')
-  .findOne({_id: {$in: this.releases}})
-  .sort({'github.date': -1})
-  .then(release => release.version)
+  .find({_id: {$in: this.releases}})
+  .then(releases => releases.sort((a, b) => Semver.rcompare(a.version, b.version)))
+  .then(releases => releases[0].version)
+}
+
+ProjectSchema.methods.getReleased = function () {
+  if (this.releases.length < 1) return Promise.resolve(null)
+
+  return this.model('release')
+  .find({_id: {$in: this.releases}})
+  .then(releases => releases.sort((a, b) => Semver.rcompare(a.version, b.version)))
+  .then(releases => {
+    return Promise.filter(releases, (release) => {
+      return release.getStatus()
+      .then((status) => status === 'FINISH')
+    })
+  })
+  .then(releases => {
+    if (releases.length > 0) return releases[0]
+
+    return null
+  })
 }
 
 ProjectSchema.methods.postLabel = function () {

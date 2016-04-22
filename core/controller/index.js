@@ -8,3 +8,4 @@
 export * as Root from './root'
 export * as Hook from './hook'
 export * as Project from './project'
+export * as Shield from './shield'
