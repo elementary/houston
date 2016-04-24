@@ -1,3 +1,8 @@
+# Houston docker file
+# Builds an ubuntu base with liftoff for packaging debian applications
+#
+# Version: 1.0.0
+
 FROM ubuntu:xenial
 
 MAINTAINER elementary
