@@ -52,3 +52,7 @@ export const log = {
   level: 'silly',
   files: false
 }
+
+export const strongback = {
+  socket: '/var/run/docker.sock'
+}

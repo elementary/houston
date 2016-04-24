@@ -63,3 +63,7 @@ export const log = {
   // Create 'error.log' and 'info.log'
   files: false
 }
+
+export const strongback = {
+  socket: '/var/run/docker.sock'
+}
