@@ -13,6 +13,7 @@ process.on('unhandledRejection', (reason, promise) => {
   /* eslint-disable no-console */
   console.log(`Unhandled Rejection at: ${promise}`)
   console.log(reason)
+  console.log(reason.stack)
   /* eslint-enable no-console */
 })
 

@@ -11,7 +11,7 @@ import db from '~/lib/database'
 import grid from '~/lib/grid'
 import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
-import toDot from '~/lib/helpers/dotNotation'
+import * as dotNotation from '~/lib/helpers/dotNotation'
 
 export const schema = new db.Schema({
   dist: {
@@ -86,10 +86,10 @@ schema.virtual('file').set(function (file, metadata) {
  * @return {Object} - mongoose query of update
  */
 schema.methods.update = function (obj, opt) {
-  return this.model('cycle').update({
+  return db.model('cycle').update({
     _id: this.cycle._id,
     'builds._id': this._id
-  }, toDot(obj, '.', 'builds.&'), opt)
+  }, dotNotation.toDot(obj, '.', 'builds.$'), opt)
 }
 
 // sets wasNew for post middleware where isNew property does not exist
