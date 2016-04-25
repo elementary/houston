@@ -62,8 +62,9 @@ class HoustonAtc extends Atc {
         const i = _.findIndex(this.sent[socket.type], (obj) => {
           return obj.hash === hash
         })
+        const message = this.sent[socket.type][i]
 
-        this.emit(`${this.sent[socket.type][i]['subject']}:received`)
+        this.emit(`${message.subject}:received`, message.message)
         this.sent[socket.type] = _.pullAt(this.sent[socket.type], i)
       })
     })

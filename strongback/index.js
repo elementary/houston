@@ -116,38 +116,33 @@ log.info('Strongback running')
  *   {String} arch - architecture to build (amd64)
  *   {String} changelog - build changelog
  *   {String} dist - distribution to build (xenial)
- *   {String} owner - repo owner on github (vocalapp)
- *   {String} repo - repo name on github (vocal)
- *   {String} tag - git tag to checkout
- *   {String} version - package version
- *   {String} token - github access token for cloning repo
+ *   {String} name - project name (vocal)
+ *   {String} repo - git repository (https://github.com/elementary/vocal)
+ *   {String} tag - git tag to checkout (v2.0.0)
+ *   {String} version - package version (2.0.0)
  * }
  * @returns {Object} - {
+ *   {Boolean} success - true if successful build (only exists on build)
+ *   {Error} error - error while trying to build (only exists on failure to run build)
+ *   {Object} files - files to send back to houston
  *   {String} arch - architecture to build (amd64)
  *   {String} dist - distribution to build (xenial)
- *   {Error} error - error while trying to build (only exists on failure to run build)
- *   {String} owner - repo owner on github (vocalapp)
- *   {String} repo - repo name on github (vocal)
- *   {Boolean} success - true if successful build (only exists on build)
- *   {String} tag - git tag to checkout
- *   {String} version - package version
- *   {Array} files - [{
- *     {String} name - file name
- *     {String} data - file data
- *   }]
+ *   {String} name - project name (vocal)
+ *   {String} repo - git repo address (https://github.com/elementary/vocal)
+ *   {String} tag - git tag to checkout (v2.0.0)
+ *   {String} version - package version (2.0.0)
  * }
  */
 connection.on('build:start', (data) => {
   // Added security measure just in case someone tries to slip us something bad
-  data.owner = escape(data.owner.replace(/[\/]/gi, ''))
-  data.repo = escape(data.repo.replace(/[\/]/gi, ''))
-  data.tag = escape(data.tag.replace(/[\/]/gi, ''))
-  data.dist = escape(data.dist.replace(/[\/]/gi, ''))
   data.arch = escape(data.arch.replace(/[\/]/gi, ''))
+  data.dist = escape(data.dist.replace(/[\/]/gi, ''))
+  data.name = escape(data.name.replace(/[\/]/gi, ''))
+  data.tag = escape(data.tag.replace(/[\/]/gi, ''))
 
-  log.info(`Starting build for ${data.owner}/${data.repo}#${data.tag}`)
+  log.info(`Starting build for ${data.name}#${data.tag}`)
 
-  const projectFolder = path.resolve(projectsFolder, `${data.owner}-${data.repo}-${data.tag}`)
+  const projectFolder = path.resolve(projectsFolder, `${data.name}#${data.tag}`)
   const repoFolder = path.resolve(projectFolder, 'code')
 
   cmd(`rm -rf ${projectFolder}`) // Clean up any left behind data
@@ -156,7 +151,7 @@ connection.on('build:start', (data) => {
     cmd(`mkdir -p ${repoFolder}`)
   ]))
   .then(() => { // Git repository setup
-    return cmd(`git clone https://${data.token}@github.com/${data.owner}/${data.repo} ${repoFolder}`)
+    return cmd(`git clone ${data.repo} ${repoFolder}`)
     .then(() => cmd(`git --git-dir=${repoFolder}/.git --work-tree=${repoFolder} checkout ${data.tag}`))
     .then(() => cmd(`rm -rf ${repoFolder}/.git`))
   })
@@ -169,21 +164,21 @@ connection.on('build:start', (data) => {
     throw new Mistake(500, 'Unable to setup workspace', error)
   })
   .then(() => { // Run build container
-    log.debug(`Building container for ${data.owner}/${data.repo}#${data.tag}`)
+    log.debug(`Building container for ${data.name}#${data.tag}`)
 
     return new Promise((resolve, reject) => {
       docker.run('houston', [
         '-a', data.arch, '-d', data.dist, '-o', '/houston'
-      ], process.stdout, {
+      ], null, {
         Binds: [`${projectFolder}:/houston:rw`, `${cacheFolder}:/var/cache/liftoff:rw`],
         Privileged: true // yes, this is needed for sudo commands
       }, (err, data, container) => {
-        if (err) reject(new Mistake(500, 'Unable to create container for build', err))
+        if (err) reject(new Mistake(500, `Unable to create container for ${data.name}#${data.tag}`, err))
 
         container.remove({
           force: true
         }, (err) => {
-          if (err) reject(new Mistake(500, 'Unable to cleanup container after build', err))
+          if (err) reject(new Mistake(500, `Unable to cleanup ${data.name}#${data.tag} after build`, err))
 
           resolve(data.StatusCode)
         })
@@ -192,18 +187,18 @@ connection.on('build:start', (data) => {
   })
   .then(async (exitCode) => { // Container is stopped and removed
     if (exitCode !== 0) {
-      log.info(`Build for ${data.owner}/${data.repo}#${data.tag} failed`)
+      log.info(`Build for ${data.name}#${data.tag} failed`)
     } else {
-      log.info(`Build for ${data.owner}/${data.repo}#${data.tag} finished`)
+      log.info(`Build for ${data.name}#${data.tag} finished`)
     }
 
     // Return blank strings if we can't access the files
-    const logFile = await fromFile(`${projectFolder}/${data.repo}_${data.version}_${data.arch}.log`)
+    const logFile = await fromFile(`${projectFolder}/${data.name}_${data.version}_${data.arch}.log`)
     .catch((error) => {
       log.error('Failed to grab log file after build', error)
       return ''
     })
-    const debFile = await fromFile(`${projectFolder}/${data.repo}_${data.version}_${data.arch}.deb`, undefined)
+    const debFile = await fromFile(`${projectFolder}/${data.name}_${data.version}_${data.arch}.deb`, undefined)
     .catch((error) => {
       log.error('Failed to grab deb file after build', error)
       return ''
@@ -213,35 +208,32 @@ connection.on('build:start', (data) => {
     return connection.send('houston', 'build:finish', {
       arch: data.arch,
       dist: data.dist,
-      owner: data.owner,
+      name: data.name,
       repo: data.repo,
       success: (exitCode === 0),
       tag: data.tag,
       version: data.version,
-      files: [{
-        name: 'log',
-        data: logFile
-      }, {
-        name: 'deb',
-        data: debFile
-      }]
+      files: {
+        log: logFile,
+        deb: debFile
+      }
     })
   })
   .catch((error) => {
-    log.error(`Technical failure building ${data.owner}/${data.repo}#${data.tag}`, error)
+    log.error(`Technical failure building ${data.name}#${data.tag}`, error)
 
     return connection.send('houston', 'build:error', {
       arch: data.arch,
       dist: data.dist,
       error,
-      owner: data.owner,
+      name: data.name,
       repo: data.repo,
       tag: data.tag,
       version: data.version
     })
   })
   .finally(() => { // Clean up all left over files
-    log.debug(`Cleaning up for ${data.owner}/${data.repo}#${data.tag}`)
+    log.debug(`Cleaning up for ${data.name}#${data.tag}`)
 
     return cmd(`rm -rf ${projectFolder}`)
   })

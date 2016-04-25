@@ -6,12 +6,12 @@
  * @exports {Object} schema - build database schema
  */
 
-import config from '~/lib/config'
+import atc from '~/houston/service/atc'
 import db from '~/lib/database'
+import grid from '~/lib/grid'
 import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
-
-import atc from '~/houston/service/atc'
+import toDot from '~/lib/helpers/dotNotation'
 
 export const schema = new db.Schema({
   dist: {
@@ -23,12 +23,14 @@ export const schema = new db.Schema({
     required: true
   },
 
-  log: String,
   status: {
     type: String,
     default: 'QUEUE',
-    enum: ['QUEUE', 'BUILD', 'FAIL', 'FINISH']
+    enum: ['QUEUE', 'BUILD', 'FAIL', 'FINISH', 'ERROR']
   },
+  mistake: db.Schema.Types.Mixed,
+
+  files: Object,
 
   started: {
     type: Date,
@@ -37,39 +39,90 @@ export const schema = new db.Schema({
   finished: Date
 })
 
-schema.methods.getCycle = function () {
-  return this.model('cycle').findOne({builds: this._id})
-}
+// Used internally for sanity
+schema.virtual('cycle').get(function () {
+  return this.ownerDocument()
+})
 
-schema.methods.getProject = async function () {
-  const cycle = await this.getCycle()
-
-  if (cycle == null) {
-    return Promise.reject("Unable to find build's cycle")
+/**
+ * file
+ * grabs a file from the database
+ *
+ * @param {String} name - file name
+ * @returns {Object} grid file object
+ */
+schema.virtual('file').get(function (name) {
+  if (this.files[name] == null) {
+    return Promise.resolve(null)
   }
 
-  return cycle.getProject()
+  return grid.get(this.files[name])
+})
+
+/**
+ * file
+ * creates a file from the database
+ *
+ * @param {Buffer} file - buffer of file to save
+ * @param {Object} metadata - any other data to save with file
+ * @return {ObjectId} - file id
+ */
+schema.virtual('file').set(function (file, metadata) {
+  return grid.create(file, metadata)
+  .then((id) => {
+    return this.update({
+      [`files.${file}`]: id
+    })
+    .then(() => id)
+  })
+})
+
+/**
+ * update
+ * updates nested build object
+ *
+ * @param {Object} obj - object of updated values
+ * @param {Object} opt - options to pass into query
+ * @return {Object} - mongoose query of update
+ */
+schema.methods.update = function (obj, opt) {
+  return this.model('cycle').update({
+    _id: this.cycle._id,
+    'builds._id': this._id
+  }, toDot(obj, '.', 'builds.&'), opt)
 }
 
-schema.methods.doBuild = async function () {
-  const cycle = await this.getCycle()
-  const project = await this.getProject()
+// sets wasNew for post middleware where isNew property does not exist
+schema.pre('save', function (next) {
+  this.wasNew = this.isNew
+  next()
+})
 
-  log.debug(`Building ${project.github.fullName} for ${this.arch} on ${this.dist}`)
+// Automaticly sends build to strongback
+schema.post('save', (doc) => {
+  if (!doc.wasNew) return
 
-  return atc.send('strongback', {
-    owner: project.github.owner,
-    repo: project.github.repo,
-    arch: this.arch,
-    dist: this.dist,
-    tag: await cycle.getTag(),
-    token: project.github.token,
-    changelog: await project.generateChangelog(this.dist, this.arch),
-    version: await cycle.getVersion()
+  atc.send('strongback', 'build:start', {
+    arch: doc.arch,
+    changelog: doc.cycle.changelog,
+    dist: doc.dist,
+    name: doc.cycle.name,
+    repo: doc.cycle.repo,
+    tag: doc.cycle.tag,
+    version: doc.cycle.version
+  })
+  .then(() => {
+    log.debug(`Building ${doc.cycle.tag} for ${doc.arch} on ${doc.dist}`)
   })
   .catch((err) => {
-    throw new Mistake(500, `Houston was unable to start a build for ${project.name}`, err)
+    log.warn(`Automated building of ${doc.cycle.tag} has failed`)
+
+    doc.update({
+      status: 'ERROR',
+      mistake: new Mistake(500, 'Automated building failed', err)
+    })
+    .exec()
   })
-}
+})
 
 export default db.model('build', schema)
