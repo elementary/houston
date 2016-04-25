@@ -11,15 +11,7 @@ import db from '~/lib/database'
 import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
 
-// TODO: move jenkins to superagent
-let jenkins = null
-
-if (config.jenkins) {
-  jenkins = require('jenkins')({
-    baseUrl: config.jenkins.url,
-    promisify: true
-  })
-}
+import atc from '~/houston/service/atc'
 
 export const schema = new db.Schema({
   dist: {
@@ -36,11 +28,6 @@ export const schema = new db.Schema({
     type: String,
     default: 'QUEUE',
     enum: ['QUEUE', 'BUILD', 'FAIL', 'FINISH']
-  },
-
-  jenkins: {
-    build: Number,
-    queue: Number
   },
 
   started: {
@@ -64,46 +51,25 @@ schema.methods.getProject = async function () {
   return cycle.getProject()
 }
 
-// TODO: no services in models!
 schema.methods.doBuild = async function () {
   const cycle = await this.getCycle()
   const project = await this.getProject()
 
-  const changelog = await project.generateChangelog(this.dist, this.arch)
-  log.debug(`Generated changelog for ${project.github.fullName}\n${changelog}`)
+  log.debug(`Building ${project.github.fullName} for ${this.arch} on ${this.dist}`)
 
-  if (config.jenkins) {
-    return jenkins.job.build({
-      name: config.jenkins.job,
-      parameters: {
-        PACKAGE: project.name,
-        VERSION: await cycle.getVersion(),
-        REPO: await cycle.getRepo(),
-        DIST: this.dist,
-        ARCH: this.arch,
-        CHANGELOG: changelog,
-        REFERENCE: await cycle.getTag(),
-        IDENTIFIER: this._id.toString()
-      }
-    })
-    .then((queue) => this.update({ 'jenkins.queue': queue }))
-    .catch((err) => {
-      throw new Mistake(500, `Houston was unable to start a build for ${project.name}`, err)
-    })
-  } else {
-    log.info('Jenkins has been disabled in configuration file. No build is running')
-    return Promise.resolve()
-  }
-}
-
-schema.methods.getLog = function () {
-  if (config.jenkins) {
-    return jenkins.build.log(config.jenkins.job, this.jenkins.build)
-    .then((log) => this.model('build').findByIdAndUpdate(this._id, { log }, { new: true }))
-  }
-
-  return Promise.resolve('Logs disabled in configuration file')
-  .then((log) => this.model('build').findByIdAndUpdate(this._id, { log }, { new: true }))
+  return atc.send('strongback', {
+    owner: project.github.owner,
+    repo: project.github.repo,
+    arch: this.arch,
+    dist: this.dist,
+    tag: await cycle.getTag(),
+    token: project.github.token,
+    changelog: await project.generateChangelog(this.dist, this.arch),
+    version: await cycle.getVersion()
+  })
+  .catch((err) => {
+    throw new Mistake(500, `Houston was unable to start a build for ${project.name}`, err)
+  })
 }
 
 export default db.model('build', schema)
