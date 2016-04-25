@@ -9,6 +9,7 @@ describe('lib', () => {
   require('./atc')
   require('./config')
   require('./database')
+  require('./grid')
   require('./mistake')
   require('./render')
 })
