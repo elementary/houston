@@ -2,8 +2,7 @@
  * houston/model/release.js
  * Mongoose schema for cycles
  *
- * @exports {Object} - Houston database model
- * @exports {Object} schema - Houston database schema
+ * @exports {Object} - Houston database schema
  */
 
 import _ from 'lodash'
@@ -30,7 +29,7 @@ import db from '~/lib/database'
  * @param {Error} mistake - mistake class error if any occured
  * @param {Array} cycles - all cycles building for this release
  */
-export const schema = new db.Schema({
+const schema = new db.Schema({
   version: {
     type: String,
     required: true
@@ -143,6 +142,7 @@ schema.methods.setStatus = function (status) {
  * createCycle
  * Creates a new cycle
  *
+ * @param {String} type - type of cycle to create
  * @returns {Object} - database object for new cycle
  */
 schema.methods.createCycle = async function (type) {
@@ -153,7 +153,7 @@ schema.methods.createCycle = async function (type) {
   return db.model('cycle').create({
     repo: this.project.repo,
     tag: this.github.tag,
-    name: this.project.name,
+    name: this.project.package.name,
     version: this.version,
     type,
     changelog: await this.createChangelog(),
@@ -191,4 +191,4 @@ schema.pre('save', function (next) {
   next()
 })
 
-export default db.model('release', schema)
+export default schema
