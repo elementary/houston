@@ -2,18 +2,29 @@
  * houston/model/build.js
  * Mongoose schema for builds
  *
- * @exports {Object} - build database model
- * @exports {Object} schema - build database schema
+ * @exports {Object} - build database schema
  */
 
+import * as dotNotation from '~/lib/helpers/dotNotation'
+import * as grid from '~/lib/grid'
 import atc from '~/houston/service/atc'
 import db from '~/lib/database'
-import grid from '~/lib/grid'
 import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
-import * as dotNotation from '~/lib/helpers/dotNotation'
 
-export const schema = new db.Schema({
+/**
+ * Stores individual build information. 1 build = 1 package = 1 log
+ *
+ * @param {String} dist - distribution to build on (xenial)
+ * @param {String} arch - architecture to build on (amd64)
+ * @param {Object} files - key storage for any file stored
+ * @param {String} package - aptly package id
+ * @param {String} _status - current status of build in strongback
+ * @param {Error} mistake - mistake class error if any occured
+ * @param {Date} started - when the build was first created in the database
+ * @param {Date} finished - when the build finished with strongback
+ */
+const schema = new db.Schema({
   dist: {
     type: String,
     required: true
@@ -23,14 +34,15 @@ export const schema = new db.Schema({
     required: true
   },
 
-  status: {
-    type: String,
-    default: 'QUEUE',
-    enum: ['QUEUE', 'BUILD', 'FAIL', 'FINISH', 'ERROR']
-  },
-  mistake: db.Schema.Types.Mixed,
-
   files: Object,
+  package: String,
+
+  _status: {
+    type: String,
+    default: 'HOLD',
+    enum: ['HOLD', 'QUEUE', 'BUILD', 'FINISH', 'FAIL', 'ERROR']
+  },
+  mistake: Object,
 
   started: {
     type: Date,
@@ -39,42 +51,14 @@ export const schema = new db.Schema({
   finished: Date
 })
 
-// Used internally for sanity
+/**
+ * cycle
+ * A cycle virtual for sanity
+ *
+ * @returns {Object} parent cycle of this build
+ */
 schema.virtual('cycle').get(function () {
   return this.ownerDocument()
-})
-
-/**
- * file
- * grabs a file from the database
- *
- * @param {String} name - file name
- * @returns {Object} grid file object
- */
-schema.virtual('file').get(function (name) {
-  if (this.files[name] == null) {
-    return Promise.resolve(null)
-  }
-
-  return grid.get(this.files[name])
-})
-
-/**
- * file
- * creates a file from the database
- *
- * @param {Buffer} file - buffer of file to save
- * @param {Object} metadata - any other data to save with file
- * @return {ObjectId} - file id
- */
-schema.virtual('file').set(function (file, metadata) {
-  return grid.create(file, metadata)
-  .then((id) => {
-    return this.update({
-      [`files.${file}`]: id
-    })
-    .then(() => id)
-  })
 })
 
 /**
@@ -92,37 +76,91 @@ schema.methods.update = function (obj, opt) {
   }, dotNotation.toDot(obj, '.', 'builds.$'), opt)
 }
 
-// sets wasNew for post middleware where isNew property does not exist
-schema.pre('save', function (next) {
-  this.wasNew = this.isNew
-  next()
-})
+/**
+ * getStatus
+ * Returns status as promised
+ *
+ * @returns {String} status of build
+ */
+schema.methods.getStatus = function () {
+  return Promise.resolve(this._status)
+}
 
-// Automaticly sends build to strongback
-schema.post('save', (doc) => {
-  if (!doc.wasNew) return
+/**
+ * setStatus
+ * Sets status as promised
+ *
+ * @param {String} status - new status of build
+ * @returns {Object} mongoose query of update
+ */
+schema.methods.setStatus = function (status) {
+  return this.update({ _status: status }).exec()
+}
 
-  atc.send('strongback', 'build:start', {
-    arch: doc.arch,
-    changelog: doc.cycle.changelog,
-    dist: doc.dist,
-    name: doc.cycle.name,
-    repo: doc.cycle.repo,
-    tag: doc.cycle.tag,
-    version: doc.cycle.version
+/**
+ * getFile
+ * grabs a file from the database
+ *
+ * @param {String} name - file name
+ * @returns {Object} grid file object
+ */
+schema.methods.getFile = function (name) {
+  if (this.files[name] == null) {
+    return Promise.resolve(null)
+  }
+
+  return grid.get(this.files[name])
+}
+
+/**
+ * setFile
+ * creates a file from the database
+ *
+ * @param {String} name - name of file to save
+ * @param {Buffer} file - buffer of file to save
+ * @param {Object} metadata - any other data to save with file
+ * @return {ObjectId} - file id
+ */
+schema.methods.setFile = function (name, file, metadata) {
+  return grid.create(file, metadata)
+  .then((id) => {
+    return this.update({
+      [`files.${name}`]: id
+    })
+    .then(() => id)
+  })
+}
+
+/**
+ * doBuild
+ * Sends build information to strongback
+ */
+schema.methods.doBuild = function () {
+  return atc.send('strongback', 'build:start', {
+    arch: this.arch,
+    changelog: this.cycle.changelog,
+    dist: this.dist,
+    name: this.cycle.name,
+    repo: this.cycle.repo,
+    tag: this.cycle.tag,
+    version: this.cycle.version
   })
   .then(() => {
-    log.debug(`Building ${doc.cycle.tag} for ${doc.arch} on ${doc.dist}`)
+    log.debug(`Building ${this.cycle.name} for ${this.arch} on ${this.dist}`)
   })
   .catch((err) => {
-    log.warn(`Automated building of ${doc.cycle.tag} has failed`)
+    log.warn(`Automated building of ${this.cycle.name} has failed`)
 
-    doc.update({
+    const mistake = new Mistake(500, 'Automated building failed', err)
+
+    return this.update({
       status: 'ERROR',
-      mistake: new Mistake(500, 'Automated building failed', err)
+      mistake
     })
-    .exec()
+    .then(() => {
+      throw mistake
+    })
   })
-})
+}
 
-export default db.model('build', schema)
+export default schema
