@@ -134,12 +134,7 @@ schema.methods.doCycle = function () {
     version: this.version,
     changelog: this.changelog
   })
-  .then(() => {
-    log.debug(`Flightchecking ${this.name}`)
-  })
   .catch((err) => {
-    log.warn(`Automated flightchecking of ${this.name} has failed`)
-
     const mistake = new Mistake(500, 'Automated flightchecking failed', err)
 
     this.update({
