@@ -10,6 +10,8 @@ import path from 'path'
 mock(path.resolve(__dirname, '../config'), require('./mocks/config'))
 
 process.on('unhandledRejection', (reason, promise) => {
+  if (reason.name === 'ValidationError') return
+
   /* eslint-disable no-console */
   console.log(`Unhandled Rejection at: ${promise}`)
   console.log(reason)

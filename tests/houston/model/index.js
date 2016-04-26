@@ -15,4 +15,5 @@ describe('model', () => {
   })
 
   require('./build')
+  require('./cycle')
 })
