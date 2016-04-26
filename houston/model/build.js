@@ -145,12 +145,7 @@ schema.methods.doBuild = function () {
     tag: this.cycle.tag,
     version: this.cycle.version
   })
-  .then(() => {
-    log.debug(`Building ${this.cycle.name} for ${this.arch} on ${this.dist}`)
-  })
   .catch((err) => {
-    log.warn(`Automated building of ${this.cycle.name} has failed`)
-
     const mistake = new Mistake(500, 'Automated building failed', err)
 
     return this.update({
