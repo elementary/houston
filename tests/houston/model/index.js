@@ -16,4 +16,6 @@ describe('model', () => {
 
   require('./build')
   require('./cycle')
+  require('./project')
+  require('./release')
 })

@@ -8,11 +8,9 @@
 
 import semver from 'semver'
 
-import * as aptly from '~/houston/service/aptly'
 import atc from '~/houston/service/atc'
 import buildSchema from './build'
 import db from '~/lib/database'
-import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
 
 /**
@@ -60,7 +58,7 @@ const schema = new db.Schema({
   },
 
   changelog: {
-    type: String,
+    type: Array,
     required: true
   },
 
@@ -103,7 +101,7 @@ schema.methods.getStatus = async function () {
  * Sets status as promised
  *
  * @param {String} status - new status of cycle
- * @returns {Object} mongoose query of update
+ * @returns {Object} mongoose update promise
  */
 schema.methods.setStatus = function (status) {
   // TODO: add a build stopper function to allow early failing of cycles
@@ -119,7 +117,11 @@ schema.methods.setStatus = function (status) {
     return Promise.reject('Unable to set status past "REVIEW" on "ORPHAN" type cycles')
   }
 
-  return this.update({ _status: status }).exec()
+  return this.update({ _status: status })
+  .then((data) => {
+    if (data.nModified === 1) this._status = status
+    return data
+  })
 }
 
 /**

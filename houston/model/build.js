@@ -9,7 +9,6 @@ import * as dotNotation from '~/lib/helpers/dotNotation'
 import * as grid from '~/lib/grid'
 import atc from '~/houston/service/atc'
 import db from '~/lib/database'
-import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
 
 /**
@@ -91,10 +90,14 @@ schema.methods.getStatus = function () {
  * Sets status as promised
  *
  * @param {String} status - new status of build
- * @returns {Object} mongoose query of update
+ * @returns {Object} mongoose update promise
  */
 schema.methods.setStatus = function (status) {
-  return this.update({ _status: status }).exec()
+  return this.update({ _status: status })
+  .then((data) => {
+    if (data.nModified === 1) this._status = status
+    return data
+  })
 }
 
 /**

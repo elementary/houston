@@ -17,7 +17,7 @@ describe('cycle', () => {
       name: 'vocal',
       version: '1.0.0',
       type: 'RELEASE',
-      changelog: 'testing'
+      changelog: [['testing']]
     }, (err) => {
       if (err) done(err)
 
@@ -27,7 +27,7 @@ describe('cycle', () => {
         name: 'vocal',
         version: '1.0.0',
         type: 'RELEASE',
-        changelog: 'testing'
+        changelog: [['testing']]
       }, (err) => {
         assert.instanceOf(err, Error, 'throws an error')
 
@@ -43,7 +43,7 @@ describe('cycle', () => {
       name: 'vocal',
       version: '1.0.0',
       type: 'RELEASE',
-      changelog: 'testing'
+      changelog: [['testing']]
     }, (err) => {
       if (err) done(err)
 
@@ -69,7 +69,7 @@ describe('cycle', () => {
       name: 'vocal',
       version: '1.0.0',
       type: 'RELEASE',
-      changelog: 'testing'
+      changelog: [['testing']]
     }, async (err, cycle) => {
       if (err) done(err)
 
@@ -87,7 +87,7 @@ describe('cycle', () => {
       name: 'vocal',
       version: '1.0.0',
       type: 'RELEASE',
-      changelog: 'testing',
+      changelog: [['testing']],
       _status: 'DEFER',
       builds: [{
         arch: 'amd64',
@@ -119,7 +119,7 @@ describe('cycle', () => {
       name: 'vocal',
       version: '1.0.0',
       type: 'RELEASE',
-      changelog: 'testing',
+      changelog: [['testing']],
       _status: 'QUEUE'
     }, async (err, cycle) => {
       if (err) done(err)
@@ -138,7 +138,7 @@ describe('cycle', () => {
       name: 'vocal',
       version: '1.0.0',
       type: 'RELEASE',
-      changelog: 'testing',
+      changelog: [['testing']],
       _status: 'QUEUE'
     }, async (err, cycle) => {
       if (err) done(err)

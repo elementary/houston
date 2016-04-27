@@ -5,7 +5,6 @@
  * @exports {Object} - Houston database schema
  */
 
-import _ from 'lodash'
 import semver from 'semver'
 
 import * as dotNotation from '~/lib/helpers/dotNotation'
@@ -88,8 +87,27 @@ schema.virtual('project').get(function () {
 })
 
 /**
+ * cycles
+ * A simple virtual to save time
+ *
+ * @returns {Object} cycles - {
+ *   {Object} latest - latest cycle
+ *   {Object} oldest - oldest cycle
+ * }
+ */
+schema.virtual('cycle').get(function () {
+  const Cycle = db.model('cycle')
+
+  return {
+    latest: Cycle.findById(this.cycles[this.cycles.length - 1]).exec(),
+    oldest: Cycle.findById(this.cycles[0]).exec()
+  }
+})
+
+/**
  * update
  * updates nested release object
+ * TODO: add support for $push updates
  *
  * @param {Object} obj - object of updated values
  * @param {Object} opt - options to pass into query
@@ -108,19 +126,13 @@ schema.methods.update = function (obj, opt) {
  *
  * @returns {String} status of release
  */
-schema.methods.getStatus = function () {
+schema.methods.getStatus = async function () {
   if (this._status !== 'DEFER') {
     return Promise.resolve(this._status)
   }
 
-  return db.model('project').findOne({
-    'releases._id': this._id
-  })
-  .populate('releases cycles')
-  .then((project) => {
-    const release = project.releases(this._id)
-    return release.cycles[0].getStatus()
-  })
+  const latest = await this.cycle.latest
+  return latest.getStatus()
 }
 
 /**
@@ -128,14 +140,18 @@ schema.methods.getStatus = function () {
  * Sets status as promised
  *
  * @param {String} status - new status of release
- * @returns {Object} mongoose query of update
+ * @returns {Object} mongoose update promise
  */
 schema.methods.setStatus = function (status) {
-  if (this._status !== 'STANDBY' || status !== 'DEFER') {
+  if (this._status === 'DEFER') {
     return Promise.reject('Unable to set status on a release currently cycled')
   }
 
-  return this.update({ _status: status }).exec()
+  return this.update({ _status: status })
+  .then((data) => {
+    if (data.nModified === 1) this._status = status
+    return data
+  })
 }
 
 /**
@@ -146,8 +162,11 @@ schema.methods.setStatus = function (status) {
  * @returns {Object} - database object for new cycle
  */
 schema.methods.createCycle = async function (type) {
-  const builds = _.zip(this.project.dists, this.project.archs, (dist, arch) => {
-    return { dist, arch }
+  const builds = []
+  this.project.dists.forEach((dist) => {
+    this.project.archs.forEach((arch) => {
+      builds.push({dist, arch})
+    })
   })
 
   return db.model('cycle').create({
@@ -158,6 +177,18 @@ schema.methods.createCycle = async function (type) {
     type,
     changelog: await this.createChangelog(),
     builds
+  })
+  .then((cycle) => {
+    // TODO: replace this with `this.update()` when $push support is added
+    return db.model('project').update({
+      _id: this.project._id,
+      'releases._id': this._id
+    }, {
+      $addToSet: {
+        'releases.$.cycles': cycle._id
+      }
+    })
+    .then(() => cycle)
   })
 }
 
@@ -170,7 +201,7 @@ schema.methods.createCycle = async function (type) {
  */
 schema.methods.createChangelog = function () {
   const uptoRelease = this.project.releases.filter((release) => {
-    return semver.lte(this.version, release.version)
+    return semver.lte(release.version, this.version)
   })
 
   return uptoRelease.map((release) => release.changelog)
