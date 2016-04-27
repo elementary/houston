@@ -10,6 +10,7 @@ import path from 'path'
 mock(path.resolve(__dirname, '../config'), require('./mocks/config'))
 
 process.on('unhandledRejection', (reason, promise) => {
+  // NOTE: If you encounter mysterious errors while testing database comment this line out
   if (reason.name === 'ValidationError') return
 
   /* eslint-disable no-console */

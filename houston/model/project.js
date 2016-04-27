@@ -40,7 +40,8 @@ import releaseSchema from './release'
 export const schema = new db.Schema({
   name: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   type: {
     type: String,
@@ -63,6 +64,7 @@ export const schema = new db.Schema({
   package: {
     name: {
       type: String,
+      required: true,
       unique: true
     },
     icon: String,
@@ -104,10 +106,7 @@ export const schema = new db.Schema({
     ref: 'user',
     required: true
   },
-  releases: [{
-    type: db.Schema.Types.ObjectId,
-    ref: 'release'
-  }],
+  releases: [releaseSchema],
   cycles: [{
     type: db.Schema.Types.ObjectId,
     ref: 'cycle'
@@ -125,13 +124,39 @@ schema.virtual('github.fullName').get(function () {
 })
 
 /**
- * release.latest
+ * release
  * A simple virtual to save time
  *
- * @returns {Object} - latest release
+ * @returns {Object} release - {
+ *   {Object} latest - latest release
+ *   {Object} oldest - oldest release
+ * }
  */
-schema.virtual('release.latest').get(function () {
-  return this.releases[0]
+schema.virtual('release').get(function () {
+  const releases = this.releases.sort((a, b) => semver.compare(a.version, b.version))
+
+  return {
+    latest: releases[releases.length - 1],
+    oldest: releases[0]
+  }
+})
+
+/**
+ * cycles
+ * A simple virtual to save time
+ *
+ * @returns {Object} cycles - {
+ *   {Object} latest - latest cycle
+ *   {Object} oldest - oldest cycle
+ * }
+ */
+schema.virtual('cycle').get(function () {
+  const Cycle = db.model('cycle')
+
+  return {
+    latest: Cycle.findById(this.cycles[this.cycles.length - 1]).exec(),
+    oldest: Cycle.findById(this.cycles[0]).exec()
+  }
 })
 
 /**
@@ -153,14 +178,18 @@ schema.methods.getStatus = function () {
  * Sets status as promised
  *
  * @param {String} status - new status of release
- * @returns {Object} mongoose query of update
+ * @returns {Object} mongoose update promise
  */
 schema.methods.setStatus = function (status) {
   if (status === 'DEFER') {
     return Promise.reject('Unable to set status on a released project')
   }
 
-  return this.update({ _status: status }).exec()
+  return this.update({ _status: status })
+  .then((data) => {
+    if (data.nModified === 1) this._status = status
+    return data
+  })
 }
 
 /**
@@ -176,7 +205,7 @@ schema.methods.postIssue = function (issue) {
   if (typeof issue.title !== 'string') return Promise.reject('Issue needs a title')
   if (typeof issue.body !== 'string') return Promise.reject('Issue needs a body')
 
-  github.sendLabel(this.github.owner, this.github.name, this.github.token, this.github.label)
+  return github.sendLabel(this.github.owner, this.github.name, this.github.token, this.github.label)
   .then(() => github.sendIssue(this.github.owner, this.github.name, this.github.token, issue, this.github.label))
 }
 
@@ -188,12 +217,19 @@ schema.methods.postIssue = function (issue) {
  * @returns {Object} - database object for new cycle
  */
 schema.methods.createCycle = async function (type) {
+  if (this._status === 'NEW') {
+    return Promise.reject('Unable to cycle an uninitalized project')
+  }
+
   if (type === 'release') {
     return this.release.latest.createCycle(type)
   }
 
-  const builds = _.zip(this.dists, this.archs, (dist, arch) => {
-    return { dist, arch }
+  const builds = []
+  this.dists.forEach((dist) => {
+    this.archs.forEach((arch) => {
+      builds.push({dist, arch})
+    })
   })
 
   return db.model('cycle').create({
@@ -204,6 +240,15 @@ schema.methods.createCycle = async function (type) {
     type,
     changelog: await this.release.latest.createChangelog(),
     builds
+  })
+  .then((cycle) => {
+    // TODO: replace this with `this.update()` when $push support is added
+    return this.update({
+      $addToSet: {
+        'cycles': cycle._id
+      }
+    })
+    .then(() => cycle)
   })
 }
 

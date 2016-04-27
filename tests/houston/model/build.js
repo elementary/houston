@@ -17,7 +17,7 @@ describe('build', () => {
       name: 'vocal',
       version: '1.0.0',
       type: 'RELEASE',
-      changelog: 'testing',
+      changelog: [['testing']],
       builds: [{
         arch: 'amd64',
         dist: 'xenial'
@@ -37,7 +37,7 @@ describe('build', () => {
       name: 'vocal',
       version: '1.0.0',
       type: 'RELEASE',
-      changelog: 'testing',
+      changelog: [['testing']],
       builds: [{
         arch: 'amd64',
         dist: 'xenial'
@@ -61,7 +61,7 @@ describe('build', () => {
       name: 'vocal',
       version: '1.0.0',
       type: 'RELEASE',
-      changelog: 'testing',
+      changelog: [['testing']],
       builds: [{
         arch: 'amd64',
         dist: 'xenial',
@@ -82,7 +82,7 @@ describe('build', () => {
       name: 'vocal',
       version: '1.0.0',
       type: 'RELEASE',
-      changelog: 'testing',
+      changelog: [['testing']],
       builds: [{
         arch: 'amd64',
         dist: 'xenial'
@@ -102,7 +102,7 @@ describe('build', () => {
       name: 'vocal',
       version: '1.0.0',
       type: 'RELEASE',
-      changelog: 'testing',
+      changelog: [['testing']],
       builds: [{
         arch: 'amd64',
         dist: 'xenial'
@@ -131,7 +131,7 @@ describe('build', () => {
       name: 'vocal',
       version: '1.0.0',
       type: 'RELEASE',
-      changelog: 'testing',
+      changelog: [['testing']],
       builds: [{
         arch: 'amd64',
         dist: 'xenial'
