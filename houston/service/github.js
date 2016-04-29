@@ -36,13 +36,17 @@ export function getReleases (owner, name, token) {
   .filter((release) => semver.valid(release.tag_name))
   .map((release) => {
     return {
+      version: semver.valid(release.tag_name, true),
+      changelog: release.body.match(/.+/g),
       github: {
         id: release.id,
         author: release.author.login,
         date: release.published_at,
         tag: release.tag_name
       },
-      changelog: release.body.match(/.+/g)
+      date: {
+        released: release.published_at
+      }
     }
   })
   .catch((error) => {
@@ -75,8 +79,12 @@ export function getProjects (token) {
   })
   .map((project) => {
     return {
+      name: project.name,
       repo: project.git_url,
       tag: project.default_branch,
+      package: {
+        name: project.name
+      },
       github: {
         id: project.id,
         owner: project.owner.login,

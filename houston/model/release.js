@@ -142,9 +142,11 @@ schema.methods.getStatus = async function () {
  * @param {String} status - new status of release
  * @returns {Object} mongoose update promise
  */
-schema.methods.setStatus = function (status) {
+schema.methods.setStatus = async function (status) {
   if (this._status === 'DEFER') {
-    return Promise.reject('Unable to set status on a release currently cycled')
+    const cycle = await db.model('cycle').findById(this.cycles[this.cycles.length - 1])
+
+    return cycle.setStatus(status)
   }
 
   return this.update({ _status: status })
@@ -170,6 +172,7 @@ schema.methods.createCycle = async function (type) {
   })
 
   return db.model('cycle').create({
+    project: this.project._id,
     repo: this.project.repo,
     tag: this.github.tag,
     name: this.project.package.name,
@@ -179,15 +182,23 @@ schema.methods.createCycle = async function (type) {
     builds
   })
   .then((cycle) => {
+    const updates = {
+      $addToSet: {
+        'releases.$.cycles': cycle._id
+      }
+    }
+
+    if (this._status !== 'DEFER') {
+      updates['$set'] = {
+        'releases.$._status': 'DEFER'
+      }
+    }
+
     // TODO: replace this with `this.update()` when $push support is added
     return db.model('project').update({
       _id: this.project._id,
       'releases._id': this._id
-    }, {
-      $addToSet: {
-        'releases.$.cycles': cycle._id
-      }
-    })
+    }, updates)
     .then(() => cycle)
   })
 }
@@ -204,7 +215,14 @@ schema.methods.createChangelog = function () {
     return semver.lte(release.version, this.version)
   })
 
-  return uptoRelease.map((release) => release.changelog)
+  return uptoRelease.map((release) => {
+    return {
+      author: release.github.author,
+      changelog: release.changelog,
+      date: release.github.date,
+      version: release.version
+    }
+  })
 }
 
 /**
@@ -213,10 +231,6 @@ schema.methods.createChangelog = function () {
 schema.pre('save', function (next) {
   if (this.version == null) {
     this.version.set(semver.clean(this.github.tag, true))
-  }
-
-  if (this.date.released == null) {
-    this.date.set(this.github.date.toUTCString().replace('GMT', '+0000'))
   }
 
   next()

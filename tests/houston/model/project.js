@@ -117,6 +117,7 @@ describe('project', () => {
 
   it('has cycle virtual', async (done) => {
     const cycle1 = await Cycle.create({
+      project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'vocal',
@@ -126,6 +127,7 @@ describe('project', () => {
     })
 
     const cycle2 = await Cycle.create({
+      project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.5',
       name: 'vocal',
@@ -279,7 +281,6 @@ describe('project', () => {
       assert.lengthOf(cycle.builds, 1, 'creates builds based on project arch and dist')
       assert.equal(cycle.tag, project.tag, 'has correct tag')
       assert.equal(cycle.repo, project.repo, 'has correct repo')
-      assert.deepEqual(cycle.changelog, [['changed things']], 'has correct changelog')
 
       done()
     })

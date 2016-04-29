@@ -57,6 +57,7 @@ describe('release', () => {
 
   it('has cycle virtual', async (done) => {
     const cycle1 = await Cycle.create({
+      project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'vocal',
@@ -66,6 +67,7 @@ describe('release', () => {
     })
 
     const cycle2 = await Cycle.create({
+      project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.5',
       name: 'vocal',
@@ -137,6 +139,7 @@ describe('release', () => {
 
   it('can get status with cycles', async (done) => {
     const cycle = await Cycle.create({
+      project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'vocal',
@@ -203,7 +206,6 @@ describe('release', () => {
     assert.lengthOf(cycle.builds, 1, 'creates builds based on project arch and dist')
     assert.equal(cycle.tag, release.github.tag, 'has correct tag')
     assert.equal(cycle.repo, project.repo, 'has correct repo')
-    assert.deepEqual(cycle.changelog, [['changed things']], 'has correct changelog')
 
     done()
   })
@@ -215,7 +217,7 @@ describe('release', () => {
       github: {
         id: 2,
         author: 'btkostner',
-        date: new Date(),
+        date: new Date(2016, 4, 27),
         tag: 'v0.1.1'
       }
     }, {
@@ -224,14 +226,26 @@ describe('release', () => {
       github: {
         id: 1,
         author: 'btkostner',
-        date: new Date(),
+        date: new Date(2016, 4, 26),
         tag: 'v0.1.0'
       }
     }]))
 
     const changelog = await project.releases[0].createChangelog()
 
-    assert.deepEqual(changelog, [['fixed changed things'], ['changed things']], 'has correct changelog')
+    const expected = [{
+      author: 'btkostner',
+      date: new Date(2016, 4, 27),
+      version: '0.1.1',
+      changelog: ['fixed changed things']
+    }, {
+      author: 'btkostner',
+      date: new Date(2016, 4, 26),
+      version: '0.1.0',
+      changelog: ['changed things']
+    }]
+
+    assert.deepEqual(changelog, expected, 'has correct changelog')
 
     done()
   })

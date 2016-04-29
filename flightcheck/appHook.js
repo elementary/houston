@@ -5,12 +5,13 @@
  * @exports {Class} - an appHook class to extend appon
  */
 
+import fs from 'fs'
 import path from 'path'
 
 import config from '~/lib/config'
 import log from '~/lib/log'
+import Mistake from '~/lib/mistake'
 import render from '~/lib/render'
-import request from '~/lib/request'
 
 /**
  * AppHook
@@ -23,6 +24,8 @@ export default class AppHook {
   constructor (data, obj) {
     this.data = data
 
+    this.folder = data.folder
+
     this.name = obj.name || 'appHook'
     this.path = obj.path || path.join(__dirname, this.name)
     this.mark = obj.mark || 'issue.md'
@@ -32,6 +35,10 @@ export default class AppHook {
     this.warnings = []
     this.metadata = {}
     this.information = {}
+
+    if (this.folder == null) {
+      throw new Mistake(500, `appHook ${this.name} received no folder to test on`)
+    }
   }
 
   test (data) {
@@ -55,12 +62,15 @@ export default class AppHook {
     this.information = Object.assign(this.information, obj)
   }
 
-  file (path) {
-    return request
-    .get(`https://api.github.com/repos/${this.data.project.github.fullName}/contents/${path}?ref=${this.data.tag}`)
-    .auth(this.data.project.github.token)
-    .then((data) => data.body.content)
-    .catch(() => null)
+  file (requested, encoding = 'utf-8') {
+    return new Promise((resolve, reject) => {
+      fs.readFile(path.join(this.folder, requested), { encoding }, (err, data) => {
+        if (err && err.code === 'ENOENT') return resolve(null)
+        if (err) return reject(err)
+
+        return resolve(data)
+      })
+    })
   }
 
   report () {
@@ -83,8 +93,11 @@ export default class AppHook {
     }
   }
 
-  async run () {
-    this.test()
+  run () {
+    return this.test()
     .then(() => this.report())
+    .catch((error) => {
+      throw new Mistake(500, `flightcheck encountered an error while trying to run ${this.name} test`, error)
+    })
   }
 }
