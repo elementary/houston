@@ -1,6 +1,0 @@
-{{ project.package.name }} ({{ release.version }}) {{ dist }}; urgency=low
-
-{% for changelog in release.changelog %}  * {{ changelog }}
-{% endfor %}
-
-{{ " " }}-- {{ release.github.author }} <{{ release.github.author }}@houston.elementary.io>  {{ helper.debian.time(release.date.released) }}
