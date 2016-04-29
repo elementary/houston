@@ -5,9 +5,9 @@
  * @exports {Class} - checks that all GitHub releases have a body
  */
 
-import AppHook from '~/flightcheck/appHook'
+import _ from 'lodash'
 
-import request from '~/lib/request'
+import AppHook from '~/flightcheck/appHook'
 
 /**
  * Changelog
@@ -24,12 +24,12 @@ export default class Changelog extends AppHook {
   }
 
   test () {
-    return request
-    .get(`https://api.github.com/repos/${this.data.project.github.fullName}/releases`)
-    .auth(this.data.project.github.token)
-    .then((res) => res.body)
-    .each((release) => {
-      if (release.body === '') this.error(release.tag_name)
+    return Promise.each(this.data.changelog, (log) => {
+      if (_.isEmpty(log.changelog)) {
+        this.error(log.version)
+      }
+
+      return
     })
   }
 }

@@ -24,7 +24,7 @@ export default class Desktop extends AppHook {
   }
 
   async test () {
-    const desktop = await this.file(`data/${this.data.project.name}.desktop`)
+    const desktop = await this.file(`data/${this.data.name}.desktop`)
 
     if (desktop == null) {
       this.error('exist')
@@ -33,7 +33,7 @@ export default class Desktop extends AppHook {
 
     let data = {}
     try {
-      data = ini.parse((new Buffer(desktop, 'base64')).toString())
+      data = ini.parse(desktop)
     } catch (err) {
       this.meta({ dump: err })
       this.error('parse')

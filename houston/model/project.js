@@ -41,7 +41,8 @@ export const schema = new db.Schema({
   name: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    index: true
   },
   type: {
     type: String,
@@ -51,6 +52,7 @@ export const schema = new db.Schema({
   repo: {
     type: String,
     required: true,
+    unique: true,
     validate: {
       validator: (s) => /.*\.git/.test(s),
       message: '{VALUE} is not a valid git repository'
@@ -83,7 +85,8 @@ export const schema = new db.Schema({
   github: {
     id: {
       type: Number,
-      unique: true
+      unique: true,
+      index: true
     },
     owner: String,
     name: String,
@@ -181,8 +184,8 @@ schema.methods.getStatus = function () {
  * @returns {Object} mongoose update promise
  */
 schema.methods.setStatus = function (status) {
-  if (status === 'DEFER') {
-    return Promise.reject('Unable to set status on a released project')
+  if (this._status === 'DEFER') {
+    return this.release.latest.setStatus(status)
   }
 
   return this.update({ _status: status })
@@ -221,8 +224,14 @@ schema.methods.createCycle = async function (type) {
     return Promise.reject('Unable to cycle an uninitalized project')
   }
 
-  if (type === 'release') {
+  if (type === 'RELEASE') {
     return this.release.latest.createCycle(type)
+    .then((data) => {
+      if (this._status === 'DEFER') return data
+
+      return this.update({ _status: 'DEFER' })
+      .then(() => data)
+    })
   }
 
   const builds = []
@@ -233,6 +242,7 @@ schema.methods.createCycle = async function (type) {
   })
 
   return db.model('cycle').create({
+    project: this._id,
     repo: this.repo,
     tag: this.tag,
     name: this.package.name,

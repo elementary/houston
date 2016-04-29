@@ -135,10 +135,10 @@ schema.methods.setFile = function (name, file, metadata) {
 }
 
 /**
- * doBuild
+ * doStrongback
  * Sends build information to strongback
  */
-schema.methods.doBuild = function () {
+schema.methods.doStrongback = function () {
   return atc.send('strongback', 'build:start', {
     arch: this.arch,
     changelog: this.cycle.changelog,
@@ -148,11 +148,12 @@ schema.methods.doBuild = function () {
     tag: this.cycle.tag,
     version: this.cycle.version
   })
+  .then(() => this.setStatus('QUEUE'))
   .catch((err) => {
     const mistake = new Mistake(500, 'Automated building failed', err)
 
     return this.update({
-      status: 'ERROR',
+      _status: 'ERROR',
       mistake
     })
     .then(() => {

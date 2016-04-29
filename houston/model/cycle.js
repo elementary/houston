@@ -27,8 +27,14 @@ import Mistake from '~/lib/mistake'
  * @param {Array} builds - all builds under this cycle
  */
 const schema = new db.Schema({
+  project: {
+    type: db.Schema.Types.ObjectId,
+    required: true
+  },
+
   repo: {
     type: String,
+    required: true,
     validate: {
       validator: (s) => /.*\.git/.test(s),
       message: '{VALUE} is not a valid git repository'
@@ -41,10 +47,12 @@ const schema = new db.Schema({
 
   name: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   version: {
     type: String,
+    index: true,
     validate: {
       validator: (s) => semver.valid(s) !== null,
       message: '{VALUE} is not a semver valid version'
@@ -105,31 +113,44 @@ schema.methods.getStatus = async function () {
  */
 schema.methods.setStatus = function (status) {
   // TODO: add a build stopper function to allow early failing of cycles
-  if (this._status === 'DEFER' && status !== 'ERROR') {
+  const final = (status === 'FINISH' || status === 'FAIL' || status === 'ERROR')
+  const options = schema.paths._status.enumValues
+
+  if (this._status === 'DEFER' && !final) {
     return Promise.reject('Unable to set status on a cycle with outstanding builds')
   }
 
-  const options = schema.paths._status.enumValues
-  if (this.type === 'INIT' && options.indexOf(status) >= 2) {
+  if (options.indexOf(this._status) >= options.indexOf(status)) {
+    return Promise.reject('Status is already greater than requested')
+  }
+
+  if (this.type === 'INIT' && (!final || options.indexOf(status) >= 2)) {
     return Promise.reject('Unable to set status past "PRE" on "INIT" type cycles')
   }
-  if (this.type === 'ORPHAN' && options.indexOf(status) >= 3) {
+  if (this.type === 'ORPHAN' && (!final || options.indexOf(status) >= 3)) {
     return Promise.reject('Unable to set status past "REVIEW" on "ORPHAN" type cycles')
   }
 
   return this.update({ _status: status })
   .then((data) => {
     if (data.nModified === 1) this._status = status
+
+    if (status === 'DEFER') {
+      return this.doStrongback()
+      .then(() => data)
+    }
+
     return data
   })
 }
 
 /**
- * doCycle
+ * doFlightcheck
  * Sets all build information to flightcheck for pre testing
  */
-schema.methods.doCycle = function () {
-  return atc.send('flightcheck', 'cycle:start', {
+schema.methods.doFlightcheck = function () {
+  return atc.send('flightcheck', 'cycle:queue', {
+    id: this._id,
     repo: this.repo,
     tag: this.tag,
     name: this.name,
@@ -148,6 +169,27 @@ schema.methods.doCycle = function () {
     })
   })
 }
+
+/**
+ * doStrongback
+ * Sends all build information to strongback
+ */
+schema.methods.doStrongback = function () {
+  return Promise.all(this.builds, (build) => {
+    return build.doStrongback()
+  })
+}
+
+/**
+ * Sends test data to flightcheck before save. Reports error on creation
+ */
+schema.pre('save', function (next) {
+  if (!this.isNew) return next()
+
+  return this.doFlightcheck()
+  .then(() => next())
+  .catch((error) => next(error))
+})
 
 export { schema }
 export default db.model('cycle', schema)

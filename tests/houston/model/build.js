@@ -6,12 +6,14 @@
 import chai from 'chai'
 
 import Cycle from '~/houston/model/cycle'
+import db from '~/lib/database'
 
 const assert = chai.assert
 
 describe('build', () => {
   it('has cycle virtual', (done) => {
     Cycle.create({
+      project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'vocal',
@@ -32,6 +34,7 @@ describe('build', () => {
 
   it('can update', async (done) => {
     const cycle = await Cycle.create({
+      project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'vocal',
@@ -56,6 +59,7 @@ describe('build', () => {
 
   it('can get status', async (done) => {
     const cycle = await Cycle.create({
+      project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'vocal',
@@ -77,6 +81,7 @@ describe('build', () => {
 
   it('can set status', async (done) => {
     const cycle = await Cycle.create({
+      project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'vocal',
@@ -97,6 +102,7 @@ describe('build', () => {
 
   it('can set file and get file', async (done) => {
     const cycle = await Cycle.create({
+      project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'vocal',
@@ -124,8 +130,9 @@ describe('build', () => {
     })
   })
 
-  it('can do build', async (done) => {
+  it('can do strongback', async (done) => {
     const cycle = await Cycle.create({
+      project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'vocal',
@@ -138,7 +145,7 @@ describe('build', () => {
       }]
     })
 
-    cycle.builds[0].doBuild()
+    cycle.builds[0].doStrongback()
     .then(() => done())
     .catch((error) => done(error))
   })
