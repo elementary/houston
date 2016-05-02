@@ -1,6 +1,6 @@
 {
   "name": "Houston",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Backend for AppHub",
   "main": "houston/index.js",
   "dependencies": {
@@ -48,7 +48,7 @@
     "houston": "node entry.js houston",
     "strongback": "node entry.js strongback",
     "lint": "a-standard",
-    "start": "npm run houston & npm run flightcheck",
+    "start": "npm run houston & npm run flightcheck & npm run strongback",
     "test": "NODE_ENV=test mocha entry.js tests --timeout 6000"
   },
   "a-standard": {

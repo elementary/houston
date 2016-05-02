@@ -8,6 +8,7 @@
 import Router from 'koa-router'
 import semver from 'semver'
 
+import * as aptly from '~/houston/service/aptly'
 import * as github from '~/houston/service/github'
 import * as policy from '~/houston/policy'
 import Project from '~/houston/model/project'
@@ -103,14 +104,17 @@ route.get('/review/:fate', policy.isRole('review'), async (ctx, next) => {
     throw new ctx.Mistake(400, 'Release is not awaiting review', true)
   }
 
-  if (ctx.query.fate !== 'yes' || ctx.query.fate !== 'no') {
+  if (ctx.params.fate !== 'yes' && ctx.params.fate !== 'no') {
     throw new ctx.Mistake(400, `${ctx.project.name}'s fate is binary'`, true)
   }
 
-  if (ctx.query.fate === 'yes') {
-    return release.setStatus('REVIEW')
+  const cycle = await release.cycle.latest
+
+  if (ctx.params.fate === 'yes') {
+    return cycle.setStatus('FINISH')
+    .then(() => aptly.stable(cycle.packages, ctx.project.dists))
   } else {
-    return release.setStatus('FAIL')
+    return cycle.setStatus('FAIL')
   }
 })
 

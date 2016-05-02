@@ -3,47 +3,21 @@
  * Client for building packages in a docker environment
  */
 
-import _ from 'lodash'
 import Docker from 'dockerode'
 import fs from 'fs'
 import path from 'path'
 
+import * as local from '~/lib/local'
 import Atc from '~/lib/atc'
 import config from '~/lib/config'
 import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
+import render from '~/lib/render'
 
 const docker = new Docker({ socketPath: config.strongback.socket })
-const spawn = require('child_process').spawn
 
 const cacheFolder = path.resolve(__dirname, 'cache')
 const projectsFolder = path.resolve(__dirname, 'projects')
-
-/**
- * cmd
- * Executes a command on server
- *
- * @param {String} command - command to be executed
- * @returns {Promise}
- */
-function cmd (command) {
-  const arr = command.split(' ')
-
-  return new Promise((resolve, reject) => {
-    const child = spawn(arr[0], _.drop(arr))
-
-    child.stdout.on('data', (data) => log.silly('Local =>', data.toString('utf8')))
-    child.stderr.on('data', (data) => log.silly('Local =>', data.toString('utf8')))
-
-    child.on('close', (code) => {
-      if (code === 0) {
-        return resolve()
-      } else {
-        return reject(code)
-      }
-    })
-  })
-}
 
 /**
  * toFile
@@ -81,42 +55,60 @@ function fromFile (file, encoding = 'utf8') {
   })
 }
 
-// Check for docker image
-// TODO: we need to pack the docker folder in a tar archive and automaticly build the image
-docker.listImages((err, images) => {
-  if (err) {
-    log.error('Failed to grab list of images. Do you have access to docker?')
-    log.error(err)
-    process.exit(1)
-  }
+/**
+ * createChangelog
+ * Returns debian changelog
+ *
+ * @param {String} name - project name
+ * @param {String} dist - distribution to put in changelog
+ * @param {Array} changelogs - houston changelog array
+ * @returns {String} - rendered debian changelog
+ */
+function createChangelog (name, dist, changelogs) {
+  return new Promise((resolve, reject) => {
+    const changelog = []
+    changelogs.forEach((change) => {
+      const rendered = render('strongback/changelog.nun', Object.assign({ name, dist }, change), false)
+      changelog.push(rendered.body)
+    })
 
-  const houstonImages = images.filter((image) => {
-    return (image.RepoTags.indexOf('houston:latest') !== -1)
+    return resolve(changelog.join('\n\n'))
   })
-
-  if (houstonImages.length > 0) {
-    log.info('Found houston image in docker')
-  } else {
-    log.error('Could not find houston image in docker. Please manually create docker image')
-    log.error(`Simply run 'docker build -t houston .' in ${path.resolve(__dirname, 'docker')}`)
-    process.exit(1)
-  }
-})
-
-// Start a new atc connection
-const connection = new Atc('strongback')
-connection.connect(config.server.url)
-
-log.info('Strongback running')
+}
 
 /**
- * Builds a repository
+ * ensureImage
+ * Check for docker houston image
+ *
+ * @returns {Boolean} - true if image exists, else catch
+ */
+function ensureImage () {
+  return new Promise((resolve, reject) => {
+    docker.listImages((err, images) => {
+      if (err) return reject(err)
+
+      const houstonImages = images.filter((image) => {
+        return (image.RepoTags.indexOf('houston:latest') !== -1)
+      })
+
+      if (houstonImages.length > 0) {
+        return resolve(true)
+      } else {
+        return reject(new Mistake(500, 'Houston image does not exist'))
+      }
+    })
+  })
+}
+
+/**
+ * runBuild
+ * Starts a build from information and returns built information
  *
  * @param {Object} data - {
  *   {String} arch - architecture to build (amd64)
  *   {String} changelog - build changelog
  *   {String} dist - distribution to build (xenial)
- *   {String} name - project name (vocal)
+ *   {String} name - package name (vocal)
  *   {String} repo - git repository (https://github.com/elementary/vocal)
  *   {String} tag - git tag to checkout (v2.0.0)
  *   {String} version - package version (2.0.0)
@@ -125,15 +117,9 @@ log.info('Strongback running')
  *   {Boolean} success - true if successful build (only exists on build)
  *   {Error} error - error while trying to build (only exists on failure to run build)
  *   {Object} files - files to send back to houston
- *   {String} arch - architecture to build (amd64)
- *   {String} dist - distribution to build (xenial)
- *   {String} name - project name (vocal)
- *   {String} repo - git repo address (https://github.com/elementary/vocal)
- *   {String} tag - git tag to checkout (v2.0.0)
- *   {String} version - package version (2.0.0)
  * }
  */
-connection.on('build:start', (data) => {
+function runBuild (data) {
   // Added security measure just in case someone tries to slip us something bad
   data.arch = escape(data.arch.replace(/[\/]/gi, ''))
   data.dist = escape(data.dist.replace(/[\/]/gi, ''))
@@ -145,31 +131,33 @@ connection.on('build:start', (data) => {
   const projectFolder = path.resolve(projectsFolder, `${data.name}#${data.tag}`)
   const repoFolder = path.resolve(projectFolder, 'code')
 
-  cmd(`rm -rf ${projectFolder}`) // Clean up any left behind data
+  return local.cmd(`rm -rf ${projectFolder}`) // Clean up any left behind data
   .then(() => Promise.all([ // Create all needed folders if they don't exist
-    cmd(`mkdir -p ${cacheFolder}`),
-    cmd(`mkdir -p ${repoFolder}`)
+    local.cmd(`mkdir -p ${cacheFolder}`),
+    local.cmd(`mkdir -p ${repoFolder}`)
   ]))
   .then(() => { // Git repository setup
-    return cmd(`git clone ${data.repo} ${repoFolder}`)
-    .then(() => cmd(`git --git-dir=${repoFolder}/.git --work-tree=${repoFolder} checkout ${data.tag}`))
-    .then(() => cmd(`rm -rf ${repoFolder}/.git`))
+    return local.cmd(`git clone --depth 1 ${data.repo} ${repoFolder}`)
+    .then(() => local.cmd(`git --git-dir=${repoFolder}/.git --work-tree=${repoFolder} checkout ${data.tag}`))
+    .then(() => local.cmd(`rm -rf ${repoFolder}/.git`))
   })
   .then(() => { // Changelog creation TODO: move to hook system
-    return cmd(`mkdir -p ${repoFolder}/debian`)
-    .then(() => cmd(`rm -f ${repoFolder}/debian/changelog`))
-    .then(() => toFile(data.changelog, `${repoFolder}/debian/changelog`))
+    return local.cmd(`mkdir -p ${repoFolder}/debian`)
+    .then(() => local.cmd(`rm -f ${repoFolder}/debian/changelog`))
+    .then(() => createChangelog(data.name, data.dist, data.changelog))
+    .then((changelog) => toFile(changelog, `${repoFolder}/debian/changelog`))
   })
   .catch((error) => {
     throw new Mistake(500, 'Unable to setup workspace', error)
   })
   .then(() => { // Run build container
     log.debug(`Building container for ${data.name}#${data.tag}`)
+    const outlog = (config.env === 'development') ? process.stdout : null
 
     return new Promise((resolve, reject) => {
       docker.run('houston', [
         '-a', data.arch, '-d', data.dist, '-o', '/houston'
-      ], null, {
+      ], outlog, {
         Binds: [`${projectFolder}:/houston:rw`, `${cacheFolder}:/var/cache/liftoff:rw`],
         Privileged: true // yes, this is needed for sudo commands
       }, (err, data, container) => {
@@ -192,49 +180,79 @@ connection.on('build:start', (data) => {
       log.info(`Build for ${data.name}#${data.tag} finished`)
     }
 
-    // Return blank strings if we can't access the files
+    // TODO: search for file names because the might not be consistant with data.name
     const logFile = await fromFile(`${projectFolder}/${data.name}_${data.version}_${data.arch}.log`)
     .catch((error) => {
-      log.error('Failed to grab log file after build', error)
-      return ''
-    })
-    const debFile = await fromFile(`${projectFolder}/${data.name}_${data.version}_${data.arch}.deb`, undefined)
-    .catch((error) => {
-      log.error('Failed to grab deb file after build', error)
-      return ''
+      log.warn('Failed to grab log file after build', error)
     })
 
-    // TODO: wait until all things are sent before removing folders
-    return connection.send('houston', 'build:finish', {
-      arch: data.arch,
-      dist: data.dist,
-      name: data.name,
-      repo: data.repo,
+    const debFile = await fromFile(`${projectFolder}/${data.name}_${data.version}_${data.arch}.deb`, null)
+    .catch((error) => {
+      log.warn('Failed to grab deb file after build', error)
+    })
+
+    return {
       success: (exitCode === 0),
-      tag: data.tag,
-      version: data.version,
       files: {
         log: logFile,
         deb: debFile
       }
-    })
+    }
   })
-  .catch((error) => {
-    log.error(`Technical failure building ${data.name}#${data.tag}`, error)
-
-    return connection.send('houston', 'build:error', {
-      arch: data.arch,
-      dist: data.dist,
-      error,
-      name: data.name,
-      repo: data.repo,
-      tag: data.tag,
-      version: data.version
-    })
-  })
-  .finally(() => { // Clean up all left over files
+  .finally((...stuff) => { // Clean up all left over files
     log.debug(`Cleaning up for ${data.name}#${data.tag}`)
 
-    return cmd(`rm -rf ${projectFolder}`)
+    if (config.env !== 'development') {
+      return local.cmd(`rm -rf ${projectFolder}`)
+    }
+
+    return stuff
+  })
+}
+
+/**
+ * Starts a build from information and returns built information
+ *
+ * @param {Object} data - {
+ *   {ObjectId} id - build database id
+ *   {String} arch - architecture to build package on (amd64)
+ *   {String} dist - distribution to build package on (xenial)
+ *   {String} name - package name
+ *   {String} repo - git repo 'git@github.com:elementary/houston.git'
+ *   {String} tag - git tag for given repo 'master'
+ *   {String} version - project version we are testing
+ *   {Array} changelog - changelog object for current release testing
+ * }
+ * @returns {ObjectId} - build database id
+ * @returns {Object} - {
+ *   {Boolean} success - true if we ended with a successful build
+ *   {Object} files - build log and deb package of finished build
+ * }
+ */
+ensureImage()
+.catch((err) => {
+  log.error('Unable to ensure Houston docker image exists')
+  log.error(err)
+  process.exit(1)
+})
+.then(() => {
+  const connection = new Atc('strongback')
+  connection.connect(config.server.url)
+
+  log.info('Strongback running')
+
+  connection.on('build:queue', (data) => {
+    log.debug(`Starting build on ${data.name} for ${data.dist} on ${data.arch}`)
+    connection.send('houston', 'build:start', data.id, true)
+
+    runBuild(data)
+    .then((pkg) => {
+      log.debug(`Build finished for ${data.name}`)
+      connection.send('houston', 'build:finish', data.id, pkg)
+    })
+    .catch((error) => {
+      log.warn(`Error building ${data.name}`, error)
+      connection.send('houston', 'build:error', data.id, error)
+    })
   })
 })

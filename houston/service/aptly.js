@@ -2,6 +2,7 @@
  * houston/service/aptly.js
  * Repository handles with aptly api
  *
+ * @exports {Function} upload - Uploads a package to aptly server
  * @exports {Function} review - Sends package to review repo
  * @exports {Function} stable - Sends package to stable repo
  */
@@ -13,33 +14,60 @@ import request from '~/lib/request'
 
 /**
  * upload
- * Uploads a package to aptly in review repository (Does not publish!)
+ * Uploads a package to aptly in review repository
  *
- * @param {String} pkg - Project / package name
- * @param {String} version - Package version
- * @returns {Array} - Aptly package keys
+ * @param {String} project - name of project package being uploaded
+ * @param {ObjectId} build - database id of build
+ * @param {Buffer} file - actual file to upload
  */
-const upload = (pkg, version) => {
+export function upload (project, build, file) {
   if (!config.aptly) {
     throw new Mistake(503, 'Aptly is currently disabled')
   }
 
   return request
-  .post(`${config.aptly.url}/repos/${config.aptly.review}/file/${pkg}-${version}`)
+  .post(`${config.aptly.url}/files/${project}`)
+  .attach('file', file, `${build}.deb`)
   .then((data) => {
-    log.debug(`Added ${log.lang.s('package', data.body.Report.Added)} of ${pkg}`)
+    log.debug(`Added ${log.lang.s('package', data.body)} of ${project} to repository`)
+
+    return
+  })
+}
+
+/**
+ * ingest
+ * Adds packages from upload directory to repository
+ *
+ * @param {String} project - name of project package being uploaded
+ * @param {String} version - package version
+ * @param {Array} build - database id of builds
+ * @returns {Array} - Aptly package keys
+ */
+const ingest = (project, version, build) => {
+  if (!config.aptly) {
+    throw new Mistake(503, 'Aptly is currently disabled')
+  }
+
+  return Promise.each(build, (build) => {
+    return request.post(`${config.aptly.url}/repos/${config.aptly.review}/file/${project}/${build}.deb`)
+    .then((data) => data.body.Report.Added)
+    .catch((error) => {
+      if (error.statusCode === 404) {
+        throw new Mistake(500, 'Repository does not exist in aptly')
+      }
+
+      throw new Mistake(500, error)
+    })
+  })
+  .then((added) => [].concat(added))
+  .then((data) => {
+    log.debug(`Ingested ${log.lang.s('package', data.length)} of ${project}`)
 
     return request
     .get(`${config.aptly.url}/repos/${config.aptly.review}/packages`)
-    .query({ q: `${pkg} (= ${version})` })
+    .query({ q: `${project} (= ${version})` })
     .then((data) => data.body)
-  })
-  .catch((error) => {
-    if (error.statusCode === 404) {
-      throw new Mistake(500, 'Repository does not exist in aptly')
-    }
-
-    throw new Mistake(500, error)
   })
 }
 
@@ -171,21 +199,21 @@ const publish = async (repo, dist) => {
 
 /**
  * review
- * 1) Uploads package to aptly
- * 2) Adds packages to review repository
- * 3) Publishes review repository
+ * 1) Adds packages to review repository
+ * 2) Publishes review repository
  *
- * @param {String} pkg - Project / package name
- * @param {String} version - Package version
+ * @param {String} project - name of project package being uploaded
+ * @param {String} version - package version
+ * @param {Array} build - database id of builds
  * @param {Array} dist - Distributions to publish to
  * @returns {Array} - Package keys successfully moved
  */
-export function review (pkg, version, dist) {
+export function review (project, version, build, dist) {
   if (!config.aptly) {
     throw new Mistake(503, 'Aptly is currently disabled')
   }
 
-  return upload(pkg, version)
+  return ingest(project, version, build)
   .then((keys) => {
     return publish(config.aptly.review, dist)
     .then(() => keys)
