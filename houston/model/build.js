@@ -17,7 +17,6 @@ import Mistake from '~/lib/mistake'
  * @param {String} dist - distribution to build on (xenial)
  * @param {String} arch - architecture to build on (amd64)
  * @param {Object} files - key storage for any file stored
- * @param {String} package - aptly package id
  * @param {String} _status - current status of build in strongback
  * @param {Error} mistake - mistake class error if any occured
  * @param {Date} started - when the build was first created in the database
@@ -34,7 +33,6 @@ const schema = new db.Schema({
   },
 
   files: Object,
-  package: String,
 
   _status: {
     type: String,
@@ -135,11 +133,31 @@ schema.methods.setFile = function (name, file, metadata) {
 }
 
 /**
+ * dropFile
+ * drops a file, then burns all records of it existing
+ *
+ * @param {String} name - name of file to save
+ */
+schema.methods.dropFile = function (name) {
+  if (this.files == null || this.files[name] == null) {
+    return Promise.reject(new Error('File does not exist'))
+  }
+
+  return grid.drop(this.files[name])
+  .then(() => {
+    return this.update({
+      [`files.${name}`]: null
+    })
+  })
+}
+
+/**
  * doStrongback
  * Sends build information to strongback
  */
 schema.methods.doStrongback = function () {
-  return atc.send('strongback', 'build:start', {
+  return atc.send('strongback', 'build:queue', {
+    id: this._id,
     arch: this.arch,
     changelog: this.cycle.changelog,
     dist: this.dist,

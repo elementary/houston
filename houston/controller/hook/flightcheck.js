@@ -48,16 +48,16 @@ atc.on('cycle:finish', async (id, data) => {
     return
   } else {
     log.verbose('Received flightcheck data for finish cycle')
-    log.debug(`Found ${log.lang.s('error', data.errors)} in ${data.name}`)
+    log.debug(`Found ${log.lang.s('error', data.errors)} in ${cycle.name}`)
     data.issues.forEach((issue) => {
       log.silly(issue)
     })
   }
 
   if (data.errors > 0) {
-    await cycle.setStatus('FAIL')
+    cycle.setStatus('FAIL')
   } else {
-    await cycle.setStatus('DEFER')
+    cycle.setStatus('DEFER')
   }
 
   const project = await Project.findById(cycle.project)

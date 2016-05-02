@@ -4,6 +4,5 @@
  */
 
 describe('service', () => {
-  require('./aptly')
   require('./atc')
 })

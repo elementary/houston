@@ -211,9 +211,10 @@ schema.methods.createCycle = async function (type) {
  * @returns {Array} - an array of all releases changelog up to this release
  */
 schema.methods.createChangelog = function () {
-  const uptoRelease = this.project.releases.filter((release) => {
-    return semver.lte(release.version, this.version)
-  })
+  const uptoRelease = this.project.releases
+  .filter((release) => semver.lte(release.version, this.version))
+  .sort((a, b) => semver.compare(a.version, b.version))
+  .reverse()
 
   return uptoRelease.map((release) => {
     return {

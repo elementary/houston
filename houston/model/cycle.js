@@ -14,7 +14,7 @@ import db from '~/lib/database'
 import Mistake from '~/lib/mistake'
 
 /**
- * Stores cycle information. 1 cycle = 1 project being built = many builds
+ * Stores cycle information. 1 cycle = 1 project version being built = many builds
  *
  * @param {String} repo - git repo of cycle (git@github.com:elementary/vocal.git)
  * @param {String} tag - git tag to build (master)
@@ -22,6 +22,7 @@ import Mistake from '~/lib/mistake'
  * @param {String} version - semver version of cycle (1.0.0)
  * @param {String} type - cycle type (INIT = up to flightcheck, ORPHAN = up to strongback)
  * @param {String} changelog
+ * @param {Array} packages - array of aptly package keys
  * @param {String} _status - current status of cycle without influence of builds
  * @param {Object} mistake - mistake class error if any occured
  * @param {Array} builds - all builds under this cycle
@@ -69,6 +70,7 @@ const schema = new db.Schema({
     type: Array,
     required: true
   },
+  packages: Array,
 
   _status: {
     type: String,
@@ -115,10 +117,6 @@ schema.methods.setStatus = function (status) {
   // TODO: add a build stopper function to allow early failing of cycles
   const final = (status === 'FINISH' || status === 'FAIL' || status === 'ERROR')
   const options = schema.paths._status.enumValues
-
-  if (this._status === 'DEFER' && !final) {
-    return Promise.reject('Unable to set status on a cycle with outstanding builds')
-  }
 
   if (options.indexOf(this._status) >= options.indexOf(status)) {
     return Promise.reject('Status is already greater than requested')
@@ -175,7 +173,7 @@ schema.methods.doFlightcheck = function () {
  * Sends all build information to strongback
  */
 schema.methods.doStrongback = function () {
-  return Promise.all(this.builds, (build) => {
+  return Promise.each(this.builds, (build) => {
     return build.doStrongback()
   })
 }
