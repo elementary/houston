@@ -7,12 +7,14 @@
 
 import Router from 'koa-router'
 
-import dashboard from './dashboard'
+import api from './api'
 import hooks from './hook'
+import dashboard from './dashboard'
 import project from './project'
 
 const route = new Router()
 
+route.use(api.routes(), api.allowedMethods())
 route.use(hooks.routes(), hooks.allowedMethods())
 
 route.use(dashboard.routes(), dashboard.allowedMethods())

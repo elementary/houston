@@ -72,8 +72,6 @@ app.use(async (ctx, next) => {
   } catch (error) {
     ctx.app.emit('error', error, ctx)
 
-    const htmlRespond = (ctx.accepts(['json', 'html']) === 'html')
-
     const pkg = {
       status: error.status || 500
     }
@@ -89,12 +87,8 @@ app.use(async (ctx, next) => {
     }
 
     ctx.status = pkg.status
-    if (htmlRespond) {
-      return ctx.render('error', { error: pkg })
-    } else {
-      ctx.body = { errors: [pkg] }
-      return null
-    }
+
+    return ctx.render('error', { error: pkg })
   }
 })
 
@@ -114,20 +108,11 @@ app.use(controllers.routes(), controllers.allowedMethods())
 app.use((ctx) => {
   ctx.status = 404
 
-  if (ctx.accepts(['json', 'html']) === 'html') {
-    return ctx.render('error', { error: {
-      status: 404,
-      title: 'Page not found',
-      detail: ''
-    }})
-  } else {
-    ctx.body = { errors: [{
-      status: 404,
-      title: 'Page Not Found',
-      detail: 'The page you are looking found can not be found'
-    }]}
-    return null
-  }
+  return ctx.render('error', { error: {
+    status: 404,
+    title: 'Page not found',
+    detail: ''
+  }})
 })
 
 // Error logging
