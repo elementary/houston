@@ -37,6 +37,7 @@ const schema = new db.Schema({
     type: String,
     required: true
   }],
+  downloads: Number,
 
   github: {
     id: {
