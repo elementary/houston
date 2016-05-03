@@ -163,6 +163,59 @@ schema.virtual('cycle').get(function () {
 })
 
 /**
+ * toObject
+ * Overwrites built in mongoose toObject function for better plain object support
+ *
+ * @param {Object} doc - mongoose document object to transform
+ * @param {Object} ret - the plain object representation of the document
+ * @param {Object} opt - options passed by schema or inline
+ * @returns {Object} - a promise of a better object
+ */
+schema.set('toObject', {
+  getters: false,
+  virtuals: false,
+  transform: async (doc, ret, opt) => {
+    const status = await doc.getStatus()
+    const releases = await Promise.map(doc.releases, (release) => release.toObject())
+
+    ret['id'] = ret['_id']
+    ret['status'] = status
+    ret['releases'] = releases
+
+    delete ret['_id']
+    delete ret['__v']
+    delete ret['_status']
+    delete ret['package']['icon']
+    delete ret['github']['token']
+
+    if (ret['mistake'] != null && ret['mistake']['stack'] != null) {
+      delete ret['mistake']['stack']
+    }
+
+    return ret
+  }
+})
+
+/**
+ * toJSON
+ * Overwrites built in mongoose toJSON function for better plain object support
+ *
+ * @param {Object} doc - mongoose document object to transform
+ * @param {Object} ret - the plain object representation of the document
+ * @param {Object} opt - options passed by schema or inline
+ * @returns {Object} - a promise of a better object
+ */
+schema.set('toJSON', {
+  getters: false,
+  virtuals: false,
+  transform: async (doc, ret, opt) => {
+    const obj = await doc.toObject()
+
+    return JSON.stringify(obj, opt)
+  }
+})
+
+/**
  * getStatus
  * Returns status as promised
  *
