@@ -90,6 +90,7 @@ export const schema = new db.Schema({
     },
     owner: String,
     name: String,
+    private: Boolean,
     token: String,
     label: {
       type: String,
