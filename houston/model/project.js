@@ -72,6 +72,7 @@ export const schema = new db.Schema({
     icon: String,
     price: Number
   },
+  downloads: Number,
 
   dists: {
     type: [String],
