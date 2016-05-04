@@ -41,14 +41,14 @@ route.get('/download', (ctx) => {
 
   if (ctx.query.status !== 'OK') {
     ctx.status = 200
-    return
+    return Promise.resolve()
   }
 
   const path = ctx.query.file.split('/')
 
   if (path[0] !== config.aptly.stable || path[path.length - 1].indexOf('.deb') === -1) {
     ctx.status = 200
-    return
+    return Promise.resolve()
   }
 
   const filename = path.pop().split('_')
@@ -58,6 +58,7 @@ route.get('/download', (ctx) => {
     'releases.version': filename[1]
   }, {
     $inc: {
+      'downloads': 1,
       'releases.$.downloads': 1
     }
   })

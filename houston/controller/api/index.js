@@ -10,6 +10,7 @@ import Router from 'koa-router'
 
 import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
+import projects from './projects'
 
 const route = new Router({
   prefix: '/api'
@@ -20,12 +21,12 @@ const route = new Router({
  * Does header checks and sets for all api calls
  */
 route.use(async (ctx, next) => {
-  if (ctx.request.header['content-type'] == null || ctx.request.header['content-type'] !== 'application/vnd.api+json') {
+  if (ctx.request.is('application/vnd.api+json') === false) {
     ctx.status = 415
     return
   }
 
-  if (ctx.request.header['accept'] == null || ctx.request.header['accept'].split(',').indexOf('application/vnd.api+json') === -1) {
+  if (ctx.request.accepts('application/vnd.api+json') !== 'application/vnd.api+json') {
     ctx.status = 406
     return
   }
@@ -52,11 +53,14 @@ route.use(async (ctx, next) => {
 
   if (ctx.body != null && ctx.body['links'] == null) ctx.body['links'] = {}
 
-  if (ctx.body != null && ctx.body['links']['self'] == null) ctx.body['links']['self'] = ctx.request.url
+  if (ctx.body != null && ctx.body['links']['self'] == null) ctx.body['links']['self'] = ctx.request.href
 
   ctx.type = 'application/vnd.api+json'
   return
 })
+
+// Load all api paths here
+route.use(projects.routes(), projects.allowedMethods())
 
 /**
  * /api/*
@@ -64,7 +68,6 @@ route.use(async (ctx, next) => {
  */
 route.all('*', (ctx) => {
   throw new Mistake(404, 'Page not found', true)
-  return
 })
 
 export default route
