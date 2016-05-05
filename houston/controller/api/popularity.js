@@ -5,11 +5,8 @@
  * @exports {Object} - Koa router
  */
 
-import semver from 'semver'
 import Router from 'koa-router'
 
-import * as policy from '~/houston/policy'
-import db from '~/lib/database'
 import Project from '~/houston/model/project'
 
 const route = new Router({
@@ -106,7 +103,7 @@ route.get('/', async (ctx) => {
 
   // Execute query
   const castedProjects = await Promise.map(query.exec(), async (project) => {
-    const data = await project.toObject()
+    const data = await project.toNormal()
     const release = project.release.latest
 
     return {

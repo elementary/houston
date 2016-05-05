@@ -26,14 +26,15 @@ const route = new Router({
 route.get('/*', policy.isRole('beta'), async (ctx, next) => {
   ctx.project = await Project.findOne({
     name: ctx.params.project
-  })
+  }).exec()
 
   if (ctx.project == null) {
     throw new ctx.Mistake(404, 'Project not found')
   }
 
   await next()
-  .then(() => ctx.redirect('/dashboard'))
+
+  return ctx.redirect('/dashboard')
 })
 
 /**

@@ -106,33 +106,27 @@ schema.virtual('cycle').get(function () {
 })
 
 /**
- * toObject
- * Overwrites built in mongoose toObject function for better plain object support
+ * toNormal
+ * Async notmalization function for objects
  *
- * @param {Object} doc - mongoose document object to transform
- * @param {Object} ret - the plain object representation of the document
- * @param {Object} opt - options passed by schema or inline
  * @returns {Object} - a promise of a better object
  */
-schema.set('toObject', {
-  getters: false,
-  virtuals: false,
-  transform: async (doc, ret, opt) => {
-    const status = await doc.getStatus()
+schema.methods.toNormal = async function () {
+  const ret = this.toObject()
+  const status = await this.getStatus()
 
-    ret['id'] = ret['_id']
-    ret['status'] = status
+  ret['id'] = ret['_id']
+  ret['status'] = status
 
-    delete ret['_id']
-    delete ret['_status']
+  delete ret['_id']
+  delete ret['_status']
 
-    if (ret['mistake'] != null && ret['mistake']['stack'] != null) {
-      delete ret['mistake']['stack']
-    }
-
-    return ret
+  if (ret['mistake'] != null && ret['mistake']['stack'] != null) {
+    delete ret['mistake']['stack']
   }
-})
+
+  return ret
+}
 
 /**
  * toJSON

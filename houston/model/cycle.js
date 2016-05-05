@@ -83,37 +83,31 @@ const schema = new db.Schema({
 })
 
 /**
- * toObject
- * Overwrites built in mongoose toObject function for better plain object support
+ * toNormal
+ * Async notmalization function for objects
  *
- * @param {Object} doc - mongoose document object to transform
- * @param {Object} ret - the plain object representation of the document
- * @param {Object} opt - options passed by schema or inline
  * @returns {Object} - a promise of a better object
  */
-schema.set('toObject', {
-  getters: false,
-  virtuals: false,
-  transform: async (doc, ret, opt) => {
-    const status = await doc.getStatus()
-    const builds = await Promise.map(doc.builds, (build) => build.toObject())
+schema.methods.toNormal = async function () {
+  const ret = this.toObject()
+  const status = await this.getStatus()
+  const builds = await Promise.map(this.builds, (build) => build.toObject())
 
-    ret['id'] = ret['_id']
-    ret['status'] = status
-    ret['builds'] = builds
+  ret['id'] = ret['_id']
+  ret['status'] = status
+  ret['builds'] = builds
 
-    delete ret['_id']
-    delete ret['__v']
-    delete ret['_status']
-    delete ret['repo'] // It possibly has access token for cloning
+  delete ret['_id']
+  delete ret['__v']
+  delete ret['_status']
+  delete ret['repo'] // It possibly has access token for cloning
 
-    if (ret['mistake'] != null && ret['mistake']['stack'] != null) {
-      delete ret['mistake']['stack']
-    }
-
-    return ret
+  if (ret['mistake'] != null && ret['mistake']['stack'] != null) {
+    delete ret['mistake']['stack']
   }
-})
+
+  return ret
+}
 
 /**
  * toJSON

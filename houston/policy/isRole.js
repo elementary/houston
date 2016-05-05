@@ -5,8 +5,8 @@
  * @exports {Function} - Koa route middleware
  */
 
+import { schema } from '~/houston/model/user'
 import ifRole from './ifRole'
-import schema from '~/houston/model/user'
 
 /**
  * Checks user rights
