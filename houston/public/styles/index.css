@@ -1,0 +1,66 @@
+/*********************************************
+* Copyright 2016 elementary LLC.             *
+* This file is part of houston.elementary.io *
+*********************************************/
+
+/*******
+* Hero *
+*******/
+
+section.hero {
+    background-color: #3a416f;
+    color: #fff;
+    text-align: center;
+    padding: 64px 0;
+    max-width: 100%;
+}
+
+section.hero .button.suggested-action{
+    max-width: 100%;
+}
+
+/*********
+* Button *
+*********/
+
+button > i.fa,
+.button > i.fa {
+  margin-left: 16px;
+}
+
+.dark button.suggested-action,
+.dark .button.suggested-action {
+    border: none;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
+                inset 0 -1px 0 0 rgba(255, 255, 255, 0.15),
+                0 1px 0 0 rgba(0, 0, 0, 0.15);
+}
+
+.dark button.suggested-action:active,
+.dark .button.suggested-action:active {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.25);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(0, 0, 0, 0.25),
+                0 2px 0 0 rgba(255, 255, 255, 0.10);
+}
+
+/********
+* Other *
+********/
+
+@media only screen and (min-width: 640px) {
+    .grid .grid .half {
+        text-align: center;
+    }
+}
+
+.third .fa {
+    color: #3a416f;
+}
+
+.grey,
+footer {
+    background-color: #fafafa;
+}

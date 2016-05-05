@@ -1,0 +1,244 @@
+/*********************************************
+* Copyright 2016 elementary LLC.             *
+* This file is part of houston.elementary.io *
+*********************************************/
+
+/*************************
+* Floating Action Button *
+*************************/
+
+i.fab {
+    font-size: 24px;
+    float: right;
+    text-align: center;
+    color: #fff;
+    background-color: #3d9bda;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
+                0 1px 2px rgba(0,0, 0, 0.24);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.10);
+    transition: all 200ms ease-in-out;
+}
+
+i.fab:hover {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16),
+                0 3px 6px rgba(0,0,0,0.23);
+}
+
+/************
+* Dashboard *
+************/
+
+.repo {
+    display: block;
+    position: relative;
+    margin: 12px auto;
+    color: #333;
+    max-width: 500px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.repo .app-icon {
+    height: 64px;
+    width: 64px;
+    vertical-align: top;
+}
+
+.repo .description {
+    display: inline-block;
+    margin: 6px;
+}
+
+.repo p {
+    margin: 0;
+    padding-bottom: 3px;
+}
+
+.repo p.subtext a {
+    opacity: 0.65;
+    color: #333;
+}
+
+.repo p.subtext a:hover {
+    color: #08C;
+    opacity: 1.0;
+}
+
+.repo .right {
+    float: right;
+}
+
+.repo i {
+    display: inline-block;
+    position: relative;
+    vertical-align: 10px;
+    margin-left: 24px;
+    margin-right: 24px;
+    font-size: 24px;
+}
+
+.repo i .popover-container {
+    position: absolute;
+    right: 50%;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.repo i .popover-container .popover-content {
+    position: relative;
+    right: -50%;
+    bottom: 30px;
+    width: 200px;
+    z-index: 2;
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 5px;
+    background: white;
+    color: #333;
+    background-clip: content-box;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    text-align: left;
+    font-size: 14px;
+    font-family: 'Open Sans', 'Droid Sans', Helvetica, sans-serif;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: visibility 0s 250ms, opacity 250ms;
+}
+
+.repo i .popover-container .popover-content:before,
+.repo i .popover-container .popover-content:after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 50%;
+    margin-left: -5px;
+    width: 0px;
+    height: 0px;
+    border: 10px outset transparent;
+}
+
+.repo i .popover-container .popover-content:before {
+    bottom: -20px;
+    border-top: 10px solid rgba(0,0,0,0.2);
+}
+
+.repo i .popover-container .popover-content:after {
+    bottom: -18px;
+    border-top: 10px solid white;
+}
+
+.repo i:hover .popover-container .popover-content {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+    transition: opacity 250ms;
+}
+
+.repo i .popover-container .popover-content p {
+    text-align: center;
+}
+
+.repo i .popover-container .popover-content strong {
+    display: inline-block;
+    margin: 15px;
+    margin-bottom: 10px;
+}
+
+.repo i .popover-container .popover-content ul {
+    margin: 5px 0;
+    padding: 0;
+    max-height: 500px;
+    overflow: auto;
+}
+
+@media (max-height: 700px) {
+
+    .repo i .popover-container .popover-content ul {
+        max-height: 300px;
+    }
+
+}
+
+@media (max-height: 450px) {
+
+    .repo i .popover-container .popover-content ul {
+        max-height: 200px;
+    }
+
+}
+
+.repo i .popover-container .popover-content ul li {
+    display: block;
+    margin: 0;
+}
+
+.repo i .popover-container .popover-content ul li a {
+    display: block;
+    padding: 5px 15px;
+}
+
+.repo i .popover-container .popover-content ul li a:hover {
+    background-color: #e0e0e0;
+}
+
+.repo i .popover-container .popover-content hr {
+    background: #e0e0e0;
+    height: 1px;
+    border: 0;
+}
+
+.repo i .popover-container .popover-content {
+    z-index: 999;
+    margin-right: 8px;
+    bottom: 50px;
+    width: auto;
+    min-width: 200px;
+}
+
+.repo i .popover-container .popover-content h2 {
+    text-align: center;
+    font-size: 18px;
+    margin: 12px;
+}
+
+.repo i .popover-container .popover-content h3 {
+    font-size: 16px;
+    margin: 12px;
+}
+
+.repo i .popover-container .popover-content p {
+    margin: 12px;
+}
+
+.repo i.fa-check,
+.repo i.fa-arrow-up {
+    background-color: #93d844;
+}
+
+.repo i.fa-exclamation-triangle {
+    background-color: #fbd25d;
+}
+
+.repo i.fa-times,
+.repo i.fa-exclamation-circle {
+    background-color: #da4d45;
+}
+
+.repo .fa-refresh:before {
+    animation: spin 4s linear infinite;
+    transform-origin: 49% 48.5%; /* less wabble */
+    display: block
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
