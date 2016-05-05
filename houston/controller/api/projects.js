@@ -144,7 +144,7 @@ route.get('/', async (ctx) => {
 
   if (ctx.query['page[limit]'] != null) {
     try {
-      limit = Number(ctx.query['page[limit]'])
+      limit = Math.abs(Number(ctx.query['page[limit]']))
     } catch (err) {
       ctx.status = 400
       ctx.body = { errors: [{
@@ -173,7 +173,7 @@ route.get('/', async (ctx) => {
 
   if (ctx.query['page[offset]'] != null) {
     try {
-      offset = Number(ctx.query['page[offset]'])
+      offset = Math.abs(Number(ctx.query['page[offset]']))
     } catch (err) {
       ctx.status = 400
       ctx.body = { errors: [{
@@ -208,6 +208,13 @@ route.get('/', async (ctx) => {
   })
   if (Object.keys(cleanQuery).length > 0) url += '&'
 
+  let nextPage = offset + limit
+  if (count < 1) {
+    nextPage = 0
+  } else {
+    nextPage = count - 1
+  }
+
   // Execute query
   const castedProjects = await Promise.map(query.exec(), (project) => castProject(project))
 
@@ -216,7 +223,7 @@ route.get('/', async (ctx) => {
     links: {
       first: `${url}page[limit]=${limit}&page[offset]=0`,
       prev: `${url}page[limit]=${limit}&page[offset]=${(offset - limit > 0) ? offset - limit : 0}`,
-      next: `${url}page[limit]=${limit}&page[offset]=${(offset + limit < count) ? offset + limit : count - 1}`,
+      next: `${url}page[limit]=${limit}&page[offset]=${nextPage}`,
       last: `${url}page[limit]=${limit}&page[offset]=${(count - limit > 0) ? count - limit : 0}`
     }
   }
