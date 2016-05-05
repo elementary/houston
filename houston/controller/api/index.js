@@ -10,6 +10,7 @@ import Router from 'koa-router'
 
 import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
+import popularity from './popularity'
 import projects from './projects'
 
 const route = new Router({
@@ -60,6 +61,7 @@ route.use(async (ctx, next) => {
 })
 
 // Load all api paths here
+route.use(popularity.routes(), popularity.allowedMethods())
 route.use(projects.routes(), projects.allowedMethods())
 
 /**
