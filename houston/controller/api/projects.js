@@ -75,7 +75,7 @@ route.param('pId', async (id, ctx, next) => {
  * @returns {Object} - JSON api object
  */
 async function castProject (project) {
-  const data = await project.toObject()
+  const data = await project.toNormal()
 
   const owner = {
     links: {
