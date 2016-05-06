@@ -3,12 +3,28 @@
  * Entry for handling all Houston tests
  */
 
-require('babel-register')
-require('babel-polyfill')
+import mock from 'mock-require'
+import path from 'path'
 
-describe('project', function () {
-  it('lints', require('mocha-standard'))
+// Required for any imports not in a mocha test
+mock(path.resolve(__dirname, '../config'), require('./mocks/config'))
+
+process.on('unhandledRejection', (reason, promise) => {
+  /* eslint-disable no-console */
+  console.log(`Unhandled Rejection at: ${promise}`)
+  console.log(reason)
+  /* eslint-enable no-console */
 })
 
-require('./mocks')
-require('./core')
+beforeEach(() => {
+  mock(path.resolve(__dirname, '../config'), require('./mocks/config'))
+})
+
+afterEach(() => {
+  mock.stopAll()
+})
+
+require('./project')
+require('./lib')
+require('./flightcheck')
+require('./houston')

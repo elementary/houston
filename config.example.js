@@ -5,9 +5,6 @@
  * @exports {Object} default - Houston configuration
  */
 
-// 'test' 'development' 'production'
-// export const env = 'development'
-
 // https://github.com/settings/developers
 export const github = {
   client: '78zx9c4vb8xc4v5647ar',
@@ -24,34 +21,21 @@ export const github = {
 }
 
 // GitHub identifiers for admin, reviewer, and beta groups
-export const rights = false
-
-/*
 export const rights = {
-
-  // https://developer.github.com/v3/orgs/teams/#get-team
   beta: 'elementary',
   admin: 213128,
   review: 1880652
 }
-*/
 
-export const jenkins = false
-
-/*
 export const jenkins = {
-  url: 'http://john:1234@jenkins.elementaryos.org',
+  url: 'http://localhost:3001',
   public: 'ZPYYkQFAL7nShsnczM4uWGmjbVPLZCp7',
   secret: 'ft2DH0i6zixHGpShlWt99vgCL7uBpqKT',
 
   // Job name for building deb files
   job: 'deb-new-test'
 }
-*/
 
-export const aptly = false
-
-/*
 export const aptly = {
   url: 'http://localhost:8080/api',
   passphrase: 'gpgkeyphrase',
@@ -60,7 +44,6 @@ export const aptly = {
   review: 'review',
   stable: 'houston'
 }
-*/
 
 export const database = 'mongodb://localhost/houston-dev'
 
@@ -69,12 +52,6 @@ export const server = {
 
   // Full route including port and protocol, without trailing slash
   url: 'http://localhost:3000'
-  // port: 3000
-}
-
-export const socket = {
-  public: 'VcSpPL255upq4vF5nGJjmOWVUgbQGYcc',
-  private: 'KUfwXUo3HDVvErvAyVp113SLE3zcQLZm'
 }
 
 export const log = {
