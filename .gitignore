@@ -1,6 +1,9 @@
 # Houston files
 *.log
-config.js
+/config.js
+/strongback/projects
+/strongback/cache
+/flightcheck/projects
 
 # Node files
 node_modules

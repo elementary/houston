@@ -1,0 +1,24 @@
+if project.status === 'NEW'
+  include /partials/status/new
+if project.status === 'INIT'
+  include /partials/status/init
+if project.status === 'STANDBY'
+  include /partials/status/standby
+if project.status === 'QUEUE'
+  include /partials/status/queue
+if project.status === 'PRE'
+  include /partials/status/pre
+if project.status === 'HOLD'
+  include /partials/status/hold
+if project.status === 'BUILD'
+  include /partials/status/build
+if project.status === 'POST'
+  include /partials/status/post
+if project.status === 'REVIEW'
+  include /partials/status/review
+if project.status === 'FINISH'
+  include /partials/status/finish
+if project.status === 'FAIL'
+  include /partials/status/fail
+if project.status === 'ERROR'
+  include /partials/status/error
