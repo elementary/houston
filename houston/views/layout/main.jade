@@ -28,9 +28,10 @@ html
       nav.nav#secondary
         div.nav-content
           ul
+            block actions
             // We can re/move this after beta is over
             if config.houston.version.split('.')[0] < 1
-              li: a(href="https://github.com/elementary/houston/issues") Bug Report
+              li: a(href="https://github.com/elementary/houston/issues") Feedback
           ul.right
             li: a(href="/auth/logout") Log Out
             if user.avatar
