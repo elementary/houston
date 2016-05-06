@@ -46,7 +46,7 @@ route.get('/download', (ctx) => {
 
   const path = ctx.query.file.split('/')
 
-  if (path[0] !== config.aptly.stable || path[path.length - 1].indexOf('.deb') === -1) {
+  if (path[1] !== config.aptly.stable || path[path.length - 1].indexOf('.deb') === -1) {
     ctx.status = 200
     return Promise.resolve()
   }
