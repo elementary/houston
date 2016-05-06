@@ -1,6 +1,13 @@
 language: node_js
 node_js:
   - "5"
-  - "4"
 git:
-  depth: 3
+  depth: 1
+services:
+  - mongodb
+addons:
+  apt:
+    sources:
+    - mongodb-3.0-precise
+    packages:
+    - mongodb-org-server
