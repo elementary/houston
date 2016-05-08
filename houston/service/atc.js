@@ -1,8 +1,7 @@
 /**
  * houston/service/atc.js
  * Wrapper for socket.io that includes message queue and pool support. Most of
- * this code is for server connection to "flightcheck" type socket. for client
- * specific class see ~/lib/atc
+ * this code is for server connection. for client specific class see ~/lib/atc
  *
  * @exports {Class} - Initalized houston type atc connection
  */

@@ -27,15 +27,6 @@ export const rights = {
   review: 1880652
 }
 
-export const jenkins = {
-  url: 'http://localhost:3001',
-  public: 'ZPYYkQFAL7nShsnczM4uWGmjbVPLZCp7',
-  secret: 'ft2DH0i6zixHGpShlWt99vgCL7uBpqKT',
-
-  // Job name for building deb files
-  job: 'deb-new-test'
-}
-
 export const aptly = {
   url: 'http://localhost:8080/api',
   passphrase: 'gpgkeyphrase',
@@ -62,4 +53,8 @@ export const log = {
 
   // Create 'error.log' and 'info.log'
   files: false
+}
+
+export const strongback = {
+  socket: '/var/run/docker.sock'
 }

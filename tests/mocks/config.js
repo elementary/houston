@@ -21,13 +21,6 @@ export const rights = {
   review: 1880652
 }
 
-export const jenkins = {
-  url: 'http://localhost:10003',
-  public: 'imatestingonajenkinsservertehehe',
-  secret: 'onepartpublic-twopartsprivatekeepo',
-  job: 'deb-new-test'
-}
-
 export const aptly = {
   url: 'http://localhost:10002',
   passphrase: 'testing',
@@ -51,4 +44,8 @@ export const log = {
   console: false,
   level: 'silly',
   files: false
+}
+
+export const strongback = {
+  socket: '/var/run/docker.sock'
 }

@@ -1,6 +1,6 @@
 /**
- * houston/controller/hook/atc.js
- * Handles all communcation from atc connections
+ * houston/controller/hook/flightcheck.js
+ * Handles all communcation from atc flightcheck connections
  */
 
 import atc from '~/houston/service/atc'
