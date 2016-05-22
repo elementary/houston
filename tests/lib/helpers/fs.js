@@ -33,7 +33,7 @@ describe('fs', () => {
   })
 
   it('walks a directory with filter function', async (done) => {
-    const tests = await fs.walk(fs.smartPath('../../../'), (path) => {
+    const tests = await fs.walk(__dirname, (path) => {
       return path.indexOf('fs.js') !== -1
     })
 

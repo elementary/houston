@@ -52,8 +52,8 @@ class HoustonAtc extends Atc {
       })
 
       // Socket listeners
-      socket.on('msg:send', (subject, data) => {
-        this.emit(subject, data)
+      socket.on('msg:send', (subject, ...data) => {
+        this.emit(subject, ...data)
 
         socket.emit('msg:confirm', this.hash(data))
       })
@@ -62,8 +62,14 @@ class HoustonAtc extends Atc {
         const i = _.findIndex(this.sent[socket.type], (obj) => {
           return obj.hash === hash
         })
+        const message = this.sent[socket.type][i]
 
-        this.emit(`${this.sent[socket.type][i]['subject']}:received`)
+        if (message == null) {
+          log.warn('received a confirmation message for a message we didnt send')
+          return
+        }
+
+        this.emit(`${message.subject}:received`, ...message.message)
         this.sent[socket.type] = _.pullAt(this.sent[socket.type], i)
       })
     })

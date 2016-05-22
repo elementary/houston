@@ -3,10 +3,16 @@
  * Client for running appHooks
  */
 
+import path from 'path'
+
 import * as fsHelper from '~/lib/helpers/fs'
+import * as local from '~/lib/local'
 import Atc from '~/lib/atc'
 import config from '~/lib/config'
 import log from '~/lib/log'
+import Mistake from '~/lib/mistake'
+
+const projectsFolder = path.resolve(__dirname, 'projects')
 
 /**
  * runHooks
@@ -15,15 +21,12 @@ import log from '~/lib/log'
  * @param {Object} data - {
  *   {String} repo - git repo 'git@github.com:elementary/houston.git'
  *   {String} tag - git tag for given repo 'master'
- *   {Object} project - database document of a project
- *   {Object} release - database document of a release
- *   {Object} cycle - database document of a cycle
+ *   {String} name - project name
+ *   {String} version - project version we are testing
+ *   {Array} changelog - changelog object for current release testing
  * }
  * @param {String} test - type of test to be ran ("pre")
  * @returns {Object} - {
- *   {String} cycle - database id for cycle
- *   {String} project - database id for project
- *   {String} release - database id for release
  *   {Number} errors - number of errors the hooks aquired
  *   {Number} warnings - number of warnings the hook aquired
  *   {Object} information - information to be updated in the database
@@ -31,55 +34,84 @@ import log from '~/lib/log'
  * }
  */
 const runHooks = async (data, test) => {
-  const hooks = await fsHelper.walk('flightcheck', (path) => {
+  data.name = escape(data.name.replace(/[\/]/gi, ''))
+  data.tag = escape(data.tag.replace(/[\/]/gi, ''))
+
+  const projectFolder = path.resolve(projectsFolder, `${data.name}#${data.tag}`)
+
+  const hooks = await fsHelper.walk(__dirname, (path) => {
     if (path.indexOf('/') === -1) return false
-    return path.indexOf(`${test.toLowerCase()}.js`) !== 0
+    if (path.split('/')[0] === 'projects') return false
+    return path.indexOf(`${test.toLowerCase()}.js`) !== -1
   })
-  const tests = hooks.map((Hook) => {
-    return new Hook(data).run()
+  .map((file) => {
+    const Hook = require(path.join(__dirname, file)).default
+    return new Hook(Object.assign(data, { folder: projectFolder }))
   })
 
-  return Promise.all(tests)
-  .catch((err) => log.error(err))
+  return local.cmd(`rm -rf ${projectFolder}`)
+  .then(() => local.cmd(`mkdir -p ${projectFolder}`))
+  .then(() => local.cmd(`git clone ${data.repo} ${projectFolder}`))
+  .then(() => local.cmd(`git --git-dir=${projectFolder}/.git --work-tree=${projectFolder} checkout ${data.tag}`))
+  .then(() => local.cmd(`rm -rf ${projectFolder}/.git`))
+  .then(() => Promise.all(hooks).map((hook) => hook.run()))
   .then((pkg) => {
     const obj = {errors: 0, warnings: 0, information: {}, issues: []}
 
-    for (const i in pkg) {
-      obj.errors = pkg[i].errors + obj.errors
-      obj.warnings = pkg[i].warnings + obj.warnings
-      obj.information = Object.assign(obj.information, pkg[i].information)
-      if (pkg[i].issue != null) obj.issues.push(pkg[i].issue)
-    }
+    pkg.forEach((hookPkg) => {
+      obj.errors = hookPkg.errors + obj.errors
+      obj.warnings = hookPkg.warnings + obj.warnings
+      obj.information = Object.assign(obj.information, hookPkg.information)
+      if (hookPkg.issue != null) obj.issues.push(hookPkg.issue)
+    })
 
     return obj
   })
-  .then((pkg) => {
-    return Object.assign({
-      cycle: data.cycle._id,
-      project: data.project._id,
-      release: (data.release != null) ? data.release._id : null
-    }, pkg)
+  .catch((err) => {
+    throw new Mistake(500, 'flightcheck ran into an error running tests', err, true)
+  })
+  .finally(() => { // Clean up all left over files
+    log.debug(`Cleaning up for ${data.name}#${data.tag}`)
+
+    return local.cmd(`rm -rf ${projectFolder}`)
   })
 }
 
-// Start a new atc connection
 const connection = new Atc('flightcheck')
 connection.connect(config.server.url)
 
 log.info('Flightcheck running')
 
-connection.on('cycle:start', (data) => {
-  log.debug(`Starting flightcheck on ${data.project.name}`)
+/**
+ * Runs hook with given package of data and returns compressed information
+ *
+ * @param {Object} data - {
+ *   {ObjectId} id - cycle database id
+ *   {String} repo - git repo 'git@github.com:elementary/houston.git'
+ *   {String} tag - git tag for given repo 'master'
+ *   {String} name - project name
+ *   {String} version - project version we are testing
+ *   {Array} changelog - changelog object for current release testing
+ * }
+ * @returns {ObjectId} - cycle database id
+ * @returns {Object} - {
+ *   {Number} errors - number of errors the hooks aquired
+ *   {Number} warnings - number of warnings the hook aquired
+ *   {Object} information - information to be updated in the database
+ *   {Array} issues - generated issues for GitHub with title and body
+ * }
+ */
+connection.on('cycle:queue', (data) => {
+  log.debug(`Starting flightcheck on ${data.name}`)
+  connection.send('houston', 'cycle:start', data.id, true)
 
   runHooks(data, 'pre')
   .then((pkg) => {
-    connection.send('houston', 'cycle:finished', pkg)
-
-    log.debug(`Found ${log.lang.s('error', pkg.errors)} in ${data.project.name}`)
+    log.debug(`Found ${log.lang.s('error', pkg.errors)} in ${data.name}`)
+    connection.send('houston', 'cycle:finish', data.id, pkg)
   })
   .catch((error) => {
-    // TODO: send back falure on test
-    log.warn(`Error running tests for ${data.project.name}`)
-    log.warn(error)
+    log.warn(`Error running tests for ${data.name}`, error)
+    connection.send('houston', 'cycle:error', data.id, error)
   })
 })

@@ -3,42 +3,139 @@
  * Handles all communcation from atc strongback connections
  */
 
+import _ from 'lodash'
+
+import * as aptly from '~/houston/service/aptly'
 import atc from '~/houston/service/atc'
 import Cycle from '~/houston/model/cycle'
+import log from '~/lib/log'
+import Mistake from '~/lib/mistake'
+import Project from '~/houston/model/project'
+import render from '~/lib/render'
 
 /**
- * Receives data from build
+ * Updates build when it starts to be built
  *
- * @param {Object} - {
- *   {String} arch - architecture to build (amd64)
- *   {String} dist - distribution to build (xenial)
- *   {Error} error - error while trying to build (only exists on failure to run build)
- *   {String} owner - repo owner on github (vocalapp)
- *   {String} repo - repo name on github (vocal)
- *   {Boolean} success - true if successful build (only exists on build)
- *   {String} tag - git tag to checkout
- *   {String} version - package version
- *   {Array} files - [{
- *     {String} name - file name
- *     {String} data - file data
- *   }]
+ * @param {ObjectId} id - build database id
+ * @param {Boolean} data - true if test starts
+ */
+atc.on('build:start', async (id, data) => {
+  const cycle = await Cycle.findOne({
+    'builds._id': id
+  })
+  const build = cycle.builds.id(id)
+  const status = await build.getStatus()
+
+  if (status !== 'QUEUE') {
+    log.debug('Received strongback start data for a build already started')
+    return
+  } else {
+    log.verbose('Received strongback data for start build')
+  }
+
+  build.setStatus('BUILD')
+})
+
+/**
+ * Updates a completed build database information
+ *
+ * @param {ObjectId} id - build database id
+ * @param {Object} data - {
+ *   {Boolean} success - true if we ended with a successful build
+ *   {Object} files - build log and deb package of finished build
  * }
  */
-atc.on('build:finish', async (data) => {
-  const build = await Cycle.findOne({
-    
+atc.on('build:finish', async (id, data) => {
+  const cycle = await Cycle.findOne({
+    'builds._id': id
   })
+  const build = cycle.builds.id(id)
+  const status = await build.getStatus()
+  const project = await Project.findOne(cycle.project)
 
-  if (data.errors > 0) {
-    cycle.update({ '_status': 'FAIL' })
-  } else if (cycle.type === 'RELEASE') {
-    cycle.build()
-    .then(() => cycle.update({ '_status': 'BUILD' }))
+  if (status !== 'BUILD') {
+    log.debug('Received strongback finish data for a build already built')
+    return
+  } else {
+    log.verbose('Received strongback data for finished build')
   }
 
-  // TODO: update project information
-  const project = await cycle.getProject()
-  for (const i in data.issues) {
-    project.postIssue(data.issues[i])
+  if (data.files != null && data.files.log != null) {
+    build.setFile('deb', data.files.log)
   }
+
+  if (data.files != null && data.files.deb != null) {
+    build.setFile('deb', data.files.deb)
+  }
+
+  if (!data.success) {
+    const issue = render('houston/issue/build.md', { dist: build.dist, arch: build.arch, log: data.files.log })
+
+    build.setStatus('FAIL')
+    .then(() => project.postIssue(issue))
+    return
+  }
+
+  build.setStatus('FINISH')
+  .then(async () => {
+    if (data.files == null || data.files.deb == null) return Promise.resolve()
+
+    const cycle = await Cycle.findOne({
+      'builds._id': id
+    })
+    const build = cycle.builds.id(id)
+
+    return aptly.upload(project.package.name, build._id, data.files.deb)
+  })
+  .then(async () => {
+    const cycle = await Cycle.findOne({
+      'builds._id': id
+    })
+    const status = await cycle.getStatus()
+
+    if (cycle._status !== 'DEFER' || status !== 'FINISH') return Promise.resolve()
+
+    // All builds have completed but we have yet to set the next cycle status
+    return cycle.setStatus('REVIEW')
+    .then(() => {
+      const buildIds = cycle.builds.map((build) => build.id)
+      const dists = _.uniq(cycle.builds.map((build) => build.dist))
+
+      return aptly.review(project.package.name, cycle.version, buildIds, dists)
+      .then((packages) => cycle.update({ packages }))
+      .catch((error) => {
+        throw new Mistake(500, 'Unable to run aptly review process', error)
+      })
+    })
+  })
+  .catch((error) => {
+    log.error('Error while trying to process strongback finish', error)
+
+    return cycle.setStatus('ERROR')
+    .then(() => cycle.update({ mistake: error }))
+  })
+})
+
+/**
+* Updates a completed build database information
+*
+* @param {ObjectId} id - build database id
+* @param {Error} error - error that occured during build process
+ */
+atc.on('build:error', async (id, error) => {
+  const cycle = await Cycle.findOne({
+    'builds._id': id
+  })
+  const build = cycle.builds.id(id)
+  const status = await build.getStatus()
+
+  if (status !== 'BUILD') {
+    log.debug('Received strongback error data for a build already built')
+    return
+  } else {
+    log.verbose('Received strongback data for build error')
+  }
+
+  build.setStatus('ERROR')
+  .then(() => build.update({ mistake: error }))
 })

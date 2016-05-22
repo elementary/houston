@@ -31,9 +31,8 @@ export default class AppHub extends AppHook {
 
     let data = {}
     try {
-      const buffer = new Buffer(apphub, 'base64').toString()
-      if (!/\S/.test(buffer)) return
-      data = JSON.parse(buffer)
+      if (!/\S/.test(apphub)) return
+      data = JSON.parse(apphub)
     } catch (error) {
       this.meta({ dump: error })
       this.error('parse')
@@ -43,13 +42,13 @@ export default class AppHub extends AppHook {
     if (typeof data.priceUSD !== 'undefined' && typeof data.priceUSD !== 'number') {
       this.warn('price')
     } else if (data.priceUSD != null) {
-      this.update({application: {package: {price: data.priceUSD}}})
+      this.update({'package.price': data.priceUSD})
     }
 
     if (typeof data.issueLabel !== 'undefined' && typeof data.issueLabel !== 'string') {
       this.warn('label')
     } else if (data.issueLabel != null) {
-      this.update({application: {'github.label': data.issueLabel}})
+      this.update({'github.label': data.issueLabel})
     }
 
     return

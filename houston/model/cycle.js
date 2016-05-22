@@ -6,174 +6,188 @@
  * @exports {Object} schema - cycle database schema
  */
 
-import db from '~/lib/database'
-import atc from '~/houston/service/atc'
-import Build from './build'
-import * as aptly from '~/houston/service/aptly'
+import semver from 'semver'
 
-export const schema = new db.Schema({
-  _repo: {
+import atc from '~/houston/service/atc'
+import buildSchema from './build'
+import db from '~/lib/database'
+import Mistake from '~/lib/mistake'
+
+/**
+ * Stores cycle information. 1 cycle = 1 project version being built = many builds
+ *
+ * @param {String} repo - git repo of cycle (git@github.com:elementary/vocal.git)
+ * @param {String} tag - git tag to build (master)
+ * @param {String} name - project name (vocal)
+ * @param {String} version - semver version of cycle (1.0.0)
+ * @param {String} type - cycle type (INIT = up to flightcheck, ORPHAN = up to strongback)
+ * @param {String} changelog
+ * @param {Array} packages - array of aptly package keys
+ * @param {String} _status - current status of cycle without influence of builds
+ * @param {Object} mistake - mistake class error if any occured
+ * @param {Array} builds - all builds under this cycle
+ */
+const schema = new db.Schema({
+  project: {
+    type: db.Schema.Types.ObjectId,
+    required: true
+  },
+
+  repo: {
     type: String,
+    required: true,
     validate: {
       validator: (s) => /.*\.git/.test(s),
       message: '{VALUE} is not a valid git repository'
     }
   },
-  _tag: {
-    type: String
+  tag: {
+    type: String,
+    required: true
   },
 
-  // Determines what we do with the test results
+  name: {
+    type: String,
+    required: true,
+    index: true
+  },
+  version: {
+    type: String,
+    index: true,
+    validate: {
+      validator: (s) => semver.valid(s) !== null,
+      message: '{VALUE} is not a semver valid version'
+    }
+  },
+
   type: {
     type: String,
     required: true,
     enum: ['INIT', 'ORPHAN', 'RELEASE']
   },
+
+  changelog: {
+    type: Array,
+    required: true
+  },
+  packages: Array,
+
   _status: {
     type: String,
     default: 'QUEUE',
-    enum: ['QUEUE', 'PRE', 'POST', 'REVIEW', 'FAIL', 'FINISH']
+    enum: ['QUEUE', 'PRE', 'DEFER', 'REVIEW', 'FINISH', 'FAIL', 'ERROR']
   },
+  mistake: Object,
 
-  builds: [{
-    type: db.Schema.Types.ObjectId,
-    ref: 'build'
-  }],
-  packages: [String]
+  builds: [buildSchema]
 })
 
-schema.methods.getProject = function () {
-  return this.model('project').findOne({
-    cycles: this._id
-  })
-}
-
-schema.methods.getRelease = function () {
-  return this.model('release').findOne({
-    cycles: this._id
-  })
-}
-
-schema.methods.getVersion = async function () {
-  const release = await this.getRelease()
-
-  if (release != null) return release.version
-
-  const project = await this.getProject()
-  return project.getVersion()
-}
-
-schema.methods.getRepo = async function () {
-  if (this._repo != null) return Promise.resolve(this._repo)
-
-  const project = await this.getProject()
-  if (project != null) return project.repo
-
-  return null
-}
-
-schema.methods.getTag = async function () {
-  if (this._tag != null) return this._tag
-
-  const release = await this.getRelease()
-  if (release != null) return release.tag
-
-  const project = await this.getProject()
-  if (project != null) return project.tag
-
-  return Promise.resolve('master')
-}
-
-// TODO: Consolidate build status
+/**
+ * getStatus
+ * Returns status as promised
+ *
+ * @returns {String} status of cycle
+ */
 schema.methods.getStatus = async function () {
-  const builds = await this.model('build').find({_id: {$in: this.builds}})
-
-  let queue = false
-  let build = false
-  let fail = false
-  let finish = true
-  for (const i in builds) {
-    if (builds[i].status !== 'QUEUE') queue = true
-    if (builds[i].status === 'BUILD') build = true
-    if (builds[i].status === 'FAIL') fail = true
-    if (builds[i].status !== 'FINISH') finish = false
+  if (this._status !== 'DEFER') {
+    return Promise.resolve(this._status)
   }
 
-  // If we have builds waiting to be built
-  if (builds.length > 0 && !finish) {
-    if (fail) return Promise.resolve('FAIL')
-    if (build) return Promise.resolve('BUILD')
-    if (queue) return Promise.resolve('QUEUE')
-  }
+  const options = buildSchema.paths._status.enumValues
+  return Promise.map(this.builds, (build) => build.getStatus())
+  .then((stati) => {
+    return stati.sort((one, two) => {
+      if (one === 'FINISH') return 1
+      if (two === 'FINISH') return -1
 
-  // Push the status to next step
-  // TODO: fix the if statement OF DOOM
-  if (builds.length > 0 && finish) {
-    if (['POST', 'REVIEW', 'FAIL', 'FINISH'].indexOf(this._status) === -1) {
-      if (this.type === 'RELEASE') {
-        // TODO: add in the POST step
-        return this.update({ _status: 'REVIEW' })
-        .then(() => 'REVIEW')
-      }
-    }
-  }
-
-  return Promise.resolve(this._status)
+      return (options.indexOf(two) - options.indexOf(one))
+    })
+  })
+  .then((sorted) => sorted[0])
 }
 
-schema.methods.spawn = async function () {
-  return Promise.all([
-    this.getProject(),
-    this.getRelease(),
-    this.getRepo(),
-    this.getTag()
-  ])
-  .then(([project, release, repo, tag]) => {
-    atc.send('flightcheck', 'cycle:start', {
-      repo,
-      tag,
-      project,
-      release,
-      cycle: this
-    }, () => {
-      this.update({ _status: 'PRE' })
+/**
+ * setStatus
+ * Sets status as promised
+ *
+ * @param {String} status - new status of cycle
+ * @returns {Object} mongoose update promise
+ */
+schema.methods.setStatus = function (status) {
+  // TODO: add a build stopper function to allow early failing of cycles
+  const final = (status === 'FINISH' || status === 'FAIL' || status === 'ERROR')
+  const options = schema.paths._status.enumValues
+
+  if (options.indexOf(this._status) >= options.indexOf(status)) {
+    return Promise.reject('Status is already greater than requested')
+  }
+
+  if (this.type === 'INIT' && (!final || options.indexOf(status) >= 2)) {
+    return Promise.reject('Unable to set status past "PRE" on "INIT" type cycles')
+  }
+  if (this.type === 'ORPHAN' && (!final || options.indexOf(status) >= 3)) {
+    return Promise.reject('Unable to set status past "REVIEW" on "ORPHAN" type cycles')
+  }
+
+  return this.update({ _status: status })
+  .then((data) => {
+    if (data.nModified === 1) this._status = status
+
+    if (status === 'DEFER') {
+      return this.doStrongback()
+      .then(() => data)
+    }
+
+    return data
+  })
+}
+
+/**
+ * doFlightcheck
+ * Sets all build information to flightcheck for pre testing
+ */
+schema.methods.doFlightcheck = function () {
+  return atc.send('flightcheck', 'cycle:queue', {
+    id: this._id,
+    repo: this.repo,
+    tag: this.tag,
+    name: this.name,
+    version: this.version,
+    changelog: this.changelog
+  })
+  .catch((err) => {
+    const mistake = new Mistake(500, 'Automated flightchecking failed', err)
+
+    this.update({
+      status: 'ERROR',
+      mistake
+    })
+    .then(() => {
+      throw mistake
     })
   })
 }
 
-schema.methods.build = async function () {
-  const cycle = this
-  const project = await cycle.getProject()
-
-  if (project == null) return project.reject('Unable to find project')
-
-  const builds = []
-
-  for (const dist in project.distributions) {
-    for (const arch in project.architectures) {
-      builds.push(new Build({
-        dist: project.distributions[dist],
-        arch: project.architectures[arch]
-      }))
-    }
-  }
-
-  return Promise.each(builds, (build) => {
-    return cycle.update({$push: {builds: build.id}})
-    .then(() => Build.create(build))
-    .then((build) => build.doBuild())
+/**
+ * doStrongback
+ * Sends all build information to strongback
+ */
+schema.methods.doStrongback = function () {
+  return Promise.each(this.builds, (build) => {
+    return build.doStrongback()
   })
 }
 
-schema.methods.release = async function () {
-  const project = await this.getProject()
+/**
+ * Sends test data to flightcheck before save. Reports error on creation
+ */
+schema.pre('save', function (next) {
+  if (!this.isNew) return next()
 
-  return aptly.stable(this.packages, project.distributions)
-}
-
-// TODO: figure out a way to detect mass import so we don't spam tests
-schema.post('save', async (cycle) => {
-  cycle.spawn()
+  return this.doFlightcheck()
+  .then(() => next())
+  .catch((error) => next(error))
 })
 
+export { schema }
 export default db.model('cycle', schema)

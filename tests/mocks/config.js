@@ -25,7 +25,8 @@ export const aptly = {
   url: 'http://localhost:10002',
   passphrase: 'testing',
   review: 'review',
-  stable: 'houston'
+  stable: 'houston',
+  public: '2Rm7LJ5gXK7qRQpC6FfdxGLTTbMUnSrh'
 }
 
 export const database = 'mongodb://localhost/houston-test'

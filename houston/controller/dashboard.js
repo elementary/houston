@@ -1,6 +1,6 @@
 /**
- * houston/controller/dash.js
- * Handles the dashboard and static pages
+ * houston/controller/dashboard.js
+ * Handles all rendered pages
  *
  * @exports {Object} - Koa router
  */
@@ -15,24 +15,43 @@ import Project from '~/houston/model/project'
 
 const route = new Router()
 
+/**
+ * GET /
+ * Homepage
+ */
 route.get('', (ctx) => {
   return ctx.render('index', { hideUser: true })
 })
 
+/**
+ * GET /dashboard
+ * Shows all projects
+ */
 route.get('/dashboard', policy.isRole('beta'), async (ctx, next) => {
   const projects = await github.getProjects(ctx.user.github.access)
   .map(async (repo) => {
     const db = await Project.findOne({ 'github.id': repo.github.id })
+
     if (db != null) return db
 
     log.debug(`Creating a new project for ${repo.github.owner}/${repo.github.name}`)
-    return Project.create(Object.assign({
+
+    return Project.create(Object.assign(repo, {
       owner: ctx.user._id
-    }, repo))
+    }))
+    .catch({code: 11000}, () => { // duplicate key error (project name already exists)
+      // TODO: replace this with a better system when we move to client side project importing
+      return Project.create(Object.assign(repo, {
+        name: `${repo.github.owner}-${repo.name}`,
+        package: {
+          name: `${repo.github.owner}-${repo.name}`
+        },
+        owner: ctx.user._id
+      }))
+    })
   })
   .map(async (project) => {
     project.status = await project.getStatus()
-    project.version = await project.getVersion()
 
     return project
   })
@@ -47,12 +66,6 @@ route.get('/dashboard', policy.isRole('beta'), async (ctx, next) => {
       _status: 'REVIEW'
     })
     .exec()
-    .map(async (cycle) => {
-      cycle.project = await cycle.getProject()
-      cycle.release = await cycle.getRelease()
-
-      return cycle
-    })
   }
 
   return ctx.render('dashboard', { title: 'Dashboard', projects, reviews })

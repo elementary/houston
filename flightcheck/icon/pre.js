@@ -22,14 +22,14 @@ export default class Icon extends AppHook {
   }
 
   async test () {
-    const icon = await this.file(`icons/64/${this.data.project.name}.svg`)
+    const icon = await this.file(`icons/64/${this.data.name}.svg`, 'base64')
 
     if (icon == null) {
       this.error(64)
       return
     }
 
-    this.update({package: {icon}})
+    this.update({'package.icon': icon})
 
     return
   }
