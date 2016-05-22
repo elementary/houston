@@ -14,7 +14,7 @@ ENV DEBCONF_NOWARNINGS yes
 
 # TODO: Update liftoff with official build or ppa
 COPY liftoff_0.1_amd64.deb /houston/liftoff.deb
-RUN dpkg -i /houston/liftoff.deb
+RUN dpkg -i /houston/liftoff.deb; exit 0
 
 RUN apt update && apt install -y -f
 
