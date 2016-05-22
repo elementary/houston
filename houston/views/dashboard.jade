@@ -13,16 +13,13 @@ block body
         div.repo
           div.right
             include /partials/status
-          if project.package != null && project.package.icon != null
+          if project.package.icon != null
             img(src="data:image/svg+xml;base64," + project.package.icon).app-icon
           else
             img(src="/images/application-default-icon.png").app-icon
           div.description
             p= project.name
             p.subtext: a(href="https://github.com/" + project.github.fullName)= project.github.fullName
-          //- TODO: We can remove this on release
-          if config.env === 'development'
-            | <!-- !{JSON.stringify(project, 2, 4)} -->
   if reviews.length > 0
     div.row
       h3 Reviews
@@ -31,13 +28,5 @@ block body
         div.repo
           div.right
             include /partials/review
-          if cycle.project.package != null && cycle.project.package.icon != null
-            img(src="data:image/svg+xml;base64," + cycle.project.package.icon).app-icon
-          else
-            img(src="/images/application-default-icon.png").app-icon
           div.description
-            p #{cycle.project.name} @ #{cycle.release.version}
-            p.subtext: a(href="https://github.com/" + cycle.project.github.fullName)= cycle.project.github.fullName
-        //- TODO: We can remove this on release
-        if config.env === 'development'
-          | <!-- !{JSON.stringify(cycle, 2, 4)} -->
+            p #{cycle.name} @ #{cycle.version}

@@ -2,26 +2,27 @@
  * houston/model/build.js
  * Mongoose schema for builds
  *
- * @exports {Object} - build database model
- * @exports {Object} schema - build database schema
+ * @exports {Object} - build database schema
  */
 
-import config from '~/lib/config'
+import * as dotNotation from '~/lib/helpers/dotNotation'
+import * as grid from '~/lib/grid'
+import atc from '~/houston/service/atc'
 import db from '~/lib/database'
-import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
 
-// TODO: move jenkins to superagent
-let jenkins = null
-
-if (config.jenkins) {
-  jenkins = require('jenkins')({
-    baseUrl: config.jenkins.url,
-    promisify: true
-  })
-}
-
-export const schema = new db.Schema({
+/**
+ * Stores individual build information. 1 build = 1 package = 1 log
+ *
+ * @param {String} dist - distribution to build on (xenial)
+ * @param {String} arch - architecture to build on (amd64)
+ * @param {Object} files - key storage for any file stored
+ * @param {String} _status - current status of build in strongback
+ * @param {Error} mistake - mistake class error if any occured
+ * @param {Date} started - when the build was first created in the database
+ * @param {Date} finished - when the build finished with strongback
+ */
+const schema = new db.Schema({
   dist: {
     type: String,
     required: true
@@ -31,17 +32,14 @@ export const schema = new db.Schema({
     required: true
   },
 
-  log: String,
-  status: {
-    type: String,
-    default: 'QUEUE',
-    enum: ['QUEUE', 'BUILD', 'FAIL', 'FINISH']
-  },
+  files: Object,
 
-  jenkins: {
-    build: Number,
-    queue: Number
+  _status: {
+    type: String,
+    default: 'HOLD',
+    enum: ['HOLD', 'QUEUE', 'BUILD', 'FINISH', 'FAIL', 'ERROR']
   },
+  mistake: Object,
 
   started: {
     type: Date,
@@ -50,60 +48,136 @@ export const schema = new db.Schema({
   finished: Date
 })
 
-schema.methods.getCycle = function () {
-  return this.model('cycle').findOne({builds: this._id})
+/**
+ * cycle
+ * A cycle virtual for sanity
+ *
+ * @returns {Object} parent cycle of this build
+ */
+schema.virtual('cycle').get(function () {
+  return this.ownerDocument()
+})
+
+/**
+ * update
+ * updates nested build object
+ *
+ * @param {Object} obj - object of updated values
+ * @param {Object} opt - options to pass into query
+ * @return {Object} - mongoose query of update
+ */
+schema.methods.update = function (obj, opt) {
+  return db.model('cycle').update({
+    _id: this.cycle._id,
+    'builds._id': this._id
+  }, dotNotation.toDot(obj, '.', 'builds.$'), opt)
 }
 
-schema.methods.getProject = async function () {
-  const cycle = await this.getCycle()
+/**
+ * getStatus
+ * Returns status as promised
+ *
+ * @returns {String} status of build
+ */
+schema.methods.getStatus = function () {
+  return Promise.resolve(this._status)
+}
 
-  if (cycle == null) {
-    return Promise.reject("Unable to find build's cycle")
+/**
+ * setStatus
+ * Sets status as promised
+ *
+ * @param {String} status - new status of build
+ * @returns {Object} mongoose update promise
+ */
+schema.methods.setStatus = function (status) {
+  return this.update({ _status: status })
+  .then((data) => {
+    if (data.nModified === 1) this._status = status
+    return data
+  })
+}
+
+/**
+ * getFile
+ * grabs a file from the database
+ *
+ * @param {String} name - file name
+ * @returns {Object} grid file object
+ */
+schema.methods.getFile = function (name) {
+  if (this.files[name] == null) {
+    return Promise.resolve(null)
   }
 
-  return cycle.getProject()
+  return grid.get(this.files[name])
 }
 
-// TODO: no services in models!
-schema.methods.doBuild = async function () {
-  const cycle = await this.getCycle()
-  const project = await this.getProject()
-
-  const changelog = await project.generateChangelog(this.dist, this.arch)
-  log.debug(`Generated changelog for ${project.github.fullName}\n${changelog}`)
-
-  if (config.jenkins) {
-    return jenkins.job.build({
-      name: config.jenkins.job,
-      parameters: {
-        PACKAGE: project.name,
-        VERSION: await cycle.getVersion(),
-        REPO: await cycle.getRepo(),
-        DIST: this.dist,
-        ARCH: this.arch,
-        CHANGELOG: changelog,
-        REFERENCE: await cycle.getTag(),
-        IDENTIFIER: this._id.toString()
-      }
+/**
+ * setFile
+ * creates a file from the database
+ *
+ * @param {String} name - name of file to save
+ * @param {Buffer} file - buffer of file to save
+ * @param {Object} metadata - any other data to save with file
+ * @return {ObjectId} - file id
+ */
+schema.methods.setFile = function (name, file, metadata) {
+  return grid.create(file, metadata)
+  .then((id) => {
+    return this.update({
+      [`files.${name}`]: id
     })
-    .then((queue) => this.update({ 'jenkins.queue': queue }))
-    .catch((err) => {
-      throw new Mistake(500, `Houston was unable to start a build for ${project.name}`, err)
+    .then(() => id)
+  })
+}
+
+/**
+ * dropFile
+ * drops a file, then burns all records of it existing
+ *
+ * @param {String} name - name of file to save
+ */
+schema.methods.dropFile = function (name) {
+  if (this.files == null || this.files[name] == null) {
+    return Promise.reject(new Error('File does not exist'))
+  }
+
+  return grid.drop(this.files[name])
+  .then(() => {
+    return this.update({
+      [`files.${name}`]: null
     })
-  } else {
-    log.info('Jenkins has been disabled in configuration file. No build is running')
-    return Promise.resolve()
-  }
+  })
 }
 
-schema.methods.getLog = function () {
-  if (config.jenkins) {
-    return jenkins.build.log(config.jenkins.job, this.jenkins.build)
-    .then((log) => this.model('build').findByIdAndUpdate(this._id, { log }, { new: true }))
-  }
+/**
+ * doStrongback
+ * Sends build information to strongback
+ */
+schema.methods.doStrongback = function () {
+  return atc.send('strongback', 'build:queue', {
+    id: this._id,
+    arch: this.arch,
+    changelog: this.cycle.changelog,
+    dist: this.dist,
+    name: this.cycle.name,
+    repo: this.cycle.repo,
+    tag: this.cycle.tag,
+    version: this.cycle.version
+  })
+  .then(() => this.setStatus('QUEUE'))
+  .catch((err) => {
+    const mistake = new Mistake(500, 'Automated building failed', err)
 
-  return Promise.resolve('Logs disabled in configuration file')
-  .then((log) => this.model('build').findByIdAndUpdate(this._id, { log }, { new: true }))
+    return this.update({
+      _status: 'ERROR',
+      mistake
+    })
+    .then(() => {
+      throw mistake
+    })
+  })
 }
 
-export default db.model('build', schema)
+export default schema

@@ -30,7 +30,6 @@ describe('config', () => {
     const config = require('../../lib/config').default
 
     assert.isObject(config, 'returns an object')
-    assert.lengthOf(Object.keys(config), 10, 'has correct length')
     assert.propertyVal(config, 'database', 'mongodb://localhost/houston-test', 'correct database')
     assert.deepPropertyVal(config, 'server.secret', 'ermagerditsasecretsodonttellanyone', 'correct server secret')
     assert.deepProperty(config, 'houston.version', 'has package version')

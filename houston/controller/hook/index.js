@@ -7,17 +7,18 @@
 
 import Router from 'koa-router'
 
+import aptly from './aptly'
 import github from './github'
-import jenkins from './jenkins'
 
 const route = new Router({
   prefix: '/hook'
 })
 
+route.use(aptly.routes(), aptly.allowedMethods())
 route.use(github.routes(), github.allowedMethods())
-route.use(jenkins.routes(), jenkins.allowedMethods())
 
 // Use event hook listeners as well
-require('./atc')
+require('./flightcheck')
+require('./strongback')
 
 export default route

@@ -350,7 +350,8 @@ section.hero .button.suggested-action{
     background-color: #fbd25d;
 }
 
-.repo i.fa-times {
+.repo i.fa-times,
+.repo i.fa-exclamation-circle {
     background-color: #da4d45;
 }
 
