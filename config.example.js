@@ -33,7 +33,9 @@ export const aptly = {
 
   // Repository names
   review: 'review',
-  stable: 'houston'
+  stable: 'houston',
+
+  public: 'PbsPVXKo5AYtC5A0c0qn'
 }
 
 export const database = 'mongodb://localhost/houston-dev'

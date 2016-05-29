@@ -89,6 +89,7 @@ export function getProjects (token) {
         id: project.id,
         owner: project.owner.login,
         name: project.name,
+        private: project.private,
         token
       }
     }
@@ -96,6 +97,24 @@ export function getProjects (token) {
   .catch((error) => {
     throw new Mistake(500, 'Houston had a problem getting projects on GitHub', error)
   })
+}
+
+/**
+ * getPermission
+ * Checks collaborator status of user on repository
+ *
+ * @param {String} owner - GitHub owner
+ * @param {String} name - GitHub project
+ * @param {String} username - GitHub username
+ * @param {String} token - User token for GitHub access
+ * @returns {Boolean} - true if user is a collaborator of repository
+ */
+export function getPermission (owner, name, username, token) {
+  return request
+  .get(`https://api.github.com/repos/${owner}/${name}/collaborators/${username}`)
+  .auth(token)
+  .then((res) => (res.status === 204))
+  .catch(() => false)
 }
 
 /**

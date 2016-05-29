@@ -9,6 +9,7 @@
 import passport from 'koa-passport'
 import Router from 'koa-router'
 
+import User from '~/houston/model/user'
 import * as github from './github'
 import log from '~/lib/log'
 
@@ -19,13 +20,15 @@ import log from '~/lib/log'
  * @param {Object} server - server to attach passport to
  */
 export function setup (server) {
-  // TODO: actually serialize users
+  // TODO: Serialize user data in the database?
   passport.serializeUser((user, done) => {
-    done(null, user)
+    done(null, user._id)
   })
 
-  passport.deserializeUser((user, done) => {
-    done(null, user)
+  passport.deserializeUser((id, done) => {
+    User.findById(id)
+    .then((user) => done(null, user))
+    .catch((error) => done(error))
   })
 
   passport.use(github.strategy)

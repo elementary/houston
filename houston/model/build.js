@@ -59,6 +59,29 @@ schema.virtual('cycle').get(function () {
 })
 
 /**
+ * toNormal
+ * Async notmalization function for objects
+ *
+ * @returns {Object} - a promise of a better object
+ */
+schema.methods.toNormal = async function () {
+  const ret = this.toObject()
+  const status = await this.getStatus()
+
+  ret['id'] = ret['_id']
+  ret['status'] = status
+
+  delete ret['_id']
+  delete ret['_status']
+
+  if (ret['mistake'] != null && ret['mistake']['stack'] != null) {
+    delete ret['mistake']['stack']
+  }
+
+  return ret
+}
+
+/**
  * update
  * updates nested build object
  *
