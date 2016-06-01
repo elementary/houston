@@ -85,7 +85,7 @@ export default class AppHook {
   issue () {
     const template = render(path.join(this.path, this.mark), this)
 
-    template.body += `\n<!-- Houston version ${config.houston.version} in ${config.env} environment -->`
+    template.body += `\n<!-- Houston v${config.houston.version} ${config.houston.commit} in ${config.env} -->`
 
     return {
       title: template.title,
