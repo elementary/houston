@@ -185,3 +185,38 @@ export function sendIssue (owner, name, token, issue, label) {
     throw new Mistake(500, 'Houston had a problem creating an issue on GitHub', error)
   })
 }
+
+/**
+ * sendFile
+ * Posts a file to GitHub release
+ *
+ * @param {String} owner - GitHub owner
+ * @param {String} name - GitHub project
+ * @param {Number} release - GitHub release id
+ * @param {String} token - GitHub authentication token
+ * @param {Buffer} file - File buffer to upload
+ * @param {Object} meta - {
+ *   {String} content - http content type of file ('application/vnd.debian.binary-package')
+ *   {String} name - File name on GitHub
+ *   {String} label - GitHub short description
+ * }
+ * @returns {Promise} - Returning GitHub issue api response
+ */
+export function sendFile (owner, name, release, token, file, meta) {
+  if (!config.github.post) {
+    log.verbose('GitHub config prohibits posting. Not posting file')
+    return Promise.resolve()
+  }
+
+  return request
+  .post(`https://uploads.github.com/repos/${owner}/${name}/releases/${release}/assets`)
+  .query(meta)
+  .set('Content-Type', meta.content)
+  .set('Content-Length', file.length)
+  .auth(token)
+  .send(file)
+  .then((res) => res.body)
+  .catch((error) => {
+    throw new Mistake(500, 'Houston had a problem posting an file on GitHub', error)
+  })
+}
