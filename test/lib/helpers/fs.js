@@ -15,12 +15,12 @@ describe('fs', () => {
     const path1 = fs.smartPath('../')
     const path2 = fs.smartPath('tests/')
     const path3 = fs.smartPath('/')
-    const path4 = fs.smartPath('../', path.resolve(__dirname, '../../flightcheck'))
+    const path4 = fs.smartPath('../../../../src/flightcheck')
 
-    assert.include(path1, '/tests/lib/helpers', 'correct relative paths')
+    assert.include(path1, '/lib/helpers', 'correct relative paths')
     assert.include(path2, '/tests', 'correct project root relative paths')
     assert.include(path3, '/', 'doesnt mess with absolute paths')
-    assert.include(path4, '/tests', 'uses relation correctly')
+    assert.include(path4, '/src/flightcheck', 'uses relation correctly')
     done()
   })
 

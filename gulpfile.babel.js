@@ -111,7 +111,15 @@ gulp.task('build-lib', ['clear-lib'], () => {
  */
 
 gulp.task('clear-strongback', () => {
-  return del(['build/strongback'])
+  // Strongback has some folders that are root. Avoid the permission error
+  return del([
+    'build/strongback/**',
+    '!build/strongback',
+    '!build/strongback/cache',
+    '!build/strongback/cache/**/*',
+    '!build/strongback/projects',
+    '!build/strongback/projects/**/*'
+  ])
 })
 
 gulp.task('build-strongback', ['clear-strongback'], () => {
