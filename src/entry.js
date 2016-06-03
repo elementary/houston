@@ -3,7 +3,6 @@
  * Simple wrapper for babel
  */
 
-require('babel-register')
 require('babel-polyfill')
 
 var path = require('path')
