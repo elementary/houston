@@ -1,11 +1,13 @@
 a(href="/project/" + cycle.name + "/review/yes")
-  i.fab.fa.fa-check
+  div.fab.sucess
+    i.fa.fa-thumbs-o-up
     div.popover-container
       div.popover-content
         h2 clear for takeoff
         p #{cycle.project.name} is ready for the real world
 a(href="/project/" + cycle.name + "/review/no")
-  i.fab.fa.fa-times
+  fab.fab.error
+    i.fa.fa-thumbs-o-down
     div.popover-container
       div.popover-content
         h2 fuel lines fluctuating

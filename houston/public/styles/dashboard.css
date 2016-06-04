@@ -1,0 +1,289 @@
+/*********************************************
+* Copyright 2016 elementary LLC.             *
+* This file is part of houston.elementary.io *
+*********************************************/
+
+/*************************
+* Floating Action Button *
+*************************/
+
+.fab {
+    background-color: #3892e0;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12),
+                0 1px 2px rgba(0,0, 0, 0.24);
+    color: #fff;
+    height: 52px;
+    position: relative;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.10);
+    transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 52px;
+    will-change: box-shadow;
+}
+
+.fab:hover {
+    box-shadow: 0 0 2px rgba(0,0,0,.18),
+                0 4px 8px rgba(0,0,0,.24);
+}
+
+.fab.success {
+    background-color: #93d844;
+}
+
+.fab.warn {
+    background-color: #fbd25d;
+}
+
+.fab.error {
+    background-color: #da4d45;
+}
+
+.fab > i {
+    font-size: 28px;
+    line-height: 52px;
+    text-align: center;
+    width: 52px;
+}
+
+.repo .fa-refresh:before {
+    animation: spin 2.5s linear infinite;
+    display: block;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/************
+* Repo list *
+************/
+
+.repo-wrap {
+    color: #333;
+    display: block;
+    padding: 24px;
+}
+
+.repo-wrap:nth-of-type(even) {
+    background-color: #fafafa;
+}
+
+.repo {
+    display: block;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    text-align: center;
+    width: 100%;
+}
+
+.repo > div {
+    margin: 12px auto;
+}
+
+.repo > div > div {
+    margin-top: 8px;
+}
+
+.repo .fab {
+    margin: auto;
+}
+
+.repo p {
+    margin: 0;
+    padding-bottom: 3px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.repo a {
+    color: #333;
+    opacity: 0.65;
+}
+
+.repo a:hover {
+    color: #08C;
+    opacity: 1.0;
+}
+
+.repo .app-icon {
+    height: 64px;
+    vertical-align: middle;
+    width: 64px;
+}
+
+@media only screen and (min-width: 500px) {
+    .repo {
+        align-items: center;
+        -webkit-flex-direction: row;
+            -ms-flex-direction: row;
+                flex-direction: row;
+        -webkit-justify-content: space-between;
+            -ms-flex-pack: justify;
+                justify-content: space-between;
+        margin: auto;
+        max-width: 600px;
+        min-width: 400px;
+        text-align: left;
+        width: 80%;
+    }
+
+    .repo > div {
+        margin: 0;
+    }
+
+    .repo > div > div {
+        display: inline-block;
+        margin: 0 0 0 8px;
+        vertical-align: middle;
+    }
+
+    .repo p {
+        text-align: left;
+    }
+}
+
+/********
+* Popup *
+********/
+
+.repo .fab .popover-container {
+    position: absolute;
+    right: 50%;
+    bottom: 12px;
+    pointer-events: none;
+}
+
+.repo .fab .popover-container .popover-content {
+    position: relative;
+    right: -50%;
+    bottom: 30px;
+    width: 200px;
+    z-index: 2;
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 5px;
+    background: white;
+    color: #333;
+    background-clip: content-box;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    text-align: left;
+    font-size: 14px;
+    font-family: 'Open Sans', 'Droid Sans', Helvetica, sans-serif;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: visibility 0s 250ms, opacity 250ms;
+}
+
+.repo .fab .popover-container .popover-content:before,
+.repo .fab .popover-container .popover-content:after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 50%;
+    margin-left: -5px;
+    width: 0px;
+    height: 0px;
+    border: 10px outset transparent;
+}
+
+.repo .fab .popover-container .popover-content:before {
+    bottom: -20px;
+    border-top: 10px solid rgba(0,0,0,0.2);
+}
+
+.repo .fab .popover-container .popover-content:after {
+    bottom: -18px;
+    border-top: 10px solid white;
+}
+
+.repo .fab:hover .popover-container .popover-content {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+    transition: opacity 250ms;
+}
+
+.repo .fab .popover-container .popover-content p {
+    text-align: center;
+}
+
+.repo .fab .popover-container .popover-content strong {
+    display: inline-block;
+    margin: 15px;
+    margin-bottom: 10px;
+}
+
+.repo .fab .popover-container .popover-content ul {
+    margin: 5px 0;
+    padding: 0;
+    max-height: 500px;
+    overflow: auto;
+}
+
+@media (max-height: 700px) {
+
+    .repo .fab .popover-container .popover-content ul {
+        max-height: 300px;
+    }
+
+}
+
+@media (max-height: 450px) {
+
+    .repo .fab .popover-container .popover-content ul {
+        max-height: 200px;
+    }
+
+}
+
+.repo .fab .popover-container .popover-content ul li {
+    display: block;
+    margin: 0;
+}
+
+.repo .fab .popover-container .popover-content ul li a {
+    display: block;
+    padding: 5px 15px;
+}
+
+.repo .fab .popover-container .popover-content ul li a:hover {
+    background-color: #e0e0e0;
+}
+
+.repo .fab .popover-container .popover-content hr {
+    background: #e0e0e0;
+    height: 1px;
+    border: 0;
+}
+
+.repo .fab .popover-container .popover-content {
+    z-index: 999;
+    margin-right: 8px;
+    bottom: 50px;
+    width: auto;
+    min-width: 200px;
+}
+
+.repo .fab .popover-container .popover-content h2 {
+    text-align: center;
+    font-size: 18px;
+    margin: 12px;
+}
+
+.repo .fab .popover-container .popover-content h3 {
+    font-size: 16px;
+    margin: 12px;
+}
+
+.repo .fab .popover-container .popover-content p {
+    margin: 12px;
+}
