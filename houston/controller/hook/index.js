@@ -9,6 +9,7 @@ import Router from 'koa-router'
 
 import aptly from './aptly'
 import github from './github'
+import log from '~/lib/log'
 
 const route = new Router({
   prefix: '/hook'
@@ -22,6 +23,8 @@ route.use(async (ctx, next) => {
   try {
     await next()
   } catch (err) {
+    log.error(err)
+
     ctx.status = 500
     return
   }

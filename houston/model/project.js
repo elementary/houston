@@ -192,6 +192,7 @@ schema.methods.toNormal = async function () {
   delete ret['_status']
   delete ret['package']['icon']
   delete ret['github']['token']
+  delete ret['github']['secret']
 
   if (ret['mistake'] != null && ret['mistake']['stack'] != null) {
     delete ret['mistake']['stack']

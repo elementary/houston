@@ -205,7 +205,7 @@ export async function upsertHook (owner, name, token, secret) {
 
   const hookEvents = ['release']
   const hookConfig = {
-    url: config.server.url,
+    url: `${config.server.url}/hook/github`,
     content_type: 'json',
     secret
   }
@@ -217,7 +217,7 @@ export async function upsertHook (owner, name, token, secret) {
   .then((hooks) => {
     return hooks.find((hook) => {
       if (hook.config == null || hook.config.url == null) return false
-      return hook.config.url === config.server.url
+      return hook.config.url === hookConfig.url
     })
   })
   .catch((error) => {
@@ -238,7 +238,7 @@ export async function upsertHook (owner, name, token, secret) {
     .catch((error) => {
       throw new Mistake(500, 'Houston had a problem creating the hook on GitHub', error)
     })
-  } else if (existingHook.config != hookConfig || existingHook.events != hookEvents) {
+  } else if (existingHook.config !== hookConfig || existingHook.events !== hookEvents) {
     return request
     .patch(`https://api.github.com/repos/${owner}/${name}/hooks/${existingHook.id}`)
     .auth(token)
