@@ -6,6 +6,7 @@
  * @exports {Object} schema - project database schema
  */
 
+import crypto from 'crypto'
 import semver from 'semver'
 
 import * as github from '~/houston/service/github'
@@ -96,6 +97,13 @@ export const schema = new db.Schema({
     label: {
       type: String,
       default: 'AppHub'
+    },
+    hook: Number,
+    secret: {
+      type: String,
+      default: () => {
+        return crypto.randomBytes(20).toString('hex')
+      }
     }
   },
 

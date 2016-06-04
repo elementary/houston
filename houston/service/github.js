@@ -5,7 +5,8 @@
  * @exports {Function} getReleases - Returns mapped array of releases from GitHub project
  * @exports {Function} getProjects - Returns mapped array of projects
  * @exports {Function} sendLabel - Creates label for GitHub project issues
- * @exports {Function} sendIssue
+ * @exports {Function} sendIssue - Creates issue for GitHub project
+ * @exports {Function} upsertHook - Creates or updates hook for GitHub project
  */
 
 import semver from 'semver'
@@ -184,4 +185,73 @@ export function sendIssue (owner, name, token, issue, label) {
   .catch((error) => {
     throw new Mistake(500, 'Houston had a problem creating an issue on GitHub', error)
   })
+}
+
+/**
+ * upsertHook
+ * Creates or updates hook for GitHub project
+ *
+ * @param {String} owner - GitHub owner
+ * @param {String} name - GitHub project
+ * @param {String} token - GitHub user token
+ * @param {String} secret - GitHub hook secret token
+ * @returns {Promise} - GitHub id of hook
+ */
+export async function upsertHook (owner, name, token, secret) {
+  if (!config.github.hook) {
+    log.verbose('GitHub config prohibits posting and hooks. Not posting hook')
+    return Promise.reject()
+  }
+
+  const hookEvents = ['release']
+  const hookConfig = {
+    url: config.server.url,
+    content_type: 'json',
+    secret
+  }
+
+  const existingHook = await request
+  .get(`https://api.github.com/repos/${owner}/${name}/hooks`)
+  .auth(token)
+  .then((res) => res.body)
+  .then((hooks) => {
+    return hooks.find((hook) => {
+      if (hook.config == null || hook.config.url == null) return false
+      return hook.config.url === config.server.url
+    })
+  })
+  .catch((error) => {
+    throw new Mistake(500, 'Houston had a problem checking GitHub hooks', error)
+  })
+
+  if (existingHook == null) {
+    return request
+    .post(`https://api.github.com/repos/${owner}/${name}/hooks`)
+    .auth(token)
+    .send({
+      name: 'web',
+      active: true,
+      events: hookEvents,
+      config: hookConfig
+    })
+    .then((res) => res.body.id)
+    .catch((error) => {
+      throw new Mistake(500, 'Houston had a problem creating the hook on GitHub', error)
+    })
+  } else if (existingHook.config != hookConfig || existingHook.events != hookEvents) {
+    return request
+    .patch(`https://api.github.com/repos/${owner}/${name}/hooks/${existingHook.id}`)
+    .auth(token)
+    .send({
+      active: true,
+      events: hookEvents,
+      config: hookConfig
+    })
+    .then((res) => res.body.id)
+    .catch((error) => {
+      throw new Mistake(500, 'Houston had a problem updating the hook on GitHub', error)
+    })
+  } else {
+    return existingHook.id
+  }
 }
