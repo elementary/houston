@@ -11,7 +11,6 @@ import crypto from 'crypto'
 import * as github from '~/houston/service/github'
 import config from '~/lib/config'
 import log from '~/lib/log'
-import Mistake from '~/lib/mistake'
 import Project from '~/houston/model/project'
 
 const route = new Router({
@@ -52,7 +51,13 @@ route.post('*', async (ctx, next) => {
     'github.id': ctx.request.body.repository.id
   })
   .then((project) => {
-    if (project == null) throw new Mistake(404, 'No project found')
+    if (project == null) {
+      log.verbose('GitHub hook was unable to find project')
+
+      ctx.status = 404
+      ctx.body = 'Project not found'
+      return
+    }
 
     const hash = crypto
     .createHmac('sha1', project.github.secret)
@@ -70,19 +75,11 @@ route.post('*', async (ctx, next) => {
     return next()
   })
   .catch((error) => {
-    if (error.mistake) {
-      log.verbose('GitHub hook was unable to find project')
+    log.error('GitHub hook encountered an error trying to find project', error)
 
-      ctx.status = 404
-      ctx.body = 'Project not found'
-      return
-    } else {
-      log.error('GitHub hook encountered an error trying to find project', error)
-
-      ctx.status = 500
-      ctx.body = 'Houston encountered an error while trying to process your request'
-      return
-    }
+    ctx.status = 500
+    ctx.body = 'Houston encountered an error while trying to process your request'
+    return
   })
 })
 
