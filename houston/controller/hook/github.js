@@ -8,10 +8,11 @@
 import Router from 'koa-router'
 import crypto from 'crypto'
 
+import * as github from '~/houston/service/github'
 import config from '~/lib/config'
 import log from '~/lib/log'
-import Project from '~/houston/model/project'
 import Mistake from '~/lib/mistake'
+import Project from '~/houston/model/project'
 
 const route = new Router({
   prefix: '/github'
@@ -86,19 +87,57 @@ route.post('*', async (ctx, next) => {
 })
 
 /**
- * POST /hook/github*
+ * POST /hook/github
  * Does the processing of GitHub hooks
  */
 route.post('*', async (ctx, next) => {
   if (ctx.request.header['x-github-event'] === 'ping') {
-    log.debug('GitHub hook ping')
+    log.debug('GitHub hook: Ping')
     ctx.status = 200
-    ctx.body = 'OK'
+    ctx.body = 'Pong'
     return
   }
 
-  ctx.status = 200
-  ctx.body = 'OK'
+  if (ctx.request.body['action'] === 'published' && ctx.request.body['release'] != null) {
+    log.debug('GitHub hook: New release')
+
+    const project = await Project.findOne({
+      'github.id': ctx.request.body.repository.id
+    })
+    .exec()
+
+    if (project == null) {
+      log.debug('GitHub hook: Repository not found')
+      ctx.status = 404
+      ctx.body = 'Repository not found'
+      return
+    }
+
+    const currentRelease = project.releases.find((release) => {
+      return (release.github.id === ctx.request.body.release.id)
+    })
+
+    if (currentRelease != null) {
+      log.debug('GitHub hook: Release already exists')
+      ctx.status = 200
+      ctx.body = 'Release already exists'
+      return
+    }
+
+    return project.update({
+      $addToSet: {
+        releases: github.castRelease(ctx.request.body.release)
+      }
+    })
+    .then(() => {
+      log.debug('GitHub hook: Release added')
+      ctx.status = 200
+      ctx.body = 'Release added'
+    })
+  }
+
+  log.debug('GitHub hook: Unknown action')
+  ctx.status = 404
   return
 })
 

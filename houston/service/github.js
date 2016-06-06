@@ -2,6 +2,7 @@
  * houston/service/github.js
  * Handles requests to GitHub, parsed and ready for use by Houston
  *
+ * @exports {Function} castRelease - Casts GitHub release to database object
  * @exports {Function} getReleases - Returns mapped array of releases from GitHub project
  * @exports {Function} getProjects - Returns mapped array of projects
  * @exports {Function} sendLabel - Creates label for GitHub project issues
@@ -15,6 +16,35 @@ import config from '~/lib/config'
 import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
 import request from '~/lib/request'
+
+/**
+ * castRelease
+ * Casts GitHub release to database object
+ *
+ * @param {Object} release - GitHub release object
+ * @returns {Object} - Mapped release object
+ */
+export function castRelease (release) {
+  try {
+    semver.valid(release.tag_name, true)
+  } catch (error) {
+    throw new Mistake(500, 'GitHub release tag is not valid semver')
+  }
+
+  return {
+    version: semver.valid(release.tag_name, true),
+    changelog: release.body.match(/.+/g),
+    github: {
+      id: release.id,
+      author: release.author.login,
+      date: release.published_at,
+      tag: release.tag_name
+    },
+    date: {
+      released: release.published_at
+    }
+  }
+}
 
 /**
  * getReleases
@@ -35,21 +65,7 @@ export function getReleases (owner, name, token) {
   .auth(token)
   .then((res) => res.body)
   .filter((release) => semver.valid(release.tag_name))
-  .map((release) => {
-    return {
-      version: semver.valid(release.tag_name, true),
-      changelog: release.body.match(/.+/g),
-      github: {
-        id: release.id,
-        author: release.author.login,
-        date: release.published_at,
-        tag: release.tag_name
-      },
-      date: {
-        released: release.published_at
-      }
-    }
-  })
+  .map((release) => castRelease(release))
   .catch((error) => {
     throw new Mistake(500, 'Houston had a problem getting releases on GitHub', error)
   })
