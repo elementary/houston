@@ -1,2 +1,5 @@
+--check-leaks
 --compilers js:babel-register
---timeout 6000
+--full-trace
+--inline-diffs
+--timeout 4000
