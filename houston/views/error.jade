@@ -1,9 +1,0 @@
-extends /layout/main
-
-block body
-  section.error
-    h1= error.status
-    h3= error.title
-    if error.detail
-      pre= error.detail
-    a(href="/dashboard").button.suggested-action Go to the Dashboard
