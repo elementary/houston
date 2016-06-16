@@ -2,7 +2,7 @@
   "presets": ["es2015"],
   "plugins": [
     ["babel-root-import", {
-      "rootPathSuffix": "/"
+      "rootPathSuffix": "/src"
     }],
     "syntax-async-functions",
     "syntax-export-extensions",

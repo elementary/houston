@@ -10,14 +10,14 @@ import fs from 'fs'
 import path from 'path'
 
 import * as dotNotation from './helpers/dotNotation'
-import houstonPkg from '~/package.json'
+import houstonPkg from '../../package.json'
 
 let config = {}
 let example = {}
 
 // Application configuration loading from config.js if not automated test
 try {
-  config = require(path.resolve(__dirname, '../config'))
+  config = require(path.resolve(__dirname, '../../config.js'))
 } catch (err) {
   if (process.env.NODE_ENV !== 'test') {
     /* eslint-disable no-console */
@@ -64,7 +64,7 @@ if (config.server.port == null) {
 let commit = '.gitless'
 try {
   // eslint-disable-next-line no-sync
-  commit = fs.readFileSync(path.resolve(__dirname, '../.git/ORIG_HEAD'), {
+  commit = fs.readFileSync(path.resolve(__dirname, '../../.git/ORIG_HEAD'), {
     encoding: 'utf8'
   })
   .split('\n')[0]
@@ -80,7 +80,7 @@ Object.assign(config, {
 
 // Try to check for unassigned configuration included in the example
 try {
-  example = require(path.resolve(__dirname, '../config.example.js'))
+  example = require(path.resolve(__dirname, '../../config.example.js'))
 } catch (error) {}
 
 const dotConfig = dotNotation.toDot(config)

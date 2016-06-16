@@ -1,13 +1,10 @@
 # Houston files
 *.log
 /config.js
-/strongback/projects
-/strongback/cache
-/flightcheck/projects
+/build
 
 # Node files
 node_modules
-npm-debug.log
 
 # System files
 *~

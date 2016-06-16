@@ -12,5 +12,4 @@ describe('lib', () => {
   require('./grid')
   require('./local')
   require('./mistake')
-  require('./render')
 })
