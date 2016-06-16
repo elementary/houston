@@ -1,9 +1,13 @@
 extends /layout/main
 
 block body
-  section.error
-    h1= error.status
-    h3= error.title
+  div.row
+    div.column.alert: i.warning.fa.fa-warning
+    div.column.alert
+      h3= error.status
+      p= error.title
     if error.detail
-      pre= error.detail
-    a(href="/dashboard").button.suggested-action Go to the Dashboard
+      div.row
+        pre= error.detail
+    div.row
+      a(href="/dashboard").button.suggested-action Go to the Dashboard

@@ -1,25 +1,28 @@
 extends /layout/main
 
+block head
+  link(rel="stylesheet", type="text/css", media="all", href="/styles/dashboard.css")
+
 block body
-  if projects.length < 1
-    div.row
+  if projects.length === 0
+    div.row: div.column.alert
       h3 No elementary apps found!
       p An 
         code .apphub
         |  file in the root of the repo is how Houston knows which apps to look at.
   else
-    div.row
-      each project in projects
-        div.repo
-          div.right
-            include /partials/status
+    each project in projects
+      div.repo-wrap: div.repo
+        div
           if project.package.icon != null
             img(src="data:image/svg+xml;base64," + project.package.icon).app-icon
           else
             img(src="/images/application-default-icon.png").app-icon
-          div.description
+          div
             p= project.name
             p.subtext: a(href="https://github.com/" + project.github.fullName)= project.github.fullName
+        div.right
+          include /partials/status
   if reviews.length > 0
     div.row
       h3 Reviews
