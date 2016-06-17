@@ -61,16 +61,14 @@ atc.on('build:finish', async (id, data) => {
     log.verbose('Received strongback data for finished build')
   }
 
-  if (data.files != null && data.files.log != null) {
-    build.setFile('deb', data.files.log)
-  }
-
-  if (data.files != null && data.files.deb != null) {
-    build.setFile('deb', data.files.deb)
-  }
-
   if (!data.success) {
+    log.debug(`Building ${project.name} failed`)
     const issue = render('houston/issue/build.md', { dist: build.dist, arch: build.arch, log: data.files.log })
+
+    if (data.files != null && data.files.log != null) {
+      log.debug('Saving log file')
+      build.setFile('deb', data.files.log)
+    }
 
     build.setStatus('FAIL')
     .then(() => project.postIssue(issue))
@@ -121,6 +119,11 @@ atc.on('build:finish', async (id, data) => {
   })
   .catch((error) => {
     log.error('Error while trying to process strongback finish', error)
+
+    if (data.files != null && data.files.deb != null) {
+      log.debug('Saving deb package')
+      build.setFile('deb', data.files.deb)
+    }
 
     return cycle.setStatus('ERROR')
     .then(() => cycle.update({ mistake: error }))
