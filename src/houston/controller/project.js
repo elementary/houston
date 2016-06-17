@@ -11,6 +11,7 @@ import semver from 'semver'
 import * as aptly from '~/houston/service/aptly'
 import * as github from '~/houston/service/github'
 import * as policy from '~/houston/policy'
+import config from '~/lib/config'
 import Project from '~/houston/model/project'
 
 const route = new Router({
@@ -49,6 +50,18 @@ route.get('/init', async (ctx, next) => {
   if (status !== 'NEW') throw new ctx.Mistake(400, 'The project is already initalized', true)
 
   const gh = ctx.project.github
+
+  if (config.github.hook) {
+    github.upsertHook(gh.owner, gh.name, gh.token, gh.secret)
+    .then((hookId) => {
+      return Project.findByIdAndUpdate(ctx.project._id, {
+        'github.hook': hookId
+      })
+    })
+    .catch((err) => {
+      throw new ctx.Mistake(500, `Unable to setup ${ctx.project.name} GitHub hooks`, err, true)
+    })
+  }
 
   return github.getReleases(gh.owner, gh.name, gh.token)
   .then((releases) => releases.sort((a, b) => semver(a.version, b.version)))

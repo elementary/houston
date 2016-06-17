@@ -11,7 +11,7 @@ import convert from 'koa-convert'
 import http from 'http'
 import Koa from 'koa'
 import koaStatic from 'koa-static'
-import parser from 'koa-bodyparser'
+import parser from 'raw-body'
 import path from 'path'
 import session from 'koa-session'
 import view from 'koa-views'
@@ -92,8 +92,20 @@ app.use(async (ctx, next) => {
   }
 })
 
+// Body parsing middleware
+app.use(async (ctx, next) => {
+  ctx.request.rawBody = await parser(ctx.req).then((buf) => buf.toString())
+
+  try {
+    ctx.request.body = JSON.parse(ctx.request.rawBody)
+  } catch (err) {
+    ctx.request.body = ctx.request.rawBody
+  }
+
+  await next()
+})
+
 // Start Passport
-app.use(parser())
 app.keys = [config.server.secret]
 app.use(convert(session(app)))
 
