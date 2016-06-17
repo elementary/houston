@@ -6,6 +6,7 @@
 import _ from 'lodash'
 
 import * as aptly from '~/houston/service/aptly'
+import * as github from '~/houston/service/github'
 import atc from '~/houston/service/atc'
 import Cycle from '~/houston/model/cycle'
 import log from '~/lib/log'
@@ -78,14 +79,24 @@ atc.on('build:finish', async (id, data) => {
 
   build.setStatus('FINISH')
   .then(async () => {
-    if (data.files == null || data.files.deb == null) return Promise.resolve()
+    if (data.files == null || data.files.deb == null) return
 
     const cycle = await Cycle.findOne({
       'builds._id': id
     })
     const build = cycle.builds.id(id)
 
-    return aptly.upload(project.package.name, build._id, data.files.deb)
+    const release = project.releases.find((x) => x.version === cycle.version)
+
+    return github.sendFile(project.github.owner, project.github.name, release.github.id, project.github.token, data.files.deb, {
+      content: 'application/vnd.debian.binary-package',
+      name: `${project.name}_${cycle.tag}_${build.arch}.deb`,
+      label: `apphub ${build.arch} (deb)`
+    })
+    .catch((error) => {
+      log.error('Unable to post debian package to GitHub', error)
+    })
+    .then(() => aptly.upload(project.package.name, build._id, data.files.deb))
   })
   .then(async () => {
     const cycle = await Cycle.findOne({
