@@ -257,6 +257,7 @@ schema.methods.createChangelog = function () {
   const uptoRelease = this.project.releases
   .filter((release) => semver.lte(release.version, this.version))
   .sort((a, b) => semver.compare(a.version, b.version))
+  .map((release) => release.toObject())
   .reverse()
 
   return uptoRelease.map((release) => {

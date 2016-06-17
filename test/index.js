@@ -7,7 +7,7 @@ import mock from 'mock-require'
 import path from 'path'
 
 // Required for any imports not in a mocha test
-mock(path.resolve(__dirname, '../config'), require('./mocks/config'))
+mock(path.resolve(__dirname, '../config.js'), require('./mocks/config'))
 
 process.on('unhandledRejection', (reason, promise) => {
   // NOTE: If you encounter mysterious errors while testing database comment this line out
@@ -21,7 +21,7 @@ process.on('unhandledRejection', (reason, promise) => {
 })
 
 beforeEach(() => {
-  mock(path.resolve(__dirname, '../config'), require('./mocks/config'))
+  mock(path.resolve(__dirname, '../config.js'), require('./mocks/config'))
 })
 
 afterEach(() => {

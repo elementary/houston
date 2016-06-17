@@ -5,9 +5,9 @@
  * @exports {Object} default - Houston configuration
  */
 
-export const env = 'test'
+module.exports.env = 'test'
 
-export const github = {
+module.exports.github = {
   client: '123456789yoloswagomg',
   secret: 'butwait%20letmetakeaselfeshutthefrackup!',
   access: 'secretrobotmanthevegivenyouauuid',
@@ -15,13 +15,13 @@ export const github = {
   hook: false
 }
 
-export const rights = {
+module.exports.rights = {
   beta: 'awesomepeople',
   admin: 213128,
   review: 1880652
 }
 
-export const aptly = {
+module.exports.aptly = {
   url: 'http://localhost:10002',
   passphrase: 'testing',
   review: 'review',
@@ -29,24 +29,24 @@ export const aptly = {
   public: '2Rm7LJ5gXK7qRQpC6FfdxGLTTbMUnSrh'
 }
 
-export const database = 'mongodb://localhost/houston-test'
+module.exports.database = 'mongodb://localhost/houston-test'
 
-export const server = {
+module.exports.server = {
   secret: 'ermagerditsasecretsodonttellanyone',
   url: 'http://localhost:3500'
 }
 
-export const socket = {
+module.exports.socket = {
   public: 'dontworryaboutthesecret%20Igotitcoveredbro',
   private: 'butseriouslydontworryboutitok?ok.goodokbye'
 }
 
-export const log = {
+module.exports.log = {
   console: false,
   level: 'silly',
   files: false
 }
 
-export const strongback = {
+module.exports.strongback = {
   socket: '/var/run/docker.sock'
 }

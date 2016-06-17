@@ -46,13 +46,13 @@ atc.on('cycle:finish', async (id, data) => {
   if (status !== 'PRE') {
     log.debug('Received flightcheck finish data for a cycle already checked')
     return
-  } else {
-    log.verbose('Received flightcheck data for finish cycle')
-    log.debug(`Found ${log.lang.s('error', data.errors)} in ${cycle.name}`)
-    data.issues.forEach((issue) => {
-      log.silly(issue)
-    })
   }
+
+  log.verbose('Received flightcheck data for finish cycle')
+  log.debug(`Found ${log.lang.s('error', data.errors)} in ${cycle.name}`)
+  data.issues.forEach((issue) => {
+    log.silly(issue)
+  })
 
   if (data.errors > 0) {
     cycle.setStatus('FAIL')
@@ -61,7 +61,7 @@ atc.on('cycle:finish', async (id, data) => {
   }
 
   const project = await Project.findById(cycle.project)
-  Promise.all(data.issues, (issue) => project.postIssue(issue))
+  Promise.each(data.issues, (issue) => project.postIssue(issue))
 
   // TODO: we should whitelist what can be updated in the database
   if (data.information != null && Object.getOwnPropertyNames(data.information).length > 0) {

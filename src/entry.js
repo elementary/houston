@@ -3,10 +3,9 @@
  * Simple wrapper for babel
  */
 
-require('babel-register')
-require('babel-polyfill')
+import path from 'path'
 
-var path = require('path')
+require('babel-polyfill')
 
 // The code forced me to overwrite native functions. I'm sorry
 global.Promise = require('bluebird')
@@ -28,14 +27,12 @@ if (currentIndex < 0) {
 
 var script = process.argv[currentIndex + 1]
 
-if (script == null) {
-  // eslint-disable-next-line no-console
-  console.error('Coming into entry wihout a ship')
-  throw new Error('entry.js requires a script file to run')
+if (script === 'flightcheck') {
+  require('./flightcheck')
+} else if (script === 'houston') {
+  require('./houston')
+} else if (script === 'strongback') {
+  require('./strongback')
+} else {
+  require('../test')
 }
-
-if (script[0] !== '/') {
-  script = path.join(__dirname, '/', script)
-}
-
-require(script)

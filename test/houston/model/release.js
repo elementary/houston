@@ -245,7 +245,9 @@ describe('release', () => {
       changelog: ['changed things']
     }]
 
-    assert.deepEqual(changelog, expected, 'has correct changelog')
+    assert.equal(changelog[0].author, expected[0].author, 'has correct author')
+    assert.equal(changelog[0].changelog[0], expected[0].changelog[0], 'has correct changelog')
+    assert.equal(changelog[1].changelog[0], expected[1].changelog[0], 'has correct changelog')
 
     done()
   })

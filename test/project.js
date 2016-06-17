@@ -10,7 +10,8 @@ import * as lang from '~/lib/helpers/lang'
 import config from '~/lib/config'
 
 describe('project', () => {
-  it('lints', (done) => {
+  it('lints', function (done) {
+    this.timeout(0) // Why is this a thing? I don't even. Thanks Obama
     const maxRules = 75
 
     aStandard.lintFiles([], {}, (err, res) => {
