@@ -30,6 +30,7 @@ import Mistake from '~/lib/mistake'
 const schema = new db.Schema({
   project: {
     type: db.Schema.Types.ObjectId,
+    ref: 'project',
     required: true
   },
 

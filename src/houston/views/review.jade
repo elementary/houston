@@ -1,0 +1,24 @@
+extends /layout/main
+
+block head
+  link(rel="stylesheet", type="text/css", media="all", href="/styles/dashboard.css")
+
+block body
+  if cycles.length === 0
+    div.row: div.column.alert
+      h3 No reviews available
+      p consider how lucky you are that life has been good to you so far
+      a(href="/dashboard").button.suggested-action Go to Dashboard
+  else
+    each cycle in cycles
+      div.repo-wrap: div.repo
+        div
+          if cycle.project.package.icon != null
+            img(src="data:image/svg+xml;base64," + cycle.project.package.icon).app-icon
+          else
+            img(src="/images/application-default-icon.png").app-icon
+          div
+            p #{cycle.name} #{cycle.version}
+            p.subtext: a(href="https://github.com/" + cycle.project.github.fullName)= cycle.project.github.fullName
+        div.right
+          include /partials/review

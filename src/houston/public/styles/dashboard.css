@@ -104,12 +104,12 @@
     white-space: nowrap;
 }
 
-.repo a {
+.repo p a {
     color: #333;
     opacity: 0.65;
 }
 
-.repo a:hover {
+.repo p a:hover {
     color: #08C;
     opacity: 1.0;
 }
@@ -118,6 +118,11 @@
     height: 64px;
     vertical-align: middle;
     width: 64px;
+}
+
+.repo > .right > * {
+    display: inline-block;
+    margin: 10px;
 }
 
 @media only screen and (min-width: 500px) {

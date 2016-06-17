@@ -3,6 +3,10 @@ extends /layout/main
 block head
   link(rel="stylesheet", type="text/css", media="all", href="/styles/dashboard.css")
 
+block actions
+  if policy.ifRole(user, 'review')
+    li: a(href="/reviews") Reviews
+
 block body
   if projects.length === 0
     div.row: div.column.alert
@@ -23,13 +27,3 @@ block body
             p.subtext: a(href="https://github.com/" + project.github.fullName)= project.github.fullName
         div.right
           include /partials/status
-  if reviews.length > 0
-    div.row
-      h3 Reviews
-      h4 #{helper.lang.s('review is', reviews)} pending
-      each cycle in reviews
-        div.repo
-          div.right
-            include /partials/review
-          div.description
-            p #{cycle.name} @ #{cycle.version}

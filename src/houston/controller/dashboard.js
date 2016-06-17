@@ -56,19 +56,18 @@ route.get('/dashboard', policy.isRole('beta'), async (ctx, next) => {
     return project
   })
 
-  // TODO: Get some design input on this, and possibly a unique page
-  let reviews = []
-  if (policy.ifRole(ctx.user, 'review')) {
-    log.debug('Grabbing projects waiting to be reviewed')
+  return ctx.render('dashboard', { title: 'Dashboard', projects })
+})
 
-    reviews = await Cycle.find({
-      type: 'RELEASE',
-      _status: 'REVIEW'
-    })
-    .exec()
-  }
+route.get('/reviews', policy.isRole('review'), async (ctx, next) => {
+  const cycles = await Cycle.find({
+    type: 'RELEASE',
+    _status: 'REVIEW'
+  })
+  .populate('project')
+  .exec()
 
-  return ctx.render('dashboard', { title: 'Dashboard', projects, reviews })
+  return ctx.render('review', { title: 'Reviews', cycles })
 })
 
 export default route
