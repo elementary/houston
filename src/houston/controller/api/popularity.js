@@ -110,7 +110,7 @@ route.get('/', async (ctx) => {
       type: 'projects',
       id: data.id,
       attributes: {
-        package: data.package.name,
+        package: data.name,
         popularity: data.downloads,
         version: release.version
       }

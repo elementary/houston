@@ -96,12 +96,9 @@ export function getProjects (token) {
   })
   .map((project) => {
     return {
-      name: project.name,
+      name: `com.github.${project.owner.login}.${project.name}`,
       repo: project.git_url,
       tag: project.default_branch,
-      package: {
-        name: project.name
-      },
       github: {
         id: project.id,
         owner: project.owner.login,
@@ -199,6 +196,10 @@ export function sendIssue (owner, name, token, issue, label) {
     })
   })
   .catch((error) => {
+    if (error.status != null && error.status === 401) {
+        throw new Mistake(500, 'config.github.access is invalid', error)
+    }
+
     throw new Mistake(500, 'Houston had a problem creating an issue on GitHub', error)
   })
 }

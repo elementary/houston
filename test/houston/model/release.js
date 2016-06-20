@@ -20,12 +20,9 @@ const assert = chai.assert
  */
 const validProject = function (releases) {
   return {
-    name: 'vocal',
+    name: 'com.github.vocalapp.vocal',
     repo: 'git@github.com:elementary/vocal.git',
     tag: 'master',
-    package: {
-      name: 'vocal'
-    },
     github: {
       id: 1,
       owner: 'elementary',

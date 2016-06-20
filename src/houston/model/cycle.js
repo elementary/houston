@@ -18,7 +18,7 @@ import Mistake from '~/lib/mistake'
  *
  * @param {String} repo - git repo of cycle (git@github.com:elementary/vocal.git)
  * @param {String} tag - git tag to build (master)
- * @param {String} name - project name (vocal)
+ * @param {String} name - project name (com.github.vocalapp.vocal)
  * @param {String} version - semver version of cycle (1.0.0)
  * @param {String} type - cycle type (INIT = up to flightcheck, ORPHAN = up to strongback)
  * @param {String} changelog
@@ -49,7 +49,11 @@ const schema = new db.Schema({
   name: {
     type: String,
     required: true,
-    index: true
+    index: true,
+    validate: {
+      validator: (s) => /(.+)\.(.+)\.(.+)/.test(s),
+      message: '{VALUE} is not a valid reverse domain name notation'
+    }
   },
   version: {
     type: String,
@@ -100,7 +104,7 @@ schema.methods.toNormal = async function () {
   delete ret['_id']
   delete ret['__v']
   delete ret['_status']
-  delete ret['repo'] // It possibly has access token for cloning
+  delete ret['repo'] // It might have access token for cloning
 
   if (ret['mistake'] != null && ret['mistake']['stack'] != null) {
     delete ret['mistake']['stack']

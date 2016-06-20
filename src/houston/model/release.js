@@ -218,7 +218,7 @@ schema.methods.createCycle = async function (type) {
     project: this.project._id,
     repo: this.project.repo,
     tag: this.github.tag,
-    name: this.project.package.name,
+    name: this.project.name,
     version: this.version,
     type,
     changelog: await this.createChangelog(),
