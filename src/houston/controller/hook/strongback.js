@@ -63,7 +63,7 @@ atc.on('build:finish', async (id, data) => {
 
   if (!data.success) {
     log.debug(`Building ${project.name} failed`)
-    const issue = render('houston/issue/build.md', { dist: build.dist, arch: build.arch, log: data.files.log })
+    const issue = render('houston/views/issue/build.md', { dist: build.dist, arch: build.arch, log: data.files.log })
 
     if (data.files != null && data.files.log != null) {
       log.debug('Saving log file')

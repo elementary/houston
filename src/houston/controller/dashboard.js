@@ -39,16 +39,6 @@ route.get('/dashboard', policy.isRole('beta'), async (ctx, next) => {
     return Project.create(Object.assign(repo, {
       owner: ctx.user._id
     }))
-    .catch({code: 11000}, () => { // duplicate key error (project name already exists)
-      // TODO: replace this with a better system when we move to client side project importing
-      return Project.create(Object.assign(repo, {
-        name: `${repo.github.owner}-${repo.name}`,
-        package: {
-          name: `${repo.github.owner}-${repo.name}`
-        },
-        owner: ctx.user._id
-      }))
-    })
   })
   .map(async (project) => {
     project.status = await project.getStatus()
