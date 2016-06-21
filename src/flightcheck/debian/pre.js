@@ -33,14 +33,14 @@ export default class Debian extends AppHook {
   }
 
   async test () {
-    const control = await this.file(`debian/control`)
+    const control = await this.file('debian/control')
 
     if (control == null) {
       this.error('exist')
       return
     }
 
-    let data = {
+    const data = {
       'Build-Depends': []
     }
     try {
@@ -48,20 +48,20 @@ export default class Debian extends AppHook {
       let header = null
 
       for (let i = 0; i < l.length; i++) {
-        const s = l[i].split(/\:\s*/)
+        const s = l[i].split(/:\s*/)
 
         if (s[1]) {
           header = s[0]
         }
 
-        if (header == 'Build-Depends') {
+        if (header === 'Build-Depends') {
           const d = paddingRemove(((s[1] == null) ? s[0] : s[1]).replace(',', ''))
 
-          if (d != '') {
+          if (d !== '') {
             data['Build-Depends'].push(d)
           }
         } else {
-          let d = paddingRemove(l[i].substr(l[i].indexOf(':') + 1))
+          const d = paddingRemove(l[i].substr(l[i].indexOf(':') + 1))
 
           if (s[1] == null) {
             data[header] += ` ${d}`

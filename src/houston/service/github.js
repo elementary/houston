@@ -26,7 +26,10 @@ import request from '~/lib/request'
  * returns {String} - Replaces clean string to use in Houston
  */
 function codize (str) {
-  return str.toLowerCase().replace(/(\s|\_)/gmi, '-').replace(/(?![a-z]|\-)./, '')
+  return str
+    .toLowerCase()
+    .replace(/(\s|_)/gmi, '-')
+    .replace(/(?![a-z]|\-)./, '')
 }
 
 /**
@@ -209,7 +212,7 @@ export function sendIssue (owner, name, token, issue, label) {
   })
   .catch((error) => {
     if (error.status != null && error.status === 401) {
-        throw new Mistake(500, 'config.github.access is invalid', error)
+      throw new Mistake(500, 'config.github.access is invalid', error)
     }
 
     throw new Mistake(500, 'Houston had a problem creating an issue on GitHub', error)

@@ -57,7 +57,7 @@ describe('release', () => {
       project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
-      name: 'vocal',
+      name: 'com.github.vocalapp.vocal',
       version: '1.0.0',
       type: 'RELEASE',
       changelog: [['testing']]
@@ -67,7 +67,7 @@ describe('release', () => {
       project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.5',
-      name: 'vocal',
+      name: 'com.github.vocalapp.vocal',
       version: '1.0.5',
       type: 'RELEASE',
       changelog: [['fixed things']]
@@ -139,7 +139,7 @@ describe('release', () => {
       project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
-      name: 'vocal',
+      name: 'com.github.vocalapp.vocal',
       version: '1.0.0',
       type: 'RELEASE',
       changelog: [['testing']],
