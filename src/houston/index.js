@@ -18,6 +18,7 @@ import view from 'koa-views'
 
 import * as helpers from '~/lib/helpers'
 import * as passport from './passport'
+import * as policy from './policy'
 import atc from './service/atc'
 import config from '~/lib/config'
 import controllers from './controller'
@@ -57,6 +58,7 @@ app.use(async (ctx, next) => {
   ctx.Mistake = Mistake
 
   ctx.state.basedir = path.normalize(`${__dirname}/views`)
+  ctx.state.policy = policy
   ctx.state.config = config
   ctx.state.helper = helpers
 
