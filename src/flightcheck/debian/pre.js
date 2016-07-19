@@ -19,6 +19,48 @@ function paddingRemove (str) {
 }
 
 /**
+ * parseControl
+ * Parses the debian control file
+ *
+ * @param {String} str - string to parse
+ * @returns {Object} - javascript object of debian control file
+ */
+function parseControl (str) {
+  const data = {
+    'Build-Depends': []
+  }
+
+  const l = str.split('\n')
+  let header = null
+
+  for (let i = 0; i < l.length; i++) {
+    const s = l[i].split(/:\s*/)
+
+    if (s[1]) {
+      header = s[0]
+    }
+
+    if (header === 'Build-Depends') {
+      const d = paddingRemove(((s[1] == null) ? s[0] : s[1]).replace(',', ''))
+
+      if (d !== '') {
+        data['Build-Depends'].push(d)
+      }
+    } else {
+      const d = paddingRemove(l[i].substr(l[i].indexOf(':') + 1))
+
+      if (s[1] == null) {
+        data[header] += ` ${d}`
+      } else {
+        data[header] = d
+      }
+    }
+  }
+
+  return data
+}
+
+/**
  * Debian
  * Checks debian control file
  *
@@ -40,36 +82,9 @@ export default class Debian extends AppHook {
       return
     }
 
-    const data = {
-      'Build-Depends': []
-    }
+    let data = null
     try {
-      const l = control.split('\n')
-      let header = null
-
-      for (let i = 0; i < l.length; i++) {
-        const s = l[i].split(/:\s*/)
-
-        if (s[1]) {
-          header = s[0]
-        }
-
-        if (header === 'Build-Depends') {
-          const d = paddingRemove(((s[1] == null) ? s[0] : s[1]).replace(',', ''))
-
-          if (d !== '') {
-            data['Build-Depends'].push(d)
-          }
-        } else {
-          const d = paddingRemove(l[i].substr(l[i].indexOf(':') + 1))
-
-          if (s[1] == null) {
-            data[header] += ` ${d}`
-          } else {
-            data[header] = d
-          }
-        }
-      }
+      data = parseControl(control)
     } catch (err) {
       this.meta({ dump: err })
       this.error('parse')

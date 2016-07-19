@@ -1,4 +1,4 @@
-.desktop has a problem
+Your .desktop file has a problem
 
 Houston requires a valid `.desktop` file for proper desktop integration.
 
