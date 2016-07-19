@@ -75,21 +75,24 @@ app.use(async (ctx, next) => {
     ctx.app.emit('error', error, ctx)
 
     const pkg = {
-      status: error.status || 500
+      status: 500,
+      detail: null,
+      title: 'Houston has encountered an error'
+    }
+
+    if (error.mistake && typeof error.status === 'number') {
+      pkg.status = error.status
+    }
+
+    if (error.expose || app.env === 'development') {
+      pkg.title = error.message || 'Houston has encountered an error'
     }
 
     if (app.env === 'development') {
       pkg.detail = error.stack
     }
 
-    if (error.expose) {
-      pkg.title = error.message || 'Houston has encountered an error'
-    } else {
-      pkg.title = 'Houston has encountered an error'
-    }
-
     ctx.status = pkg.status
-
     return ctx.render('error', { error: pkg })
   }
 })
