@@ -11,7 +11,6 @@ import * as github from '~/houston/service/github'
 import atc from '~/houston/service/atc'
 import Cycle from '~/houston/model/cycle'
 import log from '~/lib/log'
-import Mistake from '~/lib/mistake'
 import Project from '~/houston/model/project'
 import render from '~/lib/render'
 
@@ -25,6 +24,7 @@ atc.on('build:start', async (id, data) => {
   const cycle = await Cycle.findOne({
     'builds._id': id
   })
+
   const build = cycle.builds.id(id)
   const status = await build.getStatus()
 
@@ -49,10 +49,11 @@ atc.on('build:start', async (id, data) => {
  * }
  */
 atc.on('build:finish', async (id, data) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const cycle = await Cycle.findOne({
       'builds._id': id
     })
+
     const build = cycle.builds.id(id)
 
     const project = await Project.findOne(cycle.project)
@@ -109,6 +110,10 @@ atc.on('build:finish', async (id, data) => {
   })
   .catch(async (error) => {
     log.error('Error while trying to process strongback finish', error)
+
+    const cycle = await Cycle.findOne({
+      'builds._id': id
+    })
 
     await cycle.setStatus('ERROR')
     return cycle.update({ mistake: error })

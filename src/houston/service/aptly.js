@@ -50,7 +50,7 @@ const ingest = (project, arch, version) => {
     throw new Mistake(503, 'Aptly is currently disabled')
   }
 
-  return Promise.each(build, (build) => {
+  return Promise.try(() => {
     return request.post(`${config.aptly.url}/repos/${config.aptly.review}/file/${project}_${arch}_${version}.deb`)
     .then((data) => data.body.Report.Added)
     .catch((error) => {
