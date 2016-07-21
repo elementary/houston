@@ -4,5 +4,7 @@
  */
 
 describe('flightcheck', () => {
+  require('./parsers')
+
   require('./issues')
 })
