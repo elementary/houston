@@ -39,7 +39,7 @@ const runHooks = async (data, test) => {
 
   const projectFolder = path.resolve(projectsFolder, `${data.name}#${data.tag}`)
 
-  const hooks = await fsHelper.walk(__dirname, (path) => {
+  const hooks = await fsHelper.walk(path.join(__dirname, '..', 'pipes'), (path) => {
     if (path.indexOf('/') === -1) return false
     if (path.split('/')[0] === 'projects') return false
     return path.indexOf(`${test.toLowerCase()}.js`) !== -1
