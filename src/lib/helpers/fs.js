@@ -82,3 +82,43 @@ export async function walk (directory, filter = () => true, max = 10, iteration 
     return _.filter(files, filter)
   })
 }
+
+/**
+ * mkdirp
+ * Ensures given path exists
+ *
+ * @param {String} directory - directory to ensure exists
+ * @returns {Promise} - result of creation
+ */
+export function mkdirp (directory) {
+  directory = smartPath(directory)
+  const chunks = directory.split(path.sep)
+
+  return Promise.map(chunks, (chunk, i) => {
+    return chunks.slice(0, i + 1).join(path.sep)
+  })
+  .each((chunk) => {
+    if (chunk == null || chunk === '') return
+    return fs.mkdirAsync(chunk)
+    .catch({ code: 'EEXIST' }, () => true)
+  })
+}
+
+/**
+ * rmp
+ * Removes EVERYTHING you ever loved or wanted to keep
+ *
+ * @param {String} directory - directory to destroy
+ * @returns {Promise} - result of destruction
+ */
+export async function rmp (directory) {
+  directory = smartPath(directory)
+  const stat = await fs.statAsync(directory)
+
+  if (stat.isFile()) {
+    return fs.unlinkAsync(directory)
+  } else if (stat.isDirectory()) {
+    await Promise.each(fs.readdirAsync(directory), (item) => rmp(path.join(directory, item)))
+    return fs.rmdirAsync(directory)
+  }
+}

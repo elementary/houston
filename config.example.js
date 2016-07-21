@@ -57,6 +57,11 @@ module.exports.log = {
   files: false
 }
 
+module.exports.flightcheck = {
+  directory: '/tmp/flightcheck',
+  docker: '/var/run/docker.sock'
+}
+
 module.exports.strongback = {
   socket: '/var/run/docker.sock'
 }
