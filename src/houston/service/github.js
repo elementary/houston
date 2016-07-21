@@ -2,6 +2,7 @@
  * houston/service/github.js
  * Handles requests to GitHub, parsed and ready for use by Houston
  *
+ * @exports {Function} castProject - Casts GitHub project to a database object
  * @exports {Function} castRelease - Casts GitHub release to database object
  * @exports {Function} getReleases - Returns mapped array of releases from GitHub project
  * @exports {Function} getProjects - Returns mapped array of projects
@@ -15,7 +16,34 @@ import semver from 'semver'
 import config from '~/lib/config'
 import log from '~/lib/log'
 import Mistake from '~/lib/mistake'
+import Project from '~/houston/model/project'
 import request from '~/lib/request'
+
+/**
+ * castProject
+ * Casts GitHub project to a database object
+ *
+ * @param {Object} project - GitHub project object
+ * @param {String} token - GitHub token to include (if any)
+ * @returns {Object} - Mapped release object
+ */
+export function castProject (project, token) {
+  return Project.hydrate({
+    name: project.name,
+    repo: project.git_url,
+    tag: project.default_branch,
+    package: {
+      name: project.name
+    },
+    github: {
+      id: project.id,
+      owner: project.owner.login,
+      name: project.name,
+      private: project.private,
+      token
+    }
+  })
+}
 
 /**
  * castRelease
@@ -94,23 +122,7 @@ export function getProjects (token) {
     .then(() => true)
     .catch(() => false)
   })
-  .map((project) => {
-    return {
-      name: project.name,
-      repo: project.git_url,
-      tag: project.default_branch,
-      package: {
-        name: project.name
-      },
-      github: {
-        id: project.id,
-        owner: project.owner.login,
-        name: project.name,
-        private: project.private,
-        token
-      }
-    }
-  })
+  .map((project) => castProject(project, token))
   .catch((error) => {
     throw new Mistake(500, 'Houston had a problem getting projects on GitHub', error)
   })
