@@ -29,6 +29,11 @@ html
         div.nav-content
           ul
             block actions
+            li: a(href="/add") Add
+
+            if policy.ifRole(user, 'review')
+              li: a(href="/reviews") Reviews
+
             // We can re/move this after beta is over
             if config.houston.version.split('.')[0] < 1
               li: a(href="https://github.com/elementary/houston/issues") Feedback
