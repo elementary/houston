@@ -137,7 +137,7 @@ function runBuild (data) {
     local.cmd(`mkdir -p ${repoFolder}`)
   ]))
   .then(() => { // Git repository setup
-    return local.cmd(`git clone --depth 1 ${data.repo} ${repoFolder}`)
+    return local.cmd(`git clone ${data.repo} ${repoFolder}`)
     .then(() => local.cmd(`git --git-dir=${repoFolder}/.git --work-tree=${repoFolder} checkout ${data.tag}`))
     .then(() => local.cmd(`rm -rf ${repoFolder}/.git`))
   })

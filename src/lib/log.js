@@ -51,7 +51,7 @@ log.exitOnError = false
 log.lang = langHelper
 
 process.on('unhandledRejection', (reason, promise) => {
-  log.warn(`Unhandled rejection at ${promise}\n`, reason)
+  log.warn(`Unhandled rejection at ${promise._fulfillmentHandler0}\n`, reason)
 })
 
 export default log
