@@ -34,7 +34,7 @@ atc.on('build:start', async (id, data) => {
     log.verbose('Received strongback data for start build')
   }
 
-  build.setStatus('BUILD')
+  return build.setStatus('BUILD')
 })
 
 /**
@@ -70,12 +70,11 @@ atc.on('build:finish', async (id, data) => {
       build.setFile('deb', data.files.log)
     }
 
-    build.setStatus('FAIL')
+    return build.setStatus('FAIL')
     .then(() => project.postIssue(issue))
-    return
   }
 
-  build.setStatus('FINISH')
+  return build.setStatus('FINISH')
   .then(async () => {
     if (data.files == null || data.files.deb == null) return
 
@@ -94,7 +93,7 @@ atc.on('build:finish', async (id, data) => {
     .catch((error) => {
       log.error('Unable to post debian package to GitHub', error)
     })
-    .then(() => aptly.upload(project.package.name, build._id, data.files.deb))
+    .then(() => aptly.upload(project.name, build._id, cycle.version, data.files.deb))
   })
   .then(async () => {
     const cycle = await Cycle.findOne({
@@ -110,7 +109,7 @@ atc.on('build:finish', async (id, data) => {
       const buildIds = cycle.builds.map((build) => build.id)
       const dists = _.uniq(cycle.builds.map((build) => build.dist))
 
-      return aptly.review(project.package.name, cycle.version, buildIds, dists)
+      return aptly.review(project.name, cycle.version, buildIds, dists)
       .then((packages) => cycle.update({ packages }))
       .catch((error) => {
         throw new Mistake(500, 'Unable to run aptly review process', error)
@@ -119,11 +118,6 @@ atc.on('build:finish', async (id, data) => {
   })
   .catch((error) => {
     log.error('Error while trying to process strongback finish', error)
-
-    if (data.files != null && data.files.deb != null) {
-      log.debug('Saving deb package')
-      build.setFile('deb', data.files.deb)
-    }
 
     return cycle.setStatus('ERROR')
     .then(() => cycle.update({ mistake: error }))
@@ -150,6 +144,6 @@ atc.on('build:error', async (id, error) => {
     log.verbose('Received strongback data for build error')
   }
 
-  build.setStatus('ERROR')
+  return build.setStatus('ERROR')
   .then(() => build.update({ mistake: error }))
 })

@@ -44,13 +44,6 @@ export default class Desktop extends AppHook {
 
     if (entry == null) {
       this.error('entry')
-      return
-    }
-
-    if (typeof entry.Name !== 'undefined' && typeof entry.Name !== 'string') {
-      this.error('name')
-    } else if (entry.Name != null) {
-      this.update({application: {package: {name: entry.Name}}})
     }
 
     return

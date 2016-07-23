@@ -43,7 +43,11 @@ export const schema = new db.Schema({
     type: String,
     required: true,
     unique: true,
-    index: true
+    index: true,
+    validate: {
+      validator: (s) => /(.+)\.(.+)\.(.+)/.test(s),
+      message: '{VALUE} is not a valid reverse domain name notation'
+    }
   },
   type: {
     type: String,
@@ -65,11 +69,6 @@ export const schema = new db.Schema({
   },
 
   package: {
-    name: {
-      type: String,
-      required: true,
-      unique: true
-    },
     icon: String,
     price: Number
   },
@@ -303,7 +302,7 @@ schema.methods.createCycle = async function (type) {
     project: this._id,
     repo: this.repo,
     tag: this.tag,
-    name: this.package.name,
+    name: this.name,
     version: this.release.latest.version,
     type,
     changelog: await this.release.latest.createChangelog(),

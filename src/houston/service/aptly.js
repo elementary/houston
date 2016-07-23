@@ -17,17 +17,18 @@ import request from '~/lib/request'
  * Uploads a package to aptly in review repository
  *
  * @param {String} project - name of project package being uploaded
- * @param {ObjectId} build - database id of build
+ * @param {String} arch - package architecture
+ * @param {String} version - semver version of pacakge
  * @param {Buffer} file - actual file to upload
  */
-export function upload (project, build, file) {
+export function upload (project, arch, version, file) {
   if (!config.aptly) {
     throw new Mistake(503, 'Aptly is currently disabled')
   }
 
   return request
-  .post(`${config.aptly.url}/files/${project}`)
-  .attach('file', file, `${build}.deb`)
+  .post(`${config.aptly.url}/files`)
+  .attach('file', file, `${project}_${arch}_${version}.deb`)
   .then((data) => {
     log.debug(`Added ${log.lang.s('package', data.body)} of ${project} to repository`)
 
@@ -40,17 +41,17 @@ export function upload (project, build, file) {
  * Adds packages from upload directory to repository
  *
  * @param {String} project - name of project package being uploaded
- * @param {String} version - package version
- * @param {Array} build - database id of builds
+ * @param {String} arch - package architecture
+ * @param {String} version - semver version of pacakge
  * @returns {Array} - Aptly package keys
  */
-const ingest = (project, version, build) => {
+const ingest = (project, arch, version) => {
   if (!config.aptly) {
     throw new Mistake(503, 'Aptly is currently disabled')
   }
 
-  return Promise.each(build, (build) => {
-    return request.post(`${config.aptly.url}/repos/${config.aptly.review}/file/${project}/${build}.deb`)
+  return Promise.try(() => {
+    return request.post(`${config.aptly.url}/repos/${config.aptly.review}/file/${project}_${arch}_${version}.deb`)
     .then((data) => data.body.Report.Added)
     .catch((error) => {
       if (error.statusCode === 404) {
@@ -204,20 +205,22 @@ const publish = async (repo, dist) => {
  *
  * @param {String} project - name of project package being uploaded
  * @param {String} version - package version
- * @param {Array} build - database id of builds
+ * @param {Array} arch - architecture of pacakges to publish
  * @param {Array} dist - Distributions to publish to
  * @returns {Array} - Package keys successfully moved
  */
-export function review (project, version, build, dist) {
+export async function review (project, version, arch, dist) {
   if (!config.aptly) {
     throw new Mistake(503, 'Aptly is currently disabled')
   }
 
-  return ingest(project, version, build)
-  .then((keys) => {
-    return publish(config.aptly.review, dist)
-    .then(() => keys)
+  const keys = await Promise.each(arch, (arch) => {
+    return ingest(project, arch, version)
   })
+
+  await publish(config.aptly.review, dist)
+
+  return keys
 }
 
 /**

@@ -14,12 +14,9 @@ const assert = chai.assert
 describe('project', () => {
   it('validates repo value', (done) => {
     Project.create({
-      name: 'vocal',
+      name: 'com.github.vocalapp.vocal',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'master',
-      package: {
-        name: 'vocal'
-      },
       github: {
         id: 1,
         owner: 'elementary',
@@ -31,12 +28,9 @@ describe('project', () => {
       if (err) done(err)
 
       Project.create({
-        name: 'flappy',
+        name: 'net.launchpad.ubuntu.flappy',
         repo: 'lp~:ubuntu/flappy',
         tag: 'master',
-        package: {
-          name: 'flappy'
-        },
         github: {
           id: 2,
           owner: 'ubuntu',
@@ -54,12 +48,9 @@ describe('project', () => {
 
   it('has github.fullName virtual', async (done) => {
     const project = await Project.create({
-      name: 'vocal',
+      name: 'com.github.vocalapp.vocal',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'master',
-      package: {
-        name: 'vocal'
-      },
       github: {
         id: 1,
         owner: 'elementary',
@@ -75,12 +66,9 @@ describe('project', () => {
 
   it('has release virtual', async (done) => {
     const project = await Project.create({
-      name: 'vocal',
+      name: 'com.github.vocalapp.vocal',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'master',
-      package: {
-        name: 'vocal'
-      },
       github: {
         id: 1,
         owner: 'elementary',
@@ -120,7 +108,7 @@ describe('project', () => {
       project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
-      name: 'vocal',
+      name: 'com.github.vocalapp.vocal',
       version: '1.0.0',
       type: 'RELEASE',
       changelog: [['testing']]
@@ -130,19 +118,16 @@ describe('project', () => {
       project: new db.Types.ObjectId(),
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.5',
-      name: 'vocal',
+      name: 'com.github.vocalapp.vocal',
       version: '1.0.5',
       type: 'RELEASE',
       changelog: [['fixed things']]
     })
 
     const project = await Project.create({
-      name: 'vocal',
+      name: 'com.github.vocalapp.vocal',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'master',
-      package: {
-        name: 'vocal'
-      },
       github: {
         id: 1,
         owner: 'elementary',
@@ -164,12 +149,9 @@ describe('project', () => {
 
   it('can get status', async (done) => {
     const project = await Project.create({
-      name: 'vocal',
+      name: 'com.github.vocalapp.vocal',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'master',
-      package: {
-        name: 'vocal'
-      },
       github: {
         id: 1,
         owner: 'elementary',
@@ -187,12 +169,9 @@ describe('project', () => {
 
   it('can get status with releases', async (done) => {
     const project = await Project.create({
-      name: 'vocal',
+      name: 'com.github.vocalapp.vocal',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'master',
-      package: {
-        name: 'vocal'
-      },
       github: {
         id: 1,
         owner: 'elementary',
@@ -221,12 +200,9 @@ describe('project', () => {
 
   it('can set status', async (done) => {
     const project = await Project.create({
-      name: 'vocal',
+      name: 'com.github.vocalapp.vocal',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'master',
-      package: {
-        name: 'vocal'
-      },
       github: {
         id: 1,
         owner: 'elementary',
@@ -245,12 +221,9 @@ describe('project', () => {
 
   it('can create a cycle', async (done) => {
     const project = await Project.create({
-      name: 'vocal',
+      name: 'com.github.vocalapp.vocal',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'master',
-      package: {
-        name: 'vocal'
-      },
       archs: ['amd64'],
       dists: ['xenial'],
       github: {
