@@ -102,13 +102,6 @@ export function getProjects (token) {
   .get('https://api.github.com/user/repos?visibility=public')
   .auth(token)
   .then((res) => res.body)
-  .filter((githubProject) => {
-    return request
-    .get(`https://api.github.com/repos/${githubProject.full_name}/contents/.apphub`)
-    .auth(token)
-    .then(() => true)
-    .catch(() => false)
-  })
   .map((project) => {
     return {
       name: `com.github.${codize(project.owner.login)}.${codize(project.name)}`,

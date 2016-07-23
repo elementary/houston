@@ -10,7 +10,6 @@ import Router from 'koa-router'
 import * as github from '~/houston/service/github'
 import * as policy from '~/houston/policy'
 import Cycle from '~/houston/model/cycle'
-import log from '~/lib/log'
 import Project from '~/houston/model/project'
 
 const route = new Router()
@@ -29,17 +28,8 @@ route.get('', (ctx) => {
  */
 route.get('/dashboard', policy.isRole('beta'), async (ctx, next) => {
   const projects = await github.getProjects(ctx.user.github.access)
-  .map(async (repo) => {
-    const db = await Project.findOne({ 'github.id': repo.github.id })
-
-    if (db != null) return db
-
-    log.debug(`Creating a new project for ${repo.github.owner}/${repo.github.name}`)
-
-    return Project.create(Object.assign(repo, {
-      owner: ctx.user._id
-    }))
-  })
+  .map((repo) => Project.findOne({ 'github.id': repo.github.id }))
+  .filter((repo) => (repo != null))
   .map(async (project) => {
     project.status = await project.getStatus()
 
@@ -58,6 +48,16 @@ route.get('/reviews', policy.isRole('review'), async (ctx, next) => {
   .exec()
 
   return ctx.render('review', { title: 'Reviews', cycles })
+})
+
+route.get('/add', policy.isRole('beta'), async (ctx, next) => {
+  const projects = await github.getProjects(ctx.user.github.access)
+  .filter(async (repo) => {
+    const dbProject = await Project.findOne({ 'github.id': repo.github.id })
+    return (dbProject == null) // Only return github repos which have not been added
+  })
+
+  return ctx.render('add', { title: 'Adding', projects })
 })
 
 export default route
