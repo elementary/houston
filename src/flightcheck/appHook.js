@@ -24,10 +24,10 @@ export default class AppHook {
   constructor (data, obj) {
     this.data = data
 
-    this.folder = data.folder
+    this.folder = data.dir
 
     this.name = obj.name || 'appHook'
-    this.path = obj.path || path.join(__dirname, this.name)
+    this.path = obj.path || path.join(__dirname, 'pipes', this.name)
     this.mark = obj.mark || 'issue.md'
     this.post = obj.post || false
 
