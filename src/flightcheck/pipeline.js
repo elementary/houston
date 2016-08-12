@@ -76,7 +76,7 @@ export default class Pipeline {
     // Check to make sure we have everything we need to run
     // This includes all generated data from above
     assert(this.build['name'], 'Pipeline needs a package name to use in build')
-    assert(this.build['build'].split('.') >= 3, 'Pipeline needs a valid RDNN package name')
+    assert(this.build['name'].split('.').length >= 3, 'Pipeline needs a valid RDNN package name')
     assert.equal(this.build['source'], 'github', 'Pipeline can only build things from GitHub')
     assert(this.build['version'], 'Pipeline needs a semver version to use in build')
 
