@@ -5,18 +5,20 @@
  * @exports {Class} Pipeline - Runs a collection of pipes for an output
  */
 
+import _ from 'lodash'
 import assert from 'assert'
 import git from 'nodegit'
 import path from 'path'
 import semver from 'semver'
 
 import * as fsHelper from '~/lib/helpers/fs'
+import * as pipes from './pipes'
 import config from '~/lib/config'
 import log from '~/lib/log'
 
 /**
  * Pipeline
- * Runs a collection of pipes for an output
+ * Wraps a bunch of pipes together
  */
 export default class Pipeline {
 
@@ -29,12 +31,11 @@ export default class Pipeline {
    *   {String} [name] - Project name 'com.github.elementary.houston'
    *   {String} [source] - Source of project 'github'
    *   {String} [version] - Version to use for project references '3.0.0'
-   *   {Array} [changelog] - [{
-   *     {String} author - Author of release 'btkostner'
-   *     {Array} changes - List of changes made in release
-   *     {Date} date - Date release was pushed
-   *     {String} version - Semver version of release '2.9.0'
-   *   }]
+   *   {Object[]} [changelog] - a list of changes from the current version
+   *   {String} [changelog[].author] - Author of release 'btkostner'
+   *   {Array} [changelog[].changes] - List of changes made in release
+   *   {Date} changelog[].date - Date release was pushed
+   *   {String} changelog[].version - Semver version of release '2.9.0'
    *   {String} [auth] - Authentication to use with source. Needed for posting logs and builds
    * }
    */
@@ -86,6 +87,9 @@ export default class Pipeline {
 
     // Setup some dynamic variables
     this.build.dir = path.join(config.flightcheck.directory, 'projects', this.build.name)
+
+    // A list of all running / already ran pipes
+    this.pipes = []
   }
 
   /**
@@ -121,57 +125,49 @@ export default class Pipeline {
   }
 
   /**
-   * run
-   * Runs the pipeline process
+   * start
+   * Starts the pipeline process
    *
-   * @returns {Object} - {
-   *   {Number} errors - number of errors the hooks aquired
-   *   {Number} warnings - number of warnings the hook aquired
-   *   {Object} information - information to be updated in the database
-   *   {Array} issues - generated issues for GitHub with title and body
-   * }
+   * @param {String} [pipe=Director] - inital pipe to start at
    */
-  async run () {
-    await this.setup()
+  async start (pipe = 'Director') {
+    assert(pipes[pipe], `${pipe} does not exist and therefor pipeline cannot be started`)
 
-    const pipes = await fsHelper.walk(path.join(__dirname, 'pipes'), (path) => {
-      if (path.indexOf('/') === -1) return false
-      return path.indexOf('pre.js') !== -1
+    return this.setup()
+    .then(() => this.require(pipe))
+    .finally(() => this.teardown())
+  }
+
+  /**
+   * require
+   * Runs a given pipe, used mostly be already running pipes
+   *
+   * @param {String} name - name of pipe to run
+   * @param {String} [p=this.build.dir] - the path to run the code in (defaults to default git dir)
+   * @param {...*} [args] - any arguments. Literally anything...
+   * @returns {Object} - pipes data object after completion
+   */
+  async require (name, p = this.build.dir, ...args) {
+    assert(pipes[name], `${name} does not exist and therefor cannot be required`)
+
+    const completeArgs = [p, ...args]
+
+    // check if we have already ran this pipe with given arguments to reduce overhead
+    const initalizedPipe = this.pipes.find((pipe) => {
+      return (pipe.name === name && _.isEqual(pipe.args, completeArgs))
     })
-    .map((file) => {
-      const Hook = require(path.join(__dirname, 'pipes', file)).default
-      return new Hook(this.build)
-    })
 
-    log.debug(`Running ${pipes.length} pipes`)
+    if (initalizedPipe != null) {
+      // Loaded but not ran uhhh wtf?
+      if (initalizedPipe.promise == null) return initalizedPipe.run(completeArgs)
+      if (!initalizedPipe.promise.isFufilled) await initalizedPipe.promise
 
-    let results = null
-    let error = null
-    try {
-      results = await Promise.all(pipes)
-      .map((pipe) => pipe.run())
-      .then((pkg) => {
-        const obj = {errors: 0, warnings: 0, information: {}, issues: []}
-
-        pkg.forEach((hookPkg) => {
-          obj.errors = hookPkg.errors + obj.errors
-          obj.warnings = hookPkg.warnings + obj.warnings
-          obj.information = Object.assign(obj.information, hookPkg.information)
-          if (hookPkg.issue != null) obj.issues.push(hookPkg.issue)
-        })
-
-        return obj
-      })
-    } catch (err) {
-      error = err
+      return initalizedPipe.data
     }
 
-    await this.teardown()
+    const pipe = new pipes[name](this)
+    this.pipes.push(pipe)
 
-    if (error != null) {
-      throw error
-    } else {
-      return results
-    }
+    return pipe.run(completeArgs)
   }
 }
