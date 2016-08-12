@@ -14,11 +14,6 @@
  * @returns {Object} - a javascript object of the JSON string
  */
 export async function read (str) {
-  // Test if it's an empty file (no real charactors)
-  if (!/\S/.test(str)) {
-    return {}
-  }
-
   return JSON.parse(str)
 }
 

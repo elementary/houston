@@ -61,11 +61,12 @@ export default class File {
   async read (type = this.type) {
     const existance = await this.exists()
 
-    if (!existance) {
-      return null
-    }
+    if (!existance) return null
 
     const raw = await fs.readFileAsync(this.path, this.options)
+
+    // If it's a file with only whitespace charactors (no real data)
+    if (!/\S/.test(raw)) return {}
 
     if (type) {
       return parses[type].read(raw)

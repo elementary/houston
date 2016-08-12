@@ -16,11 +16,6 @@ import _ from 'lodash'
  * @returns {Object} - a javascript representation of the string
  */
 export async function read (str) {
-  // Test if it's an empty file (no real charactors)
-  if (!/\S/.test(str)) {
-    return {}
-  }
-
   const lines = str.split('\n')
 
   const data = {}

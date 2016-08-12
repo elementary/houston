@@ -16,11 +16,6 @@ import ini from 'ini'
  * @returns {Object} - javascript object of ini string
  */
 export async function read (str) {
-  // Test if it's an empty file (no real charactors)
-  if (!/\S/.test(str)) {
-    return {}
-  }
-
   return ini.parse(str)
 }
 
