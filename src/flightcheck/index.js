@@ -3,7 +3,6 @@
  * Selects the interface to run based on command arguments
  */
 
-import assert from 'assert'
 import fs from 'fs'
 
 import config from '~/lib/config'
