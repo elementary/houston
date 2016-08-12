@@ -44,9 +44,5 @@ fs.stat(config.flightcheck.docker, (err, stat) => {
     return
   }
 
-  log.error('Flightcheck was unable to determine what you want to do')
-  log.error('You should get your priorities in order. Maybe run the following?')
-  log.error('npm run flightcheck houston')
-
-  process.exit(-1)
+  require('./interfaces/cli')
 })
