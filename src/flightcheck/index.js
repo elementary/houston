@@ -11,11 +11,11 @@ import log from '~/lib/log'
 
 // Check docker is running, active, and accessable before we start anything
 fs.stat(config.flightcheck.docker, (err, stat) => {
-  assert.ifError(err)
-
-  if (!stat.isSocket()) {
+  if (err != null || !stat.isSocket()) {
     log.error(`Unable to connect to Docker at ${config.flightcheck.docker}`)
     log.error('Please make sure it is active and accessable for Flightcheck')
+
+    if (err) log.error(err)
 
     process.exit(-1)
   }
@@ -46,8 +46,8 @@ fs.stat(config.flightcheck.docker, (err, stat) => {
   }
 
   log.error('Flightcheck was unable to determine what you want to do')
-  log.error('You should really get your priorities in order. Maybe run the following?')
-  log.error('npm run flightcheck')
+  log.error('You should get your priorities in order. Maybe run the following?')
+  log.error('npm run flightcheck houston')
 
   process.exit(-1)
 })

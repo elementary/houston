@@ -24,6 +24,7 @@ connection.on('cycle:queue', async (data) => {
     log.error('Flightcheck received incorrect or incomplete data from Houston')
     log.error(err)
 
+    connection.send('houston', 'cycle:error', data.id, err)
     return
   }
 

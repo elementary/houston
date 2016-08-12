@@ -53,14 +53,12 @@ export default class Pipeline {
     assert(this.build['repo'], 'Pipeline needs a repository to build')
     assert(this.build['tag'], 'Pipeline needs a tag to checkout')
 
-    // Try to determine optional variables
-    if (this.build.source == null) {
-      if (this.build.repo.indexOf('github.com') !== -1) {
-        this.build.source = 'github'
-      }
+    // Try to determine optional variables first
+    if (this.build.source == null && this.build.repo.indexOf('github.com') !== -1) {
+      this.build.source = 'github'
     }
 
-    if (this.build.source === 'github') {
+    if (this.build.name == null && this.build.source === 'github') {
       // Filter the github information from the repo url
       // Possible urls are https://github.com/vocalapp/vocal
       // and git@github.com:vocalapp/vocal.git
@@ -75,15 +73,16 @@ export default class Pipeline {
       this.build.version = semver.valid(this.build.tag)
     }
 
-    // Check optional variables to make sure we can determine them from given manditory variables
-    if (build.version == null && this.build.version == null) {
-      throw new Error('Pipeline cannot parse tag into valid semver. Please specify it manually')
-    } else if (semver.valid(this.build.version) == null) {
-      throw new Error('Pipeline cannot parse the given version to valid semver')
-    }
+    // Check to make sure we have everything we need to run
+    // This includes all generated data from above
+    assert(this.build['name'], 'Pipeline needs a package name to use in build')
+    assert(this.build['build'].split('.') >= 3, 'Pipeline needs a valid RDNN package name')
+    assert.equal(this.build['source'], 'github', 'Pipeline can only build things from GitHub')
+    assert(this.build['version'], 'Pipeline needs a semver version to use in build')
 
-    assert.equal(this.build['source'], 'github', 'Pipeline needs a source to build from')
-    assert(this.build['name'], 'Pipeline was unable to parse repo for valid name. Please specify it manually')
+    if (this.build['auth'] == null) {
+      log.warn('Pipeline was not given auth code. Will not be able to post logs or builds')
+    }
 
     // Setup some dynamic variables
     this.build.dir = path.join(config.flightcheck.directory, 'projects', this.build.name)
