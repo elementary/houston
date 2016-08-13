@@ -48,7 +48,7 @@ export default class Pipe {
     this.data = {}
 
     // holds all information from log() done in the pipe
-    this.log = {
+    this.logs = {
       debug: [],   // debug - information gathered while testing (file dumps etc)
       info: [],    // info  - information about the test, but not worthy of being talked about (extra data etc)
       warning: [], // warning - information that is incorrect, but automaticlly fixed (incorrect values etc)
@@ -60,10 +60,9 @@ export default class Pipe {
    * code
    * Actual pipe logic to be replaced with child's code
    *
-   * @param {String} [p=this.pipeline.build.dir] - the path to run the code in (defaults to default git dir)
    * @param {...*} [args] - any arguments. Literally anything...
    */
-  async code (p = this.pipeline.build.dir, ...args) {
+  async code (...args) {
     throw new Error(`${this.name} has no testing code`)
   }
 
@@ -71,15 +70,14 @@ export default class Pipe {
    * run
    * Runs code function with helpful markers for debuging
    *
-   * @param {String} [p=this.pipeline.build.dir] - the path to run the code in (defaults to default git dir)
    * @param {...*} [args] - any arguments. Literally anything...
    * @returns {Object} - pipe's data object
    */
-  async run (p = this.pipeline.build.dir, ...args) {
+  async run (...args) {
     log.debug(`Starting ${this.name} pipe`)
 
-    this.args = [p, ...args]
-    this.promise = this.code(...this.args)
+    this.args = args
+    this.promise = this.code(...args)
 
     await this.promise
     .catch((err) => {
@@ -104,25 +102,24 @@ export default class Pipe {
    * @see Pipeline.pipe()
    *
    * @param {String} name - name of pipe to run
-   * @param {String} [p=this.pipeline.build.dir] - the path to run the code in (defaults to default git dir)
    * @param {...*} [args] - any arguments. Literally anything...
    * @returns {Object} - pipes data object after completion
    */
-  async require (name, p = this.pipeline.build.dir, ...args) {
-    return this.pipeline.require(name, p, ...args)
+  async require (name, ...args) {
+    return this.pipeline.require(name, ...args)
   }
 
   /**
-   * File
+   * file
    * Returns file as a string
    *
-   * @param {String} p - file path relative to the pipe run directory
+   * @param {String} p - file path relative to the pipeline directory
    * @param {String} [type=raw] - Type of parser to use for file
    * @param {String} [encoding=utf-8] - File encoding to use for the file
-   * @returns {Class} - new File class for requested file
+   * @returns {File} - new File class for requested file
    */
-  async File (p, type, fsOpt) {
-    return new File(path.join(this.args[0], p), type, fsOpt)
+  async file (p, type = 'raw', encoding = 'utf-8') {
+    return new File(path.join(this.pipeline.build.dir, p), type, encoding)
   }
 
   /**
@@ -146,20 +143,20 @@ export default class Pipe {
     log.verbose(`${this.name} ${level} log => ${issue.title}`)
     log.silly(`\n${issue.body}`)
 
-    this.log[level].push(issue)
+    this.logs[level].push(issue)
 
-    if (th) throw this.Error(issue.title)
+    if (th) throw this.error(issue.title)
   }
 
   /**
-   * Error
+   * error
    * Returns a pipe error
    *
    * @param {String} msg - error message
    * @param {String} [code='PIPER'] - an error code
    * @returns {Error} - node error
    */
-  Error (msg, code = 'PIPER') {
+  error (msg, code = 'PIPER') {
     const e = new Error(msg)
     e.code = code
     e.pipe = this.name
@@ -173,16 +170,17 @@ export default class Pipe {
    *
    * @param {String} tag - the docker tag name
    * @param {String} cmd - Commands to run
+   * @param {String} [dir] - directory to mount (defaults to pipeline build dir)
    * @param {Object} [options] - Other options to pass to docker
    * @returns {Object} - exit information about the container
    * @returns {Number} exit - exit code docker container ended with
    * @returns {String} log - path of docker log file
    */
-  async docker (tag, cmd, options = {}) {
+  async docker (tag, cmd, dir = this.pipeline.build.dir, options = {}) {
     assert.equal(typeof tag, 'string', 'docker requires a valid tag to run')
     assert.equal(typeof cmd, 'string', 'docker requires a command to be ran')
 
-    const defaultMount = `${this.args[0]}:/tmp/flightcheck:rw`
+    const defaultMount = `${dir}:/tmp/flightcheck:rw`
 
     if (options['Binds'] == null) {
       options['Binds'] = [defaultMount]

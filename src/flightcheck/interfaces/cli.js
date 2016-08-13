@@ -63,7 +63,7 @@ const pipeline = new Pipeline({
   auth
 })
 
-pipeline.run()
+pipeline.start()
 .then(() => {
   log.info('Flightcheck complete!')
 })

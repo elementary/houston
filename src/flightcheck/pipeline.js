@@ -16,6 +16,8 @@ import * as pipes from './pipes'
 import config from '~/lib/config'
 import log from '~/lib/log'
 
+const fs = Promise.promisifyAll(require('fs'))
+
 /**
  * Pipeline
  * Wraps a bunch of pipes together
@@ -100,11 +102,21 @@ export default class Pipeline {
    */
   async setup () {
     const repoFolder = path.join(this.build.dir, 'repository')
+    const stat = await fs.statAsync(repoFolder)
 
-    // TODO: if there is a repo folder, check to make sure its correct branch or delete it and start again
-    await fsHelper.mkdirp(repoFolder)
-    const repo = await git.Clone(this.build.repo, repoFolder)
-    await repo.checkoutBranch(this.build.tag)
+    let repo = null
+    if (stat.isDirectory()) {
+      repo = await git.Repository.open(repoFolder)
+    } else {
+      await fsHelper.mkdirp(repoFolder)
+      repo = await git.Clone(this.build.repo, repoFolder)
+    }
+
+    const ref = await repo.getReference(this.build.tag)
+
+    await repo.checkoutRef(ref, {
+      checkoutStrategy: git.Checkout.STRATEGY.FORCE
+    })
   }
 
   /**
@@ -119,9 +131,7 @@ export default class Pipeline {
       return
     }
 
-    // TODO: This could probably be removed once the repo checking (@see setup) is finished
-    log.warn('Flightcheck is running in development mode. Only deleting workspace repo.')
-    await fsHelper.rmp(path.join(this.build.dir, 'repository'))
+    log.info('Flightcheck is running in development mode. Keeping workspace.')
   }
 
   /**
@@ -143,23 +153,20 @@ export default class Pipeline {
    * Runs a given pipe, used mostly be already running pipes
    *
    * @param {String} name - name of pipe to run
-   * @param {String} [p=this.build.dir] - the path to run the code in (defaults to default git dir)
    * @param {...*} [args] - any arguments. Literally anything...
    * @returns {Object} - pipes data object after completion
    */
-  async require (name, p = this.build.dir, ...args) {
+  async require (name, ...args) {
     assert(pipes[name], `${name} does not exist and therefor cannot be required`)
-
-    const completeArgs = [p, ...args]
 
     // check if we have already ran this pipe with given arguments to reduce overhead
     const initalizedPipe = this.pipes.find((pipe) => {
-      return (pipe.name === name && _.isEqual(pipe.args, completeArgs))
+      return (pipe.name === name && _.isEqual(pipe.args, args))
     })
 
     if (initalizedPipe != null) {
       // Loaded but not ran uhhh wtf?
-      if (initalizedPipe.promise == null) return initalizedPipe.run(completeArgs)
+      if (initalizedPipe.promise == null) return initalizedPipe.run(...args)
       if (!initalizedPipe.promise.isFufilled) await initalizedPipe.promise
 
       return initalizedPipe.data
@@ -168,6 +175,6 @@ export default class Pipeline {
     const pipe = new pipes[name](this)
     this.pipes.push(pipe)
 
-    return pipe.run(completeArgs)
+    return pipe.run(...args)
   }
 }
