@@ -24,8 +24,8 @@ export default class File {
    * Creates a file class
    *
    * @param {String} p - Path to the file
-   * @param {String} [type] - Type of parser to use for file
-   * @param {Object} [encoding] - File encoding to use for the file
+   * @param {String} [type=raw] - Type of parser to use for file
+   * @param {String} [encoding=utf-8] - File encoding to use for the file
    */
   constructor (p, type, encoding = 'utf-8') {
     assert(p, 'File requires a path')
@@ -55,7 +55,7 @@ export default class File {
    * read
    * Reads file from path and parses it if type is set
    *
-   * @param {String} [type] - file type to parse as
+   * @param {String} [type=this.type] - file type to parse as
    * @returns {Object} - javascript object reporesentation of file
    */
   async read (type = this.type) {
@@ -80,7 +80,7 @@ export default class File {
    * Writes javascript object to file
    *
    * @param {Object} data - data to write to file
-   * @param {String} type - file type to write as
+   * @param {String} [type=this.type] - file type to write as
    * @returns {Void}
    */
   async write (data, type = this.type) {
