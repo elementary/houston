@@ -6,4 +6,5 @@
  */
 
 export AppHub from './AppHub'
+export Build from './Build'
 export Director from './Director'

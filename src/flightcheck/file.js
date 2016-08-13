@@ -34,7 +34,7 @@ export default class File {
     this.type = type
     this.options = { encoding }
 
-    if (type != null) {
+    if (type != null && type !== 'raw') {
       assert(parses[type], `File type "${type}" does not exist`)
     }
   }
@@ -59,9 +59,9 @@ export default class File {
    * @returns {Object} - javascript object reporesentation of file
    */
   async read (type = this.type) {
-    const existance = await this.exists()
+    if (type !== 'raw') assert(data, 'File requires something to write')
 
-    if (!existance) return null
+    if (!await this.exists()) return null
 
     const raw = await fs.readFileAsync(this.path, this.options)
 
@@ -84,7 +84,7 @@ export default class File {
    * @returns {Void}
    */
   async write (data, type = this.type) {
-    assert(data, 'File requires something to write')
+    if (type !== 'raw') assert(data, 'File requires something to write')
 
     let output = data
 

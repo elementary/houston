@@ -13,13 +13,13 @@ import Pipe from '~/flightcheck/pipes/pipe'
  *
  * @extends Pipe
  */
-export default class Directory extends Pipe {
+export default class Director extends Pipe {
 
   /**
    * code
    * Requires pipes based on apphub settings
    */
   async code () {
-    const apphub = await this.require('AppHub')
+    await this.require('Build')
   }
 }

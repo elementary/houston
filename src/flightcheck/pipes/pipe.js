@@ -81,10 +81,13 @@ export default class Pipe {
 
     await this.promise
     .catch((err) => {
-      if (err.pipe == null) {
-        log.warn(`${this.name} pipe throwed an error`)
+      if (err.pipe != null && err.pipe === this.name) {
+        log.warn(`${err.pipe} pipe throwed an error`)
+      } else if (err.pipe != null) {
+        log.debug(`${err.pipe} pipe returned an error. ${this.name} is rethrowing`)
       } else {
-        log.debug(`${this.name} pipe returned an error`)
+        log.error(`${this.name} has an uncaught error`)
+        err.pipe = this.name
       }
 
       throw err

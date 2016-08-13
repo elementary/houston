@@ -66,6 +66,7 @@ const pipeline = new Pipeline({
 pipeline.start()
 .then(() => {
   log.info('Flightcheck complete!')
+  log.debug(`Flightcheck ran ${pipeline.pipes.length} pipes`)
 })
 .catch((err) => {
   log.error(err)
