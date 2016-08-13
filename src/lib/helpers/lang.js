@@ -36,3 +36,17 @@ export function s (string, len = 0) {
 
   return after.join(' ')
 }
+
+/**
+ * chop
+ * returns a small amount of text from the end of a larger pile of text
+ *
+ * @param {String} txt - The larger pile of text
+ * @param {Number} lines - Number of lines to return
+ * @returns {String} - The small pile of text
+ */
+export function chop (txt, lines = 50) {
+  const arr = txt.split('\n')
+  const small = arr.slice(-lines)
+  return small.join('\n')
+}

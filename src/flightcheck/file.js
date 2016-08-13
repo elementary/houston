@@ -27,14 +27,14 @@ export default class File {
    * @param {String} [type=raw] - Type of parser to use for file
    * @param {String} [encoding=utf-8] - File encoding to use for the file
    */
-  constructor (p, type, encoding = 'utf-8') {
+  constructor (p, type = 'raw', encoding = 'utf-8') {
     assert(p, 'File requires a path')
 
     this.path = path.resolve(p)
     this.type = type
     this.options = { encoding }
 
-    if (type != null && type !== 'raw') {
+    if (type !== 'raw') {
       assert(parses[type], `File type "${type}" does not exist`)
     }
   }
@@ -59,16 +59,14 @@ export default class File {
    * @returns {Object} - javascript object reporesentation of file
    */
   async read (type = this.type) {
-    if (type !== 'raw') assert(data, 'File requires something to write')
-
     if (!await this.exists()) return null
 
     const raw = await fs.readFileAsync(this.path, this.options)
 
-    // If it's a file with only whitespace charactors (no real data)
-    if (!/\S/.test(raw)) return {}
+    if (type !== 'raw') {
+      // If it's a file with only whitespace charactors (no real data)
+      if (!/\S/.test(raw)) return {}
 
-    if (type) {
       return parses[type].read(raw)
     } else {
       return raw
@@ -88,7 +86,7 @@ export default class File {
 
     let output = data
 
-    if (type) {
+    if (type !== 'raw') {
       output = await parses[type].write(data)
     }
 

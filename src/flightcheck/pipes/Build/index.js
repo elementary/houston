@@ -51,8 +51,9 @@ export default class Build extends Pipe {
 
     await Promise.each(this.data.types, (type) => {
       if (type === 'cmake') {
-        return // this.require('Liftoff')
+        return this.require('Liftoff')
       }
     })
+    .each((file) => this.data.files.push(file))
   }
 }
