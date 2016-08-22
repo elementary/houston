@@ -26,7 +26,8 @@ export default class Debian extends Pipe {
     const debianFolder = path.join(p, 'debian')
 
     return Promise.all([
-      this.require('DebianChangelog', debianFolder, d)
+      this.require('DebianChangelog', debianFolder, d),
+      this.require('DebianControl', debianFolder)
     ])
   }
 }
