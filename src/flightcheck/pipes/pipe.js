@@ -51,7 +51,7 @@ export default class Pipe {
     this.logs = {
       debug: [],   // debug - information gathered while testing (file dumps etc)
       info: [],    // info  - information about the test, but not worthy of being talked about (extra data etc)
-      warning: [], // warning - information that is incorrect, but automaticlly fixed (incorrect values etc)
+      warn: [],    // warn - information that is incorrect, but automaticlly fixed (incorrect values etc)
       error: []    // error - unrecoverable errors that end the build process (build error etc)
     }
   }

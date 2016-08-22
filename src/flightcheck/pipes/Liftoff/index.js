@@ -49,6 +49,8 @@ export default class Liftoff extends Pipe {
       return this.log('error', 'Liftoff/support.md')
     }
 
+    await this.require('Debian', p, d)
+
     const mountDir = path.join(this.pipeline.build.dir, p)
     const cacheDir = path.join(config.flightcheck.directory, 'liftoff', 'cache')
     await fsHelper.mkdirp(cacheDir)
