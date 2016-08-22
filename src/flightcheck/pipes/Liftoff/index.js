@@ -28,6 +28,7 @@ export default class Liftoff extends Pipe {
   constructor (pipeline) {
     super(pipeline)
 
+    // these are file paths relative to the build directory
     this.data = {
       file: null,
       log: null
@@ -51,11 +52,11 @@ export default class Liftoff extends Pipe {
 
     await this.require('Debian', p, d)
 
-    const mountDir = path.join(this.pipeline.build.dir, p)
+    const buildPath = path.join(this.pipeline.build.dir, p)
     const cacheDir = path.join(config.flightcheck.directory, 'liftoff', 'cache')
     await fsHelper.mkdirp(cacheDir)
 
-    const returned = await this.docker('liftoff', `-a ${a} -d ${d} -o /tmp/flightcheck`, mountDir, {
+    const returned = await this.docker('liftoff', `liftoff -a ${a} -d ${d} -o /tmp/flightcheck`, buildPath, {
       Binds: [`${cacheDir}:/var/cache/liftoff:rw`],
       Privileged: true // required because of chroot in liftoff
     })
@@ -74,19 +75,21 @@ export default class Liftoff extends Pipe {
       }
     }
 
-    const debs = await fs.readdirAsync(mountDir)
+    const debs = await fs.readdirAsync(buildPath)
     .filter(async (p) => {
-      const stat = await fs.statAsync(path.join(mountDir, p))
+      const stat = await fs.statAsync(path.join(buildPath, p))
 
       if (!stat.isFile()) return false
       return (p.indexOf('.deb') !== -1)
     })
 
-    this.data.file = debs.find((deb) => {
+    const deb = debs.find((deb) => {
       if (deb.indexOf(this.pipeline.build.name) === -1) return false
       if (deb.indexOf(a) === -1) return false
       if (deb.indexOf(this.pipeline.build.version) === -1) return false
       return true
     })
+
+    this.data.file = path.join(p, deb)
   }
 }

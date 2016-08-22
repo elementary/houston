@@ -49,11 +49,10 @@ export default class Build extends Pipe {
       return this.log('warn', 'Build/support.md')
     }
 
-    await Promise.each(this.data.types, (type) => {
+    this.data.files = await Promise.map(this.data.types, (type) => {
       if (type === 'cmake') {
         return this.require('Liftoff')
       }
     })
-    .each((file) => this.data.files.push(file))
   }
 }
