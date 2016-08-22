@@ -102,14 +102,25 @@ export default class Pipeline {
    */
   async setup () {
     const repoFolder = path.join(this.build.dir, 'repository')
-    const stat = await fs.statAsync(repoFolder)
 
     let repo = null
-    if (stat.isDirectory()) {
-      repo = await git.Repository.open(repoFolder)
-    } else {
-      await fsHelper.mkdirp(repoFolder)
-      repo = await git.Clone(this.build.repo, repoFolder)
+    try {
+      const stat = await fs.statAsync(repoFolder)
+
+      if (stat.isDirectory()) {
+        repo = await git.Repository.open(repoFolder)
+      } else {
+        const e = new Error()
+        e.code = 'ENOENT'
+        throw e
+      }
+    } catch (e) {
+      if (e.code === 'ENOENT') {
+        await fsHelper.mkdirp(repoFolder)
+        repo = await git.Clone(this.build.repo, repoFolder)
+      } else {
+        throw e
+      }
     }
 
     const ref = await repo.getReference(this.build.tag)
