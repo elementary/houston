@@ -15,7 +15,7 @@ log.debug('Loaded cli interface')
 const help = function () {
   // eslint-disable-next-line no-console
   console.error(`
-    Usage: flightcheck <repo> <tag> [name]
+    Usage: flightcheck <repo> <tag> [auth]
 
     Runs flightcheck for a given repository
 

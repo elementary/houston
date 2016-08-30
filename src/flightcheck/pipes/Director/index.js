@@ -20,6 +20,8 @@ export default class Director extends Pipe {
    * Requires pipes based on apphub settings
    */
   async code () {
-    await this.require('Build')
+    const files = await this.require('Build')
+
+    await this.require('GitHubRelease', files)
   }
 }
