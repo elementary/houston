@@ -122,6 +122,43 @@ export function getProjects (token) {
 }
 
 /**
+ * getProject
+ * Returns mapped object of GitHub project
+ *
+ * @param {String} owner - GitHub owner
+ * @param {String} name - GitHub repo name
+ * @param {String} token - GitHub authentication token
+ * @returns {Object} - Mapped projects
+ */
+export function getProject (owner, name, token) {
+  if (!config.github) {
+    throw new Mistake(503, 'Github is currently disabled')
+  }
+
+  return request
+  .get(`https://api.github.com/repos/${owner}/${name}`)
+  .auth(token)
+  .then((res) => res.body)
+  .then((project) => {
+    return {
+      name: `com.github.${codize(project.owner.login)}.${codize(project.name)}`,
+      repo: project.git_url,
+      tag: project.default_branch,
+      github: {
+        id: project.id,
+        owner: project.owner.login,
+        name: project.name,
+        private: project.private,
+        token
+      }
+    }
+  })
+  .catch((error) => {
+    throw new Mistake(500, 'Houston had a problem getting projects on GitHub', error)
+  })
+}
+
+/**
  * getPermission
  * Checks collaborator status of user on repository
  *
