@@ -84,8 +84,6 @@ export default class Liftoff extends Pipe {
       return (p.indexOf('.deb') !== -1)
     })
 
-    console.log(debs)
-
     const deb = debs.find((deb) => {
       if (deb.indexOf(this.pipeline.build.name) === -1) return false
       if (deb.indexOf(a) === -1) return false

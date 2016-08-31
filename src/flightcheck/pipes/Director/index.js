@@ -7,6 +7,8 @@
 
 import Pipe from '~/flightcheck/pipes/pipe'
 
+import log from '~/lib/log'
+
 /*
  * Directory
  * Requires pipes based on apphub settings
@@ -20,8 +22,13 @@ export default class Director extends Pipe {
    * Requires pipes based on apphub settings
    */
   async code () {
-    const files = await this.require('Build')
+    const build = await this.require('Build')
 
-    await this.require('GitHubRelease', files)
+    try {
+      if (this.pipeline.build.source === 'github') await this.require('GitHubRelease', build.files.map((f) => f.file))
+    } catch (err) {
+      log.error('Error while trying to publish content to sources')
+      log.error(err)
+    }
   }
 }
