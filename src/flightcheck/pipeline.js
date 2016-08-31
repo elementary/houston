@@ -9,6 +9,7 @@ import _ from 'lodash'
 import assert from 'assert'
 import git from 'nodegit'
 import path from 'path'
+import Promise from 'bluebird'
 import semver from 'semver'
 
 import * as fsHelper from '~/lib/helpers/fs'

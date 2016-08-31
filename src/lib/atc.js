@@ -10,6 +10,7 @@
 import _ from 'lodash'
 import crypto from 'crypto'
 import events from 'events'
+import Promise from 'bluebird'
 
 import log from './log'
 

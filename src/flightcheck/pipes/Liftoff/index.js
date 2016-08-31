@@ -6,6 +6,7 @@
  */
 
 import path from 'path'
+import Promise from 'bluebird'
 
 import * as fsHelper from '~/lib/helpers/fs'
 import config from '~/lib/config'
@@ -83,6 +84,8 @@ export default class Liftoff extends Pipe {
       return (p.indexOf('.deb') !== -1)
     })
 
+    console.log(debs)
+
     const deb = debs.find((deb) => {
       if (deb.indexOf(this.pipeline.build.name) === -1) return false
       if (deb.indexOf(a) === -1) return false
@@ -90,6 +93,8 @@ export default class Liftoff extends Pipe {
       return true
     })
 
-    this.data.file = path.join(p, deb)
+    if (deb != null) {
+      this.data.file = path.join(p, deb)
+    }
   }
 }

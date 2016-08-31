@@ -204,7 +204,7 @@ schema.methods.doFlightcheck = function () {
     tag: this.tag,
     name: this.name,
     version: this.version,
-    changelog: this.changelog
+    changelog: this.changelog.reverse()
   })
   .catch((err) => {
     const mistake = new Mistake(500, 'Automated flightchecking failed', err)

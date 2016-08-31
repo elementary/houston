@@ -8,6 +8,7 @@
 
 import _ from 'lodash'
 import path from 'path'
+import Promise from 'bluebird'
 
 import config from '~/lib/config'
 

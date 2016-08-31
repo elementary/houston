@@ -44,7 +44,7 @@ connection.on('cycle:queue', async (data) => {
 
   let results = null
   try {
-    results = await pipeline.run()
+    results = await pipeline.start()
   } catch (err) {
     log.error('Flightcheck received an error while running Pipeline')
     log.error(err)
