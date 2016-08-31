@@ -22,12 +22,21 @@ export default class Director extends Pipe {
    * Requires pipes based on apphub settings
    */
   async code () {
-    const build = await this.require('Build')
+    const apphub = await this.require('AppHub')
 
     try {
-      if (this.pipeline.build.source === 'github') await this.require('GitHubRelease', build.files.map((f) => f.file))
+      const build = await this.require('Build')
+
+      if (apphub.endpoints.github && this.pipeline.build.source === 'github') await this.require('GitHubRelease', build.files.map((f) => f.file))
     } catch (err) {
       log.error('Error while trying to publish content to sources')
+      log.error(err)
+    }
+
+    try {
+      if (apphub.log.enabled && this.pipeline.build.source === 'github') await this.require('GitHubIssue')
+    } catch (err) {
+      log.error('Error while trying to publish results to sources')
       log.error(err)
     }
   }

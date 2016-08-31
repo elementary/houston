@@ -35,6 +35,8 @@ export default class GitHubRelease extends Pipe {
   /**
    * code
    * Post files to GitHub release
+   *
+   * @param {Object[]} files - a list of files to publish to GitHub
    */
   async code (files = []) {
     if (this.pipeline.build.source !== 'github') {

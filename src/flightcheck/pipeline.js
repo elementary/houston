@@ -189,4 +189,36 @@ export default class Pipeline {
 
     return pipe.run(...args)
   }
+
+  /**
+   * logs
+   * Consolidates all the logs from each pipe
+   *
+   * @param {String} [level] - start filtering logs at X level
+   * @param {String} [pipe] - name of pipe to grab logs from
+   * @return {Object[]} - an array of logs
+   */
+  async logs (level = 'debug', pipe) {
+    let pipes = this.pipes
+    if (pipe != null) pipes = pipes.filter((p) => (p.name === pipe))
+
+    const logs = []
+    const sort = ['debug', 'info', 'warn', 'error']
+
+    pipes.forEach((pipe) => {
+      const types = Object.keys(pipe.logs)
+      types.forEach((type) => {
+        if (sort.indexOf(type) < sort.indexOf(level)) return
+
+        pipe.logs[type].forEach((log) => {
+          logs.push(Object.assign({}, log, {
+            pipe: pipe.name,
+            level: type
+          }))
+        })
+      })
+    })
+
+    return logs
+  }
 }

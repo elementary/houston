@@ -37,7 +37,7 @@ export default class AppHub extends Pipe {
       package: {
         price: 0
       },
-      endpoings: {
+      endpoints: {
         github: true,
         elementary: true
       }
