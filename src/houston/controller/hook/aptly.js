@@ -54,7 +54,7 @@ route.get('/download', (ctx) => {
   const filename = path.pop().split('_')
 
   return Project.update({
-    'package.name': filename[0],
+    'name': filename[0],
     'releases.version': filename[1]
   }, {
     $inc: {

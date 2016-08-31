@@ -18,6 +18,21 @@ import Mistake from '~/lib/mistake'
 import request from '~/lib/request'
 
 /**
+ * codize
+ * Replaces string with a houston valid string (all lowercase, all dashs, etc)
+ * Lower case, replace any whitespace or _ with -, replace ANYTHING else with nothing
+ *
+ * @param {String} str - String to codize
+ * returns {String} - Replaces clean string to use in Houston
+ */
+function codize (str) {
+  return str
+    .toLowerCase()
+    .replace(/(\s|_)/gmi, '-')
+    .replace(/(?![a-z]|\-)./, '')
+}
+
+/**
  * castRelease
  * Casts GitHub release to database object
  *
@@ -87,21 +102,48 @@ export function getProjects (token) {
   .get('https://api.github.com/user/repos?visibility=public')
   .auth(token)
   .then((res) => res.body)
-  .filter((githubProject) => {
-    return request
-    .get(`https://api.github.com/repos/${githubProject.full_name}/contents/.apphub`)
-    .auth(token)
-    .then(() => true)
-    .catch(() => false)
-  })
   .map((project) => {
     return {
-      name: project.name,
+      name: `com.github.${codize(project.owner.login)}.${codize(project.name)}`,
       repo: project.git_url,
       tag: project.default_branch,
-      package: {
-        name: project.name
-      },
+      github: {
+        id: project.id,
+        owner: project.owner.login,
+        name: project.name,
+        private: project.private,
+        token
+      }
+    }
+  })
+  .catch((error) => {
+    throw new Mistake(500, 'Houston had a problem getting projects on GitHub', error)
+  })
+}
+
+/**
+ * getProject
+ * Returns mapped object of GitHub project
+ *
+ * @param {String} owner - GitHub owner
+ * @param {String} name - GitHub repo name
+ * @param {String} token - GitHub authentication token
+ * @returns {Object} - Mapped projects
+ */
+export function getProject (owner, name, token) {
+  if (!config.github) {
+    throw new Mistake(503, 'Github is currently disabled')
+  }
+
+  return request
+  .get(`https://api.github.com/repos/${owner}/${name}`)
+  .auth(token)
+  .then((res) => res.body)
+  .then((project) => {
+    return {
+      name: `com.github.${codize(project.owner.login)}.${codize(project.name)}`,
+      repo: project.git_url,
+      tag: project.default_branch,
       github: {
         id: project.id,
         owner: project.owner.login,
@@ -199,6 +241,10 @@ export function sendIssue (owner, name, token, issue, label) {
     })
   })
   .catch((error) => {
+    if (error.status != null && error.status === 401) {
+      throw new Mistake(500, 'config.github.access is invalid', error)
+    }
+
     throw new Mistake(500, 'Houston had a problem creating an issue on GitHub', error)
   })
 }

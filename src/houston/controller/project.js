@@ -19,35 +19,33 @@ const route = new Router({
 })
 
 /**
- * GET /project/:project/*
- * Grabs any route here, searches in the db, and returns db object to next route
- *
- * @param {String} project - project name
- */
-route.get('/*', policy.isRole('beta'), async (ctx, next) => {
-  ctx.project = await Project.findOne({
-    name: ctx.params.project
-  }).exec()
-
-  if (ctx.project == null) {
-    throw new ctx.Mistake(404, 'Project not found')
-  }
-
-  await next()
-
-  return ctx.redirect('/dashboard')
-})
-
-/**
  * GET /project/:project/init
  * Changes project status to init
  *
  * @param {String} project - project name
  */
-route.get('/init', async (ctx, next) => {
-  const status = await ctx.project.getStatus()
+route.get('/init', policy.isRole('beta'), async (ctx, next) => {
+  if (!/com\.github\..+\..+/.test(ctx.params.project)) {
+    throw new ctx.Mistake(404, 'Only able to setup GitHub projects')
+  }
 
-  if (status !== 'NEW') throw new ctx.Mistake(400, 'The project is already initalized', true)
+  const dp = await Project.findOne({
+    name: ctx.params.project
+  }).exec()
+
+  if (dp !== null) {
+    throw new ctx.Mistake(500, 'Project is already initalized')
+  }
+
+  const [owner, name] = ctx.params.project.replace('com.github.', '').split('.')
+
+  if (!await github.getPermission(owner, name, ctx.user.username, ctx.user.github.access)) {
+    throw new ctx.Mistake(500, 'User does not have permissions to setup project')
+  }
+
+  const tmpP = await github.getProject(owner, name, ctx.user.github.access)
+  tmpP['owner'] = ctx.user._id
+  ctx.project = await Project.create(tmpP)
 
   const gh = ctx.project.github
 
@@ -63,7 +61,7 @@ route.get('/init', async (ctx, next) => {
     })
   }
 
-  return github.getReleases(gh.owner, gh.name, gh.token)
+  await github.getReleases(gh.owner, gh.name, gh.token)
   .then((releases) => releases.sort((a, b) => semver(a.version, b.version)))
   .then((releases) => {
     return Project.findByIdAndUpdate(ctx.project._id, {
@@ -80,6 +78,8 @@ route.get('/init', async (ctx, next) => {
   .catch((err) => {
     throw new ctx.Mistake(500, `Unable to setup ${ctx.project.name} with Houston`, err, true)
   })
+
+  return ctx.redirect('/dashboard')
 })
 
 /**
@@ -89,14 +89,24 @@ route.get('/init', async (ctx, next) => {
  * @param {String} project - project name
  */
 route.get('/cycle', async (ctx, next) => {
+  ctx.project = await Project.findOne({
+    name: ctx.params.project
+  }).exec()
+
+  if (ctx.project == null) {
+    throw new ctx.Mistake(404, 'Project not found')
+  }
+
   if (ctx.project.releases.length < 1) {
     throw new ctx.Mistake(400, 'The project has no releases to cycle')
   }
 
-  return ctx.project.createCycle('RELEASE')
+  await ctx.project.createCycle('RELEASE')
   .catch((err) => {
     throw new ctx.Mistake(500, 'An error occured while creating a new release cycle', err, true)
   })
+
+  return ctx.redirect('/dashboard')
 })
 
 /**
@@ -107,6 +117,14 @@ route.get('/cycle', async (ctx, next) => {
  * @param {String} fate - yes or no approval for latest release review
  */
 route.get('/review/:fate', policy.isRole('review'), async (ctx, next) => {
+  ctx.project = await Project.findOne({
+    name: ctx.params.project
+  }).exec()
+
+  if (ctx.project == null) {
+    throw new ctx.Mistake(404, 'Project not found')
+  }
+
   if (ctx.project.releases.length < 1) {
     throw new ctx.Mistake(400, 'The project has no releases', true)
   }
@@ -125,11 +143,13 @@ route.get('/review/:fate', policy.isRole('review'), async (ctx, next) => {
   const cycle = await release.cycle.latest
 
   if (ctx.params.fate === 'yes') {
-    return cycle.setStatus('FINISH')
+    await cycle.setStatus('FINISH')
     .then(() => aptly.stable(cycle.packages, ctx.project.dists))
   } else {
-    return cycle.setStatus('FAIL')
+    await cycle.setStatus('FAIL')
   }
+
+  return ctx.redirect('/dashboard')
 })
 
 export default route

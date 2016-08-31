@@ -131,6 +131,11 @@ route.post('*', async (ctx, next) => {
       ctx.status = 200
       ctx.body = 'Release added'
     })
+    .catch((error) => {
+      log.warn(error)
+      ctx.status = 400
+      ctx.body = 'Unable to update database'
+    })
   }
 
   log.debug('GitHub hook: Unknown action')
