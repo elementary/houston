@@ -105,7 +105,7 @@ export default class DebianChangelog extends Pipe {
     }
 
     this.data.changelog = changelog
-    .sort((a, b) => semver.compare(a.version, b.version))
+    .sort((a, b) => semver.compare(b.version, a.version))
     .map((change) => render('flightcheck/pipes/Debian/Changelog/changelog.nun', change, false).body)
     .join('\n\n')
 

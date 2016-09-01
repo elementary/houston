@@ -22,10 +22,10 @@ import request from '~/lib/request'
 const aptlyerr = (str, err) => {
   log.error(str)
 
-  if (error.response != null && error.response.body[0] != null && error.response.body[0].error != null) {
-    log.error(error.response.body[0].error)
+  if (err.response != null && err.response.body[0] != null && err.response.body[0].error != null) {
+    log.error(err.response.body[0].error)
   } else {
-    log.error(error)
+    log.error(err)
   }
 }
 

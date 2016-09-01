@@ -81,7 +81,7 @@ export default class Liftoff extends Pipe {
       const stat = await fs.statAsync(path.join(buildPath, p))
 
       if (!stat.isFile()) return false
-      return (p.indexOf('.deb') !== -1)
+      return (path.extname(p) === '.deb')
     })
 
     const deb = debs.find((deb) => {
