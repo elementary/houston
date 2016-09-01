@@ -30,6 +30,11 @@ connection.on('cycle:queue', async (data) => {
 
   let pipeline = null
   try {
+    data.changelog = data.changelog.map((c) => {
+      c['changes'] = c['changelog']
+      return c
+    })
+
     pipeline = new Pipeline(data)
   } catch (err) {
     log.error('Flightcheck received an error while trying to create Pipeline')
@@ -42,9 +47,8 @@ connection.on('cycle:queue', async (data) => {
   log.debug(`Starting flightcheck on ${data.name}`)
   connection.send('houston', 'cycle:start', data.id, true)
 
-  let results = null
   try {
-    results = await pipeline.start()
+    await pipeline.start()
   } catch (err) {
     log.error('Flightcheck received an error while running Pipeline')
     log.error(err)
@@ -53,5 +57,13 @@ connection.on('cycle:queue', async (data) => {
     return
   }
 
-  connection.send('houston', 'cycle:finish', data.id, results)
+  const apphub = pipeline.pipes.find((p) => (p.name === 'AppHub'))
+  const aptly = pipeline.pipes.find((p) => (p.name === 'ElementaryAptly'))
+  const logs = await pipeline.logs()
+
+  connection.send('houston', 'cycle:finish', data.id, {
+    apphub: (apphub != null) ? apphub.data : null,
+    aptly: (aptly != null) ? aptly.data : null,
+    logs
+  })
 })

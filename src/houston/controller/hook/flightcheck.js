@@ -49,23 +49,37 @@ atc.on('cycle:finish', async (id, data) => {
   }
 
   log.verbose('Received flightcheck data for finish cycle')
-  log.debug(`Found ${log.lang.s('error', data.errors)} in ${cycle.name}`)
-  data.issues.forEach((issue) => {
-    log.silly(issue)
+  log.debug(`Found ${log.lang.s('log', data.logs)} in ${cycle.name}`)
+  data.logs.forEach((l) => {
+    log.verbose(`${l.pipe} ${l.level} log => ${l.title}`)
+    log.silly(`\n${l.body}`)
   })
 
-  if (data.errors > 0) {
-    cycle.setStatus('FAIL')
-  } else {
-    cycle.setStatus('DEFER')
+  const errors = data.logs.filter((l) => (l.level === 'error'))
+
+  if (data.apphub !== null) {
+    log.debug(`Updating ${cycle.name} project apphub object`)
+    await Project.findByIdAndUpdate(cycle.project, {
+      'apphub': data.apphub,
+      'github.label': data.apphub.log.label
+    })
   }
 
-  const project = await Project.findById(cycle.project)
-  Promise.each(data.issues, (issue) => project.postIssue(issue))
+  if (errors.length > 0) {
+    log.debug(`Failing ${cycle.name} due to error logs`)
+    return cycle.setStatus('FAIL')
+  }
 
-  // TODO: we should whitelist what can be updated in the database
-  if (data.information != null && Object.getOwnPropertyNames(data.information).length > 0) {
-    project.update(data.information).exec()
+  if (data.aptly == null || data.aptly.publishedKeys.length < 1) {
+    log.debug(`${cycle.name} has no aptly published keys. Setting to finished`)
+    return cycle.setStatus('FINISH')
+  } else {
+    log.debug(`Updating ${cycle.name} aptly file keys and setting to review`)
+    await cycle.update({
+      'packages': data.aptly.publishedKeys
+    })
+
+    return cycle.setStatus('REVIEW')
   }
 })
 

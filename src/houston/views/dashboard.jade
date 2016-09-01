@@ -12,8 +12,8 @@ block body
     each project in projects
       div.repo-wrap: div.repo
         div
-          if project.package.icon != null
-            img(src="data:image/svg+xml;base64," + project.package.icon).app-icon
+          if project.apphub.icon != null
+            img(src="data:image/svg+xml;base64," + project.apphub.icon).app-icon
           else
             img(src="/images/application-default-icon.png").app-icon
           div

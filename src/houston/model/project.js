@@ -18,11 +18,8 @@ import releaseSchema from './release'
  * @param {String} type - future use to determine types of tests to run
  * @param {String} repo - git repo code is hosted in
  * @param {String} tag - git branch to consider master (defaults to master)
- * @param {Object} package - {
- *   {String} name - name of generated package and package in repository
- *   {String} icon - svg icon for the package
- *   {Number} price - price for package in appcenter
- *  }
+ * @param {Object} apphub - the object representation of the apphub file
+ * @param {Number} downloads - the number of downloads the current project has
  * @param {Array} dists - list of disributions to build for
  * @param {Array} archs - list of architectures to build for
  * @param {Object} github - {
@@ -68,9 +65,9 @@ export const schema = new db.Schema({
     default: 'master'
   },
 
-  package: {
-    icon: String,
-    price: Number
+  apphub: {
+    type: Object,
+    default: {}
   },
   downloads: Number,
 
@@ -300,6 +297,7 @@ schema.methods.createCycle = async function (type) {
 
   return db.model('cycle').create({
     project: this._id,
+    auth: this.github.token,
     repo: this.repo,
     tag: this.tag,
     name: this.name,

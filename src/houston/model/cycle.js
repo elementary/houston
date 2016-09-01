@@ -9,12 +9,11 @@
 import semver from 'semver'
 
 import atc from '~/houston/service/atc'
-import buildSchema from './build'
 import db from '~/lib/database'
 import Mistake from '~/lib/mistake'
 
 /**
- * Stores cycle information. 1 cycle = 1 project version being built = many builds
+ * Stores cycle information. 1 cycle = 1 project version being built
  *
  * @param {String} repo - git repo of cycle (git@github.com:elementary/vocal.git)
  * @param {String} tag - git tag to build (master)
@@ -25,12 +24,15 @@ import Mistake from '~/lib/mistake'
  * @param {Array} packages - array of aptly package keys
  * @param {String} _status - current status of cycle without influence of builds
  * @param {Object} mistake - mistake class error if any occured
- * @param {Array} builds - all builds under this cycle
  */
 const schema = new db.Schema({
   project: {
     type: db.Schema.Types.ObjectId,
     ref: 'project',
+    required: true
+  },
+  auth: {
+    type: String,
     required: true
   },
 
@@ -80,11 +82,9 @@ const schema = new db.Schema({
   _status: {
     type: String,
     default: 'QUEUE',
-    enum: ['QUEUE', 'PRE', 'DEFER', 'REVIEW', 'FINISH', 'FAIL', 'ERROR']
+    enum: ['QUEUE', 'PRE', 'REVIEW', 'FINISH', 'FAIL', 'ERROR']
   },
-  mistake: Object,
-
-  builds: [buildSchema]
+  mistake: Object
 })
 
 /**
@@ -96,11 +96,9 @@ const schema = new db.Schema({
 schema.methods.toNormal = async function () {
   const ret = this.toObject()
   const status = await this.getStatus()
-  const builds = await Promise.map(this.builds, (build) => build.toObject())
 
   ret['id'] = ret['_id']
   ret['status'] = status
-  ret['builds'] = builds
 
   delete ret['_id']
   delete ret['__v']
@@ -140,21 +138,7 @@ schema.set('toJSON', {
  * @returns {String} status of cycle
  */
 schema.methods.getStatus = async function () {
-  if (this._status !== 'DEFER') {
-    return Promise.resolve(this._status)
-  }
-
-  const options = buildSchema.paths._status.enumValues
-  return Promise.map(this.builds, (build) => build.getStatus())
-  .then((stati) => {
-    return stati.sort((one, two) => {
-      if (one === 'FINISH') return 1
-      if (two === 'FINISH') return -1
-
-      return (options.indexOf(two) - options.indexOf(one))
-    })
-  })
-  .then((sorted) => sorted[0])
+  return this._status
 }
 
 /**
@@ -184,11 +168,6 @@ schema.methods.setStatus = function (status) {
   .then((data) => {
     if (data.nModified === 1) this._status = status
 
-    if (status === 'DEFER') {
-      return this.doStrongback()
-      .then(() => data)
-    }
-
     return data
   })
 }
@@ -200,6 +179,7 @@ schema.methods.setStatus = function (status) {
 schema.methods.doFlightcheck = function () {
   return atc.send('flightcheck', 'cycle:queue', {
     id: this._id,
+    auth: this.auth,
     repo: this.repo,
     tag: this.tag,
     name: this.name,
@@ -216,16 +196,6 @@ schema.methods.doFlightcheck = function () {
     .then(() => {
       throw mistake
     })
-  })
-}
-
-/**
- * doStrongback
- * Sends all build information to strongback
- */
-schema.methods.doStrongback = function () {
-  return Promise.each(this.builds, (build) => {
-    return build.doStrongback()
   })
 }
 

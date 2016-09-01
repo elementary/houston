@@ -207,22 +207,15 @@ schema.methods.setStatus = async function (status) {
  * @returns {Object} - database object for new cycle
  */
 schema.methods.createCycle = async function (type) {
-  const builds = []
-  this.project.dists.forEach((dist) => {
-    this.project.archs.forEach((arch) => {
-      builds.push({dist, arch})
-    })
-  })
-
   return db.model('cycle').create({
     project: this.project._id,
+    auth: this.project.github.token,
     repo: this.project.repo,
     tag: this.github.tag,
     name: this.project.name,
     version: this.version,
     type,
-    changelog: await this.createChangelog(),
-    builds
+    changelog: await this.createChangelog()
   })
   .then((cycle) => {
     const updates = {

@@ -46,6 +46,5 @@ route.all('*', (ctx) => {
 
 // Use event hook listeners as well
 require('./flightcheck')
-require('./strongback')
 
 export default route
