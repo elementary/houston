@@ -5,9 +5,10 @@
  * @exports {Pipe} - Requires pipes based on apphub settings
  */
 
-import Pipe from '~/flightcheck/pipes/pipe'
+import path from 'path'
 
 import log from '~/lib/log'
+import Pipe from '~/flightcheck/pipes/pipe'
 
 /*
  * Directory
@@ -26,8 +27,11 @@ export default class Director extends Pipe {
 
     try {
       const build = await this.require('Build')
+      const files = build.files.map((f) => f.file)
 
-      if (apphub.endpoints.github && this.pipeline.build.source === 'github') await this.require('GitHubRelease', build.files.map((f) => f.file))
+      if (apphub.endpoints.github && this.pipeline.build.source === 'github') await this.require('GitHubRelease', files)
+
+      if (apphub.endpoints.elementary) await this.require('ElementaryAptly', files.filter((f) => (path.extname(f) === '.deb')))
     } catch (err) {
       log.error('Error while trying to publish content to sources')
       log.error(err)
