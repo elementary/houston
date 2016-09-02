@@ -45,13 +45,13 @@ export default class Liftoff extends Pipe {
    * @param {String} d - distribution to build
    */
   async code (p = 'repository', a = 'amd64', d = 'xenial') {
-    const cmakeFile = await this.file(path.join(p, 'CMakeLists.txt'))
+    await this.require('Debian', p, d)
 
-    if (!await cmakeFile.exists()) {
+    const debianFile = await this.file(path.join(p, 'debian', 'control'))
+
+    if (!await debianFile.exists()) {
       return this.log('error', 'Liftoff/support.md')
     }
-
-    await this.require('Debian', p, d)
 
     const buildPath = path.join(this.pipeline.build.dir, p)
     const cacheDir = path.join(config.flightcheck.directory, 'liftoff', 'cache')

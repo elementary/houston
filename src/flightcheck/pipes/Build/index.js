@@ -39,10 +39,10 @@ export default class Build extends Pipe {
    * @param {String} p - folder holding the apphub file
    */
   async code (p = 'repository') {
-    const cmakeFile = await this.file(path.join(p, 'CMakeLists.txt'))
+    const debianFile = await this.file(path.join(p, 'debian', 'control'))
 
-    if (await cmakeFile.exists()) {
-      this.data.types.push('cmake')
+    if (await debianFile.exists()) {
+      this.data.types.push('debian')
     }
 
     if (this.data.types.length === 0) {
@@ -50,7 +50,7 @@ export default class Build extends Pipe {
     }
 
     this.data.files = await Promise.map(this.data.types, (type) => {
-      if (type === 'cmake') {
+      if (type === 'debian') {
         return this.require('Liftoff')
       }
     })
