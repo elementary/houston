@@ -120,7 +120,7 @@ export default class ElementaryAptly extends Pipe {
       await request
       .post(`${config.aptly.url}/repos/${config.aptly.review}/file/${this.pipeline.build.name}`)
 
-      this.data.keys = await request
+      this.data.publishedKeys = await request
       .get(`${config.aptly.url}/repos/${config.aptly.review}/packages`)
       .query({
         q: `${this.pipeline.build.name} (= ${this.pipeline.build.version})`
