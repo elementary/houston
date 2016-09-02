@@ -5,8 +5,6 @@
  * @exports {Pipe} - Create GitHub Issues
  */
 
-import path from 'path'
-
 import config from '~/lib/config'
 import log from '~/lib/log'
 import Pipe from '~/flightcheck/pipes/pipe'

@@ -106,6 +106,7 @@ describe('project', () => {
   it('has cycle virtual', async (done) => {
     const cycle1 = await Cycle.create({
       project: new db.Types.ObjectId(),
+      auth: 'asdf',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'com.github.vocalapp.vocal',
@@ -116,6 +117,7 @@ describe('project', () => {
 
     const cycle2 = await Cycle.create({
       project: new db.Types.ObjectId(),
+      auth: 'asdf',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.5',
       name: 'com.github.vocalapp.vocal',
@@ -222,6 +224,7 @@ describe('project', () => {
   it('can create a cycle', async (done) => {
     const project = await Project.create({
       name: 'com.github.vocalapp.vocal',
+      auth: 'asdf',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'master',
       archs: ['amd64'],
@@ -251,7 +254,6 @@ describe('project', () => {
       const cycle = await project.createCycle('INIT')
 
       assert.equal(cycle.type, 'INIT', 'creates init cycle')
-      assert.lengthOf(cycle.builds, 1, 'creates builds based on project arch and dist')
       assert.equal(cycle.tag, project.tag, 'has correct tag')
       assert.equal(cycle.repo, project.repo, 'has correct repo')
 

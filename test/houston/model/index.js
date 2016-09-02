@@ -14,7 +14,6 @@ describe('model', () => {
     db.connection.db.dropDatabase()
   })
 
-  require('./build')
   require('./cycle')
   require('./project')
   require('./release')

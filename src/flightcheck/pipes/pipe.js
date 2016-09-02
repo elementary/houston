@@ -142,14 +142,14 @@ export default class Pipe {
 
     issue.body += `\n\n**Affects**: ${this.pipeline.build.tag} release`
 
-    issue.body += `\n\n<!--\n`
+    issue.body += '\n\n<!--\n'
 
     issue.body += `Pipe: ${this.name}\n`
     issue.body += `Pipeline time: ${new Date()}\n`
     issue.body += `Houston version: ${config.houston.version} (${config.houston.commit})\n`
     issue.body += `Houston env: ${config.env}\n`
 
-    issue.body += `-->`
+    issue.body += '-->'
 
     log.verbose(`${this.name} ${level} log => ${issue.title}`)
     log.silly(`\n${issue.body}`)

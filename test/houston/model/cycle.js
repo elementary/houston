@@ -14,6 +14,7 @@ describe('cycle', () => {
   it('validates repo value', (done) => {
     Cycle.create({
       project: new db.Types.ObjectId(),
+      auth: 'asdf',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'com.github.vocalapp.vocal',
@@ -25,6 +26,7 @@ describe('cycle', () => {
 
       Cycle.create({
         project: new db.Types.ObjectId(),
+        auth: 'asdf',
         repo: 'lp:~elementary/vocal',
         tag: 'v1.0.0',
         name: 'com.github.vocalapp.vocal',
@@ -42,6 +44,7 @@ describe('cycle', () => {
   it('validates version value', (done) => {
     Cycle.create({
       project: new db.Types.ObjectId(),
+      auth: 'asdf',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'com.github.vocalapp.vocal',
@@ -53,6 +56,7 @@ describe('cycle', () => {
 
       Cycle.create({
         project: new db.Types.ObjectId(),
+        auth: 'asdf',
         repo: 'git@github.com:elementary/vocal.git',
         tag: 'v1.0.0',
         name: 'com.github.vocalapp.vocal',
@@ -70,6 +74,7 @@ describe('cycle', () => {
   it('can get status of a no build cycle', async (done) => {
     Cycle.create({
       project: new db.Types.ObjectId(),
+      auth: 'asdf',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'com.github.vocalapp.vocal',
@@ -86,42 +91,10 @@ describe('cycle', () => {
     })
   })
 
-  it('can get status cycle with builds', async (done) => {
-    Cycle.create({
-      project: new db.Types.ObjectId(),
-      repo: 'git@github.com:elementary/vocal.git',
-      tag: 'v1.0.0',
-      name: 'com.github.vocalapp.vocal',
-      version: '1.0.0',
-      type: 'RELEASE',
-      changelog: [['testing']],
-      _status: 'DEFER',
-      builds: [{
-        arch: 'amd64',
-        dist: 'xenial',
-        _status: 'FINISH'
-      }, {
-        arch: 'armhf',
-        dist: 'xenial',
-        _status: 'BUILD'
-      }, {
-        arch: 'i386',
-        dist: 'xenial',
-        _status: 'FAIL'
-      }]
-    }, async (err, cycle) => {
-      if (err) done(err)
-
-      const status = await cycle.getStatus()
-      assert.equal(status, 'FAIL')
-
-      done()
-    })
-  })
-
   it('can set status', async (done) => {
     Cycle.create({
       project: new db.Types.ObjectId(),
+      auth: 'asdf',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'com.github.vocalapp.vocal',
@@ -142,6 +115,7 @@ describe('cycle', () => {
   it('can do flightcheck', async (done) => {
     Cycle.create({
       project: new db.Types.ObjectId(),
+      auth: 'asdf',
       repo: 'git@github.com:elementary/vocal.git',
       tag: 'v1.0.0',
       name: 'com.github.vocalapp.vocal',
