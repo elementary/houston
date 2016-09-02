@@ -5,6 +5,7 @@
  * @exports {Pipe} - Post to
  */
 
+import _ from 'lodash'
 import path from 'path'
 
 import config from '~/lib/config'
@@ -60,7 +61,7 @@ export default class ElementaryAptly extends Pipe {
   async code (files = []) {
     files = files.filter((f) => (path.extname(f) === '.deb'))
 
-    log.silly(`ElementaryAptly has ${files.length} files to publish`)
+    log.debug(`ElementaryAptly has ${files.length} files to publish`)
 
     if (files.length < 1) return
 
@@ -68,24 +69,36 @@ export default class ElementaryAptly extends Pipe {
 
     const apphub = await this.require('AppHub')
 
-    if (!apphub.endpoints.elementary) return this.log('debug', 'Elementary/Aptly/disabled.md')
+    if (!apphub.endpoints.elementary) {
+      log.debug('ElementaryAptly endpoint is disabled in apphub file')
+      return this.log('debug', 'Elementary/Aptly/disabled.md')
+    }
 
     let existingKeys = null
     try {
+      log.debug('ElementaryAptly is trying to check for existing packages')
+
       existingKeys = await request
       .get(`${config.aptly.url}/repos/${config.aptly.review}/packages`)
       .query({
         q: `${this.pipeline.build.name} (= ${this.pipeline.build.version})`
       })
       .then((data) => data.body)
+
+      if (!_.isArray(existingKeys)) throw new Error('Unable to grab array of exisiting keys')
     } catch (error) {
       aptlyerr('ElementaryAptly encountered error while grabbing exisiting keys', error)
       return this.log('error', 'Elementary/Aptly/api.md')
     }
 
-    if (existingKeys.length > 0) return this.log('warn', 'Elementary/Aptly/existing.md')
+    if (existingKeys.length > 0) {
+      log.debug('ElementaryAptly has detected this project and version are already uploaded')
+      return this.log('warn', 'Elementary/Aptly/existing.md')
+    }
 
     try {
+      log.debug(`ElementaryAptly is uploading ${files} files to aptly`)
+
       let req = request
       .post(`${config.aptly.url}/files/${this.pipeline.build.name}`)
 
@@ -102,6 +115,8 @@ export default class ElementaryAptly extends Pipe {
     }
 
     try {
+      log.debug('ElementaryAptly is grabbing package keys')
+
       await request
       .post(`${config.aptly.url}/repos/${config.aptly.review}/file/${this.pipeline.build.name}`)
 
@@ -117,6 +132,8 @@ export default class ElementaryAptly extends Pipe {
     }
 
     try {
+      log.debug('ElementaryAptly is creating a new snapshot')
+
       const timestamp = new Date()
       .getTime()
       .toString()
@@ -129,6 +146,8 @@ export default class ElementaryAptly extends Pipe {
       })
 
       await Promise.each(this.data.dists, (dist) => {
+        log.debug(`ElementaryAptly is updating snapshot for ${dist} repository`)
+
         return request
         .put(`${config.aptly.url}/publish/${config.aptly.review}/${dist}`)
         .send({
