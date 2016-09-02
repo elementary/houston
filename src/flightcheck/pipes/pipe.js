@@ -38,7 +38,7 @@ export default class Pipe {
     this.pipeline = pipeline
 
     // an array of arguments given on pipe RUN (not construction)
-    // the first args is _ALWAYS_ the code folder the pipe should be ran in
+    // the first arg (if applicable) should be the code folder the pipe should be ran in
     this.args = []
 
     // save the promise of run() for async attachment
@@ -84,7 +84,7 @@ export default class Pipe {
       if (err.pipe != null && err.pipe === this.name) {
         log.warn(`${err.pipe} pipe throwed an error`)
       } else if (err.pipe != null) {
-        log.debug(`${err.pipe} pipe returned an error. ${this.name} is rethrowing`)
+        log.debug(`${this.name} is rethrowing an error from ${err.pipe}`)
       } else {
         log.error(`${this.name} has an uncaught error`)
         err.pipe = this.name
@@ -180,7 +180,7 @@ export default class Pipe {
    * Runs a docker image with given content
    *
    * @param {String} tag - the docker tag name
-   * @param {String} cmd - Commands to run
+   * @param {Array} cmd - Commands to run
    * @param {String} [dir] - directory to mount (defaults to pipeline build dir)
    * @param {Object} [options] - Other options to pass to docker
    * @returns {Object} - exit information about the container
@@ -189,7 +189,6 @@ export default class Pipe {
    */
   async docker (tag, cmd, dir = this.pipeline.build.dir, options = {}) {
     assert.equal(typeof tag, 'string', 'docker requires a valid tag to run')
-    assert.equal(typeof cmd, 'string', 'docker requires a command to be ran')
 
     const defaultMount = `${dir}:/tmp/flightcheck:rw`
 
@@ -223,7 +222,7 @@ export default class Pipe {
     const logStream = fs.createWriteStream(logFile)
 
     return new Promise((resolve, reject) => {
-      docker.run(dockerImage, cmd.split(' '), logStream, options, (err, data, container) => {
+      docker.run(dockerImage, cmd, logStream, options, (err, data, container) => {
         if (err) return reject(err)
 
         return resolve({

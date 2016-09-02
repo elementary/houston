@@ -57,7 +57,7 @@ export default class Liftoff extends Pipe {
     const cacheDir = path.join(config.flightcheck.directory, 'liftoff', 'cache')
     await fsHelper.mkdirp(cacheDir)
 
-    const returned = await this.docker('liftoff', `liftoff -a ${a} -d ${d} -o /tmp/flightcheck`, buildPath, {
+    const returned = await this.docker('liftoff', ['-a', a, '-d', d, '-o', '/tmp/flightcheck'], buildPath, {
       Binds: [`${cacheDir}:/var/cache/liftoff:rw`],
       Privileged: true // required because of chroot in liftoff
     })
