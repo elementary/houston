@@ -33,6 +33,7 @@
     "mongoose": "^4.4.19",
     "nodegit": "^0.14.1",
     "nunjucks": "^2.4.2",
+    "parse-link-header": "^0.4.1",
     "passport-github": "^1.1.0",
     "pluralize": "^1.2.1",
     "raw-body": "^2.1.6",
