@@ -102,7 +102,7 @@ export function getProjects (token) {
   var allProjects = []
   var nextUrl = 'https://api.github.com/user/repos?visibility=public'
 
-  function next() {
+  function next () {
     return request
     .get(nextUrl)
     .auth(token)
