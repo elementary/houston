@@ -13,7 +13,7 @@ block body
     each cycle in cycles
       div.repo-wrap: div.repo
         div
-          if cycle.project.package.icon != null
+          if cycle.project.apphub.icon != null
             img(src="data:image/svg+xml;base64," + cycle.project.package.icon).app-icon
           else
             img(src="/images/application-default-icon.png").app-icon
