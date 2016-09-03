@@ -25,6 +25,9 @@ export default class Director extends Pipe {
   async code () {
     const apphub = await this.require('AppHub')
 
+    await this.require('Desktop')
+    await this.require('AppData')
+
     try {
       const build = await this.require('Build')
 
