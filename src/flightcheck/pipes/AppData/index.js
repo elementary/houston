@@ -19,22 +19,13 @@ import Pipe from '~/flightcheck/pipes/pipe'
 export default class AppData extends Pipe {
 
   /**
-   * Creates a new Pipe
-   *
-   * @param {Pipeline} pipeline - Current running Pipeline
-   */
-  constructor (pipeline) {
-    super(pipeline)
-  }
-
-  /**
    * code
    * Checks for a valid appdata file
    *
    * @param {String} p - folder holding the appdata file
    */
   async code (p = 'repository') {
-    const appdataPath = path.join(p, 'data', this.pipeline.build.name+'.desktop.appdata.xml')
+    const appdataPath = path.join(p, 'data', `${this.pipeline.build.name}.desktop.appdata.xml`)
     const file = await this.file(appdataPath)
 
     if (!await file.exists()) {
