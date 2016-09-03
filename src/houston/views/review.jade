@@ -14,7 +14,7 @@ block body
       div.repo-wrap: div.repo
         div
           if cycle.project.apphub.icon != null
-            img(src="data:image/svg+xml;base64," + cycle.project.package.icon).app-icon
+            img(src="data:image/svg+xml;base64," + cycle.project.apphub.icon).app-icon
           else
             img(src="/images/application-default-icon.png").app-icon
           div
