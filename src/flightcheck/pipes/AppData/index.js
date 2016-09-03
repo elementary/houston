@@ -21,6 +21,7 @@ export default class AppData extends Pipe {
   /**
    * code
    * Checks for a valid appdata file
+   * TODO: create a docker image for appstream-util
    *
    * @param {String} p - folder holding the appdata file
    */
