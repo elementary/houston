@@ -11,6 +11,7 @@
  */
 
 import semver from 'semver'
+import parseLink from 'parse-link-header'
 
 import config from '~/lib/config'
 import log from '~/lib/log'
@@ -98,24 +99,49 @@ export function getProjects (token) {
     throw new Mistake(503, 'Github is currently disabled')
   }
 
-  return request
-  .get('https://api.github.com/user/repos?visibility=public')
-  .auth(token)
-  .then((res) => res.body)
-  .map((project) => {
-    return {
-      name: `com.github.${codize(project.owner.login)}.${codize(project.name)}`,
-      repo: project.git_url,
-      tag: project.default_branch,
-      github: {
-        id: project.id,
-        owner: project.owner.login,
-        name: project.name,
-        private: project.private,
-        token
+  var allProjects = []
+  var nextUrl = 'https://api.github.com/user/repos?visibility=public'
+
+  function next() {
+    return request
+    .get(nextUrl)
+    .auth(token)
+    .then((res) => {
+      const link = parseLink(res.headers['link'])
+      if (link.next) {
+        nextUrl = link.next.url
+      } else {
+        nextUrl = ''
       }
-    }
-  })
+
+      return res.body
+    })
+    .map((project) => {
+      return {
+        name: `com.github.${codize(project.owner.login)}.${codize(project.name)}`,
+        repo: project.git_url,
+        tag: project.default_branch,
+        github: {
+          id: project.id,
+          owner: project.owner.login,
+          name: project.name,
+          private: project.private,
+          token
+        }
+      }
+    })
+    .then((projects) => {
+      allProjects = allProjects.concat(projects)
+
+      if (nextUrl) {
+        return next()
+      } else {
+        return allProjects
+      }
+    })
+  }
+
+  return next()
   .catch((error) => {
     throw new Mistake(500, 'Houston had a problem getting projects on GitHub', error)
   })
