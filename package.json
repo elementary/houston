@@ -5,6 +5,7 @@
   "main": "build/houston/index.js",
   "dependencies": {
     "babel-core": "^6.9.1",
+    "babel-loader": "^6.2.5",
     "babel-plugin-syntax-async-functions": "^6.8.0",
     "babel-plugin-syntax-export-extensions": "^6.8.0",
     "babel-plugin-transform-export-extensions": "^6.8.0",
@@ -20,7 +21,6 @@
     "gulp": "3.9.0",
     "gulp-babel": "6.0.0",
     "ini": "^1.3.4",
-    "jade": "^1.11.0",
     "koa": "^2.0.0",
     "koa-convert": "^1.2.0",
     "koa-passport": "^2.1.0",
@@ -35,11 +35,14 @@
     "nunjucks": "^2.4.2",
     "passport-github": "^1.1.0",
     "pluralize": "^1.2.1",
+    "pug-loader": "^2.3.0",
     "raw-body": "^2.1.6",
     "semver": "^5.1.0",
     "socket.io": "^1.4.6",
     "socket.io-client": "^1.4.6",
     "superagent": "^2.0.0",
+    "vue": "^1.0.26",
+    "webpack": "^1.13.2",
     "winston": "^2.2.0"
   },
   "devDependencies": {
@@ -55,6 +58,7 @@
     "strongback": "node build/entry.js strongback",
     "build": "gulp build",
     "build:watch": "gulp watch",
+    "webpack": "webpack",
     "test": "NODE_ENV=test mocha build/entry.js",
     "test:watch": "NODE_ENV=test mocha build/entry.js --watch"
   },
