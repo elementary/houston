@@ -18,7 +18,7 @@ module.exports = {
       exclude: /node_modules/,
       loader: 'babel-loader'
     }, {
-      test: /\.(jade|pug)$/,
+      test: /\.pug$/,
       loader: 'pug-loader'
     }]
   }

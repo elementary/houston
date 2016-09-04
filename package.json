@@ -58,7 +58,8 @@
     "strongback": "node build/entry.js strongback",
     "build": "gulp build",
     "build:watch": "gulp watch",
-    "webpack": "webpack",
+    "webpack": "webpack --progress --colors",
+    "webpack:watch": "webpack --progress --colors --watch",
     "test": "NODE_ENV=test mocha build/entry.js",
     "test:watch": "NODE_ENV=test mocha build/entry.js --watch"
   },
