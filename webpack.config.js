@@ -11,12 +11,6 @@ module.exports = {
     filename: '[name].bundle.js'
   },
   module: {
-    preLoaders: [{
-      test: /\.js$/,
-      loader: 'eslint',
-      include: 'src',
-      exclude: /node_modules/
-    }],
     loaders: [{
       test: /\.js$/,
       exclude: /node_modules/,
