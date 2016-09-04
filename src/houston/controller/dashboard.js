@@ -51,13 +51,7 @@ route.get('/reviews', policy.isRole('review'), async (ctx, next) => {
 })
 
 route.get('/add', policy.isRole('beta'), async (ctx, next) => {
-  const projects = await github.getProjects(ctx.user.github.access)
-  .filter(async (repo) => {
-    const dbProject = await Project.findOne({ 'github.id': repo.github.id })
-    return (dbProject == null) // Only return github repos which have not been added
-  })
-
-  return ctx.render('add', { title: 'Adding', projects })
+  return ctx.render('add', { title: 'Adding' })
 })
 
 export default route

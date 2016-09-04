@@ -1,14 +1,13 @@
 import Vue from 'vue'
 
 new Vue({
-  el: '#projects',
+  el: '#content-container',
   data: {
-    projects: [{
-      name: 'Potatoe',
-      github: {
-        owner: 'emersion',
-        name: 'potatoe'
-      }
-    }]
+    projects: []
+  },
+  async ready() {
+    const res = await fetch('/api/add', {credentials: 'same-origin'})
+    const body = await res.json()
+    this.projects = body.data
   }
 })

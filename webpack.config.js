@@ -1,6 +1,10 @@
 module.exports = {
   entry: {
-    add: './src/houston/public/scripts/add.js'
+    add: [
+      'babel-polyfill',
+      'whatwg-fetch',
+      './src/houston/public/scripts/add.js'
+    ]
   },
   output: {
     path: './build/houston/public/scripts',

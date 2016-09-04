@@ -43,6 +43,7 @@
     "superagent": "^2.0.0",
     "vue": "^1.0.26",
     "webpack": "^1.13.2",
+    "whatwg-fetch": "^1.0.0",
     "winston": "^2.2.0"
   },
   "devDependencies": {
