@@ -47,6 +47,10 @@ route.get('/init', policy.isRole('beta'), async (ctx, next) => {
   tmpP['owner'] = ctx.user._id
   ctx.project = await Project.create(tmpP)
 
+  await ctx.user.update({
+    $push: { projects: ctx.project._id }
+  })
+
   const gh = ctx.project.github
 
   if (config.github.hook) {

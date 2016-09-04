@@ -5,7 +5,9 @@
  * @exports {Object} - a list of all avalible pipes
  */
 
+export AppData from './AppData'
 export AppHub from './AppHub'
+export Desktop from './Desktop'
 export Build from './Build'
 export Debian from './Debian'
 export DebianChangelog from './Debian/Changelog'
