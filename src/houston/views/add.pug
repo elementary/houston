@@ -7,13 +7,15 @@ block body
   div.row(v-if="projects.length === 0"): div.column.alert
     h3 No repositories found!
     p AppHub needs a GitHub repository to work with.
-  div.repo-wrap(v-else v-for="project in projects"): div.repo
-    div
-      img(src="/images/application-default-icon.png").app-icon
+  div(v-else)
+    input(type="search" v-model="projectsFilter")
+    div.repo-wrap(v-for="project in projects | filterBy projectsFilter in 'name'"): div.repo
       div
-        p {{project.name}}
-        p.subtext: a(href="https://github.com/{{project.github.owner}}/{{project.github.name}}") {{project.github.owner}}/{{project.github.name}}
-    div.right
-      include /partials/status/new
+        img(src="/images/application-default-icon.png").app-icon
+        div
+          p {{project.name}}
+          p.subtext: a(href="https://github.com/{{project.github.owner}}/{{project.github.name}}") {{project.github.owner}}/{{project.github.name}}
+      div.right
+        include /partials/status/new
 
   script(type="text/javascript", src="/scripts/add.bundle.js")
