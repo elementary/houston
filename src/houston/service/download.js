@@ -1,32 +1,32 @@
-import config from '~/lib/config'
-import Project from '~/houston/model/project'
-import syslogd from 'syslogd'
-import log from '~/lib/log'
-import path from 'path'
+/**
+ * houston/service/download.js
+ * Starts a log server nginx debian repository download count tracking
+ *
+ * @exports {Function} handleMessage - Handles the Syslog messages sent by the download Server
+ * @exports {Function} startSyslog - Starts a syslog server to handle nginx logs
+ */
 
-export function startSyslog () {
-  syslogd(handleMessage).listen(config.downloads.syslog_port, (err) => {
-    if (err) {
-      // TODO: Change this for proper logging
-      log.error(err)
-    } else {
-      log.info(`Download Server Statistics Capturing started successfully on port ${config.downloads.syslog_port}`)
-    }
-  })
-}
+import path from 'path'
+import semver from 'semver'
+import syslogd from 'syslogd'
+
+import config from '~/lib/config'
+import log from '~/lib/log'
+import Project from '~/houston/model/project'
 
 /**
+ * handleMessage
  * Handles the Syslog messages sent by the download Server
  *
  * TODO: we might want to consider adding an IP origin filter to avoid bad eggs
  * TODO: add some unique test, probably with client's ip address
  *
- * message.msg conatins the actual log message from nginx, which is setup to display
- * a specific log format of TODO: Insert Log format here
+ * @param {String} message - nginx log message in ($remote_addr|$status|$request_filename|$body_bytes_sent|$http_user_agent|$request_time)
+ * @return {Void}
  */
-function handleMessage (message) {
-  var arr = message.msg.split('|')
-  var data = {
+export function handleMessage (message) {
+  const arr = message.msg.split('|')
+  const data = {
     client: arr[0],
     status: arr[1],
     file: path.basename(arr[2]),
@@ -34,11 +34,11 @@ function handleMessage (message) {
     download_time: arr[5]
   }
 
-  if (path.extname(data.file) !== '.deb') {
-    return
-  }
+  const filename = data.file.split('_')
 
-  var filename = data.file.split('_')
+  if (path.extname(data.file) !== '.deb') return
+  if (data.status !== 'OK') return
+  if (semver.valid(filename[1]) == null) return
 
   return Project.update({
     'name': filename[0],
@@ -48,8 +48,23 @@ function handleMessage (message) {
       'downloads': 1,
       'releases.$.downloads': 1
     }
-  }).then((data) => {
-    // TODO: Improve the logging here
-    log.debug('Successfully saved a package download to the Database')
+  })
+  .then((data) => log.debug(`Download count of ${filename[0]}#${filename[1]} +1`))
+}
+
+/**
+ * startSyslog
+ * Starts a syslog server to handle nginx logs
+ *
+ * @return {Void}
+ */
+export function startSyslog () {
+  syslogd(handleMessage).listen(config.downloads.port, (err) => {
+    if (err) {
+      log.error('Unable to start downloads syslog server')
+      throw new Error(err)
+    } else {
+      log.info(`Downloads syslog server listening on ${config.downloads.port}`)
+    }
   })
 }

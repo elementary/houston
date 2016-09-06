@@ -38,9 +38,8 @@ const server = http.createServer(app.callback())
 atc.connect(server)
 
 // Download Tracking syslog Server
-log.debug('test1')
 download.startSyslog()
-log.debug('test')
+
 // App logging
 app.use(async (ctx, next) => {
   const start = new Date()
