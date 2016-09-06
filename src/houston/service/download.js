@@ -1,16 +1,16 @@
 import config from '~/lib/config'
 import Project from '~/houston/model/project'
-import Syslogd from 'syslogd'
+import syslogd from 'syslogd'
 import log from '~/lib/log'
 import path from 'path'
 
-function startSyslog () {
-  Syslogd(handleMessage).listen(config.downloads.syslog_port, (err) => {
+export function startSyslog () {
+  syslogd(handleMessage).listen(config.downloads.syslog_port, (err) => {
     if (err) {
       // TODO: Change this for proper logging
       log.error(err)
     } else {
-      log.info('Download Server Statistics Capturing started successfully')
+      log.info(`Download Server Statistics Capturing started successfully on port ${config.downloads.syslog_port}`)
     }
   })
 }
@@ -53,5 +53,3 @@ function handleMessage (message) {
     log.debug('Successfully saved a package download to the Database')
   })
 }
-
-export startSyslog

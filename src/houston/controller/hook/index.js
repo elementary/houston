@@ -7,7 +7,6 @@
 
 import Router from 'koa-router'
 
-import aptly from './aptly'
 import github from './github'
 import log from '~/lib/log'
 
@@ -32,7 +31,6 @@ route.use(async (ctx, next) => {
   return
 })
 
-route.use(aptly.routes(), aptly.allowedMethods())
 route.use(github.routes(), github.allowedMethods())
 
 /**
