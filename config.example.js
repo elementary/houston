@@ -33,9 +33,7 @@ module.exports.aptly = {
 
   // Repository names
   review: 'review',
-  stable: 'houston',
-
-  public: 'PbsPVXKo5AYtC5A0c0qn'
+  stable: 'houston'
 }
 
 module.exports.database = 'mongodb://localhost/houston-dev'
@@ -62,6 +60,7 @@ module.exports.flightcheck = {
   docker: '/var/run/docker.sock'
 }
 
-module.exports.strongback = {
-  socket: '/var/run/docker.sock'
+// Nginx repository syslog server
+module.exports.downloads = {
+  port: 3001
 }
