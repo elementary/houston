@@ -1,4 +1,4 @@
-# Houston docker file
+# Houston liftoff docker file
 # Builds an ubuntu base with liftoff for packaging debian applications
 # Build with `docker build -t flightcheck-liftoff-liftoff .`
 #
