@@ -46,14 +46,10 @@ describe('config', () => {
   })
 
   it('does now throw error if path is false', (done) => {
-    mock('../../config', Object.assign(require('../mocks/config'), {
-      github: false
-    }))
-    mock('../../config.example.js', {
-      github: {
-        setting: 'you need this for github settings'
-      }
-    })
+    const mockConfig = require('../mocks/config')
+    mockConfig['aptly'] = false
+
+    mock('../../config', mockConfig)
 
     assert.doesNotThrow(() => require('../../src/lib/config'), 'respects false attribute')
     done()

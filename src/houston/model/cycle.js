@@ -70,7 +70,7 @@ const schema = new db.Schema({
   type: {
     type: String,
     required: true,
-    enum: ['INIT', 'ORPHAN', 'RELEASE']
+    enum: ['RELEASE']
   },
 
   changelog: {
@@ -82,7 +82,7 @@ const schema = new db.Schema({
   _status: {
     type: String,
     default: 'QUEUE',
-    enum: ['QUEUE', 'PRE', 'REVIEW', 'FINISH', 'FAIL', 'ERROR']
+    enum: ['QUEUE', 'RUN', 'REVIEW', 'FINISH', 'FAIL', 'ERROR']
   },
   mistake: Object
 })
@@ -158,7 +158,7 @@ schema.methods.setStatus = function (status) {
   }
 
   if (this.type === 'INIT' && (!final || options.indexOf(status) >= 2)) {
-    return Promise.reject('Unable to set status past "PRE" on "INIT" type cycles')
+    return Promise.reject('Unable to set status past "RUN" on "INIT" type cycles')
   }
   if (this.type === 'ORPHAN' && (!final || options.indexOf(status) >= 3)) {
     return Promise.reject('Unable to set status past "REVIEW" on "ORPHAN" type cycles')

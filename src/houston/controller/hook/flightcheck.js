@@ -25,7 +25,7 @@ atc.on('cycle:start', async (id, data) => {
     log.verbose('Received flightcheck data for start cycle')
   }
 
-  cycle.setStatus('PRE')
+  cycle.setStatus('RUN')
 })
 
 /**
@@ -43,7 +43,7 @@ atc.on('cycle:finish', async (id, data) => {
   const cycle = await Cycle.findById(id)
   const status = await cycle.getStatus()
 
-  if (status !== 'PRE') {
+  if (status !== 'RUN') {
     log.debug('Received flightcheck finish data for a cycle already checked')
     return
   }
@@ -93,7 +93,7 @@ atc.on('cycle:error', async (id, error) => {
   const cycle = await Cycle.findById(id)
   const status = await cycle.getStatus()
 
-  if (status !== 'PRE') {
+  if (status !== 'RUN') {
     log.debug('Received flightcheck error data for a cycle already checked')
     return
   } else {

@@ -105,7 +105,7 @@ describe('cycle', () => {
     }, async (err, cycle) => {
       if (err) done(err)
 
-      const stat = await cycle.setStatus('PRE')
+      const stat = await cycle.setStatus('RUN')
       assert.equal(stat.nModified, 1, 'updated status')
 
       done()

@@ -146,7 +146,7 @@ describe('release', () => {
       version: '1.0.0',
       type: 'RELEASE',
       changelog: [['testing']],
-      _status: 'PRE'
+      _status: 'RUN'
     })
 
     const project = await Project.create(validProject([{
@@ -163,7 +163,7 @@ describe('release', () => {
     }]))
 
     const status = await project.releases[0].getStatus()
-    assert.equal(status, 'PRE')
+    assert.equal(status, 'RUN')
 
     done()
   })
@@ -200,9 +200,9 @@ describe('release', () => {
     }]))
 
     const release = project.releases[0]
-    const cycle = await release.createCycle('INIT')
+    const cycle = await release.createCycle('RELEASE')
 
-    assert.equal(cycle.type, 'INIT', 'creates init cycle')
+    assert.equal(cycle.type, 'RELEASE', 'creates release cycle')
     assert.equal(cycle.tag, release.github.tag, 'has correct tag')
     assert.equal(cycle.repo, project.repo, 'has correct repo')
 

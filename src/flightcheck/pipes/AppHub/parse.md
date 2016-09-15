@@ -5,7 +5,7 @@ seems we ran into problems trying to parse it.
 
 Here is the error we received when trying to parse it:
 ```
-{{ data.error }}
+{{ data }}
 ```
 
 If you need a short refresher on JSON, here is a simple example file:

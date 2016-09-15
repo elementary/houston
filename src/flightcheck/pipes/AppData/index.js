@@ -6,8 +6,8 @@
  */
 
 import path from 'path'
-import { spawn } from 'child_process'
 
+import log from '~/lib/log'
 import Pipe from '~/flightcheck/pipes/pipe'
 
 /**
@@ -25,33 +25,31 @@ export default class AppData extends Pipe {
    *
    * @param {String} p - folder holding the appdata file
    */
-  async code (p = 'repository') {
-    const appdataPath = path.join(p, 'data', `${this.pipeline.build.name}.desktop.appdata.xml`)
+  async code (p = 'repository/data') {
+    const appdataName = `${this.pipeline.build.name}.desktop.appdata.xml`
+    const appdataPath = path.join(p, appdataName)
+    const buildPath = path.join(this.pipeline.build.dir, p)
+
     const file = await this.file(appdataPath)
 
     if (!await file.exists()) {
       return this.log('warn', 'AppData/existance.md')
     }
 
-    try {
-      await new Promise((resolve, reject) => {
-        const cmd = spawn('appstream-util', ['validate', file.path])
+    const returned = await this.docker('util', ['validate', appdataName], buildPath)
 
-        let output = ''
-        cmd.stdout.on('data', (data) => {
-          output += data.toString()
-        })
+    if (returned.exit !== 0) {
+      try {
+        const file = await this.file(returned.log)
+        const log = await file.read()
 
-        cmd.on('close', (code) => {
-          if (code !== 0) {
-            reject(output)
-          } else {
-            resolve()
-          }
-        })
-      })
-    } catch (output) {
-      return this.log('warn', 'AppData/invalid.md', output)
+        return this.log('warn', 'AppData/invalid.md', log)
+      } catch (e) {
+        log.debug('Unable to fetch log of failed AppData validation')
+        log.debug(e)
+
+        return this.log('warn', 'AppData/invalid.md')
+      }
     }
   }
 }

@@ -52,6 +52,6 @@ module.exports.flightcheck = {
   docker: '/var/run/docker.sock'
 }
 
-module.exports.strongback = {
-  socket: '/var/run/docker.sock'
+module.exports.downloads = {
+  port: 3001
 }

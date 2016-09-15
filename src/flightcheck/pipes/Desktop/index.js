@@ -18,28 +18,38 @@ import Pipe from '~/flightcheck/pipes/pipe'
 export default class Desktop extends Pipe {
 
   /**
+   * Creates a new Pipe
+   *
+   * @param {Pipeline} pipeline - Current running Pipeline
+   */
+  constructor (pipeline) {
+    super(pipeline)
+
+    // Object representation of the desktop file
+    this.data.desktop = {}
+  }
+
+  /**
    * code
    * Checks for a valid desktop file
    *
    * @param {String} p - folder holding the desktop file
    */
-  async code (p = 'repository') {
-    const desktopPath = path.join(p, 'data', `${this.pipeline.build.name}.desktop`)
+  async code (p = 'repository/data') {
+    const desktopPath = path.join(p, `${this.pipeline.build.name}.desktop`)
     const file = await this.file(desktopPath, 'ini')
 
     if (!await file.exists()) {
-      return this.log('warn', 'Desktop/existance.md')
+      return this.log('error', 'Desktop/existance.md')
     }
 
-    let data = null
     try {
-      data = await file.read()
+      this.data.desktop = await file.read()
     } catch (e) {
-      return this.log('error', 'AppHub/parse.md', e)
+      return this.log('error', 'Desktop/parse.md', e)
     }
 
-    const entry = data['Desktop Entry']
-    if (!entry) {
+    if (this.data.desktop['Desktop Entry'] == null) {
       return this.log('error', 'AppHub/entry.md')
     }
   }
