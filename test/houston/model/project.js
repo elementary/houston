@@ -251,10 +251,10 @@ describe('project', () => {
     project.setStatus('INIT')
     .then(async () => {
       const project = await Project.findOne({})
-      const cycle = await project.createCycle('INIT')
+      const cycle = await project.createCycle('RELEASE')
 
-      assert.equal(cycle.type, 'INIT', 'creates init cycle')
-      assert.equal(cycle.tag, project.tag, 'has correct tag')
+      assert.equal(cycle.type, 'RELEASE', 'creates release cycle')
+      assert.equal(cycle.tag, project.releases[0].version, 'has correct tag')
       assert.equal(cycle.repo, project.repo, 'has correct repo')
 
       done()
