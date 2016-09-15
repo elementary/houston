@@ -88,7 +88,7 @@ function ensureImage () {
       if (err) return reject(err)
 
       const houstonImages = images.filter((image) => {
-        return (image.RepoTags.indexOf('houston:latest') !== -1)
+        return ((image.RepoTags || []).indexOf('houston:latest') !== -1)
       })
 
       if (houstonImages.length > 0) {
