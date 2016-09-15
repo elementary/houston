@@ -13,6 +13,19 @@ import Mistake from '~/lib/mistake'
 import request from '~/lib/request'
 
 /**
+ * ensureEnabled
+ * Ensures that aptly configuration is set
+ *
+ * @return {Void}
+ * @throws {Mistake} - if aptly is currently disabled
+ */
+function ensureEnabled () {
+  if (!config.aptly || !config.aptly.url) {
+    throw new Mistake(503, 'Aptly is currently disabled')
+  }
+}
+
+/**
  * upload
  * Uploads a package to aptly in review repository
  *
@@ -22,9 +35,7 @@ import request from '~/lib/request'
  * @param {Buffer} file - actual file to upload
  */
 export function upload (project, arch, version, file) {
-  if (!config.aptly) {
-    throw new Mistake(503, 'Aptly is currently disabled')
-  }
+  ensureEnabled()
 
   return request
   .post(`${config.aptly.url}/files`)
@@ -46,9 +57,7 @@ export function upload (project, arch, version, file) {
  * @returns {Array} - Aptly package keys
  */
 const ingest = (project, arch, version) => {
-  if (!config.aptly) {
-    throw new Mistake(503, 'Aptly is currently disabled')
-  }
+  ensureEnabled()
 
   return Promise.try(() => {
     return request.post(`${config.aptly.url}/repos/${config.aptly.review}/file/${project}_${arch}_${version}.deb`)
@@ -81,9 +90,7 @@ const ingest = (project, arch, version) => {
  * @returns {Promise} - Empty promise of success
  */
 const add = (pkg, repo) => {
-  if (!config.aptly) {
-    throw new Mistake(503, 'Aptly is currently disabled')
-  }
+  ensureEnabled()
 
   return request
   .post(`${config.aptly.url}/repos/${repo}/packages`)
@@ -110,9 +117,7 @@ const add = (pkg, repo) => {
  * @returns {Promise} - Empty promise of success
  */
 const remove = (pkg, repo) => {
-  if (!config.aptly) {
-    throw new Mistake(503, 'Aptly is currently disabled')
-  }
+  ensureEnabled()
 
   return request
   .delete(`${config.aptly.url}/repos/${repo}/packages`)
@@ -140,9 +145,7 @@ const remove = (pkg, repo) => {
  * @returns {Promise} - Empty promise of success
  */
 const move = (pkg, repoFrom, repoTo) => {
-  if (!config.aptly) {
-    throw new Mistake(503, 'Aptly is currently disabled')
-  }
+  ensureEnabled()
 
   return add(pkg, repoTo)
   .then(() => remove(pkg, repoFrom))
@@ -157,9 +160,7 @@ const move = (pkg, repoFrom, repoTo) => {
  * @returns {Promise} - Empty promise of success
  */
 const publish = async (repo, dist) => {
-  if (!config.aptly) {
-    throw new Mistake(503, 'Aptly is currently disabled')
-  }
+  ensureEnabled()
 
   const name = new Date()
   .getTime()
@@ -210,9 +211,7 @@ const publish = async (repo, dist) => {
  * @returns {Array} - Package keys successfully moved
  */
 export async function review (project, version, arch, dist) {
-  if (!config.aptly) {
-    throw new Mistake(503, 'Aptly is currently disabled')
-  }
+  ensureEnabled()
 
   const keys = await Promise.each(arch, (arch) => {
     return ingest(project, arch, version)
@@ -233,9 +232,7 @@ export async function review (project, version, arch, dist) {
  * @returns {Promise} - Empty promise of success
  */
 export function stable (pkg, dist) {
-  if (!config.aptly) {
-    throw new Mistake(503, 'Aptly is currently disabled')
-  }
+  ensureEnabled()
 
   return move(pkg, config.aptly.review, config.aptly.stable)
   .then(() => publish(config.aptly.stable, dist))

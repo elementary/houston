@@ -70,7 +70,7 @@ try {
   .split('\n')[0]
 } catch (error) {}
 
-Object.assign(config, {
+config = _.merge(config, {
   houston: {
     root: path.resolve(__dirname, '../'),
     version: houstonPkg.version,
@@ -87,22 +87,19 @@ const dotConfig = dotNotation.toDot(config)
 const dotExample = dotNotation.toDot(example)
 const missingConfig = []
 
+// If any higher level attribute is set to false, don't consider it missing
 Object.keys(dotExample).forEach((key) => {
   if (dotConfig[key] != null) return
 
-  // If any higher level attribute is set to false, don't consider it missing
-  let falseAttribute = false
   const splitKey = key.split('.')
-  for (let keyI = 0; keyI < splitKey.length; keyI++) {
+
+  for (let keyI = 1; keyI < splitKey.length; keyI++) {
     const miniKey = splitKey.slice(0, keyI).join('.')
 
-    if (dotConfig[miniKey] != null && !dotConfig[miniKey]) {
-      falseAttribute = true
+    if (dotConfig[miniKey] == null || dotConfig[miniKey] !== false) {
+      missingConfig.push(key)
     }
   }
-  if (falseAttribute) return
-
-  missingConfig.push(key)
 })
 
 missingConfig.forEach((key) => {
