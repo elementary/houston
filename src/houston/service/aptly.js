@@ -13,6 +13,19 @@ import Mistake from '~/lib/mistake'
 import request from '~/lib/request'
 
 /**
+ * ensureEnabled
+ * Ensures that aptly configuration is set
+ *
+ * @return {Void}
+ * @throws {Mistake} - if aptly is currently disabled
+ */
+function ensureEnabled () {
+  if (!config.aptly || !config.aptly.url) {
+    throw new Mistake(503, 'Aptly is currently disabled')
+  }
+}
+
+/**
  * upload
  * Uploads a package to aptly in review repository
  *
@@ -223,10 +236,4 @@ export function stable (pkg, dist) {
 
   return move(pkg, config.aptly.review, config.aptly.stable)
   .then(() => publish(config.aptly.stable, dist))
-}
-
-function ensureEnabled () {
-  if (!config.aptly || !config.aptly.url) {
-    throw new Mistake(503, 'Aptly is currently disabled')
-  }
 }
