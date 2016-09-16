@@ -1,4 +1,4 @@
-/*
+/**
  * flightcheck/pipes/GitHub/Release/index.js
  * Post files to GitHub release
  *
@@ -12,7 +12,7 @@ import log from '~/lib/log'
 import Pipe from '~/flightcheck/pipes/pipe'
 import request from '~/lib/request'
 
-/*
+/**
  * GitHubRelease
  * Post files to GitHub release
  *
@@ -37,6 +37,7 @@ export default class GitHubRelease extends Pipe {
    * Post files to GitHub release
    *
    * @param {Object[]} files - a list of files to publish to GitHub
+   * @returns {Void}
    */
   async code (files = []) {
     if (this.pipeline.build.source !== 'github') {

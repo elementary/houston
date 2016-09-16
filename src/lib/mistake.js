@@ -1,13 +1,18 @@
 /**
  * lib/mistake.js
  * Helper for thowing errors with http status codes and data
+ * TODO: this should be redone with named params
+ * TODO: this should be broken up into smaller types of errors for each system,
+ * one for database errors, service errors etc
  *
  * @exports {Class} - Extension of Error class including http error code
  */
 
+/* eslint-disable valid-jsdoc */
+
 /**
  * Mistake
- * Extension of Error class including http error code
+ * Extension of Error class including http error code. Use params in any order
  *
  * @param {Boolean} - Expose error message to end client
  * @param {Error} - Error to use as base
@@ -15,7 +20,16 @@
  * @param {String} - Error message
  */
 class Mistake extends Error {
-  // WARN: unnamed arguments ahead, procead with causion
+
+  /**
+   * Creates a new error for use in server
+   * WARN: unnamed arguments ahead, procead with causion
+   *
+   * @param {Boolean} - Expose error message to end client
+   * @param {Error} - Error to use as base
+   * @param {Number} - Http error code
+   * @param {String} - Error message
+   */
   constructor (...args) {
     let data = null
     let error = new Error('error')

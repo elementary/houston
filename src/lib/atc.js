@@ -21,6 +21,12 @@ import log from './log'
  * @param {String} type - Connection type ("flightcheck" or "houston")
  */
 export default class extends events.EventEmitter {
+
+  /**
+   * creates an atc connection
+   *
+   * @param {String} type - Connection type ("flightcheck" or "houston")
+   */
   constructor (type) {
     if (type == null) {
       throw new Error('Atc requires a "type" for contruction')
@@ -41,6 +47,7 @@ export default class extends events.EventEmitter {
    * sets up a connection to server
    *
    * @param {String} listen - url to conenct to
+   * @returns {Void}
    */
   connect (listen) {
     if (typeof listen !== 'string') {
@@ -97,6 +104,7 @@ export default class extends events.EventEmitter {
    * handles messages in queue after connection or reconnection
    *
    * @param {String} type - type of socket connected to
+   * @returns {Array} - a list of messages sent after reconnect
    */
   reconnect (type) {
     if (typeof type !== 'string') {

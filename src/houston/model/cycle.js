@@ -175,6 +175,9 @@ schema.methods.setStatus = function (status) {
 /**
  * doFlightcheck
  * Sets all build information to flightcheck for pre testing
+ *
+ * @throws {Mistake} - if an error occured communicating with flightcheck
+ * @returns {Void}
  */
 schema.methods.doFlightcheck = function () {
   return atc.send('flightcheck', 'cycle:queue', {

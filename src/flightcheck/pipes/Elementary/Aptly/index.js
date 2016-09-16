@@ -19,6 +19,7 @@ import request from '~/lib/request'
  *
  * @param {String} str - string to log in error
  * @param {Object} err - The request error object
+ * @returns {Void}
  */
 const aptlyerr = (str, err) => {
   log.error(str)
@@ -30,7 +31,7 @@ const aptlyerr = (str, err) => {
   }
 }
 
-/*
+/**
  * GitHubRelease
  * Post files to GitHub release
  *
@@ -57,6 +58,9 @@ export default class ElementaryAptly extends Pipe {
   /**
    * code
    * Create GitHub Issues
+   *
+   * @param {Array} files - paths of files to upload to GitHub relative to build dir
+   * @returns {Void}
    */
   async code (files = []) {
     files = files.filter((f) => (path.extname(f) === '.deb'))

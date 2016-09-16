@@ -18,6 +18,7 @@ import log from '~/lib/log'
  * Sets up passport with server
  *
  * @param {Object} server - server to attach passport to
+ * @returns {Void}
  */
 export function setup (server) {
   // TODO: Serialize user data in the database?

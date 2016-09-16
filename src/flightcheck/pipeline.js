@@ -151,6 +151,7 @@ export default class Pipeline {
    * Starts the pipeline process
    *
    * @param {String} [pipe=Director] - inital pipe to start at
+   * @returns {Void}
    */
   async start (pipe = 'Director') {
     assert(pipes[pipe], `${pipe} does not exist and therefor pipeline cannot be started`)

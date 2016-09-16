@@ -41,6 +41,7 @@ export default class DebianChangelog extends Pipe {
    *
    * @param {String} p - folder to create debian folder in
    * @param {String} d - distribution to build
+   * @returns {Void}
    */
   async code (p = 'repository/debian', d = 'xenial') {
     const changelogPath = path.join(p, 'changelog')
@@ -63,8 +64,10 @@ export default class DebianChangelog extends Pipe {
        * thr
        * Adds an error to the collection
        *
-       * @type {String} err - the message to show on log
-       * @type {Boolean} exit - true to stop the build
+       * @param {String} err - the message to show on log
+       * @param {Boolean} exit - true to stop the build
+       * @throws {Error} - if the error is unrecoverable
+       * @returns {Void}
        */
       const thr = (err, exit = false) => {
         const i = (lintedChange.version != null) ? lintedChange.version : 'Unknown version'

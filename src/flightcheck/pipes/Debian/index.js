@@ -21,6 +21,7 @@ export default class Debian extends Pipe {
   *
   * @param {String} p - folder to create debian folder in
   * @param {String} d - distribution to build
+  * @returns {Array} - the collective data of every debian file pipe
   */
   async code (p = 'repository', d = 'xenial') {
     const debianFolder = path.join(p, 'debian')

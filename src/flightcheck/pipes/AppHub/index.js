@@ -49,6 +49,7 @@ export default class AppHub extends Pipe {
    * Checks for a valid apphub file
    *
    * @param {String} p - folder holding the apphub file
+   * @returns {Void}
    */
   async code (p = 'repository') {
     const apphubPath = path.join(p, '.apphub')

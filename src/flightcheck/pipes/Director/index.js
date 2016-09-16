@@ -10,7 +10,7 @@ import path from 'path'
 import log from '~/lib/log'
 import Pipe from '~/flightcheck/pipes/pipe'
 
-/*
+/**
  * Directory
  * Requires pipes based on apphub settings
  *
@@ -21,6 +21,8 @@ export default class Director extends Pipe {
   /**
    * code
    * Requires pipes based on apphub settings
+   *
+   * @returns {Void}
    */
   async code () {
     const apphub = await this.require('AppHub')

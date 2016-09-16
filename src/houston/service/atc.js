@@ -16,6 +16,10 @@ import log from '~/lib/log'
  * for communicating between different processes and servers, includes message queue
  */
 class HoustonAtc extends Atc {
+
+  /**
+   * Creates a new atc connection
+   */
   constructor () {
     super('houston')
   }
@@ -25,6 +29,7 @@ class HoustonAtc extends Atc {
    * sets up a connection to server
    *
    * @param {Object} listen - server to attach to
+   * @returns {Void}
    */
   connect (listen) {
     if (typeof listen !== 'object') {

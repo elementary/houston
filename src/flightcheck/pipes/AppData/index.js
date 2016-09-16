@@ -24,6 +24,7 @@ export default class AppData extends Pipe {
    * TODO: create a docker image for appstream-util
    *
    * @param {String} p - folder holding the appdata file
+   * @returns {Void}
    */
   async code (p = 'repository/data') {
     const appdataName = `${this.pipeline.build.name}.desktop.appdata.xml`

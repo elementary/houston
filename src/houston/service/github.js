@@ -23,7 +23,7 @@ import request from '~/lib/request'
  * Lower case, replace any whitespace or _ with -, replace ANYTHING else with nothing
  *
  * @param {String} str - String to codize
- * returns {String} - Replaces clean string to use in Houston
+ * @returns {String} - Replaces clean string to use in Houston
  */
 function codize (str) {
   return str
@@ -249,7 +249,7 @@ export function sendIssue (owner, name, token, issue, label) {
   })
 }
 
-/*
+/**
  * sendFile
  * Posts a file to GitHub release
  *

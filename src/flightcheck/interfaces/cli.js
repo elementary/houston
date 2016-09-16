@@ -11,6 +11,8 @@ log.debug('Loaded cli interface')
 /**
  * help
  * prints out cli help information
+ *
+ * @returns {Void}
  */
 const help = function () {
   // eslint-disable-next-line no-console

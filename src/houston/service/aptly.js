@@ -33,6 +33,7 @@ function ensureEnabled () {
  * @param {String} arch - package architecture
  * @param {String} version - semver version of pacakge
  * @param {Buffer} file - actual file to upload
+ * @returns {Void}
  */
 export function upload (project, arch, version, file) {
   ensureEnabled()

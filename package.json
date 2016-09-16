@@ -45,8 +45,8 @@
   },
   "devDependencies": {
     "a-standard": "^1.0.5",
+    "ava": "^0.16.0",
     "chai": "^3.5.0",
-    "mocha": "^2.4.5",
     "mock-require": "^1.2.1",
     "nock": "^7.7.2"
   },
@@ -56,25 +56,18 @@
     "strongback": "node build/entry.js strongback",
     "build": "gulp build",
     "build:watch": "gulp watch",
-    "test": "NODE_ENV=test mocha build/entry.js",
-    "test:watch": "NODE_ENV=test mocha build/entry.js --watch"
+    "test": "eslint 'src/**/*.js' 'test/**/*.js' && NODE_ENV=test ava",
+    "test:watch": "NODE_ENV=test ava"
   },
-  "a-standard": {
-    "rules": {
-      "require-jsdoc": [
-        2,
-        {
-          "require": {
-            "FunctionDeclaration": true,
-            "ClassDeclaration": true
-          }
-        }
-      ]
-    },
-    "env": {
-      "jquery": true,
-      "mocha": true
-    }
+  "ava": {
+    "source": [
+      "!build/**/*"
+    ],
+    "require": [
+      "babel-register",
+      "babel-polyfill"
+    ],
+    "babel": "inherit"
   },
   "repository": {
     "type": "git",

@@ -1,4 +1,4 @@
-/*
+/**
  * flightcheck/pipes/GitHub/Issue/index.js
  * Creates GitHub issues based on pipe logs
  *
@@ -10,7 +10,7 @@ import log from '~/lib/log'
 import Pipe from '~/flightcheck/pipes/pipe'
 import request from '~/lib/request'
 
-/*
+/**
  * GitHubRelease
  * Post files to GitHub release
  *
@@ -35,6 +35,7 @@ export default class GitHubRelease extends Pipe {
    * Create GitHub Issues
    *
    * @param {String} level - override apphub log level
+   * @returns {Void}
    */
   async code (level) {
     if (this.pipeline.build.source !== 'github') {

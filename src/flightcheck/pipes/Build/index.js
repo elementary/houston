@@ -9,7 +9,7 @@ import path from 'path'
 
 import Pipe from '~/flightcheck/pipes/pipe'
 
-/*
+/**
  * Build
  * Builds different types of projects
  *
@@ -37,6 +37,7 @@ export default class Build extends Pipe {
    * Builds different types of projects
    *
    * @param {String} p - folder holding the apphub file
+   * @returns {Void}
    */
   async code (p = 'repository') {
     const debianFile = await this.file(path.join(p, 'debian', 'control'))

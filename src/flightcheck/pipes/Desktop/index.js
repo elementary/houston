@@ -34,6 +34,7 @@ export default class Desktop extends Pipe {
    * Checks for a valid desktop file
    *
    * @param {String} p - folder holding the desktop file
+   * @returns {Void}
    */
   async code (p = 'repository/data') {
     const desktopPath = path.join(p, `${this.pipeline.build.name}.desktop`)

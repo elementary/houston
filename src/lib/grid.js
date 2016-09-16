@@ -78,6 +78,7 @@ export function create (file, metadata) {
  * like it's hot
  *
  * @param {ObjectId} name - id of file to drop
+ * @returns {Void}
  */
 export function drop (name) {
   const store = new db.mongo.GridStore(db.connection.db, name)

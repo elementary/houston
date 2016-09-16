@@ -43,6 +43,7 @@ export default class Liftoff extends Pipe {
    * @param {String} p - folder holding cmake file
    * @param {String} a - architecture to build
    * @param {String} d - distribution to build
+   * @returns {Void}
    */
   async code (p = 'repository', a = 'amd64', d = 'xenial') {
     await this.require('Debian', p, d)

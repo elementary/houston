@@ -257,6 +257,7 @@ schema.methods.setStatus = function (status) {
  *   {String} title - issue title
  *   {String} body - issue body
  * }
+ * @returns {Void}
  */
 schema.methods.postIssue = function (issue) {
   if (typeof issue.title !== 'string') return Promise.reject('Issue needs a title')

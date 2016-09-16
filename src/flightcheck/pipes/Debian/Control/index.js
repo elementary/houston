@@ -41,6 +41,7 @@ export default class DebianControl extends Pipe {
    * Creates the debian control file
    *
    * @param {String} p - folder to create debian folder in
+   * @returns {Void}
    */
   async code (p = 'repository/debian') {
     const controlPath = path.join(p, 'control')
@@ -66,8 +67,10 @@ export default class DebianControl extends Pipe {
      * thr
      * Adds an error to the collection
      *
-     * @type {String} err - the message to show on log
-     * @type {Boolean} exit - true to stop the build
+     * @param {String} err - the message to show on log
+     * @param {Boolean} exit - true to stop the build
+     * @throws {Error} - if error is unrecoverable
+     * @returns {Void}
      */
     const thr = (err, exit = false) => {
       errors.push({

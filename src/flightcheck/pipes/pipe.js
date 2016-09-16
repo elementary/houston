@@ -61,6 +61,7 @@ export default class Pipe {
    * Actual pipe logic to be replaced with child's code
    *
    * @param {...*} [args] - any arguments. Literally anything...
+   * @returns {Void}
    */
   async code (...args) {
     throw new Error(`${this.name} has no testing code`)
