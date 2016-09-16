@@ -1,5 +1,9 @@
 {
-  "extends": ["a-standard"],
+  "name": "houston",
+
+  "plugins": ["ava"],
+
+  "extends": ["a-standard", "plugin:ava/recommended"],
 
   "env": {
     "jquery": true,
@@ -19,6 +23,9 @@
       "requireReturnType": true,
       "requireParamDescription": true,
       "requireReturnDescription": false
-    }]
+    }],
+
+    "ava/no-skip-assert": 0,
+    "ava/no-skip-test": 0
   }
 }

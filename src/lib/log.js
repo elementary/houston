@@ -12,7 +12,7 @@ import * as langHelper from './helpers/lang'
 
 const transports = []
 
-if (config.log.console) {
+if (config.env !== 'test' && config.log.console) {
   transports.push(
     new winston.transports.Console({
       handleExceptions: false,
@@ -24,7 +24,7 @@ if (config.log.console) {
   )
 }
 
-if (config.log.files) {
+if (config.env !== 'test' && config.log.files) {
   transports.push(
     new winston.transports.File({
       handleExceptions: false,

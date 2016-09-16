@@ -47,6 +47,7 @@
     "a-standard": "^1.0.5",
     "ava": "^0.16.0",
     "chai": "^3.5.0",
+    "eslint-plugin-ava": "^3.0.0",
     "mock-require": "^1.2.1",
     "nock": "^7.7.2"
   },
@@ -56,8 +57,9 @@
     "strongback": "node build/entry.js strongback",
     "build": "gulp build",
     "build:watch": "gulp watch",
-    "test": "eslint 'src/**/*.js' 'test/**/*.js' && NODE_ENV=test ava",
-    "test:watch": "NODE_ENV=test ava"
+    "lint": "eslint 'src/**/*.js' 'test/**/*.js'",
+    "test": "NODE_ENV=test ava",
+    "test:watch": "NODE_ENV=test ava --watch"
   },
   "ava": {
     "source": [

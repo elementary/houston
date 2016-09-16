@@ -43,9 +43,11 @@ if (process.env.PORT != null) {
 const envConfig = {}
 
 Object.keys(process.env).forEach((key) => {
-  if (key.toLowerCase().substring(0, 7) !== 'houston') return
+  const standardKey = key.toLowerCase()
 
-  envConfig[key.toLowerCase().substring(8, key.length)] = process.env[key]
+  if (standardKey.substring(0, 7) !== 'houston') return
+
+  envConfig[standardKey.substring(8, key.length)] = process.env[key]
 })
 
 const expanedEnvConfig = dotNotation.toObj(envConfig, '_')
