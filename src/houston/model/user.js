@@ -6,7 +6,7 @@
  * @exports {Object} schema - user database schema
  */
 
-import db from '~/lib/database'
+import db from 'lib/database'
 
 /**
  * @param {String} username - user's username (btkostner)

@@ -8,10 +8,10 @@
 import path from 'path'
 import Promise from 'bluebird'
 
-import * as fsHelper from '~/lib/helpers/fs'
-import config from '~/lib/config'
-import log from '~/lib/log'
-import Pipe from '~/flightcheck/pipes/pipe'
+import * as fsHelper from 'lib/helpers/fs'
+import config from 'lib/config'
+import log from 'lib/log'
+import Pipe from 'flightcheck/pipes/pipe'
 
 const fs = Promise.promisifyAll(require('fs'))
 

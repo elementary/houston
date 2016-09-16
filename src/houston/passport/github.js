@@ -10,10 +10,10 @@ import github from 'passport-github'
 import passport from 'koa-passport'
 import Router from 'koa-router'
 
-import config from '~/lib/config'
-import log from '~/lib/log'
-import request from '~/lib/request'
-import User from '~/houston/model/user'
+import config from 'lib/config'
+import log from 'lib/log'
+import request from 'lib/request'
+import User from 'houston/model/user'
 
 /**
  * getMembership

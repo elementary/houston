@@ -7,7 +7,7 @@
 
 import path from 'path'
 
-import Pipe from '~/flightcheck/pipes/pipe'
+import Pipe from 'flightcheck/pipes/pipe'
 
 /**
  * Debian

@@ -5,7 +5,7 @@
 
 import test from 'ava'
 
-import * as dot from '~/lib/helpers/dotNotation'
+import * as dot from 'lib/helpers/dotNotation'
 
 test('transforms expanded to dot', (t) => {
   const one = dot.toDot({

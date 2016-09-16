@@ -5,10 +5,10 @@
  * @exports {Function} - Checks user rights against GitHub
  */
 
-import * as github from '~/houston/service/github'
-import config from '~/lib/config'
-import log from '~/lib/log'
-import Mistake from '~/lib/mistake'
+import * as github from 'houston/service/github'
+import config from 'lib/config'
+import log from 'lib/log'
+import Mistake from 'lib/mistake'
 
 /**
  * Checks user rights against GitHub

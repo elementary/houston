@@ -8,8 +8,8 @@
 import path from 'path'
 import semver from 'semver'
 
-import Pipe from '~/flightcheck/pipes/pipe'
-import render from '~/lib/render'
+import Pipe from 'flightcheck/pipes/pipe'
+import render from 'lib/render'
 
 /**
  * DebianChangelog

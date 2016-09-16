@@ -10,11 +10,11 @@ import Docker from 'dockerode'
 import path from 'path'
 import Promise from 'bluebird'
 
-import * as helpers from '~/lib/helpers'
-import config from '~/lib/config'
-import File from '~/flightcheck/file'
-import log from '~/lib/log'
-import render from '~/lib/render'
+import * as helpers from 'lib/helpers'
+import config from 'lib/config'
+import File from 'flightcheck/file'
+import log from 'lib/log'
+import render from 'lib/render'
 
 const docker = new Docker({ socketPath: config.flightcheck.docker })
 const fs = Promise.promisifyAll(require('fs'))

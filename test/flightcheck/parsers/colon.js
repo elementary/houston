@@ -5,7 +5,7 @@
 
 import test from 'ava'
 
-import * as colon from '~/flightcheck/parsers/colon'
+import * as colon from 'flightcheck/parsers/colon'
 
 test('can read a file', async (t) => {
   const one = await colon.read(`

@@ -12,10 +12,10 @@ import path from 'path'
 import Promise from 'bluebird'
 import semver from 'semver'
 
-import * as fsHelper from '~/lib/helpers/fs'
+import * as fsHelper from 'lib/helpers/fs'
 import * as pipes from './pipes'
-import config from '~/lib/config'
-import log from '~/lib/log'
+import config from 'lib/config'
+import log from 'lib/log'
 
 const fs = Promise.promisifyAll(require('fs'))
 

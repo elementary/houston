@@ -8,10 +8,10 @@
 import _ from 'lodash'
 import path from 'path'
 
-import config from '~/lib/config'
-import log from '~/lib/log'
-import Pipe from '~/flightcheck/pipes/pipe'
-import request from '~/lib/request'
+import config from 'lib/config'
+import log from 'lib/log'
+import Pipe from 'flightcheck/pipes/pipe'
+import request from 'lib/request'
 
 /**
  * aptlyerr

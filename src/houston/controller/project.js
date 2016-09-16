@@ -8,11 +8,11 @@
 import Router from 'koa-router'
 import semver from 'semver'
 
-import * as aptly from '~/houston/service/aptly'
-import * as github from '~/houston/service/github'
-import * as policy from '~/houston/policy'
-import config from '~/lib/config'
-import Project from '~/houston/model/project'
+import * as aptly from 'houston/service/aptly'
+import * as github from 'houston/service/github'
+import * as policy from 'houston/policy'
+import config from 'lib/config'
+import Project from 'houston/model/project'
 
 const route = new Router({
   prefix: '/project/:project'

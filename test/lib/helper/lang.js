@@ -5,7 +5,7 @@
 
 import test from 'ava'
 
-import * as lang from '~/lib/helpers/lang'
+import * as lang from 'lib/helpers/lang'
 
 test('can conver based on array length', (t) => {
   const one = lang.s('all things to singluar form', 1)

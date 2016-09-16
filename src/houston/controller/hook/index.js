@@ -8,7 +8,7 @@
 import Router from 'koa-router'
 
 import github from './github'
-import log from '~/lib/log'
+import log from 'lib/log'
 
 const route = new Router({
   prefix: '/hook'

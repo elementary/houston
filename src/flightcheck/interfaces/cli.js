@@ -3,8 +3,8 @@
  * Runs flightcheck from cli. Used for mostly testing purposes
  */
 
-import log from '~/lib/log'
-import Pipeline from '~/flightcheck/pipeline'
+import log from 'lib/log'
+import Pipeline from 'flightcheck/pipeline'
 
 log.debug('Loaded cli interface')
 

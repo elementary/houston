@@ -8,8 +8,8 @@
 
 import Router from 'koa-router'
 
-import log from '~/lib/log'
-import Mistake from '~/lib/mistake'
+import log from 'lib/log'
+import Mistake from 'lib/mistake'
 import popularity from './popularity'
 import projects from './projects'
 

@@ -8,9 +8,9 @@
 
 import semver from 'semver'
 
-import atc from '~/houston/service/atc'
-import db from '~/lib/database'
-import Mistake from '~/lib/mistake'
+import atc from 'houston/service/atc'
+import db from 'lib/database'
+import Mistake from 'lib/mistake'
 
 /**
  * Stores cycle information. 1 cycle = 1 project version being built

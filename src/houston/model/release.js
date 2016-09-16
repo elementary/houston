@@ -7,8 +7,8 @@
 
 import semver from 'semver'
 
-import * as dotNotation from '~/lib/helpers/dotNotation'
-import db from '~/lib/database'
+import * as dotNotation from 'lib/helpers/dotNotation'
+import db from 'lib/database'
 
 /**
  * @param {String} version -semver version of release

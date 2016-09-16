@@ -10,9 +10,9 @@ import path from 'path'
 import semver from 'semver'
 import syslogd from 'syslogd'
 
-import config from '~/lib/config'
-import log from '~/lib/log'
-import Project from '~/houston/model/project'
+import config from 'lib/config'
+import log from 'lib/log'
+import Project from 'houston/model/project'
 
 /**
  * handleMessage

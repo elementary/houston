@@ -7,7 +7,7 @@
 
 import Router from 'koa-router'
 
-import Project from '~/houston/model/project'
+import Project from 'houston/model/project'
 
 const route = new Router({
   prefix: '/popularity'

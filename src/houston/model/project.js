@@ -9,8 +9,8 @@
 import crypto from 'crypto'
 import semver from 'semver'
 
-import * as github from '~/houston/service/github'
-import db from '~/lib/database'
+import * as github from 'houston/service/github'
+import db from 'lib/database'
 import releaseSchema from './release'
 
 /**

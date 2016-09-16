@@ -7,10 +7,10 @@
 
 import Router from 'koa-router'
 
-import * as github from '~/houston/service/github'
-import * as policy from '~/houston/policy'
-import Cycle from '~/houston/model/cycle'
-import Project from '~/houston/model/project'
+import * as github from 'houston/service/github'
+import * as policy from 'houston/policy'
+import Cycle from 'houston/model/cycle'
+import Project from 'houston/model/project'
 
 const route = new Router()
 

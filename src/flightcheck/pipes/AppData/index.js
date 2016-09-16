@@ -7,8 +7,8 @@
 
 import path from 'path'
 
-import log from '~/lib/log'
-import Pipe from '~/flightcheck/pipes/pipe'
+import log from 'lib/log'
+import Pipe from 'flightcheck/pipes/pipe'
 
 /**
  * AppData

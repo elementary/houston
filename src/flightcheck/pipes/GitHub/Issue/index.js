@@ -5,10 +5,10 @@
  * @exports {Pipe} - Create GitHub Issues
  */
 
-import config from '~/lib/config'
-import log from '~/lib/log'
-import Pipe from '~/flightcheck/pipes/pipe'
-import request from '~/lib/request'
+import config from 'lib/config'
+import log from 'lib/log'
+import Pipe from 'flightcheck/pipes/pipe'
+import request from 'lib/request'
 
 /**
  * GitHubRelease

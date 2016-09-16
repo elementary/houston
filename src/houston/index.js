@@ -16,16 +16,16 @@ import path from 'path'
 import session from 'koa-session'
 import view from 'koa-views'
 
-import * as helpers from '~/lib/helpers'
+import * as helpers from 'lib/helpers'
 import * as passport from './passport'
 import * as policy from './policy'
 import atc from './service/atc'
 import * as download from './service/download.js'
-import config from '~/lib/config'
+import config from 'lib/config'
 import controllers from './controller'
-import db from '~/lib/database'
-import log from '~/lib/log'
-import Mistake from '~/lib/mistake'
+import db from 'lib/database'
+import log from 'lib/log'
+import Mistake from 'lib/mistake'
 
 const app = new Koa()
 

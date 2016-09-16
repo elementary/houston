@@ -5,7 +5,7 @@
  * @exports {Function} - Koa route middleware
  */
 
-import { schema } from '~/houston/model/user'
+import { schema } from 'houston/model/user'
 import ifRole from './ifRole'
 
 /**

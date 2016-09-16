@@ -3,10 +3,10 @@
  * Handles all communcation from atc flightcheck connections
  */
 
-import atc from '~/houston/service/atc'
-import Cycle from '~/houston/model/cycle'
-import log from '~/lib/log'
-import Project from '~/houston/model/project'
+import atc from 'houston/service/atc'
+import Cycle from 'houston/model/cycle'
+import log from 'lib/log'
+import Project from 'houston/model/project'
 
 /**
  * Updates cycle when it starts to be tested

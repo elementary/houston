@@ -8,10 +8,10 @@
 import Router from 'koa-router'
 import crypto from 'crypto'
 
-import * as github from '~/houston/service/github'
-import config from '~/lib/config'
-import log from '~/lib/log'
-import Project from '~/houston/model/project'
+import * as github from 'houston/service/github'
+import config from 'lib/config'
+import log from 'lib/log'
+import Project from 'houston/model/project'
 
 const route = new Router({
   prefix: '/github'

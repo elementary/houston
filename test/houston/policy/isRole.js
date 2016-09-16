@@ -5,7 +5,7 @@
 
 import test from 'ava'
 
-import isRole from '~/houston/policy/isRole'
+import isRole from 'houston/policy/isRole'
 
 test('returns an accurate function', (t) => {
   const one = isRole('USER')

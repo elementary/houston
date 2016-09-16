@@ -9,9 +9,9 @@
 import passport from 'koa-passport'
 import Router from 'koa-router'
 
-import User from '~/houston/model/user'
+import User from 'houston/model/user'
 import * as github from './github'
-import log from '~/lib/log'
+import log from 'lib/log'
 
 /**
  * setup

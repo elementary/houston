@@ -5,10 +5,10 @@
 
 import assert from 'assert'
 
-import Atc from '~/lib/atc'
-import config from '~/lib/config'
-import log from '~/lib/log'
-import Pipeline from '~/flightcheck/pipeline'
+import Atc from 'lib/atc'
+import config from 'lib/config'
+import log from 'lib/log'
+import Pipeline from 'flightcheck/pipeline'
 
 const connection = new Atc('flightcheck')
 connection.connect(config.server.url)

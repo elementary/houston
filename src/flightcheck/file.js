@@ -9,7 +9,7 @@ import assert from 'assert'
 import path from 'path'
 import Promise from 'bluebird'
 
-import * as fsHelpers from '~/lib/helpers/fs'
+import * as fsHelpers from 'lib/helpers/fs'
 import * as parses from './parsers'
 
 const fs = Promise.promisifyAll(require('fs'))

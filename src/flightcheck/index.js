@@ -5,8 +5,8 @@
 
 import fs from 'fs'
 
-import config from '~/lib/config'
-import log from '~/lib/log'
+import config from 'lib/config'
+import log from 'lib/log'
 
 // Check docker is running, active, and accessable before we start anything
 fs.stat(config.flightcheck.docker, (err, stat) => {

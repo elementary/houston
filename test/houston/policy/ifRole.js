@@ -5,7 +5,7 @@
 
 import test from 'ava'
 
-import ifRole from '~/houston/policy/ifRole'
+import ifRole from 'houston/policy/ifRole'
 
 test('authenticates based on right', (t) => {
   const one = ifRole({ right: 'USER' }, 'USER')

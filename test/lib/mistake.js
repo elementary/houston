@@ -5,7 +5,7 @@
 
 import test from 'ava'
 
-import Mistake from '~/lib/mistake'
+import Mistake from 'lib/mistake'
 
 test('is an error', (t) => {
   t.true(Mistake.prototype instanceof Error)

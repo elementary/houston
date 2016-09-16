@@ -8,9 +8,9 @@
 import semver from 'semver'
 import Router from 'koa-router'
 
-import * as policy from '~/houston/policy'
-import db from '~/lib/database'
-import Project from '~/houston/model/project'
+import * as policy from 'houston/policy'
+import db from 'lib/database'
+import Project from 'houston/model/project'
 
 const route = new Router({
   prefix: '/projects'

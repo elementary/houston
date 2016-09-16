@@ -5,10 +5,10 @@
  * @exports {Function} - Checks user rights
  */
 
-import { schema } from '~/houston/model/user'
-import config from '~/lib/config'
-import log from '~/lib/log'
-import Mistake from '~/lib/mistake'
+import { schema } from 'houston/model/user'
+import config from 'lib/config'
+import log from 'lib/log'
+import Mistake from 'lib/mistake'
 
 /**
  * Checks user rights

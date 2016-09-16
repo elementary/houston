@@ -12,10 +12,10 @@
 
 import semver from 'semver'
 
-import config from '~/lib/config'
-import log from '~/lib/log'
-import Mistake from '~/lib/mistake'
-import request from '~/lib/request'
+import config from 'lib/config'
+import log from 'lib/log'
+import Mistake from 'lib/mistake'
+import request from 'lib/request'
 
 /**
  * codize

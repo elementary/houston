@@ -7,8 +7,8 @@
 
 import path from 'path'
 
-import * as dot from '~/lib/helpers/dotNotation'
-import Pipe from '~/flightcheck/pipes/pipe'
+import * as dot from 'lib/helpers/dotNotation'
+import Pipe from 'flightcheck/pipes/pipe'
 
 /**
  * AppHub

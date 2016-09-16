@@ -2,7 +2,7 @@
  * lib/atc.js
  * Wrapper for socket.io that includes message queue and pool support. Most of
  * this code is for client connection to "houston" type socket. for "houston"
- * specific class see ~/houston/service/atc
+ * specific class see houston/service/atc
  *
  * @exports {Class} - Wrapper for socket.io that includes message queue and pool support
  */
