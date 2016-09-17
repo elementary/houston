@@ -3,9 +3,15 @@
  * Tests ifRole for security
  */
 
+import mock from 'mock-require'
+import path from 'path'
 import test from 'ava'
 
+import alias from 'root/.alias'
 import ifRole from 'houston/policy/ifRole'
+import mockConfig from './fixtures/config'
+
+mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
 
 test('authenticates based on right', (t) => {
   const one = ifRole({ right: 'USER' }, 'USER')
