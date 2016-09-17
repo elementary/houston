@@ -39,13 +39,7 @@ gulp.task('build-flightcheck', ['clear-flightcheck'], () => {
   .pipe(gulp.dest('build/flightcheck'))
 
   const javascript = gulp.src('src/flightcheck/**/*.js')
-  .pipe(babel({
-    plugins: [
-      ['babel-root-import', {
-        'rootPathSuffix': '/build'
-      }]
-    ]
-  }))
+  .pipe(babel())
   .pipe(gulp.dest('build/flightcheck'))
 
   return merge(copy, javascript)
@@ -70,13 +64,7 @@ gulp.task('build-houston', ['clear-houston'], () => {
   const javascript = gulp.src([
     'src/houston/**/*.js'
   ])
-  .pipe(babel({
-    plugins: [
-      ['babel-root-import', {
-        'rootPathSuffix': '/build'
-      }]
-    ]
-  }))
+  .pipe(babel())
   .pipe(gulp.dest('build/houston'))
 
   return merge(copy, javascript)
@@ -95,13 +83,7 @@ gulp.task('build-lib', ['clear-lib'], () => {
   return gulp.src([
     'src/lib/**/*.js'
   ])
-  .pipe(babel({
-    plugins: [
-      ['babel-root-import', {
-        'rootPathSuffix': '/build'
-      }]
-    ]
-  }))
+  .pipe(babel())
   .pipe(gulp.dest('build/lib'))
 })
 
@@ -132,13 +114,7 @@ gulp.task('build-strongback', ['clear-strongback'], () => {
   const javascript = gulp.src([
     'src/strongback/**/*.js'
   ])
-  .pipe(babel({
-    plugins: [
-      ['babel-root-import', {
-        'rootPathSuffix': '/build'
-      }]
-    ]
-  }))
+  .pipe(babel())
   .pipe(gulp.dest('build/strongback'))
 
   return merge(copy, javascript)
