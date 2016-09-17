@@ -1,19 +1,40 @@
 language: node_js
+
+compiler: clang
+
 node_js:
   - "4"
   - "5"
   - "6"
+  - "node"
+
 git:
   depth: 1
+
 script:
   - npm run build
   - npm run lint
   - npm run test
+
 services:
   - mongodb
+
 addons:
   apt:
     sources:
     - mongodb-3.0-precise
+    - ubuntu-toolchain-r-test
     packages:
+    - build-essential
+    - g++-4.9-multilib
+    - gcc-4.9-multilib
+    - lcov
+    - libssl-dev
     - mongodb-org-server
+
+before_install:
+  - export CC=clang
+  - export CXX=clang++
+  - export GYP_DEFINES="use_obsolete_asm=true"
+  - export JOBS=4
+  - export npm_config_clang=1
