@@ -11,6 +11,8 @@ const path = require('path')
 module.exports = {
   resolve: {
     alias: {
+      'root': path.resolve(__dirname),
+
       'branding': path.resolve(__dirname, 'branding'),
 
       'build': path.resolve(__dirname, 'build'),
