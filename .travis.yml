@@ -8,12 +8,13 @@ script:
   - npm run lint
   - npm run test
 
-services:
-  - mongodb
-
-addons:
-  apt:
-    sources:
-    - mongodb-3.0-precise
-    packages:
-    - mongodb-org-server
+# When we work with database tests, this is the travis config we will need
+# services:
+#   - mongodb
+#
+# addons:
+#   apt:
+#     sources:
+#       - mongodb-3.0-precise
+#     packages:
+#       - mongodb-org-server
