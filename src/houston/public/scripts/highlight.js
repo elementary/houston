@@ -1,3 +1,5 @@
+/* global hljs $ */
+
 $('document').ready(function () {
   $('pre code').each(function (i, block) {
     // Remove newline from CloudFlare's e-mail protection script
