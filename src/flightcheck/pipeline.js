@@ -197,10 +197,10 @@ export default class Pipeline extends events.EventEmitter {
 
     const pipe = new pipes[name](this)
 
-    pipe.on('start', () => this.emit('pipe:start', pipe))
-    pipe.on('error', (err) => this.emit('pipe:error', pipe, err))
-    pipe.on('finish', () => this.emit('pipe:finish', pipe))
-    pipe.on('log', (log) => this.emit('pipe:log', pipe, log))
+    pipe.on('start', (...args) => this.emit('pipe:start', pipe, ...args))
+    pipe.on('error', (...args) => this.emit('pipe:error', pipe, ...args))
+    pipe.on('finish', (...args) => this.emit('pipe:finish', pipe, ...args))
+    pipe.on('log', (...args) => this.emit('pipe:log', pipe, ...args))
 
     this.pipes.push(pipe)
     return pipe.run(...args)
