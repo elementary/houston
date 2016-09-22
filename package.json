@@ -29,6 +29,7 @@
     "koa-views": "^4.1.0",
     "lodash": "^4.13.1",
     "merge2": "^1.0.2",
+    "moment": "^2.15.1",
     "mongoose": "^4.4.19",
     "nodegit": "^0.14.1",
     "nunjucks": "^2.4.2",

@@ -1,7 +1,8 @@
 # Houston files
 *.log
-/config.js
+*.pem
 /build
+/config.js
 
 # Node files
 node_modules
