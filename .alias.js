@@ -20,6 +20,7 @@ module.exports = {
       'flightcheck': path.resolve(__dirname, 'src', 'flightcheck'),
       'houston': path.resolve(__dirname, 'src', 'houston'),
       'lib': path.resolve(__dirname, 'src', 'lib'),
+      'service': path.resolve(__dirname, 'src', 'service'),
 
       'test': path.resolve(__dirname, 'test')
     }
