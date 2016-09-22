@@ -7,6 +7,7 @@
 
 import assert from 'assert'
 import Docker from 'dockerode'
+import events from 'events'
 import path from 'path'
 import Promise from 'bluebird'
 
@@ -22,8 +23,15 @@ const fs = Promise.promisifyAll(require('fs'))
 /**
  * Pipe
  * an Pipe class to extend appon
+ *
+ * @extends EventEmitter
+ *
+ * @fires Pipe#start
+ * @fires Pipe#error
+ * @fires Pipe#finish
+ * @fires Pipe#log
  */
-export default class Pipe {
+export default class Pipe extends events.EventEmitter {
 
   /**
    * Creates a new Pipe
@@ -31,6 +39,8 @@ export default class Pipe {
    * @param {Pipeline} pipeline - Current running Pipeline
    */
   constructor (pipeline) {
+    super()
+
     // This will give the newly created pipe the name of the pipe class
     this.name = this.constructor.name
 
@@ -73,9 +83,14 @@ export default class Pipe {
    *
    * @param {...*} [args] - any arguments. Literally anything...
    * @returns {Object} - pipe's data object
+   *
+   * @fires Pipe#start
+   * @fires Pipe#error
+   * @fires Pipe#finish
    */
   async run (...args) {
     log.debug(`Starting ${this.name} pipe`)
+    this.emit('start')
 
     this.args = args
     this.promise = this.code(...args)
@@ -84,17 +99,20 @@ export default class Pipe {
     .catch((err) => {
       if (err.pipe != null && err.pipe === this.name) {
         log.warn(`${err.pipe} pipe throwed an error`)
+        this.emit('error', err)
       } else if (err.pipe != null) {
         log.debug(`${this.name} is rethrowing an error from ${err.pipe}`)
       } else {
         log.error(`${this.name} has an uncaught error`)
         err.pipe = this.name
+        this.emit('error', err)
       }
 
       throw err
     })
 
     log.debug(`Finished ${this.name} pipe`)
+    this.emit('finish')
 
     return this.data
   }
@@ -103,7 +121,7 @@ export default class Pipe {
    * require
    * Requires the pipeline to run a given pipe
    *
-   * @see Pipeline.pipe()
+   * @see Pipeline.require()
    *
    * @param {String} name - name of pipe to run
    * @param {...*} [args] - any arguments. Literally anything...
@@ -135,6 +153,8 @@ export default class Pipe {
    * @param {*} [data] - data to send to template file (accessable with `data` var)
    * @param {Boolean} [th] - true if an error should be thrown
    * @returns {Void}
+   *
+   * @fires Pipe#log
    */
   async log (level, file, data, th = (level === 'error')) {
     assert.notEqual(['debug', 'info', 'warn', 'error'].indexOf(level), -1, 'log requires a valid reporting level')
@@ -156,6 +176,7 @@ export default class Pipe {
     log.silly(`\n${issue.body}`)
 
     this.logs[level].push(issue)
+    this.emit('log', issue)
 
     if (th) throw this.error(issue.title)
   }

@@ -7,6 +7,7 @@
 
 import _ from 'lodash'
 import assert from 'assert'
+import events from 'events'
 import git from 'nodegit'
 import path from 'path'
 import Promise from 'bluebird'
@@ -22,8 +23,15 @@ const fs = Promise.promisifyAll(require('fs'))
 /**
  * Pipeline
  * Wraps a bunch of pipes together
+ *
+ * @extends EventEmitter
+ *
+ * @fires Pipeline#pipe:start
+ * @fires Pipeline#pipe:error
+ * @fires Pipeline#pipe:finish
+ * @fires Pipeline#pipe:log
  */
-export default class Pipeline {
+export default class Pipeline extends events.EventEmitter {
 
   /**
    * Creates a new pipeline
@@ -43,6 +51,8 @@ export default class Pipeline {
    * }
    */
   constructor (build = {}) {
+    super()
+
     this.build = {
       repo: build.repo,
       tag: build.tag,
@@ -186,8 +196,13 @@ export default class Pipeline {
     }
 
     const pipe = new pipes[name](this)
-    this.pipes.push(pipe)
 
+    pipe.on('start', () => this.emit('pipe:start', pipe))
+    pipe.on('error', (err) => this.emit('pipe:error', pipe, err))
+    pipe.on('finish', () => this.emit('pipe:finish', pipe))
+    pipe.on('log', (log) => this.emit('pipe:log', pipe, log))
+
+    this.pipes.push(pipe)
     return pipe.run(...args)
   }
 
