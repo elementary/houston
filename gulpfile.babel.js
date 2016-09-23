@@ -6,136 +6,75 @@
 import babel from 'gulp-babel'
 import del from 'del'
 import gulp from 'gulp'
-import merge from 'merge2'
+import path from 'path'
 
 /**
- * overarching tasks
+ * functionCopy
+ * Returns gulp task for copying files based on file input
+ *
+ * @param [String] file - path of file to copy
+ * @returns {Stream} - a gulp stream
  */
+const functionCopy = (file) => {
+  const buildFiles = (file == null) ? ['src/**/*', '!src/**/*.js'] : file
 
-gulp.task('clear', () => {
+  return gulp.src(buildFiles, { base: 'src' })
+  .pipe(gulp.dest('build'))
+}
+
+/**
+ * functionBabel
+ * Returns gulp task for building with babel based on file input
+ *
+ * @param [String] file - path of file to build with babel
+ * @returns {Stream} - a gulp stream
+ */
+const functionBabel = (file) => {
+  const buildFiles = (file == null) ? ['src/**/*.js'] : file
+
+  return gulp.src(buildFiles, { base: 'src' })
+  .pipe(babel())
+  .pipe(gulp.dest('build'))
+}
+
+/**
+ * clean
+ * Removes any compiled files
+ */
+gulp.task('clean', () => {
   return del(['build'])
 })
 
-gulp.task('build-entry', () => {
-  return gulp.src('src/entry.js')
-  .pipe(babel())
-  .pipe(gulp.dest('build'))
-})
+/**
+ * build
+ * Runs all build related tasks
+ */
+gulp.task('build', ['build-copy', 'build-babel'])
 
 /**
- * flightcheck
- * all clear and build functions for flightcheck process
+ * build-copy
+ * Copies all non built files to build directory
  */
-
-gulp.task('clear-flightcheck', () => {
-  return del(['build/flightcheck'])
-})
-
-gulp.task('build-flightcheck', ['clear-flightcheck'], () => {
-  const copy = gulp.src([
-    'src/flightcheck/**/*',
-    '!src/flightcheck/**/*.js'
-  ])
-  .pipe(gulp.dest('build/flightcheck'))
-
-  const javascript = gulp.src('src/flightcheck/**/*.js')
-  .pipe(babel())
-  .pipe(gulp.dest('build/flightcheck'))
-
-  return merge(copy, javascript)
-})
+gulp.task('build-copy', () => functionCopy())
 
 /**
- * houston
- * all clear and build functions for houston process
+ * build-babel
+ * Builds all src/ code with babel
  */
-
-gulp.task('clear-houston', () => {
-  return del(['build/houston'])
-})
-
-gulp.task('build-houston', ['clear-houston'], () => {
-  const copy = gulp.src([
-    'src/houston/**/*',
-    '!src/houston/**/*.js'
-  ])
-  .pipe(gulp.dest('build/houston'))
-
-  const javascript = gulp.src([
-    'src/houston/**/*.js'
-  ])
-  .pipe(babel())
-  .pipe(gulp.dest('build/houston'))
-
-  return merge(copy, javascript)
-})
+gulp.task('build-babel', () => functionBabel())
 
 /**
- * lib
- * all clear and build functions for lib helper files
+ * watch
+ * Watches files for change
  */
-
-gulp.task('clear-lib', () => {
-  return del(['build/lib'])
-})
-
-gulp.task('build-lib', ['clear-lib'], () => {
-  return gulp.src([
-    'src/lib/**/*.js'
-  ])
-  .pipe(babel())
-  .pipe(gulp.dest('build/lib'))
-})
-
-/**
- * strongback
- * all clear and build functions for strongback process
- */
-
-gulp.task('clear-strongback', () => {
-  // Strongback has some folders that are root. Avoid the permission error
-  return del([
-    'build/strongback/**',
-    '!build/strongback',
-    '!build/strongback/cache',
-    '!build/strongback/cache/**/*',
-    '!build/strongback/projects',
-    '!build/strongback/projects/**/*'
-  ])
-})
-
-gulp.task('build-strongback', ['clear-strongback'], () => {
-  const copy = gulp.src([
-    'src/strongback/**/*',
-    '!src/strongback/**/*.js'
-  ])
-  .pipe(gulp.dest('build/strongback'))
-
-  const javascript = gulp.src([
-    'src/strongback/**/*.js'
-  ])
-  .pipe(babel())
-  .pipe(gulp.dest('build/strongback'))
-
-  return merge(copy, javascript)
-})
-
-/**
- * wrapped tasks
- * functions to be ran
- */
-
-gulp.task('build', [
-  'build-entry',
-  'build-flightcheck',
-  'build-houston',
-  'build-lib',
-  'build-strongback'
-])
-
 gulp.task('watch', () => {
-  gulp.watch('src/flightcheck/**/*', ['build-flightcheck'])
-  gulp.watch('src/houston/**/*', ['build-houston'])
-  gulp.watch('src/lib/**/*', ['build-lib'])
-  gulp.watch('src/strongback/**/*', ['build-strongback'])
+  gulp.watch('src/**/*', (obj) => {
+    if (obj == null || obj.type !== 'changed') return
+
+    if (path.extname(obj.path) !== '.js') {
+      functionCopy(obj.path)
+    } else {
+      functionBabel(obj.path)
+    }
+  })
 })

@@ -28,7 +28,6 @@
     "koa-static": "^3.0.0",
     "koa-views": "^4.1.0",
     "lodash": "^4.13.1",
-    "merge2": "^1.0.2",
     "mongoose": "^4.4.19",
     "nodegit": "^0.14.1",
     "nunjucks": "^2.4.2",
@@ -54,7 +53,7 @@
   "scripts": {
     "flightcheck": "node build/entry.js flightcheck",
     "houston": "node build/entry.js houston",
-    "strongback": "node build/entry.js strongback",
+    "clean": "gulp clean",
     "build": "gulp build",
     "build:watch": "gulp watch",
     "lint": "eslint 'src/**/*.js' 'test/**/*.js'",
