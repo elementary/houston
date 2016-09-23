@@ -19,6 +19,8 @@ const publicKey = path.resolve(alias.resolve.alias['test'], 'fixtures', 'github'
 test.beforeEach((t) => {
   mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
 
+  nock.disableNetConnect() // Disables all real HTTP requests
+
   t.context.config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
   t.context.github = require(path.resolve(alias.resolve.alias['service'], 'github'))
 })
@@ -67,15 +69,40 @@ test('Can generate an accurate JWT', async (t) => {
   t.true(four.exp === Math.floor(futureDate.getTime() / 1000))
 })
 
-test.skip('Can generate an accurate token', async (t) => {
+test('Can generate an accurate token', async (t) => {
   const github = t.context.github
 
-  nock.recorder.rec({
-    logging: (c) => fs.appendFile('record.txt', c)
+  nock('https://api.github.com:443', { encodedQueryParams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .matchHeader('Authorization', /Bearer [a-z\d]{30,}/i)
+  .post('/installations/1/access_tokens')
+  .reply(201, {
+    token: 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh',
+    'expires_at': '2016-09-23T21:26:26Z',
+    'on_behalf_of': null
+  }, {
+    server: 'GitHub.com',
+    date: 'Fri, 23 Sep 2016 20:26:26 GMT',
+    'content-type': 'application/json; charset=utf-8',
+    'content-length': '111',
+    connection: 'close',
+    status: '201 Created',
+    'cache-control': 'public, max-age=60, s-maxage=60',
+    vary: 'Accept, Accept-Encoding',
+    etag: '"a8e448a94v8w198bvw4e846efwefxd34"',
+    'x-github-media-type': 'github.machine-man-preview; format=json',
+    'access-control-expose-headers': 'ETag, Link, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval',
+    'access-control-allow-origin': '*',
+    'content-security-policy': 'default-src \'none\'',
+    'strict-transport-security': 'max-age=31536000; includeSubdomains; preload',
+    'x-content-type-options': 'nosniff',
+    'x-frame-options': 'deny',
+    'x-xss-protection': '1; mode=block',
+    'x-served-by': 'w498ve4q56189w48e9g4s5a6d41189wf',
+    'x-github-request-id': '12457896:7384:4857186:94875132'
   })
 
-  const one = await github.generateToken()
+  const one = await github.generateToken(1)
 
-  // eslint-disable-next-line
-  console.log(one)
+  t.is(one, 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh')
 })

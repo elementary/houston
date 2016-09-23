@@ -23,11 +23,12 @@ const tokenCache = []
  * getToken
  * Returns a token from the cache or null if it does not exist
  *
+ * @param {Number} inst - GitHub organization integration ID
  * @param {Number} [user] - optional GitHub user id
  * @return {String} - GitHub token or null for non-existant
  */
-const getToken = (user) => {
-  const foundIndex = tokenCache.findIndex((a) => (a.user === user))
+const getToken = (inst, user) => {
+  const foundIndex = tokenCache.findIndex((a) => (a.inst === inst && a.user === user))
 
   // Remove anything that is less than one minute to expire
   if (foundIndex !== -1 && tokenCache[foundIndex].exp.getTime() > Date.now() + 1000) {
@@ -43,12 +44,13 @@ const getToken = (user) => {
  * setToken
  * Saves a token in the cache
  *
+ * @param {Number} inst - GitHub organization integration ID
  * @param {String} token - GitHub authentication token
  * @param {Date} exp - the date it expires
  * @param {Number} [user] - the GitHub user id
  * @returns {Void}
  */
-const setToken = (token, exp, user) => {
+const setToken = (inst, token, exp, user) => {
   if (typeof token !== 'string') {
     throw new GitHubError('Unable to setToken without a token parameter')
   }
@@ -56,7 +58,7 @@ const setToken = (token, exp, user) => {
     throw new GitHubError('Unable to setToken without a exp parameter')
   }
 
-  tokenCache.push({ token, exp, user })
+  tokenCache.push({ inst, token, exp, user })
 }
 
 /**
@@ -124,10 +126,15 @@ export async function generateJWT (exp = moment().add(1, 'minutes').toDate()) {
  * generateToken
  * Generates GitHub authentication token
  *
+ * @param {Number} inst - GitHub organization integration ID
  * @param {Number} [user] - optional GitHub user id to generate token on behalf of
  * @returns {String} - GitHub token to use for authentication
  */
-export async function generateToken (user) {
+export async function generateToken (inst, user) {
+  if (typeof inst !== 'number') {
+    log.error('GitHub service tried to generate token without organization integration ID')
+    throw new GitHubError('Unable to generate token without organization integration ID')
+  }
   if (typeof config.github.integration.id !== 'number') {
     log.warn('GitHub configuration does not include an integration id')
     throw new GitHubError('Unable to generate JWT without integration id')
@@ -139,9 +146,9 @@ export async function generateToken (user) {
   const JWT = await generateJWT()
 
   const githubReq = request
-  .post(`https://api.github.com/installations/${config.github.integration.id}/access_tokens`)
-  .set('Accept', 'application/vnd.github.machine-man-preview+json')
+  .post(`https://api.github.com/installations/${inst}/access_tokens`)
   .set('Authorization', `Bearer ${JWT}`)
+  .set('Accept', 'application/vnd.github.machine-man-preview+json')
 
   if (user != null) {
     log.debug(`GitHub service is generating a token for user ${user}`)
@@ -150,16 +157,17 @@ export async function generateToken (user) {
 
   const githubRes = await githubReq
   .catch((err) => {
+    if (err.status === '404') {
+      log.error('Trying to generate GitHub token for an incorrect organization integration ID')
+      throw new GitHubError('Authentication denied')
+    }
+
     log.error(`Trying to generate GitHub token returned a ${err.status}`)
     throw new GitHubError('Unable to generate authentication token')
   })
 
   if (githubRes.body != null && githubRes.body.token != null) {
-    setToken({
-      token: githubRes.body.token,
-      exp: moment(githubRes.body.expires_at).toDate(),
-      user
-    })
+    setToken(inst, githubRes.body.token, moment(githubRes.body.expires_at).toDate(), user)
 
     return githubRes.body.token
   } else {
