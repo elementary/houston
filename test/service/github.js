@@ -7,6 +7,7 @@ import fs from 'fs'
 import jwt from 'jsonwebtoken'
 import mock from 'mock-require'
 import moment from 'moment'
+import nock from 'nock'
 import path from 'path'
 import test from 'ava'
 
@@ -20,14 +21,6 @@ test.beforeEach((t) => {
 
   t.context.config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
   t.context.github = require(path.resolve(alias.resolve.alias['service'], 'github'))
-})
-
-test('GitHubError is an error', (t) => {
-  const github = t.context.github
-
-  const one = new github.GitHubError('testing')
-
-  t.true(one instanceof Error)
 })
 
 test('GitHubError has correct error code', (t) => {
@@ -70,6 +63,19 @@ test('Can generate an accurate JWT', async (t) => {
   t.is(four.iss, config.github.integration.id)
   t.true(three.iat < new Date().getTime())
   t.true(four.iat < new Date().getTime())
-  t.true(three.exp > new Date().getTime())
-  t.true(four.exp === new Date(futureDate).getTime())
+  t.true(three.exp > Math.floor(Date.now() / 1000))
+  t.true(four.exp === Math.floor(futureDate.getTime() / 1000))
+})
+
+test.skip('Can generate an accurate token', async (t) => {
+  const github = t.context.github
+
+  nock.recorder.rec({
+    logging: (c) => fs.appendFile('record.txt', c)
+  })
+
+  const one = await github.generateToken()
+
+  // eslint-disable-next-line
+  console.log(one)
 })
