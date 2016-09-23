@@ -27,11 +27,13 @@ const tokenCache = []
  * @param {Number} [user] - optional GitHub user id
  * @return {String} - GitHub token or null for non-existant
  */
-const getToken = (inst, user) => {
-  const foundIndex = tokenCache.findIndex((a) => (a.inst === inst && a.user === user))
+const getToken = (inst, user = null) => {
+  const foundIndex = tokenCache.findIndex((a) => {
+    return (a.inst === inst && a.user === user)
+  })
 
   // Remove anything that is less than one minute to expire
-  if (foundIndex !== -1 && tokenCache[foundIndex].exp.getTime() > Date.now() + 1000) {
+  if (foundIndex !== -1 && tokenCache[foundIndex].exp.getTime() < Date.now() + 1000) {
     delete tokenCache[foundIndex]
     return null
   }
@@ -50,7 +52,7 @@ const getToken = (inst, user) => {
  * @param {Number} [user] - the GitHub user id
  * @returns {Void}
  */
-const setToken = (inst, token, exp, user) => {
+const setToken = (inst, token, exp, user = null) => {
   if (typeof token !== 'string') {
     throw new GitHubError('Unable to setToken without a token parameter')
   }
@@ -140,7 +142,7 @@ export async function generateToken (inst, user) {
     throw new GitHubError('Unable to generate JWT without integration id')
   }
 
-  const cachedToken = getToken(user)
+  const cachedToken = getToken(inst, user)
   if (cachedToken != null) return cachedToken.token
 
   const JWT = await generateJWT()

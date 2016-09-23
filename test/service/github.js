@@ -11,6 +11,7 @@ import nock from 'nock'
 import path from 'path'
 import test from 'ava'
 
+import * as helper from './helpers/github'
 import alias from 'root/.alias'
 import mockConfig from 'test/fixtures/config'
 
@@ -72,37 +73,41 @@ test('Can generate an accurate JWT', async (t) => {
 test('Can generate an accurate token', async (t) => {
   const github = t.context.github
 
-  nock('https://api.github.com:443', { encodedQueryParams: true })
-  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
-  .matchHeader('Authorization', /Bearer [a-z\d]{30,}/i)
-  .post('/installations/1/access_tokens')
-  .reply(201, {
+  helper.mock('/installations/1/access_tokens', {
     token: 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh',
     'expires_at': '2016-09-23T21:26:26Z',
     'on_behalf_of': null
-  }, {
-    server: 'GitHub.com',
-    date: 'Fri, 23 Sep 2016 20:26:26 GMT',
-    'content-type': 'application/json; charset=utf-8',
-    'content-length': '111',
-    connection: 'close',
-    status: '201 Created',
-    'cache-control': 'public, max-age=60, s-maxage=60',
-    vary: 'Accept, Accept-Encoding',
-    etag: '"a8e448a94v8w198bvw4e846efwefxd34"',
-    'x-github-media-type': 'github.machine-man-preview; format=json',
-    'access-control-expose-headers': 'ETag, Link, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval',
-    'access-control-allow-origin': '*',
-    'content-security-policy': 'default-src \'none\'',
-    'strict-transport-security': 'max-age=31536000; includeSubdomains; preload',
-    'x-content-type-options': 'nosniff',
-    'x-frame-options': 'deny',
-    'x-xss-protection': '1; mode=block',
-    'x-served-by': 'w498ve4q56189w48e9g4s5a6d41189wf',
-    'x-github-request-id': '12457896:7384:4857186:94875132'
-  })
+  }, 201)
 
   const one = await github.generateToken(1)
 
   t.is(one, 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh')
+})
+
+test('Uses token cache', async (t) => {
+  const github = t.context.github
+
+  helper.mock('/installations/1/access_tokens', {
+    token: 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh',
+    'expires_at': moment().add(1, 'hours').toISOString(),
+    'on_behalf_of': null
+  }, 201)
+
+  helper.mock('/installations/2/access_tokens', {
+    token: 'v1.afj9830jf0a293jf0aj30f9jaw30f9jaw039fj0a',
+    'expires_at': moment().add(1, 'hours').toISOString(),
+    'on_behalf_of': null
+  }, 201)
+
+  const one = await github.generateToken(1)
+  const two = await github.generateToken(1)
+  const three = await github.generateToken(2)
+  const four = await github.generateToken(2)
+
+  t.throws(github.generateToken(3))
+
+  t.is(one, 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh')
+  t.is(two, one)
+  t.is(three, 'v1.afj9830jf0a293jf0aj30f9jaw30f9jaw039fj0a')
+  t.is(three, four)
 })
