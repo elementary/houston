@@ -5,6 +5,8 @@
  * @exports {Class} ServiceError - error related to communication with GitHub
  */
 
+import moment from 'moment'
+
 import * as service from './index'
 
 /**
@@ -25,4 +27,17 @@ export class GitHubError extends service.ServiceError {
 
     this.code = 'GTHERR'
   }
+}
+
+/**
+ * generateJWT
+ * Generates JWT bearer token for GitHub authentication
+ *
+ * @param {Date} exp - date to expire on
+ * @returns {String} - JWT bearer token to authenticate with
+ */
+export function generateJWT (exp = moment().add(1, 'hours').toDate()) {
+  if (exp.toDate == null) throw new GitHubError('Unable to generate JWT without expiration date')
+
+
 }

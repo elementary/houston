@@ -4,6 +4,8 @@
 /build
 /config.js
 
+!/test/fixtures/github/private.pem
+
 # Node files
 node_modules
 
