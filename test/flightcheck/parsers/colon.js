@@ -41,6 +41,7 @@ test('can read a file', async (t) => {
 
   t.is(one['Source'], 'vocal')
   t.is(one['Maintainer'], 'Nathan Dyer')
+  // eslint-disable-next-line no-template-curly-in-string
   t.is(one['Depends'], '${misc:Depends}, ${shlibs:Depends}')
   t.is(one['Description'], 'Vocal\n     Simple podcast client for the modern desktop.')
 
@@ -59,6 +60,7 @@ test('can write a file', async (t) => {
     'Standards-Version': '3.9.3',
     Package: 'vocal',
     Architecture: 'any',
+    // eslint-disable-next-line no-template-curly-in-string
     Depends: '${misc:Depends}, ${shlibs:Depends}',
     Description: 'Vocal\n Simple podcast client for the modern desktop.'
   })
@@ -75,6 +77,7 @@ test('can write a file', async (t) => {
     'Standards-Version: 3.9.3',
     'Package: vocal',
     'Architecture: any',
+    // eslint-disable-next-line no-template-curly-in-string
     'Depends: ${misc:Depends}, ${shlibs:Depends}',
     'Description: Vocal',
     ' Simple podcast client for the modern desktop.',

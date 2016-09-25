@@ -19,7 +19,7 @@ export function time (date) {
   if (typeof date === 'number') {
     date = new Date(date)
   }
-  if (!date instanceof Date) {
+  if (date instanceof !Date) {
     throw new Error('date is expected to be an instance of Date')
   }
 
