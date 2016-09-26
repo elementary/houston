@@ -2,7 +2,6 @@
  * lib/atc.js
  * A message queue class based around mongodb
  *
- * @exports {AtcError} AtcError - An atc specific error class
  * @exports {Class} Worker - Works on items in a queue
  * @exports {Class} Sender - Adds items to worker queue
  */
@@ -12,26 +11,6 @@ import monq from 'monq'
 import config from 'lib/config'
 
 const client = monq(config.database)
-
-/**
- * AtcError
- * An atc specific error class
- *
- * @extends Error
- */
-export class AtcError extends Error {
-
-  /**
-   * Creates a new AtcError
-   *
-   * @param {String} msg - error message
-   */
-  constructor (msg) {
-    super(msg)
-
-    this.code = 'ATCERR'
-  }
-}
 
 /**
  * Worker
