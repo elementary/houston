@@ -6,6 +6,7 @@
  * @exports {Class} Sender - Adds items to worker queue
  */
 
+import events from 'events'
 import monq from 'monq'
 
 import config from 'lib/config'
@@ -16,14 +17,14 @@ const client = monq(config.database)
  * Worker
  * Works on items in a queue
  *
- * @extends monq.Worker
+ * @extends EventEmitter
  *
- * @emits Worker#dequeued
+ * @emits Worker#removed
  * @emits Worker#failed
  * @emits Worker#complete
  * @emits Worker#error
  */
-export class Worker extends client.Worker {
+export class Worker extends events.EventEmitter {
 
   /**
    * Creates a queue worker
@@ -32,10 +33,26 @@ export class Worker extends client.Worker {
    * @param {Number} int - Time to check for new items in queue
    */
   constructor (name, int = 5000) {
-    super([name], {
-      collection: 'queue',
+    super()
+
+    this.worker = client.worker([name], {
       interval: int
     })
+  }
+
+  /**
+   * start
+   * Starts worker queue
+   *
+   * @returns {Void}
+   */
+  start () {
+    this.worker.on('dequeued', (data) => this.emit('unqueued', data))
+    this.worker.on('failed', (data) => this.emit('failed', data))
+    this.worker.on('complete', (data) => this.emit('complete', data))
+    this.worker.on('error', (err) => this.emit('error', err))
+
+    this.worker.start()
   }
 
   /**
@@ -47,10 +64,10 @@ export class Worker extends client.Worker {
    * @return {Void}
    */
   register (name, fn) {
-    super({
+    this.worker.register({
       [name]: (param, callback) => {
         fn(param)
-        .then((val) => callback(null, val))
+        .then((data) => callback(null, data))
         .catch((err) => callback(err))
       }
     })
@@ -61,7 +78,7 @@ export class Worker extends client.Worker {
  * Sender
  * Adds items to worker queue
  */
-export class Sender extends client.Queue {
+export class Sender {
 
   /**
    * Creates a new queue sender
@@ -69,25 +86,38 @@ export class Sender extends client.Queue {
    * @param {String} name - Message queue name
    */
   constructor (name) {
-    super(client, name, {
-      collection: 'queue'
+    this.queue = client.queue(name)
+  }
+
+  /**
+   * get
+   * Returns a job object in the queue
+   *
+   * @param {String} id - mongodb job id
+   * @returns {Object} - a promise of the job object
+   */
+  get (id) {
+    return new Promise((resolve, reject) => {
+      this.queue.get(id, (err, obj) => {
+        if (err) return reject(err)
+        return resolve(obj.data)
+      })
     })
   }
 
   /**
-   * enqueue
+   * add
    * Adds an item to the queue
    *
-   * @param {String} name - job name
-   * @param {Object} param - job parameters
-   * @param {Object} opt - options
-   * @return {Object} - monq job object
+   * @param {String} name - the job name
+   * @param {Object} param - the job parameters
+   * @returns {Object} - a promise of the job object
    */
-  enqueue (name, param, opt) {
+  add (name, param) {
     return new Promise((resolve, reject) => {
-      super(name, param, opt, (err, job) => {
+      this.queue.enqueue(name, param, (err, job) => {
         if (err) return reject(err)
-        return resolve(job)
+        return resolve(job.data)
       })
     })
   }
