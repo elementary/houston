@@ -16,18 +16,20 @@ import config from './config'
 const namespace = 'app'
 
 // Set the default log level for the app and possibly other libraries
-/* eslint-disable no-fallthrough */
-switch (true) {
-  case (config.log === 'debug'):
-    Debug.enable(`${namespace}:*:debug`)
-  case (config.log === 'info'):
-    Debug.enable(`${namespace}:*:info`)
-  case (config.log === 'warn'):
-    Debug.enable(`${namespace}:*:warn`)
-  case (config.log === 'error'):
-    Debug.enable(`${namespace}:*:error`)
+if (process.env.DEBUG == null) {
+  /* eslint-disable no-fallthrough */
+  switch (true) {
+    case (config.log === 'debug'):
+      Debug.enable(`${namespace}:*:debug`)
+    case (config.log === 'info'):
+      Debug.enable(`${namespace}:*:info`)
+    case (config.log === 'warn'):
+      Debug.enable(`${namespace}:*:warn`)
+    case (config.log === 'error'):
+      Debug.enable(`${namespace}:*:error`)
+  }
+  /* eslint-enable no-fallthourgh */
 }
-/* eslint-enable no-fallthourgh */
 
 /**
  * Creates a new Log class
