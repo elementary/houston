@@ -1,57 +1,108 @@
 /**
  * lib/log.js
- * Starts a winston logging session
+ * Creates a simple, multi environment, namespaced log class
+ * NOTE: our global namespace is "app"
  *
- * @exports {EventHandler} - Winston event handler
+ * @see https://github.com/visionmedia/debug
+ *
+ * @exports {Log} default - a simple, multi environment log module
+ * @exports {Log} global - an initalized Log class for logs with no other home
  */
 
-import winston from 'winston'
+import Debug from 'debug'
 
 import config from './config'
-import * as langHelper from './helpers/lang'
 
-const transports = []
+const namespace = 'app'
 
-if (config.env !== 'test' && config.log.console) {
-  transports.push(
-    new winston.transports.Console({
-      handleExceptions: false,
-      prettyPrint: true,
-      colorize: true,
-      level: config.log.level,
-      timestamp: () => new Date().toLocaleString()
-    })
-  )
+// Set the default log level for the app and possibly other libraries
+/* eslint-disable no-fallthrough */
+switch (true) {
+  case (config.log === 'debug'):
+    Debug.enable(`${namespace}:*:debug`)
+  case (config.log === 'info'):
+    Debug.enable(`${namespace}:*:info`)
+  case (config.log === 'warn'):
+    Debug.enable(`${namespace}:*:warn`)
+  case (config.log === 'error'):
+    Debug.enable(`${namespace}:*:error`)
+}
+/* eslint-enable no-fallthourgh */
+
+/**
+ * Creates a new Log class
+ */
+const Log = class {
+
+  /**
+   * Creates a new log subclass
+   *
+   * @param {String} name - log namespace
+   */
+  constructor (name = 'global') {
+    // This stores all of our upstream Debug instances
+    this.upstream = {}
+
+    this.upstream.debug = Debug(`${namespace}:${name}:debug`)
+    this.upstream.info = Debug(`${namespace}:${name}:info`)
+    this.upstream.warn = Debug(`${namespace}:${name}:warn`)
+    this.upstream.error = Debug(`${namespace}:${name}:error`)
+  }
+
+  /**
+   * debug
+   * Logs a message to debug log
+   *
+   * @param {...*} args - anything to send to upstream Debug library
+   * @returns {Void}
+   */
+  debug (...args) {
+    this.upstream.debug(...args)
+  }
+
+  /**
+   * info
+   * Logs a message to info log
+   *
+   * @param {...*} args - anything to send to upstream Debug library
+   * @returns {Void}
+   */
+  info (...args) {
+    this.upstream.info(...args)
+  }
+
+  /**
+   * warn
+   * Logs a message to warn log
+   *
+   * @param {...*} args - anything to send to upstream Debug library
+   * @returns {Void}
+   */
+  warn (...args) {
+    this.upstream.warn(...args)
+  }
+
+  /**
+   * error
+   * Logs a message to error log
+   *
+   * @param {...*} args - anything to send to upstream Debug library
+   * @returns {Void}
+   */
+  error (...args) {
+    this.upstream.error(...args)
+  }
 }
 
-if (config.env !== 'test' && config.log.files) {
-  transports.push(
-    new winston.transports.File({
-      handleExceptions: false,
-      name: 'info-file',
-      filename: 'info.log',
-      level: 'info'
-    })
-  )
+/**
+ * From this point on, all Log class functions should be complete. It's time to
+ * setup global log functions, listeners, and third party services.
+ */
 
-  transports.push(
-    new winston.transports.File({
-      handleExceptions: false,
-      name: 'error-file',
-      filename: 'error.log',
-      level: 'error'
-    })
-  )
-}
-
-const log = new winston.Logger({ transports })
-
-log.exitOnError = false
-
-log.lang = langHelper
+export const global = new Log('global')
 
 process.on('unhandledRejection', (reason, promise) => {
-  log.warn(`Unhandled rejection at ${promise._fulfillmentHandler0}\n`, reason)
+  global.warn(`Unhandled rejection at ${promise._fulfillmentHandler0}\n`, reason)
 })
 
-export default log
+export default Log

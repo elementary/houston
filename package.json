@@ -14,6 +14,7 @@
     "babel-register": "^6.9.0",
     "bluebird": "^3.4.0",
     "co": "^4.6.0",
+    "debug": "^2.2.0",
     "del": "^2.2.0",
     "dockerode": "^2.2.10",
     "gulp": "3.9.0",

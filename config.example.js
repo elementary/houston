@@ -45,15 +45,8 @@ module.exports.server = {
   url: 'http://localhost:3000'
 }
 
-module.exports.log = {
-  console: true,
-
-  // 'silly' 'debug' 'verbose' 'info' 'warn' 'error'
-  level: 'silly',
-
-  // Create 'error.log' and 'info.log'
-  files: false
-}
+// 'debug' 'info' 'warn' 'error'
+module.exports.log = 'info'
 
 module.exports.flightcheck = {
   directory: '/tmp/flightcheck',
