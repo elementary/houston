@@ -59,7 +59,6 @@
   "scripts": {
     "flightcheck": "node build/entry.js flightcheck",
     "houston": "node build/entry.js houston",
-    "strongback": "node build/entry.js strongback",
     "build": "gulp build",
     "build:watch": "gulp watch",
     "lint": "eslint 'src/**/*.js' 'test/**/*.js'",
