@@ -40,8 +40,7 @@
     "socket.io": "^1.4.6",
     "socket.io-client": "^1.4.6",
     "superagent": "^2.0.0",
-    "syslogd": "^1.1.2",
-    "winston": "^2.2.0"
+    "syslogd": "^1.1.2"
   },
   "devDependencies": {
     "ava": "^0.16.0",
