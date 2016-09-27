@@ -6,7 +6,6 @@
  * @see https://github.com/visionmedia/debug
  *
  * @exports {Log} default - a simple, multi environment log module
- * @exports {Log} global - an initalized Log class for logs with no other home
  */
 
 import Debug from 'debug'
@@ -101,10 +100,10 @@ const Log = class {
  * setup global log functions, listeners, and third party services.
  */
 
-export const global = new Log('global')
+const log = new Log('lib:log')
 
 process.on('unhandledRejection', (reason, promise) => {
-  global.warn(`Unhandled rejection at ${promise._fulfillmentHandler0}\n`, reason)
+  log.warn(`Unhandled rejection at ${promise._fulfillmentHandler0}\n`, reason)
 })
 
 export default Log
