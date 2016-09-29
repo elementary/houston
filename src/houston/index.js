@@ -16,15 +16,15 @@ import path from 'path'
 import session from 'koa-session'
 import view from 'koa-views'
 
+import * as download from './service/download.js'
 import * as helpers from 'lib/helpers'
+import * as log from 'lib/log'
 import * as passport from './passport'
 import * as policy from './policy'
 import atc from './service/atc'
-import * as download from './service/download.js'
 import config from 'lib/config'
 import controllers from './controller'
 import db from 'lib/database'
-import log from 'lib/log'
 import Mistake from 'lib/mistake'
 
 const app = new Koa()
@@ -45,7 +45,7 @@ app.use(async (ctx, next) => {
   const start = new Date()
   await next()
   const end = new Date()
-  log.verbose(`${ctx.method} ${ctx.status} ${ctx.url} => ${end - start}ms`)
+  log.default.verbose(`${ctx.method} ${ctx.status} ${ctx.url} => ${end - start}ms`)
 })
 
 // Static 'public' folder serving
@@ -140,10 +140,13 @@ app.use((ctx) => {
 app.on('error', async (error, ctx, next) => {
   if (app.env === 'test') return
 
+  // Sentry error logging
+  if (log.sentry != null) app.on('error', (err) => log.sentry.captureException(err))
+
   if (/4.*/.test(error.status)) {
-    log.verbose(`${ctx.method} ${ctx.status} ${ctx.url} |> ${error.message}`)
+    log.default.verbose(`${ctx.method} ${ctx.status} ${ctx.url} |> ${error.message}`)
   } else {
-    log.error(error)
+    log.default.error(error)
   }
 
   try {
@@ -159,11 +162,11 @@ app.on('error', async (error, ctx, next) => {
 
 // Launching server
 server.listen(config.server.port)
-log.info(`Houston listening on ${config.server.port} in ${app.env} configuration`)
+log.default.info(`Houston listening on ${config.server.port} in ${app.env} configuration`)
 
 server.on('close', () => {
   db.disconnect()
-  log.info('And now my watch has ended')
+  log.default.info('And now my watch has ended')
 })
 
 export default { app, server }
