@@ -12,7 +12,7 @@ import path from 'path'
  * functionCopy
  * Returns gulp task for copying files based on file input
  *
- * @param [String] file - path of file to copy
+ * @param {String} [file] - path of file to copy
  * @returns {Stream} - a gulp stream
  */
 const functionCopy = (file) => {
@@ -26,7 +26,7 @@ const functionCopy = (file) => {
  * functionBabel
  * Returns gulp task for building with babel based on file input
  *
- * @param [String] file - path of file to build with babel
+ * @param {String} [file] - path of file to build with babel
  * @returns {Stream} - a gulp stream
  */
 const functionBabel = (file) => {
