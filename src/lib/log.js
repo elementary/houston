@@ -5,12 +5,24 @@
  * @exports {EventHandler} - Winston event handler
  */
 
+import raven from 'raven'
 import winston from 'winston'
 
 import config from './config'
 import * as langHelper from './helpers/lang'
 
 const transports = []
+let sentry = null
+
+if (config.sentry) {
+  sentry = new raven.Client(config.sentry, {
+    environment: config.env,
+    release: config.houston.version,
+    tags: { commit: config.houston.comment }
+  })
+
+  sentry.patchGlobal()
+}
 
 if (config.env !== 'test' && config.log.console) {
   transports.push(
@@ -52,6 +64,9 @@ log.lang = langHelper
 
 process.on('unhandledRejection', (reason, promise) => {
   log.warn(`Unhandled rejection at ${promise._fulfillmentHandler0}\n`, reason)
+
+  if (sentry != null) sentry.captureException(reason)
 })
 
+export { sentry }
 export default log
