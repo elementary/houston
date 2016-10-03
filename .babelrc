@@ -15,5 +15,7 @@
     }]
   ],
 
-  "comments": false
+  "sourceMaps": "inline",
+
+  "comments": true
 }
