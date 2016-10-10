@@ -3,19 +3,21 @@
  * Handles all communcation from atc flightcheck connections
  */
 
-import atc from 'houston/service/atc'
+import * as atc from 'lib/atc'
 import Cycle from 'houston/model/cycle'
 import log from 'lib/log'
 import Project from 'houston/model/project'
 
+const worker = new atc.Worker('cycle')
+
 /**
  * Updates cycle when it starts to be tested
  *
- * @param {ObjectId} id - cycle database id
- * @param {Boolean} data - true if test starts
+ * @param {Object} param - details sent by flightcheck
+ * @param {ObjectId} param.id - cycle database id
  */
-atc.on('cycle:start', async (id, data) => {
-  const cycle = await Cycle.findById(id)
+worker.register('start', async (param) => {
+  const cycle = await Cycle.findById(param.id)
   const status = await cycle.getStatus()
 
   if (status !== 'QUEUE') {
@@ -31,37 +33,36 @@ atc.on('cycle:start', async (id, data) => {
 /**
  * Updates a completed cycle database information
  *
- * @param {ObjectId} id - cycle database id
- * @param {Object} data - {
- *   {Number} errors - number of errors the hooks aquired
- *   {Number} warnings - number of warnings the hook aquired
- *   {Object} information - information to be updated in the database
- *   {Array} issues - generated issues for GitHub with title and body
- * }
+ * @param {Object} param - data sent by flightcheck on finish
+ * @param {ObjectId} param.id - cycle database id
+ * @param {Object} param.apphub - AppHub Pipe result data
+ * @param {Object} param.aptly - ElementaryAptly Pipe result data
+ * @param {Object}[] param.logs - a list of all logs outputed during Pipeline
  */
-atc.on('cycle:finish', async (id, data) => {
-  const cycle = await Cycle.findById(id)
+worker.register('finish', async (param) => {
+  const cycle = await Cycle.findById(param.id)
   const status = await cycle.getStatus()
 
   if (status !== 'RUN') {
-    log.debug('Received flightcheck finish data for a cycle already checked')
+    log.debug('Received flightcheck finish data for a cycle not running')
     return
   }
 
-  log.verbose('Received flightcheck data for finish cycle')
-  log.debug(`Found ${log.lang.s('log', data.logs)} in ${cycle.name}`)
-  data.logs.forEach((l) => {
+  log.verbose(`Received flightcheck data for finish cycle ${param.id}`)
+  log.debug(`Found ${log.lang.s('log', param.logs)} in ${cycle.name}`)
+  param.logs.forEach((l) => {
     log.verbose(`${l.pipe} ${l.level} log => ${l.title}`)
     log.silly(`\n${l.body}`)
   })
 
-  const errors = data.logs.filter((l) => (l.level === 'error'))
+  const errors = param.logs.filter((l) => (l.level === 'error'))
 
-  if (data.apphub !== null) {
+  if (param.apphub !== null) {
     log.debug(`Updating ${cycle.name} project apphub object`)
+
     await Project.findByIdAndUpdate(cycle.project, {
-      'apphub': data.apphub,
-      'github.label': data.apphub.log.label
+      'apphub': param.apphub,
+      'github.label': param.apphub.log.label
     })
   }
 
@@ -70,13 +71,13 @@ atc.on('cycle:finish', async (id, data) => {
     return cycle.setStatus('FAIL')
   }
 
-  if (data.aptly == null || data.aptly.publishedKeys.length < 1) {
+  if (param.aptly == null || param.aptly.publishedKeys.length < 1) {
     log.debug(`${cycle.name} has no aptly published keys. Setting to finished`)
     return cycle.setStatus('FINISH')
   } else {
     log.debug(`Updating ${cycle.name} aptly file keys and setting to review`)
     await cycle.update({
-      'packages': data.aptly.publishedKeys
+      'packages': param.aptly.publishedKeys
     })
 
     return cycle.setStatus('REVIEW')
@@ -86,20 +87,23 @@ atc.on('cycle:finish', async (id, data) => {
 /**
  * Updates a cycle with error
  *
- * @returns {ObjectId} id - cycle database id
- * @returns {Error} error - error that occured during testing
+ * @returns {Object} param - data sent by an errored flightcheck cycle
+ * @returns {ObjectId} param.id - cycle database id
+ * @returns {Error} param.error - error that occured during testing
  */
-atc.on('cycle:error', async (id, error) => {
-  const cycle = await Cycle.findById(id)
+worker.register('error', async (param) => {
+  const cycle = await Cycle.findById(param.id)
   const status = await cycle.getStatus()
 
   if (status !== 'RUN') {
-    log.debug('Received flightcheck error data for a cycle already checked')
+    log.debug('Received flightcheck error data for a cycle not running')
     return
   } else {
     log.verbose('Received flightcheck data for error cycle')
   }
 
   cycle.setStatus('ERROR')
-  .then(() => cycle.update({ mistake: error }))
+  .then(() => cycle.update({ mistake: param.error }))
 })
+
+worker.start()

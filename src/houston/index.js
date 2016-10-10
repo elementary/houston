@@ -21,7 +21,6 @@ import * as helpers from 'lib/helpers'
 import * as log from 'lib/log'
 import * as passport from './passport'
 import * as policy from './policy'
-import atc from './service/atc'
 import config from 'lib/config'
 import controllers from './controller'
 import db from 'lib/database'
@@ -35,7 +34,6 @@ app.env = config.env
 
 // Socket installation
 const server = http.createServer(app.callback())
-atc.connect(server)
 
 // Download Tracking syslog Server
 download.startSyslog()
