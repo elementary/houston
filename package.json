@@ -28,7 +28,6 @@
     "koa-static": "^3.0.0",
     "koa-views": "^4.1.0",
     "lodash": "^4.13.1",
-    "merge2": "^1.0.2",
     "mongoose": "^4.4.19",
     "monq": "^0.3.4",
     "nodegit": "^0.14.1",
@@ -63,6 +62,7 @@
     "houston": "node build/entry.js houston",
     "build": "gulp build",
     "build:watch": "gulp watch",
+    "clean": "gulp clean",
     "lint": "eslint 'src/**/*.js' 'test/**/*.js'",
     "test": "NODE_ENV=test ava",
     "test:watch": "NODE_ENV=test ava --watch"
