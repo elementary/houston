@@ -1,15 +1,15 @@
 a(href="project/" + cycle.name + "/review/no")
-  div.fab
-    i.fa.fa-thumbs-o-down
+  div.fab.error
+    i.fa.fa-times
     div.popover-container
       div.popover-content
-        h2 fuel lines fluctuating
-        p abort abort abort!
+        h2 Request Changes
+        p #{cycle.project.name} needs fixing
 
 a(href="project/" + cycle.name + "/review/yes")
-  div.fab
-    i.fa.fa-thumbs-o-up
+  div.fab.success
+    i.fa.fa-check
     div.popover-container
       div.popover-content
-        h2 clear for takeoff
-        p #{cycle.project.name} is ready for the real world
+        h2 Approve
+        p Release #{cycle.project.name} into AppCenter
