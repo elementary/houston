@@ -4,10 +4,11 @@ html
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0")
 
-    link(rel="stylesheet", type="text/css", media="all", href="//fonts.googleapis.com/css?family=Raleway:100,100italic|Open+Sans:300,400,600,300italic,400italic|Droid+Sans|Roboto+Mono")
-    link(rel="stylesheet", type="text/css", media="all", href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css")
-    link(rel="stylesheet", type="text/css", media="all", href="//elementary.io/styles/main.css")
+    link(rel="stylesheet", type="text/css", media="all", href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,300italic,400italic|Droid+Sans|Roboto+Mono")
+    link(rel="stylesheet", type="text/css", media="all", href="https://cdn.jsdelivr.net/fontawesome/4.6.3/css/font-awesome.min.css")
+    link(rel="stylesheet", type="text/css", media="all", href="https://elementary.io/styles/main.css")
     link(rel="stylesheet", type="text/css", media="all", href="/styles/houston.css")
+    script(type="text/javascript", src="https://cdn.jsdelivr.net/g/jquery")
 
     block head
 
@@ -16,43 +17,45 @@ html
     nav.nav
       div.nav-content
         ul
-          li: a(href="//elementary.io", class="logomark")
+          li: a(href="https://elementary.io", class="logomark")
             include /partials/svg-logomark
-          li: a(href="//blog.elementary.io") Blog
-          li: a(href="//elementary.io/support") Support
+          li: a(href="http://blog.elementary.io") Blog
+          li: a(href="https://elementary.io/support") Support
+          li: a(href="https://elementary.io/store") Store
         ul.right
           li: a(href="/") Developer
-          li: a(href="//elementary.io/get-involved") Get Involved
+          li: a(href="https://elementary.io/get-involved") Get Involved
     if user && !hideUser
       nav.nav#secondary
         div.nav-content
           ul
             block actions
-            li: a(href="/add") Add
+            li: a(href="/dashboard") Dashboard
+            li: a(href="/add") Add App
 
             if policy.ifRole(user, 'review')
               li: a(href="/reviews") Reviews
 
+          ul.right
             // We can re/move this after beta is over
             if config.houston.version.split('.')[0] < 1
-              li: a(href="https://github.com/elementary/houston/issues") Feedback
-          ul.right
+              li: a(href="https://github.com/elementary/houston/issues/new", target="_blank") Send Feedback
+
             li: a(href="/auth/logout") Log Out
             if user.avatar
               li: img(src= user.avatar).avatar
     div#content-container
       block body
     footer
-      p Copyright © 2016 elementary LLC.
-        a(href="//elementary.io/team") Team
-        a(href="//elementary.io/brand") Brand
-        a(href="//elementary.io/privacy-policy") Privacy Policy
+      div: p Copyright © 2016 elementary LLC.
+        a(href="https://elementary.io/team") Team
+        a(href="https://elementary.io/brand") Brand
+        a(href="https://elementary.io/privacy-policy") Privacy Policy
       ul
         li: a(href="https://twitter.com/elementary", target="_blank", title="Twitter"): i.fa.fa-twitter
         li: a(href="https://www.reddit.com/r/elementaryos", target="_blank", title="Reddit"): i.fa.fa-reddit
         li: a(href="https://elementaryos.stackexchange.com", target="_blank", title="StackExchange"): i.fa.fa-stack-exchange
         li: a(href="https://plus.google.com/+elementary", target="_blank", title="Google+"): i.fa.fa-google-plus
         li: a(href="https://www.facebook.com/elementaryos", target="_blank", title="Facebook"): i.fa.fa-facebook
-      div.clear
 
       block footer

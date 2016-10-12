@@ -17,8 +17,11 @@ const nun = nunjucks.configure(config.houston.root, {
   trimBlocks: true,
   lstripBlocks: true
 })
+
 nun.addGlobal('config', config)
-nun.addGlobal('helper', helpers)
+
+nun.addFilter('debianTime', helpers.debian.time)
+nun.addFilter('langChop', helpers.lang.chop)
 
 /**
  * Renders markdown

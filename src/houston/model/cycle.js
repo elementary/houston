@@ -8,9 +8,10 @@
 
 import semver from 'semver'
 
-import atc from 'houston/service/atc'
+import * as atc from 'lib/atc'
 import db from 'lib/database'
-import Mistake from 'lib/mistake'
+
+const sender = new atc.Sender('cycle')
 
 /**
  * Stores cycle information. 1 cycle = 1 project version being built
@@ -180,7 +181,7 @@ schema.methods.setStatus = function (status) {
  * @returns {Void}
  */
 schema.methods.doFlightcheck = function () {
-  return atc.send('flightcheck', 'cycle:queue', {
+  return sender.add('release', {
     id: this._id,
     auth: this.auth,
     repo: this.repo,
@@ -188,17 +189,6 @@ schema.methods.doFlightcheck = function () {
     name: this.name,
     version: this.version,
     changelog: this.changelog.reverse()
-  })
-  .catch((err) => {
-    const mistake = new Mistake(500, 'Automated flightchecking failed', err)
-
-    this.update({
-      status: 'ERROR',
-      mistake
-    })
-    .then(() => {
-      throw mistake
-    })
   })
 }
 
