@@ -38,7 +38,7 @@ html
           ul.right
             // We can re/move this after beta is over
             if config.houston.version.split('.')[0] < 1
-              li: a(href="https://github.com/elementary/houston/issues/new") Send Feedback
+              li: a(href="https://github.com/elementary/houston/issues/new", target="_blank") Send Feedback
 
             li: a(href="/auth/logout") Log Out
             if user.avatar
