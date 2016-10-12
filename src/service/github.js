@@ -168,7 +168,7 @@ export async function generateToken (inst, user) {
     throw new GitHubError('Unable to generate authentication token')
   })
 
-  if (githubRes.body != null && githubRes.body.token != null) {
+  if (githubRes.body != null && githubRes.body.token != null && githubRes.body.expires_at != null) {
     setToken(inst, githubRes.body.token, moment(githubRes.body.expires_at).toDate(), user)
 
     return githubRes.body.token

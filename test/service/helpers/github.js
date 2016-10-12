@@ -23,7 +23,7 @@ export function mock (url, body, reply = 200) {
   .matchHeader('Authorization', (head) => {
     if (head.substring(0, 6) === 'Bearer') return /Bearer [a-z0-9]{30,}/i.test(head)
 
-    return false
+    return true
   })
   .replyContentLength()
   .replyDate()

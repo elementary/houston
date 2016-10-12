@@ -87,6 +87,9 @@ test('Can generate an accurate token', async (t) => {
 test('Uses token cache', async (t) => {
   const github = t.context.github
 
+  // NOTE: we only mock each endpoint ONCE. if you get to this point due to an
+  // 'Unable to generate authentication token' it's most likely because the
+  // cache failed and we are trying to connect to GitHub again.
   helper.mock('/installations/1/access_tokens', {
     token: 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh',
     'expires_at': moment().add(1, 'hours').toISOString(),
@@ -100,14 +103,19 @@ test('Uses token cache', async (t) => {
   }, 201)
 
   const one = await github.generateToken(1)
-  const two = await github.generateToken(1)
-  const three = await github.generateToken(2)
-  const four = await github.generateToken(2)
+  const two = await github.generateToken(2)
+
+  t.is(one, 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh')
+  t.is(two, 'v1.afj9830jf0a293jf0aj30f9jaw30f9jaw039fj0a')
 
   t.throws(github.generateToken(3))
 
-  t.is(one, 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh')
-  t.is(two, one)
-  t.is(three, 'v1.afj9830jf0a293jf0aj30f9jaw30f9jaw039fj0a')
-  t.is(three, four)
+  // Due to async nature we timeout to prevent a race condition
+  setTimeout(async () => {
+    const three = await github.generateToken(1)
+    const four = await github.generateToken(2)
+
+    t.is(one, three)
+    t.is(two, four)
+  }, 1000)
 })
