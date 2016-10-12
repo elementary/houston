@@ -14,10 +14,16 @@ import moment from 'moment'
 import * as service from './index'
 import config from 'lib/config'
 import log from 'lib/log'
-import request from 'lib/request'
+import { domain } from 'lib/request'
 
 // This is a poor man's cache for GitHub authentication tokens
 const tokenCache = []
+
+const api = domain('https://api.github.com')
+.use((req) => {
+  req.set('Accept', 'application/vnd.github.machine-man-preview+json')
+  return req
+})
 
 /**
  * getToken
@@ -147,10 +153,9 @@ export async function generateToken (inst, user) {
 
   const JWT = await generateJWT()
 
-  const githubReq = request
-  .post(`https://api.github.com/installations/${inst}/access_tokens`)
+  const githubReq = api
+  .post(`/installations/${inst}/access_tokens`)
   .set('Authorization', `Bearer ${JWT}`)
-  .set('Accept', 'application/vnd.github.machine-man-preview+json')
 
   if (user != null) {
     log.debug(`GitHub service is generating a token for user ${user}`)
