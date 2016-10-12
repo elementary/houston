@@ -1,6 +1,6 @@
 {
   "name": "Houston",
-  "version": "0.2.6",
+  "version": "0.3.0",
   "description": "Backend for AppHub",
   "main": "build/houston/index.js",
   "dependencies": {
