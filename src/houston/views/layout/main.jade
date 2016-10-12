@@ -30,6 +30,7 @@ html
         div.nav-content
           ul
             block actions
+            li: a(href="/dashboard") Dashboard
             li: a(href="/add") Add App
 
             if policy.ifRole(user, 'review')
