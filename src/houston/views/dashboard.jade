@@ -6,8 +6,8 @@ block head
 block body
   if projects.length === 0
     div.row: div.column.alert
-      h3 No repositories found!
-      p AppHub needs some repositories added.
+      h3 No Repositories Found
+      p Add a repository to make it appear here.
   else
     each project in projects
       div.repo-wrap: div.repo
@@ -18,6 +18,6 @@ block body
             img(src="/images/application-default-icon.png").app-icon
           div
             p= project.name
-            p.subtext: a(href="https://github.com/" + project.github.fullName)= project.github.fullName
+            p.subtext: a(href="https://github.com/" + project.github.fullName, target="_blank")= project.github.fullName
         div.right
           include /partials/status
