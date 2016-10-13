@@ -44,7 +44,7 @@ export function domain (url) {
     req[method] = (...args) => {
       const request = superagent[method].apply(req, args)
 
-      request.url = `${req.prefix}${request.url}`
+      if (request.url[0] === '/') request.url = `${req.prefix}${request.url}`
 
       req.uses.forEach((fn) => {
         request.use(fn)
