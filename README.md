@@ -1,13 +1,11 @@
-<div align="center">
-  <img src="branding/apphub-purple-transparent-256.png" alt="apphub" width="256">
-  <br>
-  <h1>Houston</h1>
-  <h4>We have liftoff</h4>
-  <br>
-  <br>
-</div>
+<img src="branding/apphub-purple-transparent-256.png" alt="AppCenter" width="128">
 
-Houston is part of AppHub, a multi component system for making developers and
+#Houston
+
+[![Bountysource](https://www.bountysource.com/badge/tracker?tracker_id=27692469)](https://www.bountysource.com/trackers/27692469-elementary-houston)
+[![Gitter](https://badges.gitter.im/elementary/houston.svg)](https://gitter.im/elementary/houston?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
+Houston is part of AppCenter, a multi component system for making developers and
 end users life easier.
 
 Think of Houston as your personal assistant when it comes to elementary
