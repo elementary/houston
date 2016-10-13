@@ -135,7 +135,7 @@ const errorCheck = (err, res, fn, fo) => {
 
   if (err.status === 401) {
     log.info(`Bad credentials ${errorString}`)
-    return new GitHubError('Expired GitHub token')
+    return new GitHubError('Bad GitHub credentials')
   }
 
   if (err.status === 403) {
@@ -148,9 +148,9 @@ const errorCheck = (err, res, fn, fo) => {
     return new GitHubError('A GitHub error occured')
   }
 
-  if (res.status != null) {
-    log.error(`${err.status} ${errorString}`, err)
-    return new GitHubError(`GitHub ${err.status} error`)
+  if (res != null && res.status != null) {
+    log.error(`${res.status} ${errorString}`, err)
+    return new GitHubError(`GitHub ${res.status} error`)
   }
 
   log.error(`Error occured ${errorString}`, err)
@@ -313,8 +313,7 @@ export function getRepos (token, sort = 'pushed') {
   return api
   .get('/user/repos')
   .auth(token)
-  .then((res) => res.body)
-  .map((project) => castProject(project))
+  .then((res) => res.body.map((project) => castProject(project)))
   .catch((err, res) => {
     throw errorCheck(err, res, 'getRepos')
   })
@@ -336,11 +335,13 @@ export function getReleases (owner, repo, token) {
   paramAssert(owner, 'string', 'getReleases', 'owner')
   paramAssert(repo, 'string', 'getReleases', 'repo')
 
-  return api
+  let res = api
   .get(`/repos/${owner}/${repo}/releases`)
-  .auth(token)
-  .then((res) => res.body)
-  .map((release) => castRelease(release))
+
+  if (token != null) res = res.auth(token)
+
+  return res
+  .then((res) => res.body.map((release) => castRelease(release)))
   .catch((err, res) => {
     throw errorCheck(err, res, 'getReleases', `${owner}/${repo}`)
   })
@@ -364,9 +365,12 @@ export function getPermission (owner, repo, username, token) {
   paramAssert(repo, 'string', 'getPermission', 'repo')
   paramAssert(username, 'string', 'getPermission', 'username')
 
-  return api
+  let req = api
   .get(`/repos/${owner}/${repo}/collaborators/${username}`)
-  .auth(token)
+
+  if (token != null) req = req.auth(token)
+
+  return req
   .then((res) => (res.status === 204))
   .catch(() => false)
 }
