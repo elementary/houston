@@ -3,6 +3,7 @@
  * Tests GitHub third party functions
  */
 
+import _ from 'lodash'
 import fs from 'fs'
 import jwt from 'jsonwebtoken'
 import mock from 'mock-require'
@@ -12,11 +13,17 @@ import path from 'path'
 import test from 'ava'
 
 import * as fixture from './fixtures/github'
-import * as helper from './helpers/github'
 import alias from 'root/.alias'
 import mockConfig from 'test/fixtures/config'
 
 const publicKey = path.resolve(alias.resolve.alias['test'], 'fixtures', 'github', 'public.pem')
+
+// Manually enable GitHub posting
+const override = {
+  github: {
+    post: true
+  }
+}
 
 test.before((t) => {
   // This will capture any incoming data and put it to a file.
@@ -31,10 +38,12 @@ test.before((t) => {
 })
 
 test.beforeEach((t) => {
-  mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
+  mock(path.resolve(alias.resolve.alias['root'], 'config.js'), _.merge(mockConfig, override))
 
   t.context.config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
   t.context.github = require(path.resolve(alias.resolve.alias['service'], 'github'))
+
+  nock.cleanAll()
 })
 
 test('GitHubError has correct error code', (t) => {
@@ -84,11 +93,16 @@ test('Can generate an accurate JWT', async (t) => {
 test('Can generate an accurate token', async (t) => {
   const github = t.context.github
 
-  helper.mockPost('/installations/1/access_tokens', {
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .post('/installations/1/access_tokens', '*')
+  .reply(201, {
     token: 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh',
     'expires_at': '2016-09-23T21:26:26Z',
     'on_behalf_of': null
-  }, 201, true)
+  }, fixture.header)
 
   const one = await github.generateToken(1)
 
@@ -101,17 +115,27 @@ test('Uses token cache', async (t) => {
   // NOTE: we only mock each endpoint ONCE. if you get to this point due to an
   // 'Unable to generate authentication token' it's most likely because the
   // cache failed and we are trying to connect to GitHub again.
-  helper.mockPost('/installations/1/access_tokens', {
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .post('/installations/1/access_tokens', '*')
+  .reply(201, {
     token: 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh',
     'expires_at': moment().add(1, 'hours').toISOString(),
     'on_behalf_of': null
-  }, 201, true)
+  }, fixture.header)
 
-  helper.mockPost('/installations/2/access_tokens', {
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .post('/installations/2/access_tokens', '*')
+  .reply(201, {
     token: 'v1.afj9830jf0a293jf0aj30f9jaw30f9jaw039fj0a',
     'expires_at': moment().add(1, 'hours').toISOString(),
     'on_behalf_of': null
-  }, 201, true)
+  }, fixture.header)
 
   const one = await github.generateToken(1)
   const two = await github.generateToken(2)
@@ -134,7 +158,12 @@ test('Uses token cache', async (t) => {
 test('Can get list of repos', async (t) => {
   const github = t.context.github
 
-  helper.mockGet('/user/repos', fixture.repos)
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .get('/user/repos')
+  .reply(200, fixture.repos, fixture.header)
 
   const one = await github.getRepos('testingToken')
 
@@ -148,7 +177,12 @@ test('Can get list of repos', async (t) => {
 test('Can get list of releases', async (t) => {
   const github = t.context.github
 
-  helper.mockGet('/repos/elementary/test1/releases', fixture.releases)
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .get('/repos/elementary/test1/releases')
+  .reply(200, fixture.releases, fixture.header)
 
   const one = await github.getReleases('elementary', 'test1')
 
@@ -161,8 +195,19 @@ test('Can get list of releases', async (t) => {
 test('Can get accurate permissions', async (t) => {
   const github = t.context.github
 
-  helper.mockGet('/repos/elementary/test/collaborators/test1', '204: No Content', 204)
-  helper.mockGet('/repos/elementary/test/collaborators/test2', '404: Not Found', 404)
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .get('/repos/elementary/test/collaborators/test1')
+  .reply(204, '204: No Content', fixture.header)
+
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .get('/repos/elementary/test/collaborators/test2')
+  .reply(404, '404: Not Found', fixture.header)
 
   const one = await github.getPermission('elementary', 'test', 'test1')
   const two = await github.getPermission('elementary', 'test', 'test2')
@@ -171,4 +216,140 @@ test('Can get accurate permissions', async (t) => {
   t.true(one)
   t.false(two)
   t.false(three)
+})
+
+test('Can post a label', async (t) => {
+  const github = t.context.github
+
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .post('/repos/elemenetary/test1/labels', '*')
+  .reply(201, {
+    'url': 'https://api.github.com/repos/elemenetary/test1/labels/test1',
+    'name': 'test1',
+    'color': 'f29513'
+  }, fixture.header)
+
+  const one = await github.postLabel('elementary', 'test1', 'testToken', {
+    'name': 'test1',
+    'color': 'f29513'
+  })
+
+  t.is(typeof one, 'object')
+  t.is(one.name, 'test1')
+  t.is(one.color, 'f29513')
+})
+
+test('Can post an issue', async (t) => {
+  const github = t.context.github
+
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .post('/repos/elemenetary/test1/issues', '*')
+  .reply(201, {
+    'id': 1,
+    'url': 'https://api.github.com/repos/elemenetary/test1/issues/1347',
+    'repository_url': 'https://api.github.com/repos/elemenetary/test1',
+    'labels_url': 'https://api.github.com/repos/elemenetary/test1/issues/1347/labels{/name}',
+    'comments_url': 'https://api.github.com/repos/elemenetary/test1/issues/1347/comments',
+    'events_url': 'https://api.github.com/repos/elemenetary/test1/issues/1347/events',
+    'html_url': 'https://github.com/elemenetary/test1/issues/1347',
+    'number': 1,
+    'state': 'open',
+    'title': 'test1',
+    'body': 'test1',
+    'user': {
+      'login': 'elemenetary',
+      'id': 1,
+      'avatar_url': 'https://github.com/images/error/elemenetary_happy.gif',
+      'gravatar_id': '',
+      'url': 'https://api.github.com/users/elemenetary',
+      'html_url': 'https://github.com/elemenetary',
+      'followers_url': 'https://api.github.com/users/elemenetary/followers',
+      'following_url': 'https://api.github.com/users/elemenetary/following{/other_user}',
+      'gists_url': 'https://api.github.com/users/elemenetary/gists{/gist_id}',
+      'starred_url': 'https://api.github.com/users/elemenetary/starred{/owner}{/repo}',
+      'subscriptions_url': 'https://api.github.com/users/elemenetary/subscriptions',
+      'organizations_url': 'https://api.github.com/users/elemenetary/orgs',
+      'repos_url': 'https://api.github.com/users/elemenetary/repos',
+      'events_url': 'https://api.github.com/users/elemenetary/events{/privacy}',
+      'received_events_url': 'https://api.github.com/users/elemenetary/received_events',
+      'type': 'User',
+      'site_admin': false
+    },
+    'labels': [
+      {
+        'url': 'https://api.github.com/repos/elemenetary/test1/labels/bug',
+        'name': 'test1',
+        'color': 'f29513'
+      }
+    ],
+    'locked': false,
+    'comments': 0,
+    'closed_at': null,
+    'created_at': '2011-04-22T13:33:48Z',
+    'updated_at': '2011-04-22T13:33:48Z'
+  }, fixture.header)
+
+  const one = await github.postIssue('elementary', 'test1', 'testToken', {
+    'title': 'test1',
+    'body': 'test1',
+    'label': ['test1']
+  })
+
+  t.is(one, 1)
+})
+
+test('Can post a file', async (t) => {
+  const github = t.context.github
+
+  nock('https://uploads.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .post('/repos/elementary/test1/1/assets', '*')
+  .reply(201, {
+    'url': 'https://api.github.com/repos/elementary/test1/releases/assets/1',
+    'browser_download_url': 'https://github.com/elementary/test1/releases/download/v1.0.0/example.zip',
+    'id': 1,
+    'name': 'config.js',
+    'label': 'config',
+    'state': 'uploaded',
+    'content_type': 'application/javascript',
+    'size': 1024,
+    'download_count': 42,
+    'created_at': '2013-02-27T19:35:32Z',
+    'updated_at': '2013-02-27T19:35:32Z',
+    'uploader': {
+      'login': 'elementary',
+      'id': 1,
+      'avatar_url': 'https://github.com/images/error/elementary_happy.gif',
+      'gravatar_id': '',
+      'url': 'https://api.github.com/users/elementary',
+      'html_url': 'https://github.com/elementary',
+      'followers_url': 'https://api.github.com/users/elementary/followers',
+      'following_url': 'https://api.github.com/users/elementary/following{/other_user}',
+      'gists_url': 'https://api.github.com/users/elementary/gists{/gist_id}',
+      'starred_url': 'https://api.github.com/users/elementary/starred{/owner}{/repo}',
+      'subscriptions_url': 'https://api.github.com/users/elementary/subscriptions',
+      'organizations_url': 'https://api.github.com/users/elementary/orgs',
+      'repos_url': 'https://api.github.com/users/elementary/repos',
+      'events_url': 'https://api.github.com/users/elementary/events{/privacy}',
+      'received_events_url': 'https://api.github.com/users/elementary/received_events',
+      'type': 'User',
+      'site_admin': false
+    }
+  }, fixture.header)
+
+  const one = await github.postFile('elementary', 'test1', 1, 'testToken', {
+    'name': 'config.js',
+    'label': 'config',
+    'path': path.resolve(alias.resolve.alias['test'], 'fixtures', 'config.js')
+  })
+
+  t.is(one, 1)
 })

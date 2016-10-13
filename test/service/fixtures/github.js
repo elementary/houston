@@ -1,13 +1,38 @@
 /**
-* test/service/fixtures/github.js
-* A monolithic file of all things raw GitHub response
-*
-* @exports {Function} mockRepo - Mocks a repo object
-* @exports {Object} repo - a single GitHub repo response
-* @exports {Object[]} repos - four repo objects in an array
-*/
+ * test/service/fixtures/github.js
+ * A monolithic file of all things raw GitHub response
+ *
+ * @exports {Object} header - basic GitHub headers
+ * @exports {Function} mockRepo - Mocks a repo object
+ * @exports {Object} repo - a single GitHub repo response
+ * @exports {Object[]} repos - four repo objects in an array
+ * @exports {Object} release - a single GitHub release
+ * @exports {Object[]} releases - four release objects in an array
+ */
 
 import _ from 'lodash'
+
+/**
+ * header
+ * Basic GitHub server headers for use in mocking
+ */
+export const header = {
+  'server': 'GitHub.com',
+  'connection': 'close',
+  'cache-control': 'public, max-age=60, s-maxage=60',
+  'vary': 'Accept, Accept-Encoding',
+  'etag': '"a8e448a94v8w198bvw4e846efwefxd34"',
+  'x-github-media-type': 'github.machine-man-preview; format=json',
+  'access-control-expose-headers': 'ETag, Link, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval',
+  'access-control-allow-origin': '*',
+  'content-security-policy': 'default-src \'none\'',
+  'strict-transport-security': 'max-age=31536000; includeSubdomains; preload',
+  'x-content-type-options': 'nosniff',
+  'x-frame-options': 'deny',
+  'x-xss-protection': '1; mode=block',
+  'x-served-by': 'w498ve4q56189w48e9g4s5a6d41189wf',
+  'x-github-request-id': '12457896:7384:4857186:94875132'
+}
 
 /**
  * mockRepo
