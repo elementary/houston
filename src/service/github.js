@@ -9,6 +9,12 @@
  * @exports {Function} castRelease - Casts a GitHub release for internal use
  * @exports {Function} generateJWT - Generates JWT bearer token
  * @exports {Function} generateToken - Generates GitHub authentication token
+ * @exports {Function} getRepos - Fetches all repos the token has access to
+ * @exports {Function} getReleases - Fetches all releases a repo has
+ * @exports {Function} getPermission - Checks callaborator status on repository
+ * @exports {Function} postLabel - Creates a label on GitHub repository
+ * @exports {Function} postIssue - Creates an issue on GitHub repository
+ * @exports {Function} postFile - Creates a file for a release asset
  */
 
 import fs from 'fs'
@@ -292,7 +298,7 @@ export async function generateToken (inst, user) {
 
 /**
  * getRepos
- * Fetches all repos the user has access to
+ * Fetches all repos the token has access to
  *
  * @see https://developer.github.com/v3/repos/#list-user-repositories
  *
@@ -466,10 +472,10 @@ export function postIssue (owner, repo, token, issue) {
  * @throws {GitHubError} - on an error
  * @returns {Number} - GitHub asset number
  */
-export function postFile (owner, repo, release, token, file) {
+export async function postFile (owner, repo, release, token, file) {
   if (!config.github.post) {
     log.verbose('Config prohibits posting to GitHub. Not posting file')
-    return Promise.resolve(0)
+    return 0
   }
 
   paramAssert(owner, 'string', 'postFile', 'owner')
@@ -482,6 +488,17 @@ export function postFile (owner, repo, release, token, file) {
 
   const filePath = file.path
   delete file.path
+
+  await new Promise((resolve, reject) => {
+    fs.stat(filePath, (err, stat) => {
+      if (err) {
+        log.error(`GitHub service tryed to postFile that does not exist`, err)
+        return reject(new GitHubError('Unable to postFile that does not exist'))
+      }
+
+      return resolve()
+    })
+  })
 
   return api
   .post(`https://uploads.github.com/repos/${owner}/${repo}/${release}/assets`)
