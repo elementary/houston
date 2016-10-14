@@ -64,7 +64,7 @@ section.hero .small-label a:hover {
 
 button > i.fa,
 .button > i.fa {
-  margin-left: 16px;
+    margin-left: 16px;
 }
 
 .dark button.suggested-action,
