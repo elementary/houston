@@ -6,6 +6,7 @@
  */
 
 import Router from 'koa-router'
+import Promise from 'bluebird'
 
 import * as github from 'houston/service/github'
 import * as policy from 'houston/policy'
@@ -27,9 +28,14 @@ route.get('', (ctx) => {
  * Shows all projects
  */
 route.get('/dashboard', policy.isRole('beta'), async (ctx, next) => {
-  const projects = await github.getProjects(ctx.user.github.access)
-  .map((repo) => Project.findOne({ 'github.id': repo.github.id }))
-  .filter((repo) => (repo != null))
+  const githubProjects = await github.getProjects(ctx.user.github.access)
+  .map((repo) => repo.github.id)
+
+  const databaseProjects = await Project.find({
+    'github.id': { $in: githubProjects }
+  })
+
+  const projects = await Promise.resolve(databaseProjects)
   .map(async (project) => {
     project.status = await project.getStatus()
 
