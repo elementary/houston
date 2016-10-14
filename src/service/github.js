@@ -276,6 +276,7 @@ export async function generateToken (inst, user) {
   }
 
   const githubRes = await githubReq
+  .then((res) => res.body)
   .catch((err) => {
     if (err.status === '404') {
       log.error('Trying to generate GitHub token for an incorrect organization integration ID')
@@ -286,10 +287,10 @@ export async function generateToken (inst, user) {
     throw new GitHubError('Unable to generate authentication token')
   })
 
-  if (githubRes.body != null && githubRes.body.token != null && githubRes.body.expires_at != null) {
-    setToken(inst, githubRes.body.token, moment(githubRes.body.expires_at).toDate(), user)
+  if (githubRes != null && githubRes.token != null && githubRes.expires_at != null) {
+    setToken(inst, githubRes.token, moment(githubRes.expires_at).toDate(), user)
 
-    return githubRes.body.token
+    return githubRes.token
   } else {
     log.error('GitHub token generation returned an unexpected body')
     throw new GitHubError('Unable to generate authentication token')
@@ -390,7 +391,7 @@ export function getPermission (owner, repo, username, token) {
  * @param {String} label.color - label color in 6 hex code
  *
  * @throws {GitHubError} - on an error
- * @returns {Object} - raw GitHub response object
+ * @returns {Object} - raw GitHub response body object
  */
 export function postLabel (owner, repo, token, label) {
   if (!config.github.post) {
@@ -409,6 +410,7 @@ export function postLabel (owner, repo, token, label) {
   .post(`/repos/${owner}/${repo}/labels`)
   .auth(token)
   .send(label)
+  .then((res) => res.body)
   .catch((err, res) => {
     throw errorCheck(err, res, 'postLabel', `${owner}/${repo}`)
   })

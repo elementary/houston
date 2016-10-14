@@ -43,7 +43,7 @@ test.beforeEach((t) => {
   t.context.config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
   t.context.github = require(path.resolve(alias.resolve.alias['service'], 'github'))
 
-  nock.cleanAll()
+  // A note to the smart people. Don't use nock cleanAll() here.
 })
 
 test('GitHubError has correct error code', (t) => {
@@ -97,7 +97,7 @@ test('Can generate an accurate token', async (t) => {
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
   .replyDate()
-  .post('/installations/1/access_tokens', '*')
+  .post('/installations/1/access_tokens')
   .reply(201, {
     token: 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh',
     'expires_at': '2016-09-23T21:26:26Z',
@@ -119,7 +119,7 @@ test('Uses token cache', async (t) => {
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
   .replyDate()
-  .post('/installations/1/access_tokens', '*')
+  .post('/installations/1/access_tokens')
   .reply(201, {
     token: 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh',
     'expires_at': moment().add(1, 'hours').toISOString(),
@@ -130,7 +130,7 @@ test('Uses token cache', async (t) => {
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
   .replyDate()
-  .post('/installations/2/access_tokens', '*')
+  .post('/installations/2/access_tokens')
   .reply(201, {
     token: 'v1.afj9830jf0a293jf0aj30f9jaw30f9jaw039fj0a',
     'expires_at': moment().add(1, 'hours').toISOString(),
@@ -195,19 +195,19 @@ test('Can get list of releases', async (t) => {
 test('Can get accurate permissions', async (t) => {
   const github = t.context.github
 
-  nock('https://api.github.com:443', { encodedQueryparams: true })
+  nock('https://api.github.com:443', { encodedQueryParams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
   .replyDate()
   .get('/repos/elementary/test/collaborators/test1')
-  .reply(204, '204: No Content', fixture.header)
+  .reply(204, null, fixture.header)
 
-  nock('https://api.github.com:443', { encodedQueryparams: true })
+  nock('https://api.github.com:443', { encodedQueryParams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
   .replyDate()
   .get('/repos/elementary/test/collaborators/test2')
-  .reply(404, '404: Not Found', fixture.header)
+  .reply(404, null, fixture.header)
 
   const one = await github.getPermission('elementary', 'test', 'test1')
   const two = await github.getPermission('elementary', 'test', 'test2')
@@ -221,13 +221,17 @@ test('Can get accurate permissions', async (t) => {
 test('Can post a label', async (t) => {
   const github = t.context.github
 
-  nock('https://api.github.com:443', { encodedQueryparams: true })
+  nock('https://api.github.com:443', { encodedQueryParams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .matchHeader('Authorization', 'Basic dGVzdFRva2VuOg==')
   .replyContentLength()
   .replyDate()
-  .post('/repos/elemenetary/test1/labels', '*')
+  .post('/repos/elementary/test1/labels', {
+    'name': 'test1',
+    'color': 'f29513'
+  })
   .reply(201, {
-    'url': 'https://api.github.com/repos/elemenetary/test1/labels/test1',
+    'url': 'https://api.github.com/repos/btkostner/vocal/labels/test1',
     'name': 'test1',
     'color': 'f29513'
   }, fixture.header)
@@ -247,9 +251,14 @@ test('Can post an issue', async (t) => {
 
   nock('https://api.github.com:443', { encodedQueryparams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .matchHeader('Authorization', 'Basic dGVzdFRva2VuOg==')
   .replyContentLength()
   .replyDate()
-  .post('/repos/elemenetary/test1/issues', '*')
+  .post('/repos/elementary/test1/issues', {
+    'title': 'test1',
+    'body': 'test1',
+    'label': ['test1']
+  })
   .reply(201, {
     'id': 1,
     'url': 'https://api.github.com/repos/elemenetary/test1/issues/1347',
@@ -309,9 +318,14 @@ test('Can post a file', async (t) => {
 
   nock('https://uploads.github.com:443', { encodedQueryparams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .matchHeader('Authorization', 'Basic dGVzdFRva2VuOg==')
   .replyContentLength()
   .replyDate()
-  .post('/repos/elementary/test1/1/assets', '*')
+  .post('/repos/elementary/test1/1/assets')
+  .query({
+    name: 'config.js',
+    label: 'config'
+  })
   .reply(201, {
     'url': 'https://api.github.com/repos/elementary/test1/releases/assets/1',
     'browser_download_url': 'https://github.com/elementary/test1/releases/download/v1.0.0/example.zip',

@@ -17,21 +17,22 @@ import _ from 'lodash'
  * Basic GitHub server headers for use in mocking
  */
 export const header = {
-  'server': 'GitHub.com',
-  'connection': 'close',
-  'cache-control': 'public, max-age=60, s-maxage=60',
-  'vary': 'Accept, Accept-Encoding',
-  'etag': '"a8e448a94v8w198bvw4e846efwefxd34"',
-  'x-github-media-type': 'github.machine-man-preview; format=json',
-  'access-control-expose-headers': 'ETag, Link, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval',
   'access-control-allow-origin': '*',
+  'access-control-expose-headers': 'ETag, Link, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval',
+  'cache-control': 'public, max-age=60, s-maxage=60',
+  'connection': 'close',
   'content-security-policy': 'default-src \'none\'',
+  'content-type': 'application/json; charset=utf-8',
+  'etag': '"a8e448a94v8w198bvw4e846efwefxd34"',
+  'server': 'GitHub.com',
   'strict-transport-security': 'max-age=31536000; includeSubdomains; preload',
+  'vary': 'Accept, Accept-Encoding',
   'x-content-type-options': 'nosniff',
   'x-frame-options': 'deny',
-  'x-xss-protection': '1; mode=block',
+  'x-github-media-type': 'github.machine-man-preview; format=json',
+  'x-github-request-id': '12457896:7384:4857186:94875132',
   'x-served-by': 'w498ve4q56189w48e9g4s5a6d41189wf',
-  'x-github-request-id': '12457896:7384:4857186:94875132'
+  'x-xss-protection': '1; mode=block'
 }
 
 /**
