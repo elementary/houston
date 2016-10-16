@@ -3,10 +3,12 @@
  * Runs flightcheck from cli. Used for mostly testing purposes
  */
 
-import log from 'lib/log'
+import Log from 'lib/log'
 import Pipeline from 'flightcheck/pipeline'
 
-log.debug('Loaded cli interface')
+const log = new Log('flightcheck')
+
+log.debug('Loaded')
 
 /**
  * help
@@ -54,10 +56,10 @@ if (repo == null || tag == null) {
 }
 
 if (auth == null) {
-  log.warn('Running flightcheck without an authentication key')
+  log.warn('Running without an authentication key')
 }
 
-log.info(`Running flightcheck ${repo} for ${tag}`)
+log.info(`Running ${repo} for ${tag}`)
 
 const pipeline = new Pipeline({
   repo,
@@ -67,8 +69,8 @@ const pipeline = new Pipeline({
 
 pipeline.start()
 .then(() => {
-  log.info('Flightcheck complete!')
-  log.debug(`Flightcheck ran ${pipeline.pipes.length} pipes`)
+  log.info('complete!')
+  log.debug(`Ran ${pipeline.pipes.length} pipes`)
 })
 .catch((err) => {
   log.error(err)

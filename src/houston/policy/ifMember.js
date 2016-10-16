@@ -7,8 +7,10 @@
 
 import * as github from 'houston/service/github'
 import config from 'lib/config'
-import log from 'lib/log'
+import Log from 'lib/log'
 import Mistake from 'lib/mistake'
+
+const log = new Log('policy')
 
 /**
  * Checks user rights against GitHub

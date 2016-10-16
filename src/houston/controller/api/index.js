@@ -8,10 +8,12 @@
 
 import Router from 'koa-router'
 
-import log from 'lib/log'
+import Log from 'lib/log'
 import Mistake from 'lib/mistake'
 import popularity from './popularity'
 import projects from './projects'
+
+const log = new Log('api')
 
 const route = new Router({
   prefix: '/api'

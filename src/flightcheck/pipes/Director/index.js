@@ -7,8 +7,10 @@
 
 import path from 'path'
 
-import log from 'lib/log'
+import Log from 'lib/log'
 import Pipe from 'flightcheck/pipes/pipe'
+
+const log = new Log('flightcheck:Director')
 
 /**
  * Directory
