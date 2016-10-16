@@ -8,7 +8,9 @@
 import mongoose from 'mongoose'
 
 import config from './config'
-import log from './log'
+import Log from './log'
+
+const log = new Log('lib:database')
 
 mongoose.Promise = global.Promise
 
@@ -18,6 +20,6 @@ mongoose.connection.on('error', (msg) => log.error(msg))
 
 mongoose.connection.once('open', () => log.info('Connected to database'))
 
-mongoose.connection.once('close', () => log.info('Disconnected to database'))
+mongoose.connection.once('close', () => log.warn('Disconnected to database'))
 
 export default mongoose
