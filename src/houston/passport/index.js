@@ -11,7 +11,9 @@ import Router from 'koa-router'
 
 import User from 'houston/model/user'
 import * as github from './github'
-import log from 'lib/log'
+import Log from 'lib/log'
+
+const log = new Log('passport')
 
 /**
  * setup

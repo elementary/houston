@@ -11,9 +11,11 @@ import passport from 'koa-passport'
 import Router from 'koa-router'
 
 import config from 'lib/config'
-import log from 'lib/log'
+import Log from 'lib/log'
 import request from 'lib/request'
 import User from 'houston/model/user'
+
+const log = new Log('passport:github')
 
 /**
  * getMembership

@@ -10,9 +10,10 @@ import crypto from 'crypto'
 
 import * as github from 'houston/service/github'
 import config from 'lib/config'
-import log from 'lib/log'
+import Log from 'lib/log'
 import Project from 'houston/model/project'
 
+const log = new Log('hook:github')
 const route = new Router({
   prefix: '/github'
 })
