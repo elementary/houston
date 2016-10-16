@@ -6,8 +6,8 @@
  * @exports {Function} domain - a superagent function for a whole domain
  */
 
-import _ from 'lodash'
-import http from 'http'
+import { cloneDeep } from 'lodash'
+import { METHODS } from 'http'
 import superagent from 'superagent'
 
 // Once upon a time, when superagent wasn't as cool, we had to use plugins for
@@ -27,7 +27,7 @@ export default superagent
  * @returns {Object} - a superagent request object
  */
 export function domain (url) {
-  const req = _.cloneDeep(superagent)
+  const req = cloneDeep(superagent)
 
   req.prefix = url
   req.uses = []
@@ -37,7 +37,7 @@ export function domain (url) {
     return req
   }
 
-  http.METHODS.forEach((method) => {
+  METHODS.forEach((method) => {
     method = method.toLowerCase()
     if (req[method] == null) return
 
