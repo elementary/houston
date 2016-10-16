@@ -77,12 +77,7 @@
 }
 
 .repo {
-    display: block;
-    display: -webkit-flex;
-    display: -ms-flexbox;
     display: flex;
-    -webkit-flex-direction: column;
-    -ms-flex-direction: column;
     flex-direction: column;
     text-align: center;
     width: 100%;
@@ -131,11 +126,7 @@
 @media only screen and (min-width: 500px) {
     .repo {
         align-items: center;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
         justify-content: space-between;
         margin: auto;
         max-width: 600px;

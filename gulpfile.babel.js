@@ -3,10 +3,18 @@
  * Transcodes and builds all needed files.
  */
 
-import babel from 'gulp-babel'
 import del from 'del'
 import gulp from 'gulp'
 import path from 'path'
+
+import babel from 'gulp-babel'
+import postcss from 'gulp-postcss'
+import cssnext from 'postcss-cssnext'
+
+const browsers = [
+  'last 4 version',
+  'not ie <= 11'
+]
 
 /**
  * functionCopy
@@ -16,7 +24,7 @@ import path from 'path'
  * @returns {Stream} - a gulp stream
  */
 const functionCopy = (file) => {
-  const buildFiles = (file == null) ? ['src/**/*', '!src/**/*.js'] : file
+  const buildFiles = (file == null) ? ['src/**/*', '!src/**/*.js', '!src/**/*.css'] : file
 
   return gulp.src(buildFiles, { base: 'src' })
   .pipe(gulp.dest('build'))
@@ -38,6 +46,23 @@ const functionBabel = (file) => {
 }
 
 /**
+ * functionPostCSS
+ * Returns gulp task for building stylesheets with PostCSS
+ *
+ * @param {String} [file] - path of the file to build with PostCSS
+ * @returns {Stream} - a gulp stream
+ */
+const functionPostCSS = (file) => {
+  const buildFiles = (file == null) ? ['src/**/*.css'] : file
+
+  return gulp.src(buildFiles, { base: 'src' })
+  .pipe(postcss([
+    cssnext({ browsers })
+  ]))
+  .pipe(gulp.dest('build'))
+}
+
+/**
  * clean
  * Removes any compiled files
  */
@@ -49,7 +74,7 @@ gulp.task('clean', () => {
  * build
  * Runs all build related tasks
  */
-gulp.task('build', ['build-copy', 'build-babel'])
+gulp.task('build', ['build-copy', 'build-babel', 'build-postcss'])
 
 /**
  * build-copy
@@ -64,6 +89,12 @@ gulp.task('build-copy', () => functionCopy())
 gulp.task('build-babel', () => functionBabel())
 
 /**
+ * build-postcss
+ * Builds all src/ stylesheets with PostCSS
+ */
+gulp.task('build-postcss', () => functionPostCSS())
+
+/**
  * watch
  * Watches files for change
  */
@@ -71,10 +102,12 @@ gulp.task('watch', () => {
   gulp.watch('src/**/*', (obj) => {
     if (obj == null || obj.type !== 'changed') return
 
-    if (path.extname(obj.path) !== '.js') {
-      functionCopy(obj.path)
-    } else {
+    if (path.extname(obj.path) === '.css') {
+      functionPostCSS(obj.path)
+    } else if (path.extname(obj.path) === '.js') {
       functionBabel(obj.path)
+    } else {
+      functionCopy(obj.path)
     }
   })
 })
