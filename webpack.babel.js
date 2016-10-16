@@ -30,14 +30,26 @@ export default {
   },
   module: {
     loaders: [
-      { test: /\.js$/, loader: 'babel', exclude: /node_modules/ },
-      { test: /\.css$/, loader: 'style!css!postcss' }
+      {
+        test: /\.js$/,
+        loader: 'babel',
+        exclude: /node_modules/
+      },
+      {
+        test: /\.css$/,
+        use: [
+          'style',
+          {
+            loader: 'css',
+            options: { importLoaders: 1 }
+          }, {
+            loader: 'postcss',
+            options: { plugins: [cssnext({ browsers })] }
+          }]
+      }
     ]
   },
   resolve: { alias: alias.resolve.alias },
-  postcss: [
-    cssnext({ browsers })
-  ],
   plugins: [
     new webpack.optimize.CommonsChunkPlugin({
       name: 'common',
