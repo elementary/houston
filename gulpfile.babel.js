@@ -8,8 +8,12 @@ import gulp from 'gulp'
 import path from 'path'
 
 import babel from 'gulp-babel'
-import postcss from 'gulp-postcss'
 import cssnext from 'postcss-cssnext'
+import gulpWebpack from 'gulp-webpack'
+import postcss from 'gulp-postcss'
+import webpack from 'webpack'
+
+import webpackConfig from './webpack.babel.js'
 
 const browsers = [
   'last 4 version',
@@ -38,7 +42,7 @@ const functionCopy = (file) => {
  * @returns {Stream} - a gulp stream
  */
 const functionBabel = (file) => {
-  const buildFiles = (file == null) ? ['src/**/*.js'] : file
+  const buildFiles = (file == null) ? ['src/**/*.js', '!src/houston/public/scripts/app.js'] : file
 
   return gulp.src(buildFiles, { base: 'src' })
   .pipe(babel())
@@ -63,6 +67,18 @@ const functionPostCSS = (file) => {
 }
 
 /**
+ * functionWebpack
+ * Returns gulp task for building client side webpack bundle
+ *
+ * @returns {String} - a gulp stream
+ */
+const functionWebpack = () => {
+  return gulp.src('src/houston/public/scripts/app.js')
+  .pipe(gulpWebpack(webpackConfig, webpack))
+  .pipe(gulp.dest('build/houston/public/scripts'))
+}
+
+/**
  * clean
  * Removes any compiled files
  */
@@ -74,7 +90,7 @@ gulp.task('clean', () => {
  * build
  * Runs all build related tasks
  */
-gulp.task('build', ['build-copy', 'build-babel', 'build-postcss'])
+gulp.task('build', ['build-copy', 'build-babel', 'build-postcss', 'build-webpack'])
 
 /**
  * build-copy
@@ -95,6 +111,12 @@ gulp.task('build-babel', () => functionBabel())
 gulp.task('build-postcss', () => functionPostCSS())
 
 /**
+ * build-webpack
+ * Builds client side webpack bundle
+ */
+gulp.task('build-webpack', () => functionWebpack())
+
+/**
  * watch
  * Watches files for change
  */
@@ -106,6 +128,7 @@ gulp.task('watch', () => {
       functionPostCSS(obj.path)
     } else if (path.extname(obj.path) === '.js') {
       functionBabel(obj.path)
+      functionWebpack()
     } else {
       functionCopy(obj.path)
     }
