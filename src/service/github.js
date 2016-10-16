@@ -4,6 +4,7 @@
  * NOTE: This file uses GitHub early-access integrations. Things may change
  * NOTE: GitHub api requires the use of a custom `Accept` header while in early-access
  *
+ * @exports {Object} default - superagent for communicating with GitHub
  * @exports {Class} GitHubError - error related to communication with GitHub
  * @exports {Function} castProject - Casts a GitHub project for internal use.
  * @exports {Function} castRelease - Casts a GitHub release for internal use
@@ -22,7 +23,7 @@ import jwt from 'jsonwebtoken'
 import moment from 'moment'
 import semver from 'semver'
 
-import { domain } from 'lib/request'
+import { domain, pagination } from 'lib/request'
 import * as service from './index'
 import config from 'lib/config'
 import log from 'lib/log'
@@ -31,8 +32,9 @@ const api = domain('https://api.github.com')
 .use((req) => {
   req.set('Accept', 'application/vnd.github.machine-man-preview+json')
   req.set('User-Agent', 'elementary-houston')
-  return req
 })
+
+export default api
 
 // This is a poor man's cache for GitHub authentication tokens
 const tokenCache = []
@@ -315,10 +317,14 @@ export async function generateToken (inst, user) {
  */
 export function getRepos (token, sort = 'pushed') {
   paramAssert(token, 'string', 'getRepos', 'token')
+  paramAssert(sort, 'string', 'getRepos', 'sort')
 
-  return api
+  const req = api
   .get('/user/repos')
   .auth(token)
+  .query({ sort })
+
+  return pagination(req)
   .then((res) => res.body.map((project) => castProject(project)))
   .catch((err, res) => {
     throw errorCheck(err, res, 'getRepos')
@@ -341,12 +347,12 @@ export function getReleases (owner, repo, token) {
   paramAssert(owner, 'string', 'getReleases', 'owner')
   paramAssert(repo, 'string', 'getReleases', 'repo')
 
-  let res = api
+  let req = api
   .get(`/repos/${owner}/${repo}/releases`)
 
-  if (token != null) res = res.auth(token)
+  if (token != null) req = req.auth(token)
 
-  return res
+  return pagination(req)
   .then((res) => res.body.map((release) => castRelease(release)))
   .catch((err, res) => {
     throw errorCheck(err, res, 'getReleases', `${owner}/${repo}`)

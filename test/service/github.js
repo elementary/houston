@@ -163,6 +163,7 @@ test('Can get list of repos', async (t) => {
   .replyContentLength()
   .replyDate()
   .get('/user/repos')
+  .query({ sort: 'pushed', page: 1 })
   .reply(200, fixture.repos, fixture.header)
 
   const one = await github.getRepos('testingToken')
@@ -182,6 +183,7 @@ test('Can get list of releases', async (t) => {
   .replyContentLength()
   .replyDate()
   .get('/repos/elementary/test1/releases')
+  .query({ page: 1 })
   .reply(200, fixture.releases, fixture.header)
 
   const one = await github.getReleases('elementary', 'test1')

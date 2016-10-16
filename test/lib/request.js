@@ -47,3 +47,8 @@ test('Can use methods for each domain request', async (t) => {
   t.is(two.url, 'http://testing.com')
   t.is(three.url, 'http://testing.com')
 })
+
+// TODO: add unit test for request pagination
+// nock query does not work as intended and therefor cannot be used
+// eslint-disable-next-line
+test.todo('Can use pagination accurately')
