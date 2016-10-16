@@ -1,7 +1,7 @@
 /**
  * lib/log.js
  * Creates a simple, multi environment, namespaced log class
- * NOTE: our global namespace is "app"
+ * NOTE: our global namespace is "houston"
  *
  * @see https://github.com/visionmedia/debug
  *
@@ -13,7 +13,7 @@ import raven from 'raven'
 
 import config from './config'
 
-const namespace = 'app'
+const namespace = 'houston'
 
 let sentry = null
 if (config.sentry) {
@@ -31,12 +31,16 @@ if (process.env.DEBUG == null) {
   /* eslint-disable no-fallthrough */
   switch (true) {
     case (config.log === 'debug'):
+      Debug.enable(`${namespace}:debug`)
       Debug.enable(`${namespace}:*:debug`)
     case (config.log === 'info'):
+      Debug.enable(`${namespace}:info`)
       Debug.enable(`${namespace}:*:info`)
     case (config.log === 'warn'):
+      Debug.enable(`${namespace}:warn`)
       Debug.enable(`${namespace}:*:warn`)
     case (config.log === 'error'):
+      Debug.enable(`${namespace}:error`)
       Debug.enable(`${namespace}:*:error`)
   }
   /* eslint-enable no-fallthourgh */
@@ -52,14 +56,19 @@ const Log = class {
    *
    * @param {String} name - log namespace
    */
-  constructor (name = 'global') {
+  constructor (name) {
     // This stores all of our upstream Debug instances
     this.upstream = {}
 
-    this.upstream.debug = Debug(`${namespace}:${name}:debug`)
-    this.upstream.info = Debug(`${namespace}:${name}:info`)
-    this.upstream.warn = Debug(`${namespace}:${name}:warn`)
-    this.upstream.error = Debug(`${namespace}:${name}:error`)
+    const prefix = (name == null) ? namespace : `${namespace}:${name}`
+
+    this.upstream.debug = Debug(`${prefix}:debug`)
+    this.upstream.info = Debug(`${prefix}:info`)
+    this.upstream.warn = Debug(`${prefix}:warn`)
+    this.upstream.error = Debug(`${prefix}:error`)
+
+    // Setup sentry passthrough
+    this.reporter = sentry
   }
 
   /**
@@ -105,6 +114,22 @@ const Log = class {
   error (...args) {
     this.upstream.error(...args)
   }
+
+  /**
+   * report
+   * Sends a report to third party error logging service
+   *
+   * @param {Error} err - an error to capture
+   * @param {Object} data - any extra data to send along with error
+   * @returns {Void}
+   */
+  report (err, data) {
+    if (this.sentry != null) {
+      sentry.captureException(err, data)
+    } else {
+      this.info('Reporter disabled. Not sending error')
+    }
+  }
 }
 
 /**
@@ -117,7 +142,7 @@ const log = new Log('lib:log')
 process.on('unhandledRejection', (reason, promise) => {
   log.warn(`Unhandled rejection at ${promise._fulfillmentHandler0}\n`, reason)
 
-  if (sentry != null) sentry.captureException(reason)
+  log.report(reason)
 })
 
 export { sentry }
