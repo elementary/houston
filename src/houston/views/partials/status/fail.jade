@@ -1,8 +1,7 @@
-a(href="https://github.com/" + project.github.fullName + "/issues?q=is%3Aissue+is%3Aopen+label%3A" + project.github.label)
+a(href="https://github.com/" + project.github.fullName + "/issues?q=is%3Aissue+is%3Aopen+label%3A" + project.github.label, target="_blank")
   div.fab.warn
     i.fa.fa-exclamation-triangle
     div.popover-container
       div.popover-content
-        h2 Failed
-        p It seems #{project.name} failed along the release proccess.
+        h2 #{project.name} Has Failed The Release Proccess
         p No worries though, we have submitted detailed reports on GitHub for you.

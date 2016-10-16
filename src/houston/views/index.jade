@@ -5,14 +5,14 @@ block head
   link(rel="stylesheet", type="text/css", media="all", href="https://elementary.io/styles/solarized_light.css")
 
 block footer
-  script(src="https://cdn.jsdelivr.net/g/jquery@3,highlight.js@9(highlight.min.js+languages/vala.min.js)")
+  script(src="https://cdn.jsdelivr.net/g/highlight.js@9(highlight.min.js+languages/vala.min.js)")
   script(src="/scripts/highlight.js")
 
 block body
 
   section.hero.dark: div
-    img(src='/images/developer-sketch.svg', alt='default application icon')
-    h1 AppHub: the new Wild West
+    img(src='/images/system-software-install.svg', alt='AppCenter icon')
+    h1 AppCenter
     h4 An open, pay-what-you-want app store for indie developers
     if user
       a(href='/dashboard').button.suggested-action Welcome Back

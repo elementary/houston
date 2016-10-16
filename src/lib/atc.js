@@ -1,205 +1,124 @@
 /**
  * lib/atc.js
- * Wrapper for socket.io that includes message queue and pool support. Most of
- * this code is for client connection to "houston" type socket. for "houston"
- * specific class see houston/service/atc
+ * A message queue class based around mongodb
  *
- * @exports {Class} - Wrapper for socket.io that includes message queue and pool support
+ * @exports {Class} Worker - Works on items in a queue
+ * @exports {Class} Sender - Adds items to worker queue
  */
 
-import _ from 'lodash'
-import crypto from 'crypto'
 import events from 'events'
-import Promise from 'bluebird'
+import monq from 'monq'
 
-import log from './log'
+import config from 'lib/config'
+
+const client = monq(config.database)
 
 /**
- * Atc
- * for communicating between different processes and servers, includes message queue
+ * Worker
+ * Works on items in a queue
  *
- * @param {String} type - Connection type ("flightcheck" or "houston")
+ * @extends EventEmitter
+ *
+ * @emits Worker#removed
+ * @emits Worker#failed
+ * @emits Worker#complete
+ * @emits Worker#error
  */
-export default class extends events.EventEmitter {
+export class Worker extends events.EventEmitter {
 
   /**
-   * creates an atc connection
+   * Creates a queue worker
    *
-   * @param {String} type - Connection type ("flightcheck" or "houston")
+   * @param {String} name - Message queue name
+   * @param {Number} int - Time to check for new items in queue
    */
-  constructor (type) {
-    if (type == null) {
-      throw new Error('Atc requires a "type" for contruction')
-    }
-
+  constructor (name, int = 5000) {
     super()
 
-    this.type = type
-
-    this.queue = {}
-    this.sent = {}
-
-    this.connections = {}
+    this.worker = client.worker([name], {
+      interval: int
+    })
   }
 
   /**
-   * connect
-   * sets up a connection to server
+   * start
+   * Starts worker queue
    *
-   * @param {String} listen - url to conenct to
    * @returns {Void}
    */
-  connect (listen) {
-    if (typeof listen !== 'string') {
-      throw new Error('Atc connect requires a "listen" string to connect to')
-    }
+  start () {
+    this.worker.on('dequeued', (data) => this.emit('unqueued', data))
+    this.worker.on('failed', (data) => this.emit('failed', data))
+    this.worker.on('complete', (data) => this.emit('complete', data))
+    this.worker.on('error', (err) => this.emit('error', err))
 
-    this.io = require('socket.io-client').connect(listen)
+    this.worker.start()
+  }
 
-    // A lot of the code below looks pointless, but it's for keeping things
-    // consistent for a server which would have multiple connections
-    this.io.on('connect', () => {
-      log.debug('Atc connection established')
-
-      this.io.emit('atc:type', this.type)
-
-      if (this.connections['houston'] == null) this.connections['houston'] = []
-      this.connections['houston'][0] = this.io
-
-      this.reconnect('houston')
-    })
-
-    this.io.on('disconnect', () => {
-      log.debug('Atc connection lost')
-
-      if (this.connections['houston'] == null) this.connections['houston'] = []
-      this.connections['houston'][0] = null
-    })
-
-    // Socket listeners
-    this.io.on('msg:send', (subject, ...data) => {
-      this.emit(subject, ...data)
-
-      this.io.emit('msg:confirm', this.hash(data))
-    })
-
-    this.io.on('msg:confirm', (hash) => {
-      const i = _.findIndex(this.sent['houston'], (obj) => {
-        return obj.hash === hash
-      })
-      const message = this.sent['houston'][i]
-
-      if (message == null) {
-        log.warn('received a confirmation message for a message we didnt send')
-        return
+  /**
+   * register
+   * Registers a function for a particular job type
+   *
+   * @param {String} name - job name
+   * @param {Function} fn - function to run given params, must return promise
+   * @return {Void}
+   */
+  register (name, fn) {
+    this.worker.register({
+      [name]: (param, callback) => {
+        fn(param)
+        .then((data) => callback(null, data))
+        .catch((err) => callback(err))
       }
-
-      this.emit(`${message.subject}:received`, ...message.message)
-      this.sent['houston'] = _.pullAt(this.sent['houston'], i)
     })
+  }
+}
+
+/**
+ * Sender
+ * Adds items to worker queue
+ */
+export class Sender {
+
+  /**
+   * Creates a new queue sender
+   *
+   * @param {String} name - Message queue name
+   */
+  constructor (name) {
+    this.queue = client.queue(name)
   }
 
   /**
-   * reconnect
-   * handles messages in queue after connection or reconnection
+   * get
+   * Returns a job object in the queue
    *
-   * @param {String} type - type of socket connected to
-   * @returns {Array} - a list of messages sent after reconnect
+   * @param {String} id - mongodb job id
+   * @returns {Object} - a promise of the job object
    */
-  reconnect (type) {
-    if (typeof type !== 'string') {
-      throw new Error('Atc reconnect requires a valid "type" value')
-    }
-
-    if (this.queue[type] == null) this.queue[type] = []
-
-    return Promise.each(this.queue[type], (msg) => {
-      return this.delegate(type)
-      .then((socket) => {
-        socket.emit(msg.r, msg.subject, ...msg.message)
-        this.sent[type].push({
-          socket,
-          subject: msg.subject,
-          message: msg.message,
-          hash: this.hash(msg.message)
-        })
-        this.queue[type] = _.remove(this.queue[type], (obj) => {
-          return obj === msg
-        })
-      })
-    })
-  }
-
-  /**
-   * delegate
-   * returns a socket to send messages to
-   *
-   * @param {String} type - type of socket to send to ("flightcheck" or "houston")
-   * @returns {Promise} - An socket to emit to
-   */
-  delegate (type) {
+  get (id) {
     return new Promise((resolve, reject) => {
-      if (typeof type !== 'string') {
-        reject('Atc delegate requires a "type" string to find socket')
-      }
-      if (type !== 'houston') {
-        reject('Atc can only communicate with houston')
-      }
-      if (this.connections['houston'][0] == null) {
-        reject('Atc has no avalible connections')
-      }
-
-      resolve(this.connections['houston'][0])
-    })
-  }
-
-  /**
-   * hash
-   * hashes a blob
-   *
-   * @param {Blob} msg - what to be hashed
-   * @returns {String} - hash of msg
-   */
-  hash (msg) {
-    return crypto
-    .createHash('sha256')
-    .update(JSON.stringify(msg))
-    .digest('hex')
-  }
-
-  /**
-   * send
-   * sends message to specified client
-   *
-   * @param {String} to - who to send message to ("flightcheck" or "houston")
-   * @param {String} subject - subject of message, used for event handling
-   * @param {...Blob} message - what to send to client
-   * @returns {Promise} - promise that the message was send or is in queue to be sent
-   */
-  send (to, subject, ...message) {
-    if (typeof to !== 'string') {
-      throw new Error('Atc send requires a valid "to" value')
-    }
-    if (typeof subject !== 'string') {
-      throw new Error('Atc send requires a valid "subject" value')
-    }
-
-    if (this.queue[to] == null) this.queue[to] = []
-    if (this.sent[to] == null) this.sent[to] = []
-    if (this.connections[to] == null) this.connections[to] = []
-
-    return this.delegate(to)
-    .then((socket) => {
-      socket.emit('msg:send', subject, ...message)
-      this.sent[to].push({
-        subject,
-        message,
-        socket,
-        hash: this.hash(message)
+      this.queue.get(id, (err, obj) => {
+        if (err) return reject(err)
+        return resolve(obj.data)
       })
     })
-    .catch(() => {
-      this.queue[to].push({r: 'msg:send', subject, message})
+  }
+
+  /**
+   * add
+   * Adds an item to the queue
+   *
+   * @param {String} name - the job name
+   * @param {Object} param - the job parameters
+   * @returns {Object} - a promise of the job object
+   */
+  add (name, param) {
+    return new Promise((resolve, reject) => {
+      this.queue.enqueue(name, param, (err, job) => {
+        if (err) return reject(err)
+        return resolve(job.data)
+      })
     })
   }
 }

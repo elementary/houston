@@ -9,10 +9,22 @@
  */
 
 import Debug from 'debug'
+import raven from 'raven'
 
 import config from './config'
 
 const namespace = 'app'
+
+let sentry = null
+if (config.sentry) {
+  sentry = new raven.Client(config.sentry, {
+    environment: config.env,
+    release: config.houston.version,
+    tags: { commit: config.houston.comment }
+  })
+
+  sentry.patchGlobal()
+}
 
 // Set the default log level for the app and possibly other libraries
 if (process.env.DEBUG == null) {
@@ -104,6 +116,9 @@ const log = new Log('lib:log')
 
 process.on('unhandledRejection', (reason, promise) => {
   log.warn(`Unhandled rejection at ${promise._fulfillmentHandler0}\n`, reason)
+
+  if (sentry != null) sentry.captureException(reason)
 })
 
+export { sentry }
 export default Log

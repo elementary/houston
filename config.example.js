@@ -48,6 +48,10 @@ module.exports.server = {
 // 'debug' 'info' 'warn' 'error'
 module.exports.log = 'info'
 
+// Sentry exception capturing
+// https://docs.sentry.io/hosted/quickstart/#about-the-dsn
+module.exports.sentry = null
+
 module.exports.flightcheck = {
   directory: '/tmp/flightcheck',
   docker: '/var/run/docker.sock'
