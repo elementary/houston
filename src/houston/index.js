@@ -18,15 +18,16 @@ import view from 'koa-views'
 
 import * as download from './service/download.js'
 import * as helpers from 'lib/helpers'
-import * as log from 'lib/log'
 import * as passport from './passport'
 import * as policy from './policy'
 import config from 'lib/config'
 import controllers from './controller'
 import db from 'lib/database'
+import Log from 'lib/log'
 import Mistake from 'lib/mistake'
 
 const app = new Koa()
+const log = new Log('server')
 
 // Setup App configuration
 app.name = 'Houston'
@@ -43,7 +44,7 @@ app.use(async (ctx, next) => {
   const start = new Date()
   await next()
   const end = new Date()
-  log.default.verbose(`${ctx.method} ${ctx.status} ${ctx.url} => ${end - start}ms`)
+  log.debug(`${ctx.method} ${ctx.status} ${ctx.url} => ${end - start}ms`)
 })
 
 // Static 'public' folder serving
@@ -139,7 +140,7 @@ app.on('error', async (error, ctx, next) => {
   if (app.env === 'test') return
 
   // Sentry error logging
-  if (log.sentry != null) app.on('error', (err) => log.sentry.captureException(err))
+  app.on('error', (err) => log.report(err))
 
   if (/4.*/.test(error.status)) {
     log.default.verbose(`${ctx.method} ${ctx.status} ${ctx.url} |> ${error.message}`)
@@ -160,11 +161,11 @@ app.on('error', async (error, ctx, next) => {
 
 // Launching server
 server.listen(config.server.port)
-log.default.info(`Houston listening on ${config.server.port} in ${app.env} configuration`)
+log.info(`Houston listening on ${config.server.port} in ${app.env} configuration`)
 
 server.on('close', () => {
   db.disconnect()
-  log.default.info('And now my watch has ended')
+  log.info('And now my watch has ended')
 })
 
 export default { app, server }
