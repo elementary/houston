@@ -143,6 +143,11 @@ const errorCheck = (err, res, fn, fo) => {
     return new GitHubError('Exceeding maximum number of authentication calls to GitHub')
   }
 
+  if (res != null && res.header != null && res.header['x-ratelimit-remaining'] < 10) {
+    log.warn(`Rate limit remaining is at ${res.header['x-ratelimit-remaining']}`)
+    return new GitHubError('Low rate limit remaning')
+  }
+
   if (res != null && res.body != null && res.body.message != null) {
     log.error(`${res.body.message} ${errorString}`)
     return new GitHubError('A GitHub error occured')
