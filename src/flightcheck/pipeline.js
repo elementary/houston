@@ -16,9 +16,11 @@ import semver from 'semver'
 import * as fsHelper from 'lib/helpers/fs'
 import * as pipes from './pipes'
 import config from 'lib/config'
-import log from 'lib/log'
+import Log from 'lib/log'
 
 const fs = Promise.promisifyAll(require('fs'))
+
+const log = new Log('flightcheck:Pipeline')
 
 /**
  * Pipeline

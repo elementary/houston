@@ -7,13 +7,15 @@ import assert from 'assert'
 
 import * as atc from 'lib/atc'
 import config from 'lib/config'
-import log from 'lib/log'
+import Log from 'lib/log'
 import Pipeline from 'flightcheck/pipeline'
+
+const log = new Log('flightcheck')
 
 const worker = new atc.Worker('cycle')
 const sender = new atc.Sender('cycle')
 
-log.info(`Flightcheck running in ${config.env} configuration`)
+log.info(`Running in ${config.env} configuration`)
 
 worker.on('error', (err) => {
   log.error('Flightcheck errored')
