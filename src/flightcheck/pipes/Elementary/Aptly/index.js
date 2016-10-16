@@ -9,9 +9,11 @@ import _ from 'lodash'
 import path from 'path'
 
 import config from 'lib/config'
-import log from 'lib/log'
+import Log from 'lib/log'
 import Pipe from 'flightcheck/pipes/pipe'
 import request from 'lib/request'
+
+const log = new Log('flightcheck:ElementaryAptly')
 
 /**
  * aptlyerr

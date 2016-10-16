@@ -7,8 +7,10 @@
 
 import { schema } from 'houston/model/user'
 import config from 'lib/config'
-import log from 'lib/log'
+import Log from 'lib/log'
 import Mistake from 'lib/mistake'
+
+const log = new Log('policy')
 
 /**
  * Checks user rights

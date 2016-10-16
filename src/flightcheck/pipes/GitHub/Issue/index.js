@@ -6,17 +6,19 @@
  */
 
 import config from 'lib/config'
-import log from 'lib/log'
+import Log from 'lib/log'
 import Pipe from 'flightcheck/pipes/pipe'
 import request from 'lib/request'
 
+const log = new Log('flightcheck:GitHubIssue')
+
 /**
- * GitHubRelease
- * Post files to GitHub release
+ * GitHubIssue
+ * Post logs to GitHub
  *
  * @extends Pipe
  */
-export default class GitHubRelease extends Pipe {
+export default class GitHubIssue extends Pipe {
 
   /**
    * Creates a new Pipe

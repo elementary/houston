@@ -14,11 +14,13 @@ import Promise from 'bluebird'
 import * as helpers from 'lib/helpers'
 import config from 'lib/config'
 import File from 'flightcheck/file'
-import log from 'lib/log'
+import Log from 'lib/log'
 import render from 'lib/render'
 
-const docker = new Docker({ socketPath: config.flightcheck.docker })
 const fs = Promise.promisifyAll(require('fs'))
+
+const docker = new Docker({ socketPath: config.flightcheck.docker })
+const log = new Log('flightcheck:Pipe')
 
 /**
  * Pipe
@@ -172,8 +174,8 @@ export default class Pipe extends events.EventEmitter {
 
     issue.body += '-->'
 
-    log.verbose(`${this.name} ${level} log => ${issue.title}`)
-    log.silly(`\n${issue.body}`)
+    log.info(`${this.name} ${level} log => ${issue.title}`)
+    log.debug(`\n${issue.body}`)
 
     this.logs[level].push(issue)
     this.emit('log', issue)

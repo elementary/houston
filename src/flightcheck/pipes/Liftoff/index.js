@@ -10,10 +10,12 @@ import Promise from 'bluebird'
 
 import * as fsHelper from 'lib/helpers/fs'
 import config from 'lib/config'
-import log from 'lib/log'
+import Log from 'lib/log'
 import Pipe from 'flightcheck/pipes/pipe'
 
 const fs = Promise.promisifyAll(require('fs'))
+
+const log = new Log('flightcheck:Liftoff')
 
 /**
  * Liftoff

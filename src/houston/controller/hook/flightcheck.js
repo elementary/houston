@@ -5,9 +5,10 @@
 
 import * as atc from 'lib/atc'
 import Cycle from 'houston/model/cycle'
-import log from 'lib/log'
+import Log from 'lib/log'
 import Project from 'houston/model/project'
 
+const log = new Log('hook:flightcheck')
 const worker = new atc.Worker('cycle')
 
 /**
