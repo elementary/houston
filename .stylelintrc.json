@@ -9,6 +9,7 @@
     }],
     "at-rule-name-case": "lower",
     "at-rule-name-space-after": "always-single-line",
+    "at-rule-no-vendor-prefix": true,
     "at-rule-semicolon-newline-after": "always",
     "block-closing-brace-empty-line-before": "never",
     "block-closing-brace-newline-after": "always",
@@ -120,6 +121,7 @@
     "unit-no-unknown": true,
     "value-list-comma-newline-after": "always-multi-line",
     "value-list-comma-space-after": "always-single-line",
-    "value-list-comma-space-before": "never"
+    "value-list-comma-space-before": "never",
+    "value-no-vendor-prefix": true
   }
 }
