@@ -8,7 +8,7 @@ import Cycle from 'houston/model/cycle'
 import Log from 'lib/log'
 import Project from 'houston/model/project'
 
-const log = new Log('hook:flightcheck')
+const log = new Log('controller:hook:flightcheck')
 const worker = new atc.Worker('cycle')
 
 /**
