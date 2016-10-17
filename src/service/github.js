@@ -232,7 +232,7 @@ export async function generateJWT (exp = moment().add(1, 'minutes').toDate()) {
   paramAssert(config.github.integration.id, 'number', 'generateJWT', 'integration ID')
 
   const key = await new Promise((resolve, reject) => {
-    log.debug('GitHub service is reading integration key')
+    log.debug('Rading integration key')
     fs.readFile(config.github.integration.key, (err, data) => {
       if (err) return reject(err)
       return resolve(data)
@@ -247,7 +247,8 @@ export async function generateJWT (exp = moment().add(1, 'minutes').toDate()) {
   }
 
   return new Promise((resolve, reject) => {
-    log.debug('GitHub service is generating a new JWT token')
+    log.debug('Generating a new JWT token')
+
     jwt.sign(payload, key, { algorithm: 'RS256' }, (err, token) => {
       if (err) return reject(err)
       return resolve(token)
@@ -280,7 +281,7 @@ export async function generateToken (inst, user) {
   .set('Authorization', `Bearer ${JWT}`)
 
   if (user != null) {
-    log.debug(`GitHub service is generating a token for user ${user}`)
+    log.debug(`Generating a token for user ${user}`)
     githubReq.send({ 'user_id': user })
   }
 
@@ -323,7 +324,7 @@ export function getRepos (token, sort = 'pushed') {
 
   const req = api
   .get('/user/repos')
-  .auth(token)
+  .set('Authorization', `token ${token}`)
   .query({ sort })
 
   return pagination(req)
@@ -352,7 +353,7 @@ export function getReleases (owner, repo, token) {
   let req = api
   .get(`/repos/${owner}/${repo}/releases`)
 
-  if (token != null) req = req.auth(token)
+  if (token != null) req = req.set('Authorization', `token ${token}`)
 
   return pagination(req)
   .then((res) => res.body.map((release) => castRelease(release)))
@@ -382,7 +383,7 @@ export function getPermission (owner, repo, username, token) {
   let req = api
   .get(`/repos/${owner}/${repo}/collaborators/${username}`)
 
-  if (token != null) req = req.auth(token)
+  if (token != null) req = req.set('Authorization', `token ${token}`)
 
   return req
   .then((res) => (res.status === 204))
@@ -421,7 +422,7 @@ export function postLabel (owner, repo, token, label) {
 
   return api
   .post(`/repos/${owner}/${repo}/labels`)
-  .auth(token)
+  .set('Authorization', `token ${token}`)
   .send(label)
   .then((res) => res.body)
   .catch((err, res) => {
@@ -463,7 +464,7 @@ export function postIssue (owner, repo, token, issue) {
 
   return api
   .post(`/repos/${owner}/${repo}/issues`)
-  .auth(token)
+  .set('Authorization', `token ${token}`)
   .send(issue)
   .then((res) => res.body.number)
   .catch((err, res) => {
@@ -522,7 +523,7 @@ export async function postFile (owner, repo, release, token, file) {
   return api
   .post(`https://uploads.github.com/repos/${owner}/${repo}/${release}/assets`)
   .query(file)
-  .auth(token)
+  .set('Authorization', `token ${token}`)
   .attach('file', filePath, file.name)
   .then((res) => res.body.id)
   .catch((err, res) => {
