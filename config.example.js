@@ -17,7 +17,10 @@ module.exports.github = {
     id: 11,
 
     // Full path to GitHub integration private key.
-    key: path.resolve(__dirname, 'github.pem')
+    key: path.resolve(__dirname, 'github.pem'),
+
+    // GitHub webhook secret
+    secret: 'thisisawebhooksecuritystring'
   },
 
   // Post data to GitHub?

@@ -14,7 +14,8 @@ module.exports.github = {
   secret: 'butwait%20letmetakeaselfeshutthefrackup!',
   integration: {
     id: 11,
-    key: path.resolve(__dirname, 'github', 'private.pem')
+    key: path.resolve(__dirname, 'github', 'private.pem'),
+    secret: 'asecretwebhookkey'
   },
   post: false,
   hook: false
