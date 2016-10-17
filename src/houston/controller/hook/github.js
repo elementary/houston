@@ -38,6 +38,11 @@ route.all('/', (ctx, next) => {
  * Checks for accurate webhook secret
  */
 route.all('/', async (ctx, next) => {
+  if (config.github.integration.secret == null || !config.github.integration.secret) {
+    log.warn('Using insecure settings. Please setup integration webhook secret')
+    return next()
+  }
+
   if (ctx.request.header['x-hub-signature'] == null) {
     log.warn('Received a webhook without signature')
 
