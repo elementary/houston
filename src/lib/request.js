@@ -73,21 +73,22 @@ export function domain (url) {
  * @return {Object} - the last response object with combined body array
  */
 export async function pagination (req) {
-  if (req.pagination_cache == null) req.pagination_cache = []
+  if (req.pagination_body == null) req.pagination_body = []
+  if (req.pagination_req == null) req.pagination_req = cloneDeep(req)
 
   let page = (req.qs != null && req.qs.page != null) ? req.qs.page : 1
 
-  const res = await req
+  const res = await cloneDeep(req.pagination_req)
   .query({ page })
 
   if (!Array.isArray(res.body)) {
     throw new Error('Tried to pagination on non array response body')
   }
 
-  req.pagination_cache.push(...res.body)
+  req.pagination_body.push(...res.body)
 
   if (res.links.next == null) {
-    return Object.assign(res, { body: req.pagination_cache })
+    return Object.assign(res, { body: req.pagination_body })
   }
 
   page++
