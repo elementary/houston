@@ -26,7 +26,9 @@ import semver from 'semver'
 import { domain, pagination } from 'lib/request'
 import * as service from './index'
 import config from 'lib/config'
-import log from 'lib/log'
+import Log from 'lib/log'
+
+const log = new Log('service:github')
 
 const api = domain('https://api.github.com')
 .use((req) => {
