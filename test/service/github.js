@@ -225,7 +225,7 @@ test('Can post a label', async (t) => {
 
   nock('https://api.github.com:443', { encodedQueryParams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
-  .matchHeader('Authorization', 'Basic dGVzdFRva2VuOg==')
+  .matchHeader('Authorization', 'token testToken')
   .replyContentLength()
   .replyDate()
   .post('/repos/elementary/test1/labels', {
@@ -253,7 +253,7 @@ test('Can post an issue', async (t) => {
 
   nock('https://api.github.com:443', { encodedQueryparams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
-  .matchHeader('Authorization', 'Basic dGVzdFRva2VuOg==')
+  .matchHeader('Authorization', 'token testToken')
   .replyContentLength()
   .replyDate()
   .post('/repos/elementary/test1/issues', {
@@ -320,7 +320,7 @@ test('Can post a file', async (t) => {
 
   nock('https://uploads.github.com:443', { encodedQueryparams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
-  .matchHeader('Authorization', 'Basic dGVzdFRva2VuOg==')
+  .matchHeader('Authorization', 'token testToken')
   .replyContentLength()
   .replyDate()
   .post('/repos/elementary/test1/1/assets')
