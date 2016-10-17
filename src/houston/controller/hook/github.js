@@ -111,7 +111,7 @@ route.post('/', async (ctx, next) => {
 
     ctx.request.body.repositories_added.forEach((repo) => {
       const promise = async () => {
-        const repoObject = github.castProject(repo, installationId)
+        const repoObject = github.castProject(repo.parent, installationId)
 
         const foundProject = await Project.findOne({ name: repoObject.name })
 

@@ -8,7 +8,7 @@
 import Router from 'koa-router'
 import Promise from 'bluebird'
 
-import * as github from 'houston/service/github'
+import * as github from 'service/github'
 import * as policy from 'houston/policy'
 import Cycle from 'houston/model/cycle'
 import Project from 'houston/model/project'
@@ -28,8 +28,10 @@ route.get('', (ctx) => {
  * Shows all projects
  */
 route.get('/dashboard', policy.isRole('beta'), async (ctx, next) => {
-  const githubProjects = await github.getProjects(ctx.user.github.access)
+  const githubProjects = await github.getRepos(ctx.user.github.access)
   .map((repo) => repo.github.id)
+
+  console.log(githubProjects)
 
   const databaseProjects = await Project.find({
     'github.id': { $in: githubProjects }
@@ -54,16 +56,6 @@ route.get('/reviews', policy.isRole('review'), async (ctx, next) => {
   .exec()
 
   return ctx.render('review', { title: 'Reviews', cycles })
-})
-
-route.get('/add', policy.isRole('beta'), async (ctx, next) => {
-  const projects = await github.getProjects(ctx.user.github.access)
-  .filter(async (repo) => {
-    const dbProject = await Project.findOne({ 'github.id': repo.github.id })
-    return (dbProject == null) // Only return github repos which have not been added
-  })
-
-  return ctx.render('add', { title: 'Adding', projects })
 })
 
 export default route
