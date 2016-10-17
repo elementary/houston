@@ -76,14 +76,8 @@ export const schema = new db.Schema({
       unique: true,
       index: true
     },
-    owner: {
-      type: String,
-      required: true
-    },
-    name: {
-      type: String,
-      required: true
-    },
+    owner: String,
+    name: String,
     private: {
       type: Boolean,
       default: false
@@ -92,10 +86,7 @@ export const schema = new db.Schema({
       type: String,
       default: 'AppHub'
     },
-    installation: {
-      type: Number,
-      required: true
-    }
+    installation: Number
   },
 
   _status: {
