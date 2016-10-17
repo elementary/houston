@@ -31,8 +31,6 @@ route.get('/dashboard', policy.isRole('beta'), async (ctx, next) => {
   const githubProjects = await github.getRepos(ctx.user.github.access)
   .map((repo) => repo.github.id)
 
-  console.log(githubProjects)
-
   const databaseProjects = await Project.find({
     'github.id': { $in: githubProjects }
   })
