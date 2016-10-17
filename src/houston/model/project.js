@@ -6,7 +6,6 @@
  * @exports {Object} schema - project database schema
  */
 
-import crypto from 'crypto'
 import semver from 'semver'
 
 import * as github from 'houston/service/github'
@@ -71,49 +70,44 @@ export const schema = new db.Schema({
   },
   downloads: Number,
 
-  dists: {
-    type: [String],
-    default: ['xenial']
-  },
-  archs: {
-    type: [String],
-    default: ['amd64']
-  },
-
   github: {
     id: {
       type: Number,
       unique: true,
       index: true
     },
-    owner: String,
-    name: String,
-    private: Boolean,
-    token: String,
+    owner: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String,
+      required: true
+    },
+    private: {
+      type: Boolean,
+      default: false
+    },
     label: {
       type: String,
       default: 'AppHub'
     },
-    hook: Number,
-    secret: {
-      type: String,
-      default: () => {
-        return crypto.randomBytes(20).toString('hex')
-      }
+    installation: {
+      type: Number,
+      required: true
     }
   },
 
   _status: {
     type: String,
     default: 'NEW',
-    enum: ['NEW', 'INIT', 'DEFER', 'ERROR']
+    enum: ['NEW', 'DEFER', 'ERROR']
   },
   mistake: Object,
 
   owner: {
     type: db.Schema.Types.ObjectId,
-    ref: 'user',
-    required: true
+    ref: 'user'
   },
   releases: [releaseSchema],
   cycles: [{
