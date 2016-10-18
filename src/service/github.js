@@ -171,10 +171,10 @@ const errorCheck = (err, res, fn, fo) => {
  * Casts a GitHub project to a simpler object for internal use
  *
  * @param {Object} project - GitHub API project object
- * @param {Number} [integration] - GitHub integration number
+ * @param {Number} [installation] - GitHub installation number
  * @returns {Object} - a mapped project object
  */
-export function castProject (project, integration) {
+export function castProject (project, installation) {
   const owner = service.nameify(project.owner.login)
   const repo = service.nameify(project.name)
 
@@ -187,7 +187,7 @@ export function castProject (project, integration) {
       owner: project.owner.login,
       name: project.name,
       private: project.private,
-      integration
+      installation
     }
   }
 }

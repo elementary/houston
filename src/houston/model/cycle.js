@@ -17,10 +17,11 @@ const sender = new atc.Sender('cycle')
  * Stores cycle information. 1 cycle = 1 project version being built
  *
  * @param {String} repo - git repo of cycle (git@github.com:elementary/vocal.git)
+ * @param {Number} installation - github installation number
  * @param {String} tag - git tag to build (master)
  * @param {String} name - project name (com.github.vocalapp.vocal)
  * @param {String} version - semver version of cycle (1.0.0)
- * @param {String} type - cycle type (INIT = up to flightcheck, ORPHAN = up to strongback)
+ * @param {String} type - cycle type (RELEASE = go all the way)
  * @param {String} changelog
  * @param {Array} packages - array of aptly package keys
  * @param {String} _status - current status of cycle without influence of builds
@@ -32,8 +33,8 @@ const schema = new db.Schema({
     ref: 'project',
     required: true
   },
-  auth: {
-    type: String,
+  installation: {
+    type: Number,
     required: true
   },
 
@@ -103,12 +104,10 @@ schema.methods.toNormal = async function () {
 
   delete ret['_id']
   delete ret['__v']
+  delete ret['installation'] // security reasons
   delete ret['_status']
   delete ret['repo'] // It might have access token for cloning
-
-  if (ret['mistake'] != null && ret['mistake']['stack'] != null) {
-    delete ret['mistake']['stack']
-  }
+  delete ret['mistake'] // Don't leak private code things
 
   return ret
 }
@@ -180,10 +179,10 @@ schema.methods.setStatus = function (status) {
  * @throws {Mistake} - if an error occured communicating with flightcheck
  * @returns {Void}
  */
-schema.methods.doFlightcheck = function () {
+schema.methods.doFlightcheck = async function () {
   return sender.add('release', {
     id: this._id,
-    auth: this.auth,
+    installation: this.installation,
     repo: this.repo,
     tag: this.tag,
     name: this.name,
