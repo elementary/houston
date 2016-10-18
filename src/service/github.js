@@ -158,11 +158,13 @@ const errorCheck = (err, res, fn, fo) => {
   }
 
   if (res != null && res.status != null) {
-    log.error(`${res.status} ${errorString}`, err)
+    log.error(`${res.status} ${errorString}`)
+    log.error(err)
     return new GitHubError(`GitHub ${res.status} error`)
   }
 
-  log.error(`Error occured ${errorString}`, err)
+  log.error(`Error occured ${errorString}`)
+  log.error(err)
   return new GitHubError('An error occured')
 }
 
@@ -232,7 +234,8 @@ export async function generateJWT (exp = moment().add(1, 'minutes').toDate()) {
   paramAssert(config.github.integration.id, 'number', 'generateJWT', 'integration ID')
 
   const key = await new Promise((resolve, reject) => {
-    log.debug('Rading integration key')
+    log.debug('Reading integration key')
+
     fs.readFile(config.github.integration.key, (err, data) => {
       if (err) return reject(err)
       return resolve(data)
@@ -272,7 +275,10 @@ export async function generateToken (inst, user) {
   paramAssert(config.github.integration.id, 'number', 'generateToken', 'integration ID')
 
   const cachedToken = getToken(inst, user)
-  if (cachedToken != null) return cachedToken.token
+  if (cachedToken != null) {
+    log.debug(`Using cached token key for installation #${inst}`)
+    return cachedToken.token
+  }
 
   const JWT = await generateJWT()
 
@@ -467,7 +473,7 @@ export function getLabel (owner, repo, label, token) {
 export function getAssets (owner, repo, release, token) {
   paramAssert(owner, 'string', 'getAssets', 'owner')
   paramAssert(repo, 'string', 'getAssets', 'repo')
-  paramAssert(release, 'string', 'getAssets', 'release')
+  paramAssert(release, 'number', 'getAssets', 'release')
 
   let req = api
   .get(`/repos/${owner}/${repo}/releases/${release}/assets`)
@@ -535,7 +541,7 @@ export function postLabel (owner, repo, token, label) {
  * @param {String} issue.title - GitHub issue title
  * @param {String} [issue.body] - GitHub issue body
  * @param {Number} [issue.milestone] - GitHub milestone ID to attach to issue
- * @param {String[]} [issue.label] - GitHub labels to attach to issue
+ * @param {String[]} [issue.labels] - GitHub labels to attach to issue
  * @param {String[]} [issue.assignees] - GitHub users to assign to issue
  *
  * @throws {GitHubError} - on an error
@@ -602,19 +608,25 @@ export async function postFile (owner, repo, release, token, file) {
 
   await new Promise((resolve, reject) => {
     fs.stat(filePath, (err, stat) => {
+      const res = new GitHubError('Unable to postFile that does not exist')
+
       if (err) {
-        log.error(`GitHub service tryed to postFile that does not exist`, err)
-        return reject(new GitHubError('Unable to postFile that does not exist'))
+        log.error('GitHub service tryed to postFile that does not exist')
+        log.error(err)
+
+        return reject(res)
       }
+
+      if (!stat.isFile()) return reject(res)
 
       return resolve()
     })
   })
 
   return api
-  .post(`https://uploads.github.com/repos/${owner}/${repo}/${release}/assets`)
-  .query(file)
+  .post(`https://uploads.github.com/repos/${owner}/${repo}/releases/${release}/assets`)
   .set('Authorization', `token ${token}`)
+  .query(file)
   .attach('file', filePath, file.name)
   .then((res) => res.body.id)
   .catch((err, res) => {

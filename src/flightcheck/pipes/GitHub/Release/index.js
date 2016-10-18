@@ -62,10 +62,10 @@ export default class GitHubRelease extends Pipe {
 
     log.debug(`GitHubRelease found GitHub owner and repo: ${owner}/${repo}`)
 
-    const token = await github.generateToken(this.pipeline.build.auth)
+    const token = await github.generateToken(Number(this.pipeline.build.auth))
 
     const releaseId = await github.getReleaseByTag(owner, repo, this.pipeline.build.tag, token)
-    .then((res) => res.github.id)
+    .then((res) => Number(res.github.id))
     .catch((err) => {
       log.error('Error while trying to get release id')
       log.error(err)
@@ -114,7 +114,8 @@ export default class GitHubRelease extends Pipe {
       return github.postFile(owner, repo, releaseId, token, {
         name: file.name,
         label: file.label,
-        path: path.join(this.pipeline.build.dir, file.file)
+        path: path.join(this.pipeline.build.dir, file.file),
+        type: file.type
       })
     })
     .catch((err) => {

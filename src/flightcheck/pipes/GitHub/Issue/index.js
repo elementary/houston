@@ -68,7 +68,7 @@ export default class GitHubIssue extends Pipe {
 
     log.debug(`Found GitHub owner and repo: ${owner}/${repo}`)
 
-    const token = await github.generateToken(this.pipeline.build.auth)
+    const token = await github.generateToken(Number(this.pipeline.build.auth))
 
     const hasLabel = await github.getLabel(owner, repo, apphub.log.label, token)
     .then(() => true)
@@ -96,7 +96,7 @@ export default class GitHubIssue extends Pipe {
 
     return Promise.each(logs, (log) => {
       return github.postIssue(owner, repo, token, Object.assign(log, {
-        label: apphub.log.label
+        labels: [apphub.log.label]
       }))
     })
     .catch((err) => {

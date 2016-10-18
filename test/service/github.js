@@ -299,7 +299,7 @@ test('Can get release assets', async (t) => {
     }
   }], fixture.header)
 
-  const one = await github.getAssets('elementary', 'test1', '1')
+  const one = await github.getAssets('elementary', 'test1', 1)
 
   t.is(typeof one, 'object')
   t.is(one[0].id, 1)
@@ -409,7 +409,7 @@ test('Can post a file', async (t) => {
   .matchHeader('Authorization', 'token testToken')
   .replyContentLength()
   .replyDate()
-  .post('/repos/elementary/test1/1/assets')
+  .post('/repos/elementary/test1/releases/1/assets')
   .query({
     name: 'config.js',
     label: 'config'
