@@ -363,6 +363,37 @@ export function getReleases (owner, repo, token) {
 }
 
 /**
+ * getReleaseByTag
+ * Fetches a single release based on the Git tag
+ *
+ * @see https://developer.github.com/v3/repos/releases/#get-a-release-by-tag-name
+ *
+ * @param {String} owner - GitHub user / organization that ownes the repo
+ * @param {String} repo - GitHub repo name
+ * @param {String} tag - Git tag to lookup
+ * @param {String} [token] - GitHub authentication token
+ *
+ * @throws {GitHubError} - on an error
+ * @returns {Object} - a mapped GitHub release
+ */
+export function getReleaseByTag (owner, repo, tag, token) {
+  paramAssert(owner, 'string', 'getReleaseByTag', 'owner')
+  paramAssert(repo, 'string', 'getReleaseByTag', 'repo')
+  paramAssert(tag, 'string', 'getReleaseByTag', 'tag')
+
+  let req = api
+  .get(`/repos/${owner}/${repo}/releases/tags/${tag}`)
+
+  if (token != null) req = req.set('Authorization', `token ${token}`)
+
+  return req
+  .then((res) => castRelease(res.body))
+  .catch((err, res) => {
+    throw errorCheck(err, res, 'getReleaseByTag', `${owner}/${repo}#${tag}`)
+  })
+}
+
+/**
  * getPermission
  * Checks collaborator status of user on repository
  *
@@ -416,6 +447,37 @@ export function getLabel (owner, repo, label, token) {
   .then((res) => res.body)
   .catch((err, res) => {
     throw errorCheck(err, res, 'getLabel', `${owner}/${repo}`)
+  })
+}
+
+/**
+ * getAssets
+ * Returns raw GitHub array of release assets
+ *
+ * @see https://developer.github.com/v3/repos/releases/#list-assets-for-a-release
+ *
+ * @param {String} owner - GitHub owner
+ * @param {String} repo - GitHub repository
+ * @param {String} release - GitHub release ID
+ * @param {String} [token] - GitHub authentication token
+ *
+ * @throws {GitHubError} - on an error
+ * @returns {Object} - raw GitHub response body object
+ */
+export function getAssets (owner, repo, release, token) {
+  paramAssert(owner, 'string', 'getAssets', 'owner')
+  paramAssert(repo, 'string', 'getAssets', 'repo')
+  paramAssert(release, 'string', 'getAssets', 'release')
+
+  let req = api
+  .get(`/repos/${owner}/${repo}/releases/${release}/assets`)
+
+  if (token != null) req = req.set('Authorization', `token ${token}`)
+
+  return req
+  .then((res) => res.body)
+  .catch((err, res) => {
+    throw errorCheck(err, res, 'getAssets', `${owner}/${repo}#${release}`)
   })
 }
 

@@ -7,10 +7,10 @@
 
 import path from 'path'
 
+import * as github from 'service/github'
 import config from 'lib/config'
 import Log from 'lib/log'
 import Pipe from 'flightcheck/pipes/pipe'
-import request from 'lib/request'
 
 const log = new Log('flightcheck:GitHubRelease')
 
@@ -62,34 +62,29 @@ export default class GitHubRelease extends Pipe {
 
     log.debug(`GitHubRelease found GitHub owner and repo: ${owner}/${repo}`)
 
-    let releaseId = null
-    try {
-      releaseId = await request
-      .get(`https://api.github.com/repos/${owner}/${repo}/releases/tags/${this.pipeline.build.tag}`)
-      .auth(this.pipeline.build.auth)
-      .then((res) => res.body.id)
+    const token = await github.generateToken(this.pipeline.build.auth)
 
-      log.debug(`GitHubRelease found release id: ${releaseId}`)
-    } catch (err) {
-      log.error('GitHubRelease errored while trying to get release id')
+    const releaseId = await github.getReleaseByTag(owner, repo, this.pipeline.build.tag, token)
+    .then((res) => res.github.id)
+    .catch((err) => {
+      log.error('Error while trying to get release id')
       log.error(err)
-      return this.log('error', 'GitHub/Release/api.md')
-    }
 
-    let releasedAssets = null
-    try {
-      releasedAssets = await request
-      .get(`https://api.github.com/repos/${owner}/${repo}/releases/${releaseId}/assets`)
-      .auth(this.pipeline.build.auth)
-      .then((res) => res.body)
-      .map((release) => release.label)
+      return this.log('error', 'GitHub/Release/error.md')
+    })
 
-      log.debug(`GitHubRelease found ${releasedAssets.length} published assets`)
-    } catch (err) {
-      log.error('GitHubRelease errored while trying to get published assets')
+    log.debug(`Found release id: ${releaseId}`)
+
+    const releasedAssets = await github.getAssets(owner, repo, releaseId, token)
+    .then((body) => body.map((res) => res.label))
+    .catch((err) => {
+      log.error('Error while trying to get published assets')
       log.error(err)
-      return this.log('error', 'GitHub/Release/api.md')
-    }
+
+      return this.log('error', 'GitHub/Release/error.md')
+    })
+
+    log.debug(`Found ${releasedAssets.length} published assets`)
 
     files.forEach((file) => {
       const abs = path.join(this.pipeline.build.dir, file)
@@ -113,23 +108,20 @@ export default class GitHubRelease extends Pipe {
       this.data.published.push({file, label, name, type})
     })
 
-    try {
-      log.debug(`GitHubRelease publishing ${this.data.published.length} files`)
+    log.debug(`Publishing ${this.data.published.length} files`)
 
-      return Promise.each(this.data.published, async (file) => {
-        return request // Keep it in a promise so we can execute in parallel
-        .post(`https://uploads.github.com/repos/${owner}/${repo}/releases/${releaseId}/assets`)
-        .query({
-          name: file.name,
-          label: file.label
-        })
-        .auth(this.pipeline.build.auth)
-        .attach('file', path.join(this.pipeline.build.dir, file.file), file.name)
+    return Promise.each(this.data.published, (file) => {
+      return github.postFile(owner, repo, releaseId, token, {
+        name: file.name,
+        label: file.label,
+        path: path.join(this.pipeline.build.dir, file.file)
       })
-    } catch (err) {
-      log.error('GitHubRelease encountered an error while trying to publish files')
+    })
+    .catch((err) => {
+      log.error('Error while trying to push files')
       log.error(err)
+
       return this.error('error', 'GitHub/Release/error.md')
-    }
+    })
   }
 }

@@ -194,6 +194,24 @@ test('Can get list of releases', async (t) => {
   t.true(one[0].date.released instanceof Date)
 })
 
+test('Can get a release by way of tag', async (t) => {
+  const github = t.context.github
+
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .get('/repos/elementary/test1/releases/tags/v1.0.0')
+  .reply(200, fixture.release, fixture.header)
+
+  const one = await github.getReleaseByTag('elementary', 'test1', 'v1.0.0')
+
+  t.is(typeof one, 'object')
+  t.is(one.version, '1.0.0')
+  t.is(one.github.id, 1)
+  t.true(one.date.released instanceof Date)
+})
+
 test('Can get accurate permissions', async (t) => {
   const github = t.context.github
 
@@ -238,6 +256,54 @@ test('Can get a single label', async (t) => {
 
   t.is(typeof one, 'object')
   t.is(one.name, 'test1')
+})
+
+test('Can get release assets', async (t) => {
+  const github = t.context.github
+
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .get('/repos/elementary/test1/releases/1/assets')
+  .reply(200, [{
+    'url': 'https://api.github.com/repos/elementary/test1/releases/assets/1',
+    'browser_download_url': 'https://github.com/elementary/test1/releases/download/v1.0.0/example.zip',
+    'id': 1,
+    'name': 'example.zip',
+    'label': 'short description',
+    'state': 'uploaded',
+    'content_type': 'application/zip',
+    'size': 1024,
+    'download_count': 42,
+    'created_at': '2013-02-27T19:35:32Z',
+    'updated_at': '2013-02-27T19:35:32Z',
+    'uploader': {
+      'login': 'octocat',
+      'id': 1,
+      'avatar_url': 'https://github.com/images/error/octocat_happy.gif',
+      'gravatar_id': '',
+      'url': 'https://api.github.com/users/octocat',
+      'html_url': 'https://github.com/octocat',
+      'followers_url': 'https://api.github.com/users/octocat/followers',
+      'following_url': 'https://api.github.com/users/octocat/following{/other_user}',
+      'gists_url': 'https://api.github.com/users/octocat/gists{/gist_id}',
+      'starred_url': 'https://api.github.com/users/octocat/starred{/owner}{/repo}',
+      'subscriptions_url': 'https://api.github.com/users/octocat/subscriptions',
+      'organizations_url': 'https://api.github.com/users/octocat/orgs',
+      'repos_url': 'https://api.github.com/users/octocat/repos',
+      'events_url': 'https://api.github.com/users/octocat/events{/privacy}',
+      'received_events_url': 'https://api.github.com/users/octocat/received_events',
+      'type': 'User',
+      'site_admin': false
+    }
+  }], fixture.header)
+
+  const one = await github.getAssets('elementary', 'test1', '1')
+
+  t.is(typeof one, 'object')
+  t.is(one[0].id, 1)
+  t.is(one[0].size, 1024)
 })
 
 test('Can post a label', async (t) => {
