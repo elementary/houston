@@ -8,34 +8,12 @@
 *************************/
 
 .fab {
-    background-color: #3892e0;
-    border-radius: 50%;
-    box-shadow:
-        0 1px 3px rgba(0, 0, 0, 0.12),
-        0 1px 2px rgba(0, 0, 0, 0.24);
-    color: #fff;
-    height: 52px;
-    position: relative;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 52px;
-    will-change: box-shadow;
-}
-
-.fab:hover {
-    box-shadow:
-        0 0 2px rgba(0, 0, 0, 0.18),
-        0 4px 8px rgba(0, 0, 0, 0.24);
-}
-
-.fab.busy {
     background-color: #f9c440;
-}
-
-.fab.busy:hover {
-    box-shadow:
-        0 1px 3px rgba(0, 0, 0, 0.12),
-        0 1px 2px rgba(0, 0, 0, 0.24);
+    border-radius: 50%;
+    color: #fff;
+    height: 32px;
+    position: relative;
+    width: 32px;
 }
 
 .fab.success {
@@ -51,25 +29,10 @@
 }
 
 .fab > i {
-    font-size: 28px;
-    line-height: 52px;
+    font-size: 18px;
+    line-height: 32px;
     text-align: center;
-    width: 52px;
-}
-
-.repo .fa-refresh::before {
-    animation: spin 2.5s linear infinite;
-    display: block;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
+    width: 32px;
 }
 
 /************
@@ -101,6 +64,13 @@
     margin-top: 8px;
 }
 
+.repo .button {
+    font-size: 12px;
+    padding: 6px 12px;
+    position: relative;
+}
+
+.repo .button,
 .repo .fab {
     margin: auto;
 }
@@ -110,6 +80,10 @@
     padding-bottom: 3px;
     text-align: center;
     white-space: nowrap;
+}
+
+.repo .button > p {
+    padding-bottom: 0;
 }
 
 .repo p a {
@@ -164,14 +138,14 @@
 * Popup *
 ********/
 
-.repo .fab .popover-container {
+.repo .popover-container {
     position: absolute;
     right: 50%;
-    bottom: 12px;
+    bottom: -3px;
     pointer-events: none;
 }
 
-.repo .fab .popover-container .popover-content {
+.repo .popover-container .popover-content {
     position: relative;
     right: -50%;
     bottom: 30px;
@@ -192,8 +166,8 @@
     transition: visibility 0s 250ms, opacity 250ms;
 }
 
-.repo .fab .popover-container .popover-content::before,
-.repo .fab .popover-container .popover-content::after {
+.repo .popover-container .popover-content::before,
+.repo .popover-container .popover-content::after {
     content: '';
     display: block;
     position: absolute;
@@ -204,16 +178,17 @@
     border: 10px outset transparent;
 }
 
-.repo .fab .popover-container .popover-content::before {
+.repo .popover-container .popover-content::before {
     bottom: -20px;
     border-top: 10px solid rgba(0, 0, 0, 0.2);
 }
 
-.repo .fab .popover-container .popover-content::after {
+.repo .popover-container .popover-content::after {
     bottom: -18px;
     border-top: 10px solid white;
 }
 
+.repo .button:hover .popover-container .popover-content,
 .repo .fab:hover .popover-container .popover-content {
     visibility: visible;
     pointer-events: auto;
@@ -221,17 +196,17 @@
     transition: opacity 250ms;
 }
 
-.repo .fab .popover-container .popover-content p {
+.repo .popover-container .popover-content p {
     text-align: center;
 }
 
-.repo .fab .popover-container .popover-content strong {
+.repo .popover-container .popover-content strong {
     display: inline-block;
     margin: 15px;
     margin-bottom: 10px;
 }
 
-.repo .fab .popover-container .popover-content ul {
+.repo .popover-container .popover-content ul {
     margin: 5px 0;
     padding: 0;
     max-height: 500px;
@@ -239,38 +214,38 @@
 }
 
 @media (max-height: 700px) {
-    .repo .fab .popover-container .popover-content ul {
+    .repo .popover-container .popover-content ul {
         max-height: 300px;
     }
 }
 
 @media (max-height: 450px) {
-    .repo .fab .popover-container .popover-content ul {
+    .repo .popover-container .popover-content ul {
         max-height: 200px;
     }
 }
 
-.repo .fab .popover-container .popover-content ul li {
+.repo .popover-container .popover-content ul li {
     display: block;
     margin: 0;
 }
 
-.repo .fab .popover-container .popover-content ul li a {
+.repo .popover-container .popover-content ul li a {
     display: block;
     padding: 5px 15px;
 }
 
-.repo .fab .popover-container .popover-content ul li a:hover {
+.repo .popover-container .popover-content ul li a:hover {
     background-color: #e0e0e0;
 }
 
-.repo .fab .popover-container .popover-content hr {
+.repo .popover-container .popover-content hr {
     background: #e0e0e0;
     height: 1px;
     border: 0;
 }
 
-.repo .fab .popover-container .popover-content {
+.repo .popover-container .popover-content {
     z-index: 999;
     margin-right: 8px;
     bottom: 50px;
@@ -278,17 +253,17 @@
     min-width: 200px;
 }
 
-.repo .fab .popover-container .popover-content h2 {
+.repo .popover-container .popover-content h2 {
     text-align: center;
     font-size: 18px;
     margin: 12px;
 }
 
-.repo .fab .popover-container .popover-content h3 {
+.repo .popover-container .popover-content h3 {
     font-size: 16px;
     margin: 12px;
 }
 
-.repo .fab .popover-container .popover-content p {
+.repo .popover-container .popover-content p {
     margin: 12px;
 }
