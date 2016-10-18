@@ -11,9 +11,11 @@
     background-color: #f9c440;
     border-radius: 50%;
     color: #fff;
-    height: 32px;
+    display: inline-block;
+    height: 24px;
     position: relative;
-    width: 32px;
+    vertical-align: middle;
+    width: 24px;
 }
 
 .fab.success {
@@ -29,10 +31,10 @@
 }
 
 .fab > i {
-    font-size: 18px;
-    line-height: 32px;
+    font-size: 14px;
+    line-height: 24px;
     text-align: center;
-    width: 32px;
+    width: 24px;
 }
 
 /************
@@ -70,7 +72,10 @@
     position: relative;
 }
 
-.repo .button,
+.repo .button {
+    margin: auto 12px;
+}
+
 .repo .fab {
     margin: auto;
 }
@@ -141,7 +146,7 @@
 .repo .popover-container {
     position: absolute;
     right: 50%;
-    bottom: -3px;
+    bottom: -9px;
     pointer-events: none;
 }
 
