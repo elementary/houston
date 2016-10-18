@@ -220,6 +220,26 @@ test('Can get accurate permissions', async (t) => {
   t.false(three)
 })
 
+test('Can get a single label', async (t) => {
+  const github = t.context.github
+
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .get('/repos/elementary/test/labels/test1')
+  .reply(200, {
+    'url': 'https://api.github.com/repos/elementary/test/labels/test1',
+    'name': 'test1',
+    'color': 'f29513'
+  }, fixture.header)
+
+  const one = await github.getLabel('elementary', 'test', 'test1', 'testToken')
+
+  t.is(typeof one, 'object')
+  t.is(one.name, 'test1')
+})
+
 test('Can post a label', async (t) => {
   const github = t.context.github
 

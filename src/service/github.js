@@ -391,6 +391,35 @@ export function getPermission (owner, repo, username, token) {
 }
 
 /**
+ * getLabel
+ * Returns GitHub label for repository
+ *
+ * @see https://developer.github.com/v3/issues/labels/#get-a-single-label
+ *
+ * @param {String} owner - GitHub owner
+ * @param {String} repo - GitHub repository
+ * @param {String} label - GitHub label name
+ * @param {String} token - token for GitHub authentication
+ *
+ * @throws {GitHubError} - on an error
+ * @returns {Object} - raw GitHub response body object
+ */
+export function getLabel (owner, repo, label, token) {
+  paramAssert(owner, 'string', 'getLabel', 'owner')
+  paramAssert(repo, 'string', 'getLabel', 'repo')
+  paramAssert(label, 'string', 'getLabel', 'label')
+  paramAssert(token, 'string', 'getLabel', 'token')
+
+  return api
+  .get(`/repos/${owner}/${repo}/labels/${label}`)
+  .set('Authorization', `token ${token}`)
+  .then((res) => res.body)
+  .catch((err, res) => {
+    throw errorCheck(err, res, 'getLabel', `${owner}/${repo}`)
+  })
+}
+
+/**
  * postLabel
  * Creates a label on GitHub repository
  *

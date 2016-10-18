@@ -5,10 +5,10 @@
  * @exports {Pipe} - Create GitHub Issues
  */
 
+import * as github from 'service/github'
 import config from 'lib/config'
 import Log from 'lib/log'
 import Pipe from 'flightcheck/pipes/pipe'
-import request from 'lib/request'
 
 const log = new Log('flightcheck:GitHubIssue')
 
@@ -44,7 +44,7 @@ export default class GitHubIssue extends Pipe {
       return this.log('debug', 'GitHub/Issue/unsupported.md')
     }
 
-    if (!config.github.access || !config.github.post) {
+    if (this.pipeline.build.auth == null || !config.github.post) {
       return this.log('debug', 'GitHub/Issue/disabled.md', !config.github.post)
     }
 
@@ -66,47 +66,43 @@ export default class GitHubIssue extends Pipe {
     const owner = splits[splits.length - 3].replace('.', '_')
     const repo = splits[splits.length - 1].replace('.git', '').replace('.', '_')
 
-    log.debug(`GitHubIssue found GitHub owner and repo: ${owner}/${repo}`)
+    log.debug(`Found GitHub owner and repo: ${owner}/${repo}`)
 
-    let label = false
-    if (this.pipeline.build.auth != null) {
-      label = await request
-      .post(`https://api.github.com/repos/${owner}/${repo}/labels`)
-      .auth(this.pipeline.build.auth)
-      .send({
-        name: apphub.log.label,
-        color: apphub.log.color
-      })
-      .then(() => true)
-      .catch(async (error) => {
-        if (error.status === 422) return true // it already exists
+    const token = await github.generateToken(this.pipeline.build.auth)
 
-        await this.log('warn', 'GitHub/Issue/label.md')
-        return false
-      })
+    const hasLabel = await github.getLabel(owner, repo, apphub.log.label, token)
+    .then(() => true)
+    .catch(() => false)
+
+    if (hasLabel) {
+      log.debug('Label already exists. Not posting new label')
     } else {
-      await this.log('debug', 'GitHub/Issue/auth.md')
+      log.debug('Label does not exist. Posting new label')
+
+      try {
+        await github.postLabel(owner, repo, token, {
+          name: apphub.log.label,
+          color: apphub.log.color
+        })
+      } catch (err) {
+        log.error('Encountered an error trying to push label')
+        log.error(err)
+
+        // return here because if we can't post a label, we won't be able to
+        // post an issue
+        return this.log('error', 'GitHub/Issue/error.md')
+      }
     }
 
-    return Promise.each(logs, async (log) => {
-      const res = await request
-      .post(`https://api.github.com/repos/${owner}/${repo}/issues`)
-      .auth(config.github.access)
-      .send(log)
-      .then((res) => res.body)
-
-      if (!label) return
-
-      return request
-      .patch(`https://api.github.com/repos/${owner}/${repo}/issues/${res.number}`)
-      .auth(this.pipeline.build.auth)
-      .send({
-        labels: [apphub.log.label]
-      })
+    return Promise.each(logs, (log) => {
+      return github.postIssue(owner, repo, token, Object.assign(log, {
+        label: apphub.log.label
+      }))
     })
     .catch((err) => {
-      log.error('GitHubIssue encountered an error trying to publish logs')
+      log.error('Encountered an error trying to push logs')
       log.error(err)
+
       return this.log('error', 'GitHub/Issue/error.md')
     })
   }

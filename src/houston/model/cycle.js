@@ -182,7 +182,7 @@ schema.methods.setStatus = function (status) {
 schema.methods.doFlightcheck = async function () {
   return sender.add('release', {
     id: this._id,
-    installation: this.installation,
+    auth: this.installation,
     repo: this.repo,
     tag: this.tag,
     name: this.name,
