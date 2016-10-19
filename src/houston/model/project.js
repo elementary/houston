@@ -263,27 +263,12 @@ schema.methods.postIssue = async function (issue) {
  */
 schema.methods.createCycle = async function (type) {
   if (this._status === 'NEW') {
-    return Promise.reject('Unable to cycle an uninitalized project')
+    throw new Error('Unable to cycle a project without a release')
   }
 
-  if (type === 'RELEASE') {
-    return this.release.latest.createCycle(type)
-    .then((data) => {
-      if (this._status === 'DEFER') return data
+  if (type === 'RELEASE') return this.release.latest.createCycle(type)
 
-      return this.update({ _status: 'DEFER' })
-      .then(() => data)
-    })
-  }
-
-  const builds = []
-  this.dists.forEach((dist) => {
-    this.archs.forEach((arch) => {
-      builds.push({dist, arch})
-    })
-  })
-
-  return db.model('cycle').create({
+  const cycle = await db.model('cycle').create({
     project: this._id,
     installation: this.github.installation,
     repo: this.repo,
@@ -291,18 +276,12 @@ schema.methods.createCycle = async function (type) {
     name: this.name,
     version: this.release.latest.version,
     type,
-    changelog: await this.release.latest.createChangelog(),
-    builds
+    changelog: await this.release.latest.createChangelog()
   })
-  .then((cycle) => {
-    // TODO: replace this with `this.update()` when $push support is added
-    return this.update({
-      $addToSet: {
-        'cycles': cycle._id
-      }
-    })
-    .then(() => cycle)
-  })
+
+  await this.update({ $addToSet: { 'cycles': cycle._id } })
+
+  return cycle
 }
 
 export default db.model('project', schema)
