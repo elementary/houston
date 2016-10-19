@@ -29,14 +29,14 @@ export default class AppData extends Pipe {
    * @returns {Void}
    */
   async code (p = 'repository/data') {
-    const appdataName = `${this.pipeline.build.name}.desktop.appdata.xml`
+    const appdataName = `${this.pipeline.build.name}.appdata.xml`
     const appdataPath = path.join(p, appdataName)
     const buildPath = path.join(this.pipeline.build.dir, p)
 
     const file = await this.file(appdataPath)
 
     if (!await file.exists()) {
-      return this.log('warn', 'AppData/existance.md')
+      return this.log('warn', 'AppData/existance.md', `${this.pipeline.build.name}.appdata.xml`)
     }
 
     const returned = await this.docker('util', ['validate', appdataName], buildPath)
