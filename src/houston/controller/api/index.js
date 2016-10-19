@@ -13,7 +13,7 @@ import Mistake from 'lib/mistake'
 import popularity from './popularity'
 import projects from './projects'
 
-const log = new Log('api')
+const log = new Log('controller:api')
 
 const route = new Router({
   prefix: '/api'

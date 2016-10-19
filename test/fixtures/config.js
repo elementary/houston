@@ -5,12 +5,18 @@
  * @exports {Object} default - Houston configuration
  */
 
+const path = require('path')
+
 module.exports.env = 'test'
 
 module.exports.github = {
   client: '123456789yoloswagomg',
   secret: 'butwait%20letmetakeaselfeshutthefrackup!',
-  access: 'secretrobotmanthevegivenyouauuid',
+  integration: {
+    id: 11,
+    key: path.resolve(__dirname, 'github', 'private.pem'),
+    secret: 'asecretwebhookkey'
+  },
   post: false,
   hook: false
 }

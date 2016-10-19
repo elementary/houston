@@ -8,7 +8,7 @@ import path from 'path'
 import test from 'ava'
 
 import alias from 'root/.alias'
-import mockConfig from './fixtures/config'
+import mockConfig from 'test/fixtures/config'
 
 test('false objects correctly', (t) => {
   mockConfig['aptly'] = false
