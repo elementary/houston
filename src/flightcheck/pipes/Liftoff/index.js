@@ -54,15 +54,13 @@ export default class Liftoff extends Pipe {
       this.require('Desktop')
     ])
 
-    const debianFile = await this.file(path.join(p, 'debian', 'control'))
-
-    if (!await debianFile.exists()) {
-      return this.log('error', 'Liftoff/support.md')
-    }
+    log.debug('Running liftoff')
 
     const buildPath = path.join(this.pipeline.build.dir, p)
     const cacheDir = path.join(config.flightcheck.directory, 'liftoff', 'cache')
     await fsHelper.mkdirp(cacheDir)
+
+    log.debug(`Using cache directory: ${cacheDir}`)
 
     const returned = await this.docker('liftoff', ['-a', a, '-d', d, '-o', '/tmp/flightcheck'], buildPath, {
       Binds: [`${cacheDir}:/var/cache/liftoff:rw`],
@@ -72,6 +70,8 @@ export default class Liftoff extends Pipe {
     this.data.log = returned.log
 
     if (returned.exit !== 0) {
+      log.debug(`Flightcheck returned ${returned.exit} exit code`)
+
       try {
         const file = await this.file(returned.log)
         const log = await file.read()
@@ -91,6 +91,8 @@ export default class Liftoff extends Pipe {
       return (path.extname(p) === '.deb')
     })
 
+    log.debug(`Found ${debs.length} deb files in folder`)
+
     const deb = debs.find((deb) => {
       if (deb.indexOf(this.pipeline.build.name) === -1) return false
       if (deb.indexOf(a) === -1) return false
@@ -99,6 +101,7 @@ export default class Liftoff extends Pipe {
     })
 
     if (deb != null) {
+      log.debug(`Found deb file for release: ${deb}`)
       this.data.file = path.join(p, deb)
     }
   }
