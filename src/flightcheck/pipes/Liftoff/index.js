@@ -48,7 +48,11 @@ export default class Liftoff extends Pipe {
    * @returns {Void}
    */
   async code (p = 'repository', a = 'amd64', d = 'xenial') {
-    await this.require('Debian', p, d)
+    await Promise.all([
+      this.require('AppData'),
+      this.require('Debian', p, d),
+      this.require('Desktop')
+    ])
 
     const debianFile = await this.file(path.join(p, 'debian', 'control'))
 
