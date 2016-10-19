@@ -189,7 +189,6 @@
     border-top: 6px solid rgba(51, 51, 51, 0.9);
 }
 
-.repo .button:hover .popover-container .popover-content,
 .repo .fab:hover .popover-container .popover-content {
     visibility: visible;
     pointer-events: auto;
