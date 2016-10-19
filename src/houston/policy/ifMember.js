@@ -5,7 +5,7 @@
  * @exports {Function} - Checks user rights against GitHub
  */
 
-import * as github from 'houston/service/github'
+import { getPermission } from 'service/github'
 import config from 'lib/config'
 import Log from 'lib/log'
 import Mistake from 'lib/mistake'
@@ -32,5 +32,5 @@ export default function (project, user) {
     return true
   }
 
-  return github.getPermission(project.github.owner, project.github.name, user.username, user.github.access)
+  return getPermission(project.github.owner, project.github.name, user.username, user.github.access)
 }

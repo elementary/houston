@@ -10,7 +10,7 @@ import Router from 'koa-router'
 import github from './github'
 import Log from 'lib/log'
 
-const log = new Log('hook')
+const log = new Log('controller:hook')
 const route = new Router({
   prefix: '/hook'
 })

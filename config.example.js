@@ -5,13 +5,23 @@
  * @exports {Object} default - Houston configuration
  */
 
+const path = require('path')
+
 // https://github.com/settings/developers
 module.exports.github = {
   client: '78zx9c4vb8xc4v5647ar',
   secret: '4ra56dsv489asd4r56b456a489sd7ft89a75s4b8',
 
-  // User access token for submitting issues
-  access: 'ar4sd56v456as4edr564s5dv6a45sr156we48zxw',
+  // GitHub integration https://developer.github.com/early-access/integrations
+  integration: {
+    id: 11,
+
+    // Full path to GitHub integration private key.
+    key: path.resolve(__dirname, 'github.pem'),
+
+    // GitHub webhook secret
+    secret: 'thisisawebhooksecuritystring'
+  },
 
   // Post data to GitHub?
   post: false,

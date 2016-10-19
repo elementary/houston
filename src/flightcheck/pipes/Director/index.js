@@ -41,8 +41,6 @@ export default class Director extends Pipe {
       if (apphub.endpoints.github && this.pipeline.build.source === 'github') await this.require('GitHubRelease', files)
       if (apphub.endpoints.elementary) await this.require('ElementaryAptly', debFiles)
     } catch (err) {
-      if (err.code === 'PIPER') return
-
       log.error('Error while trying to publish content to sources')
       log.error(err)
     }
@@ -50,8 +48,6 @@ export default class Director extends Pipe {
     try {
       if (apphub.log.enabled && this.pipeline.build.source === 'github') await this.require('GitHubIssue')
     } catch (err) {
-      if (err.code === 'PIPER') return
-
       log.error('Error while trying to publish results to sources')
       log.error(err)
     }

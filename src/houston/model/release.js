@@ -120,10 +120,7 @@ schema.methods.toNormal = async function () {
 
   delete ret['_id']
   delete ret['_status']
-
-  if (ret['mistake'] != null && ret['mistake']['stack'] != null) {
-    delete ret['mistake']['stack']
-  }
+  delete ret['mistake']
 
   return ret
 }
@@ -209,7 +206,7 @@ schema.methods.setStatus = async function (status) {
 schema.methods.createCycle = async function (type) {
   return db.model('cycle').create({
     project: this.project._id,
-    auth: this.project.github.token,
+    installation: this.project.github.installation,
     repo: this.project.repo,
     tag: this.github.tag,
     name: this.project.name,

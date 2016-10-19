@@ -26,7 +26,7 @@ const help = function () {
     Examples:
 
       flightcheck git@github.com:vocalapp/vocal 2.0.6-beta
-      flightcheck https://github.com/birdieapp/birdie 1.1 thisisanauthenticationkey
+      flightcheck https://github.com/birdieapp/birdie 1.1 1337
   `)
 }
 

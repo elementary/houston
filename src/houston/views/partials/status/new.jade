@@ -1,6 +1,8 @@
-a(href="/project/" + project.name + "/init")
-  i.fab.fa.fa-check
+a(href="https://github.com/" + project.github.fullName + "/releases/new", target="_blank")
+  div.button
+    p Create a New Release…
+  i.fab.fa.fa-tag
     div.popover-container
       div.popover-content
-        h3 New Project
-        p One click and #{project.name} will be ready for AppCenter.
+        h3 Release #{project.name} on GitHub
+        p Make sure to use a Semantic Version Number like 1.0.0

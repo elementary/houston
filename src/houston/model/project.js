@@ -6,10 +6,9 @@
  * @exports {Object} schema - project database schema
  */
 
-import crypto from 'crypto'
 import semver from 'semver'
 
-import * as github from 'houston/service/github'
+import * as github from 'service/github'
 import db from 'lib/database'
 import releaseSchema from './release'
 
@@ -71,15 +70,6 @@ export const schema = new db.Schema({
   },
   downloads: Number,
 
-  dists: {
-    type: [String],
-    default: ['xenial']
-  },
-  archs: {
-    type: [String],
-    default: ['amd64']
-  },
-
   github: {
     id: {
       type: Number,
@@ -88,32 +78,27 @@ export const schema = new db.Schema({
     },
     owner: String,
     name: String,
-    private: Boolean,
-    token: String,
+    private: {
+      type: Boolean,
+      default: false
+    },
     label: {
       type: String,
       default: 'AppHub'
     },
-    hook: Number,
-    secret: {
-      type: String,
-      default: () => {
-        return crypto.randomBytes(20).toString('hex')
-      }
-    }
+    installation: Number
   },
 
   _status: {
     type: String,
     default: 'NEW',
-    enum: ['NEW', 'INIT', 'DEFER', 'ERROR']
+    enum: ['NEW', 'DEFER', 'ERROR']
   },
   mistake: Object,
 
   owner: {
     type: db.Schema.Types.ObjectId,
-    ref: 'user',
-    required: true
+    ref: 'user'
   },
   releases: [releaseSchema],
   cycles: [{
@@ -189,10 +174,7 @@ schema.methods.toNormal = async function () {
   delete ret['package']['icon']
   delete ret['github']['token']
   delete ret['github']['secret']
-
-  if (ret['mistake'] != null && ret['mistake']['stack'] != null) {
-    delete ret['mistake']['stack']
-  }
+  delete ret['mistake']
 
   return ret
 }
@@ -259,12 +241,17 @@ schema.methods.setStatus = function (status) {
  * }
  * @returns {Void}
  */
-schema.methods.postIssue = function (issue) {
+schema.methods.postIssue = async function (issue) {
   if (typeof issue.title !== 'string') return Promise.reject('Issue needs a title')
   if (typeof issue.body !== 'string') return Promise.reject('Issue needs a body')
 
-  return github.sendLabel(this.github.owner, this.github.name, this.github.token, this.github.label)
-  .then(() => github.sendIssue(this.github.owner, this.github.name, this.github.token, issue, this.github.label))
+  const gh = this.github
+  const token = await github.generateToken(gh.installation)
+
+  await github.postLabel(gh.owner, gh.name, token, gh.label)
+  return github.postIssue(gh.owner, gh.name, token, Object.assign(issue, {
+    label: gh.label
+  }))
 }
 
 /**
@@ -298,7 +285,7 @@ schema.methods.createCycle = async function (type) {
 
   return db.model('cycle').create({
     project: this._id,
-    auth: this.github.token,
+    installation: this.github.installation,
     repo: this.repo,
     tag: this.tag,
     name: this.name,

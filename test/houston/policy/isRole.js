@@ -8,7 +8,7 @@ import path from 'path'
 import test from 'ava'
 
 import alias from 'root/.alias'
-import mockConfig from './fixtures/config'
+import mockConfig from 'test/fixtures/config'
 
 test.beforeEach('setup configuration mock', (t) => {
   mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
