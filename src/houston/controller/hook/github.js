@@ -45,7 +45,10 @@ const processInstallations = async (installation, additions = [], removals = [])
       }
 
       repo.releases = await github.getReleases(repo.github.owner, repo.github.name, token)
-      .then((releases) => releases.sort((a, b) => semver(a.version, b.version)))
+
+      repo.releases = repo.releases
+      .filter((release) => (release.version != null))
+      .sort((a, b) => semver(a.version, b.version))
 
       if (repo.releases.length > 0) {
         repo._status = 'DEFER'
