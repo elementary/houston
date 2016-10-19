@@ -529,7 +529,7 @@ export function getAssets (owner, repo, release, token) {
  */
 export function postLabel (owner, repo, token, label) {
   if (!config.github.post) {
-    log.verbose('Config prohibits posting to GitHub. Not posting label')
+    log.debug('Config prohibits posting to GitHub. Not posting label')
     return Promise.resolve(label) // like it happened minus the url key
   }
 
@@ -572,7 +572,7 @@ export function postLabel (owner, repo, token, label) {
  */
 export function postIssue (owner, repo, token, issue) {
   if (!config.github.post) {
-    log.verbose('Config prohibits posting to GitHub. Not posting issue')
+    log.debug('Config prohibits posting to GitHub. Not posting issue')
     return Promise.resolve(0)
   }
 
@@ -614,7 +614,7 @@ export function postIssue (owner, repo, token, issue) {
  */
 export async function postFile (owner, repo, release, token, file) {
   if (!config.github.post) {
-    log.verbose('Config prohibits posting to GitHub. Not posting file')
+    log.debug('Config prohibits posting to GitHub. Not posting file')
     return 0
   }
 

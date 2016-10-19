@@ -24,11 +24,10 @@ worker.register('start', async (param) => {
   if (status !== 'QUEUE') {
     log.debug('Received flightcheck start data for a cycle already checked')
     return
-  } else {
-    log.verbose('Received flightcheck data for start cycle')
   }
 
-  cycle.setStatus('RUN')
+  log.debug('Received flightcheck data for start cycle')
+  await cycle.setStatus('RUN')
 })
 
 /**
@@ -49,11 +48,11 @@ worker.register('finish', async (param) => {
     return
   }
 
-  log.verbose(`Received flightcheck data for finish cycle ${param.id}`)
-  log.debug(`Found ${log.lang.s('log', param.logs)} in ${cycle.name}`)
+  log.debug(`Received flightcheck data for finish cycle ${param.id}`)
+  log.debug(`Found ${param.logs.length} logs in ${cycle.name}`)
   param.logs.forEach((l) => {
-    log.verbose(`${l.pipe} ${l.level} log => ${l.title}`)
-    log.silly(`\n${l.body}`)
+    log.debug(`${l.pipe} ${l.level} log => ${l.title}`)
+    log.debug(`\n${l.body}`)
   })
 
   const errors = param.logs.filter((l) => (l.level === 'error'))
@@ -100,11 +99,11 @@ worker.register('error', async (param) => {
     log.debug('Received flightcheck error data for a cycle not running')
     return
   } else {
-    log.verbose('Received flightcheck data for error cycle')
+    log.debug('Received flightcheck data for error cycle')
   }
 
-  cycle.setStatus('ERROR')
-  .then(() => cycle.update({ mistake: param.error }))
+  await cycle.setStatus('ERROR')
+  await cycle.update({ mistake: param.error })
 })
 
 worker.start()

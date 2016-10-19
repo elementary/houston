@@ -143,9 +143,9 @@ app.on('error', async (error, ctx, next) => {
   app.on('error', (err) => log.report(err))
 
   if (/4.*/.test(error.status)) {
-    log.default.verbose(`${ctx.method} ${ctx.status} ${ctx.url} |> ${error.message}`)
+    log.debug(`${ctx.method} ${ctx.status} ${ctx.url} |> ${error.message}`)
   } else {
-    log.default.error(error)
+    log.error(error)
   }
 
   try {
