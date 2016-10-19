@@ -611,7 +611,7 @@ export async function postFile (owner, repo, release, token, file) {
       const res = new GitHubError('Unable to postFile that does not exist')
 
       if (err) {
-        log.error('GitHub service tryed to postFile that does not exist')
+        log.error('GitHub service tried to postFile that does not exist')
         log.error(err)
 
         return reject(res)
