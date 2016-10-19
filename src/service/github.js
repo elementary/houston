@@ -400,6 +400,29 @@ export function getReleaseByTag (owner, repo, tag, token) {
 }
 
 /**
+ * getInstallations
+ * Returns a list of repositories for token
+ *
+ * @see https://developer.github.com/v3/integrations/installations/
+ *
+ * @param {String} token - token for GitHub authentication
+ * @param {String} [user] - GitHub ID of user to cross reference for
+ * @throws {GitHubError} - on an error
+ * @returns {Object[]} - List of casted repositories
+ */
+export function getInstallations (token, user) {
+  paramAssert(token, 'string', 'getInstallations', 'token')
+
+  return api
+  .get('/installation/repositories')
+  .set('Authorization', `token ${token}`)
+  .then((res) => castProject(res.body))
+  .catch((err, res) => {
+    throw errorCheck(err, res, 'getInstallations')
+  })
+}
+
+/**
  * getPermission
  * Checks collaborator status of user on repository
  *

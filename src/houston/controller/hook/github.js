@@ -20,6 +20,51 @@ const route = new Router({
 })
 
 /**
+ * processInstallations
+ * Processes the addition and removal of installations from GitHub hooks
+ *
+ * @param {Number} installation - GitHub installation number
+ * @param {Object[]} [additions] - all installations that have been added
+ * @param {Object[]} [removals] - all installations that have been removed
+ *
+ * @returns {Promise} - a promise of a bunch of work that needs to be done
+ */
+const processInstallations = async (installation, additions = [], removals = []) => {
+  const token = await github.generateToken(installation)
+  const promises = []
+
+  log.info(`Adding ${additions.length} repositories`)
+
+  additions.forEach((repo) => {
+    const promise = async () => {
+      const foundProject = await Project.findOne({ name: repo.name })
+
+      if (foundProject != null) {
+        log.info('Trying to add a repository that already exists in database')
+        return
+      }
+
+      repo.releases = await github.getReleases(repo.github.owner, repo.github.name, token)
+      .then((releases) => releases.sort((a, b) => semver(a.version, b.version)))
+
+      if (repo.releases.length > 0) {
+        repo._status = 'DEFER'
+      } else {
+        repo._status = 'NEW'
+      }
+
+      return Project.create(repo)
+    }
+
+    promises.push(promise())
+  })
+
+  // TODO: setup removing projects on GitHub hook event
+
+  return Promise.all(promises)
+}
+
+/**
  * ANY /hook/github
  * Checks config for GitHub hook enabled
  */
@@ -85,7 +130,46 @@ route.post('/', (ctx, next) => {
 
 /**
  * POST /hook/github
- * Handles creation and removing of installations
+ * Handles the creation of new installations
+ */
+route.post('/', async (ctx, next) => {
+  if (ctx.request.header['x-github-event'] !== 'integration_installation') return next()
+
+  if (typeof ctx.request.body !== 'object') {
+    ctx.status = 400
+    ctx.body = 'Malformed request'
+    return
+  }
+
+  if (typeof ctx.request.body.installation !== 'object' || ctx.request.body.installation.id == null) {
+    ctx.status = 400
+    ctx.body = 'Missing installation ID'
+    return
+  }
+
+  const installationId = Number(ctx.request.body.installation.id)
+
+  const token = await github.generateToken(installationId)
+  const repositories = await github.getInstallations(token)
+
+  try {
+    await processInstallations(installationId, repositories)
+  } catch (err) {
+    log.error('Error while handling installation addition / removal')
+    log.error(err)
+
+    ctx.status = 500
+    ctx.body = 'Internal error while adding and removing repositories'
+    return
+  }
+
+  ctx.status = 200
+  return
+})
+
+/**
+ * POST /hook/github
+ * Handles adding and removing of installations
  */
 route.post('/', async (ctx, next) => {
   if (ctx.request.header['x-github-event'] !== 'integration_installation_repositories') return next()
@@ -103,47 +187,11 @@ route.post('/', async (ctx, next) => {
   }
 
   const installationId = Number(ctx.request.body.installation.id)
-  const token = await github.generateToken(installationId)
-  const promises = []
-
-  if (Array.isArray(ctx.request.body.repositories_added)) {
-    log.info(`Adding ${ctx.request.body.repositories_added.length} repositories`)
-
-    ctx.request.body.repositories_added.forEach((repo) => {
-      const promise = async () => {
-        const repoObject = github.castProject(repo, installationId)
-
-        const foundProject = await Project.findOne({ name: repoObject.name })
-
-        if (foundProject != null) {
-          log.info('Trying to add a repository that already exists in database')
-          return
-        }
-
-        repoObject.releases = await github.getReleases(repoObject.github.owner, repoObject.github.name, token)
-        .then((releases) => releases.sort((a, b) => semver(a.version, b.version)))
-
-        if (repoObject.releases.length > 0) {
-          repoObject._status = 'DEFER'
-        } else {
-          repoObject._status = 'NEW'
-        }
-
-        return Project.create(repoObject)
-      }
-
-      promises.push(promise())
-    })
-  }
-
-  if (Array.isArray(ctx.request.body.repositories_removed)) {
-    // TODO: setup database for cascading removal
-    log.info(`Removing ${ctx.request.body.repositories_removed.length} repositories`)
-    // TODO: setup removing projects on GitHub hook event
-  }
+  const additions = ctx.request.body.repositories_added.map((repo) => github.castProject(repo))
+  const removals = ctx.request.body.repositories_removed.map((repo) => github.castProject(repo))
 
   try {
-    await Promise.all(promises)
+    await processInstallations(installationId, additions, removals)
   } catch (err) {
     log.error('Error while handling installation addition / removal')
     log.error(err)
@@ -161,7 +209,7 @@ route.post('/', async (ctx, next) => {
  * POST /hook/github
  * Does the processing of GitHub hooks
  */
-route.post('*', async (ctx, next) => {
+route.post('/', async (ctx, next) => {
   if (ctx.request.body['action'] !== 'published' || ctx.request.body['release'] == null) return next()
 
   log.debug('Processing new release')
