@@ -41,7 +41,7 @@ export default class Desktop extends Pipe {
     const file = await this.file(desktopPath, 'ini')
 
     if (!await file.exists()) {
-      return this.log('error', 'Desktop/existance.md')
+      return this.log('error', 'Desktop/existance.md', `${this.pipeline.build.name}.desktop`)
     }
 
     try {
