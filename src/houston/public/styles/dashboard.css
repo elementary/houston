@@ -39,6 +39,7 @@
 
 .fab::before {
     font-size: 14px;
+    vertical-align: middle;
 }
 
 .fab.fa-tag::before {
