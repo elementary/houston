@@ -31,11 +31,16 @@ html
         div.nav-content
           ul
             block actions
-            li: a(href="/dashboard") Dashboard
-            li: a(href="https://github.com/integration/appcenter", target="_blank") Add App…
+            li: a(href="https://github.com/integration/appcenter", target="_blank") Manage Apps…
 
-            if policy.ifRole(user, 'review')
-              li: a(href="/reviews") Reviews
+          if policy.ifRole(user, 'review')
+          ul
+            li: a(href="/dashboard")
+              i.fa.fa-bar-chart
+              span  Dashboard
+            li: a(href="/reviews")
+              i.fa.fa-check-square-o
+              span  Reviews
 
           ul.right
             // We can re/move this after beta is over
