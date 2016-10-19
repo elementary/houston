@@ -149,8 +149,18 @@ route.post('/', async (ctx, next) => {
 
   const installationId = Number(ctx.request.body.installation.id)
 
+  // TODO: need some logic for removing repos from the database
+  if (ctx.request.body.action === 'deleted') {
+    log.debug('Installation was delete, but we dont have that logic yet')
+    return
+  }
+
   const token = await github.generateToken(installationId)
   const repositories = await github.getInstallations(token)
+  .then((projects) => projects.map((project) => {
+    project.github.installation = installationId
+    return project
+  }))
 
   try {
     await processInstallations(installationId, repositories)
@@ -187,8 +197,8 @@ route.post('/', async (ctx, next) => {
   }
 
   const installationId = Number(ctx.request.body.installation.id)
-  const additions = ctx.request.body.repositories_added.map((repo) => github.castProject(repo))
-  const removals = ctx.request.body.repositories_removed.map((repo) => github.castProject(repo))
+  const additions = ctx.request.body.repositories_added.map((repo) => github.castProject(repo, installationId))
+  const removals = ctx.request.body.repositories_removed.map((repo) => github.castProject(repo, installationId))
 
   try {
     await processInstallations(installationId, additions, removals)

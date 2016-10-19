@@ -416,7 +416,7 @@ export function getInstallations (token, user) {
   return api
   .get('/installation/repositories')
   .set('Authorization', `token ${token}`)
-  .then((res) => castProject(res.body))
+  .then((res) => res.body.repositories.map((repo) => castProject(repo)))
   .catch((err, res) => {
     throw errorCheck(err, res, 'getInstallations')
   })
