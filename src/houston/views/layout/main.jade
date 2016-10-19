@@ -32,7 +32,7 @@ html
           ul
             block actions
             li: a(href="/dashboard") Dashboard
-            li: a(href="https://github.com/integration/appcenter") Add App
+            li: a(href="https://github.com/integration/appcenter", target="_blank") Add App…
 
             if policy.ifRole(user, 'review')
               li: a(href="/reviews") Reviews
@@ -40,7 +40,7 @@ html
           ul.right
             // We can re/move this after beta is over
             if config.houston.version.split('.')[0] < 1
-              li: a(href="https://github.com/elementary/houston/issues/new", target="_blank") Send Feedback
+              li: a(href="https://github.com/elementary/houston/issues/new", target="_blank") Send Feedback…
 
             li: a(href="/auth/logout") Log Out
             if user.avatar
