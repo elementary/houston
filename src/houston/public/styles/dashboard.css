@@ -8,27 +8,14 @@
 *************************/
 
 .fab {
-    background-color: #3892e0;
-    border-radius: 50%;
-    box-shadow:
-        0 1px 3px rgba(0, 0, 0, 0.12),
-        0 1px 2px rgba(0, 0, 0, 0.24);
-    color: #fff;
-    height: 52px;
-    position: relative;
-    transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 52px;
-    will-change: box-shadow;
-}
-
-.fab:hover:not(.busy) {
-    box-shadow:
-        0 0 2px rgba(0, 0, 0, 0.18),
-        0 4px 8px rgba(0, 0, 0, 0.24);
-}
-
-.fab.busy {
     background-color: #f9c440;
+    border-radius: 50%;
+    color: #fff;
+    display: inline-block;
+    height: 24px;
+    position: relative;
+    vertical-align: middle;
+    width: 24px;
 }
 
 .fab.success {
@@ -44,26 +31,10 @@
 }
 
 .fab > i {
-    font-size: 28px;
-    line-height: 52px;
+    font-size: 14px;
+    line-height: 24px;
     text-align: center;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    width: 52px;
-}
-
-.repo .fa-refresh::before {
-    animation: spin 2.5s linear infinite;
-    display: block;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
+    width: 24px;
 }
 
 /************
@@ -95,6 +66,16 @@
     margin-top: 8px;
 }
 
+.repo .button {
+    font-size: 12px;
+    padding: 6px 12px;
+    position: relative;
+}
+
+.repo .button {
+    margin: auto 12px;
+}
+
 .repo .fab {
     margin: auto;
 }
@@ -104,6 +85,10 @@
     padding-bottom: 3px;
     text-align: center;
     white-space: nowrap;
+}
+
+.repo .button > p {
+    padding-bottom: 0;
 }
 
 .repo p a {
@@ -158,10 +143,10 @@
 * Popup *
 ********/
 
-.repo .fab .popover-container {
+.repo .popover-container {
     position: absolute;
     right: 50%;
-    bottom: 12px;
+    bottom: -9px;
     pointer-events: none;
 }
 
@@ -187,8 +172,8 @@
     z-index: 999;
 }
 
-.repo .fab .popover-container .popover-content::before,
-.repo .fab .popover-container .popover-content::after {
+.repo .popover-container .popover-content::before,
+.repo .popover-container .popover-content::after {
     content: '';
     display: block;
     position: absolute;
@@ -204,6 +189,7 @@
     border-top: 6px solid rgba(51, 51, 51, 0.9);
 }
 
+.repo .button:hover .popover-container .popover-content,
 .repo .fab:hover .popover-container .popover-content {
     visibility: visible;
     pointer-events: auto;
@@ -217,7 +203,7 @@
     margin-bottom: 10px;
 }
 
-.repo .fab .popover-container .popover-content ul {
+.repo .popover-container .popover-content ul {
     margin: 5px 0;
     padding: 0;
     max-height: 500px;
@@ -225,32 +211,32 @@
 }
 
 @media (max-height: 700px) {
-    .repo .fab .popover-container .popover-content ul {
+    .repo .popover-container .popover-content ul {
         max-height: 300px;
     }
 }
 
 @media (max-height: 450px) {
-    .repo .fab .popover-container .popover-content ul {
+    .repo .popover-container .popover-content ul {
         max-height: 200px;
     }
 }
 
-.repo .fab .popover-container .popover-content ul li {
+.repo .popover-container .popover-content ul li {
     display: block;
     margin: 0;
 }
 
-.repo .fab .popover-container .popover-content ul li a {
+.repo .popover-container .popover-content ul li a {
     display: block;
     padding: 5px 15px;
 }
 
-.repo .fab .popover-container .popover-content ul li a:hover {
+.repo .popover-container .popover-content ul li a:hover {
     background-color: #e0e0e0;
 }
 
-.repo .fab .popover-container .popover-content hr {
+.repo .popover-container .popover-content hr {
     background: #e0e0e0;
     height: 1px;
     border: 0;
@@ -261,7 +247,7 @@
     font-size: 18px;
 }
 
-.repo .fab .popover-container .popover-content h3 {
+.repo .popover-container .popover-content h3 {
     font-size: 16px;
     margin: 0 0 6px;
     opacity: 1;
