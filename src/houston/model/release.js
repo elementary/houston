@@ -204,7 +204,7 @@ schema.methods.setStatus = async function (status) {
  * @returns {Object} - database object for new cycle
  */
 schema.methods.createCycle = async function (type) {
-  return db.model('cycle').create({
+  const cycle = await db.model('cycle').create({
     project: this.project._id,
     installation: this.project.github.installation,
     repo: this.project.repo,
@@ -214,26 +214,25 @@ schema.methods.createCycle = async function (type) {
     type,
     changelog: await this.createChangelog()
   })
-  .then((cycle) => {
-    const updates = {
-      $addToSet: {
-        'releases.$.cycles': cycle._id
-      }
-    }
 
-    if (this._status !== 'DEFER') {
-      updates['$set'] = {
-        'releases.$._status': 'DEFER'
-      }
+  const updates = {
+    $addToSet: {
+      'releases.$.cycles': cycle._id
     }
+  }
 
-    // TODO: replace this with `this.update()` when $push support is added
-    return db.model('project').update({
-      _id: this.project._id,
-      'releases._id': this._id
-    }, updates)
-    .then(() => cycle)
-  })
+  if (this._status !== 'DEFER') {
+    updates['$set'] = {
+      'releases.$._status': 'DEFER'
+    }
+  }
+
+  await db.model('project').update({
+    _id: this.project._id,
+    'releases._id': this._id
+  }, updates)
+
+  return cycle
 }
 
 /**

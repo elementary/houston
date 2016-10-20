@@ -27,12 +27,11 @@ export default class Director extends Pipe {
    * @returns {Void}
    */
   async code () {
-    const apphub = await this.require('AppHub')
-
-    await this.require('Desktop')
-    await this.require('AppData')
+    let apphub = {}
 
     try {
+      apphub = await this.require('AppHub')
+
       const build = await this.require('Build')
 
       const files = build.files.map((f) => f.file).filter((f) => (f != null))
