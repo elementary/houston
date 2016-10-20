@@ -39,6 +39,7 @@ export default class Pipeline extends events.EventEmitter {
    * Creates a new pipeline
    *
    * @param {Object} build - {
+   *   {String} [id] - Repo source identification
    *   {String} repo - Git repository that hosts the code 'git@github.com:elementary/houston.git'
    *   {String} tag - Git tag for checkout. 'v3.0.0'
    *   {String} [name] - Project name 'com.github.elementary.houston'
@@ -56,6 +57,7 @@ export default class Pipeline extends events.EventEmitter {
     super()
 
     this.build = {
+      id: build.id,
       repo: build.repo,
       tag: build.tag,
       name: build.name,
@@ -74,14 +76,23 @@ export default class Pipeline extends events.EventEmitter {
       this.build.source = 'github'
     }
 
-    if (this.build.name == null && this.build.source === 'github') {
+    let owner = null
+    let repo = null
+
+    if (this.build.source === 'github') {
       // Filter the github information from the repo url
       // Possible urls are https://github.com/vocalapp/vocal
       // and git@github.com:vocalapp/vocal.git
       const splits = this.build.repo.split(/(\/|:)/)
-      const owner = splits[splits.length - 3].replace('.', '_')
-      const repo = splits[splits.length - 1].replace('.git', '').replace('.', '_')
+      owner = splits[splits.length - 3].replace('.', '_')
+      repo = splits[splits.length - 1].replace('.git', '').replace('.', '_')
+    }
 
+    if (this.build.id == null && this.build.source === 'github') {
+      this.build.id = `${owner}/${repo}`
+    }
+
+    if (this.build.name == null && this.build.source === 'github') {
       this.build.name = `com.github.${owner}.${repo}`
     }
 
