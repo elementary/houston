@@ -22,19 +22,19 @@ const route = new Router({
  * @param {String} project - project name
  */
 route.get('/cycle', async (ctx, next) => {
-  ctx.project = await Project.findOne({
+  const project = await Project.findOne({
     name: ctx.params.project
-  }).exec()
+  })
 
-  if (ctx.project == null) {
+  if (project == null) {
     throw new ctx.Mistake(404, 'Project not found')
   }
 
-  if (ctx.project.releases.length < 1) {
+  if (project.releases.length < 1) {
     throw new ctx.Mistake(400, 'The project has no releases to cycle')
   }
 
-  await ctx.project.createCycle('RELEASE')
+  await project.createCycle('RELEASE')
   .catch((err) => {
     throw new ctx.Mistake(500, 'An error occured while creating a new release cycle', err, true)
   })

@@ -44,7 +44,7 @@ export function upload (project, arch, version, file) {
   .post(`${config.aptly.url}/files`)
   .attach('file', file, `${project}_${arch}_${version}.deb`)
   .then((data) => {
-    log.debug(`Added ${log.lang.s('package', data.body)} of ${project} to repository`)
+    log.debug(`Added ${data.body.length} packages of ${project} to repository`)
 
     return
   })
@@ -75,7 +75,7 @@ const ingest = (project, arch, version) => {
   })
   .then((added) => [].concat(added))
   .then((data) => {
-    log.debug(`Ingested ${log.lang.s('package', data.length)} of ${project}`)
+    log.debug(`Ingested ${data.length} packages of ${project}`)
 
     return request
     .get(`${config.aptly.url}/repos/${config.aptly.review}/packages`)
