@@ -58,13 +58,7 @@ export default class GitHubIssue extends Pipe {
 
     if (logs.length < 1) return
 
-    // Filter the github information from the repo url
-    // Possible urls are https://github.com/vocalapp/vocal
-    // and git@github.com:vocalapp/vocal.git
-    // @see Pipeline class for same code
-    const splits = this.pipeline.build.repo.split(/(\/|:)/)
-    const owner = splits[splits.length - 3].replace('.', '_')
-    const repo = splits[splits.length - 1].replace('.git', '').replace('.', '_')
+    const [owner, repo] = this.pipeline.build.id.split('/')
 
     log.debug(`Found GitHub owner and repo: ${owner}/${repo}`)
 
