@@ -39,7 +39,7 @@ export default class AppData extends Pipe {
       return this.log('warn', 'AppData/existance.md', `${this.pipeline.build.name}.appdata.xml`)
     }
 
-    const returned = await this.docker('util', ['validate', appdataName], buildPath)
+    const returned = await this.docker('util', ['validate-relax', appdataName], buildPath)
 
     if (returned.exit !== 0) {
       try {
