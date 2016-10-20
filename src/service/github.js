@@ -400,6 +400,29 @@ export function getReleaseByTag (owner, repo, tag, token) {
 }
 
 /**
+ * getInstallations
+ * Returns a list of repositories for token
+ *
+ * @see https://developer.github.com/v3/integrations/installations/
+ *
+ * @param {String} token - token for GitHub authentication
+ * @param {String} [user] - GitHub ID of user to cross reference for
+ * @throws {GitHubError} - on an error
+ * @returns {Object[]} - List of casted repositories
+ */
+export function getInstallations (token, user) {
+  paramAssert(token, 'string', 'getInstallations', 'token')
+
+  return api
+  .get('/installation/repositories')
+  .set('Authorization', `token ${token}`)
+  .then((res) => res.body.repositories.map((repo) => castProject(repo)))
+  .catch((err, res) => {
+    throw errorCheck(err, res, 'getInstallations')
+  })
+}
+
+/**
  * getPermission
  * Checks collaborator status of user on repository
  *
@@ -506,7 +529,7 @@ export function getAssets (owner, repo, release, token) {
  */
 export function postLabel (owner, repo, token, label) {
   if (!config.github.post) {
-    log.verbose('Config prohibits posting to GitHub. Not posting label')
+    log.debug('Config prohibits posting to GitHub. Not posting label')
     return Promise.resolve(label) // like it happened minus the url key
   }
 
@@ -549,7 +572,7 @@ export function postLabel (owner, repo, token, label) {
  */
 export function postIssue (owner, repo, token, issue) {
   if (!config.github.post) {
-    log.verbose('Config prohibits posting to GitHub. Not posting issue')
+    log.debug('Config prohibits posting to GitHub. Not posting issue')
     return Promise.resolve(0)
   }
 
@@ -591,7 +614,7 @@ export function postIssue (owner, repo, token, issue) {
  */
 export async function postFile (owner, repo, release, token, file) {
   if (!config.github.post) {
-    log.verbose('Config prohibits posting to GitHub. Not posting file')
+    log.debug('Config prohibits posting to GitHub. Not posting file')
     return 0
   }
 

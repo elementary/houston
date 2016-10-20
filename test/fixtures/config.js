@@ -47,11 +47,7 @@ module.exports.socket = {
   private: 'butseriouslydontworryboutitok?ok.goodokbye'
 }
 
-module.exports.log = {
-  console: false,
-  level: 'silly',
-  files: false
-}
+module.exports.log = 'debug'
 
 module.exports.flightcheck = {
   directory: '/tmp/flightcheck',
