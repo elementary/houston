@@ -35,3 +35,19 @@ nav#secondary {
     font-size: 14px;
     height: 48px;
 }
+
+@media only screen and (min-width: 1024px) {
+    nav#secondary ul {
+        display: flex;
+        flex: 0 0 33%;
+        justify-content: center;
+    }
+
+    nav#secondary ul:first-child {
+        justify-content: flex-start;
+    }
+
+    nav#secondary ul:last-child {
+        justify-content: flex-end;
+    }
+}
