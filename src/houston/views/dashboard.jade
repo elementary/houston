@@ -5,9 +5,10 @@ block head
 
 block body
   if projects.length === 0
-    div.row: div.column.alert
-      h3 No Repositories Found
-      p Add a repository to make it appear here.
+    section.grid.alert: div.half
+      img(src="/images/add-repo.svg")
+      h3 Link a Repo to AppCenter
+      p Install the AppCenter integration and select repositories to build by clicking "Manage Apps…" in the top left corner.
   else
     each project in projects
       div.repo-wrap: div.repo
