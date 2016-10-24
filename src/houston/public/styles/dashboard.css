@@ -12,10 +12,17 @@
     border-radius: 50%;
     color: #fff;
     display: inline-block;
-    height: 24px;
+    height: 30px;
+    line-height: 30px;
     position: relative;
+    text-align: center;
     vertical-align: middle;
-    width: 24px;
+    width: 30px;
+}
+
+.fab.fa-tag {
+    background-color: #f3f3f3;
+    color: #888;
 }
 
 .fab.success {
@@ -30,11 +37,15 @@
     background-color: #da4d45;
 }
 
-.fab > i {
+.fab::before {
     font-size: 14px;
-    line-height: 24px;
-    text-align: center;
-    width: 24px;
+    vertical-align: middle;
+}
+
+.fab.fa-tag::before {
+    -webkit-text-fill-color: #f3f3f3;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: #888;
 }
 
 /************
