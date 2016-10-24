@@ -14,7 +14,7 @@ html
     title #{title} &sdot; elementary
 
   body
-    nav.nav
+    nav
       div.nav-content
         ul
           li: a(href="https://elementary.io", class="logomark")
@@ -27,7 +27,7 @@ html
           li: a(href="https://elementary.io/get-involved") Get Involved
 
     if user && !hideUser
-      nav.nav#secondary
+      nav#secondary
         div.nav-content
           ul
             block actions
@@ -42,7 +42,7 @@ html
               i.fa.fa-check-square-o
               span  Reviews
 
-          ul.right
+          ul
             // We can re/move this after beta is over
             if config.houston.version.split('.')[0] < 1
               li: a(href="https://github.com/elementary/houston/issues/new", target="_blank") Send Feedback…
