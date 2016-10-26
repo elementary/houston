@@ -2,6 +2,7 @@
   "name": "Houston",
   "version": "0.3.0",
   "description": "Backend for AppHub",
+  "license": "MIT",
   "main": "build/houston/index.js",
   "dependencies": {
     "babel-core": "^6.9.1",
