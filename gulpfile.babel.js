@@ -9,7 +9,7 @@ import path from 'path'
 
 import babel from 'gulp-babel'
 import cssnext from 'postcss-cssnext'
-import gulpWebpack from 'gulp-webpack'
+import gulpWebpack from 'webpack-stream'
 import postcss from 'gulp-postcss'
 import webpack from 'webpack'
 
