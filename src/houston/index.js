@@ -47,7 +47,7 @@ app.use(koaStatic(path.join(__dirname, 'public')))
 
 // Setup server rendering
 app.use(convert(view(path.join(__dirname, 'views'), {
-  extension: 'jade',
+  extension: 'pug',
   cache: (app.env === 'production')
 })))
 
