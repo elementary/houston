@@ -46,8 +46,6 @@
     "raven": "^0.12.1",
     "raw-body": "^2.1.6",
     "semver": "^5.1.0",
-    "socket.io": "^1.4.6",
-    "socket.io-client": "^1.4.6",
     "style-loader": "^0.13.1",
     "superagent": "^2.0.0",
     "syslogd": "^1.1.2",
