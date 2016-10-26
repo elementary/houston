@@ -12,10 +12,15 @@
     border-radius: 50%;
     color: #fff;
     display: inline-block;
-    height: 24px;
+    height: 30px;
     position: relative;
     vertical-align: middle;
-    width: 24px;
+    width: 30px;
+}
+
+.fab.tag {
+    background-color: #f3f3f3;
+    color: #888;
 }
 
 .fab.success {
@@ -32,9 +37,15 @@
 
 .fab > i {
     font-size: 14px;
-    line-height: 24px;
+    line-height: 30px;
     text-align: center;
-    width: 24px;
+    width: 30px;
+}
+
+.fab.fa-tag > i {
+    -webkit-text-fill-color: #f3f3f3;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: #888;
 }
 
 /************
