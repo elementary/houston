@@ -3,12 +3,10 @@
  * Starts Houston's Web Interface
  *
  * @exports {Object} app - Koa server object
- * @exports {Object} server - Running Http server
  */
 
 import co from 'co'
 import convert from 'koa-convert'
-import http from 'http'
 import Koa from 'koa'
 import koaStatic from 'koa-static'
 import parser from 'raw-body'
@@ -32,9 +30,6 @@ const log = new Log('server')
 // Setup App configuration
 app.name = 'Houston'
 app.env = config.env
-
-// Socket installation
-const server = http.createServer(app.callback())
 
 // Download Tracking syslog Server
 download.startSyslog()
@@ -160,12 +155,12 @@ app.on('error', async (error, ctx, next) => {
 })
 
 // Launching server
-server.listen(config.server.port)
+app.listen(config.server.port)
 log.info(`Houston listening on ${config.server.port} in ${app.env} configuration`)
 
-server.on('close', () => {
+app.on('close', () => {
   db.disconnect()
   log.info('And now my watch has ended')
 })
 
-export default { app, server }
+export default { app }
