@@ -42,7 +42,7 @@
     width: 30px;
 }
 
-.fab.fa-tag > i {
+.fab.tag > i {
     -webkit-text-fill-color: #f3f3f3;
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: #888;
