@@ -1,6 +1,6 @@
 # Houston appdata docker file
-# Builds an ubuntu base with appstream-util for validating appstream files
-# Build with `docker build -t flightcheck-apphub-util .`
+# Builds an ubuntu base with desktop-file-utils for validating desktop files
+# Build with `docker build -t flightcheck-desktop-util .`
 #
 # TODO: Move this to a unique repository?
 #
@@ -15,11 +15,9 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV DEBIAN_PRIORITY critical
 ENV DEBCONF_NOWARNINGS yes
 
-# ca-certificate stuff for removing glib-net error
-RUN apt update && apt install -y appstream-util openssl ca-certificates
-RUN update-ca-certificates
+RUN apt update && apt install -y desktop-file-utils
 
 # Execution
 RUN mkdir -p /tmp/flightcheck
 WORKDIR /tmp/flightcheck
-ENTRYPOINT ["appstream-util"]
+ENTRYPOINT ["desktop-file-validate"]
