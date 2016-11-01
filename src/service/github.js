@@ -180,6 +180,13 @@ export function castProject (project, installation) {
   const owner = service.nameify(project.owner.login)
   const repo = service.nameify(project.name)
 
+  // Why GitHub mixes different urls depending on API call I don't know
+  if (project.git_url.substr(0, 6) === 'git://') {
+    project.git_url = `https://${project.git_url.substr(6)}`
+  } else if (project.git_url.substr(0, 4) === 'git:') {
+    project.git_url = `https://${project.git_url.substr(4)}`
+  }
+
   return {
     name: `com.github.${owner}.${repo}`,
     repo: project.git_url,
