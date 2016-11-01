@@ -29,12 +29,19 @@ worker.register('release', async (param) => {
 
   let pipeline = null
   try {
-    param.changelog = param.changelog.map((c) => {
+    const changelog = param.changelog.map((c) => {
       c['changes'] = c['changelog']
       return c
     })
 
-    pipeline = new Pipeline(param)
+    pipeline = new Pipeline({
+      repo: param.repo,
+      tag: param.tag,
+      name: param.name,
+      source: 'github',
+      changelog,
+      auth: param.auth
+    })
   } catch (err) {
     log.error(`Flightcheck received an error while trying to create Pipeline for ${param.id}`)
     log.error(err)
