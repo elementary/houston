@@ -38,7 +38,7 @@ export function nameify (str) {
   return str
   .toLowerCase()
   .replace(/(\s|_|\.)+/gmi, '-')
-  .replace(/(?![a-z0-9]|\-)./gmi, '')
-  .replace(/\-+/gmi, '-')
-  .replace(/\-(?![a-z0-9])$/gmi, '')
+  .replace(/(?![a-z0-9]|-)./gmi, '')
+  .replace(/-+/gmi, '-')
+  .replace(/-(?![a-z0-9])$/gmi, '')
 }
