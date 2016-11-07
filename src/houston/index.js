@@ -72,6 +72,12 @@ app.use(async (ctx, next) => {
   } catch (error) {
     ctx.app.emit('error', error, ctx)
 
+    // Because the only difference between a permission error and a beta error
+    // is the wording. I regret nothing about this implementation.
+    if (error.status === 403 && error.message.toLowerCase().indexOf('beta') !== 0) {
+      return ctx.render('beta')
+    }
+
     const pkg = {
       status: 500,
       detail: null,
