@@ -86,27 +86,32 @@ export const strategy = new github.Strategy({
   clientSecret: config.github.secret,
   callbackURL: `${config.server.url}/auth/github/callback`
 }, (access, refresh, profile, done) => {
-  const mappedUser = {
-    username: profile.username,
-    'github.id': profile.id,
-    'github.access': access,
-    'github.refresh': refresh,
-    'date.visited': new Date()
-  }
+  // Yes, an async promise constructor. Don't judge.
+  new Promise(async (resolve, reject) => {
+    let user = await User.findOne({
+      'github.id': profile.id
+    })
 
-  if (profile.emails != null) mappedUser.email = profile.emails[0].value
-  if (profile.photos != null) mappedUser.avatar = profile.photos[0].value
+    if (user == null) {
+      const mappedUser = {
+        username: profile.username,
+        'github.id': profile.id,
+        'github.access': access,
+        'github.refresh': refresh,
+        'date.visited': new Date()
+      }
 
-  User.findOneAndUpdate({
-    username: mappedUser.username
-  }, mappedUser, {
-    upsert: true,
-    new: true,
-    setDefaultsOnInsert: true
+      if (profile.emails != null) mappedUser.email = profile.emails[0].value
+      if (profile.photos != null) mappedUser.avatar = profile.photos[0].value
+
+      user = await User.create(mappedUser)
+    }
+
+    await getRights(user)
+    return resolve(user)
   })
-  .then((user) => getRights(user))
   .then((user) => done(null, user))
-  .catch((error) => done(error))
+  .catch((err) => done(err))
 })
 
 // Koa server routes used for authentication

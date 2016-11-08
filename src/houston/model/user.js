@@ -2,28 +2,34 @@
  * houston/model/user.js
  * Mongoose modal and schema for user accounts
  *
- * @exports {Object} - user database model
  * @exports {Object} schema - user database schema
+ * @exports {Object} default - user database model
  */
 
 import db from 'lib/database'
 
 /**
- * @param {String} username - user's username (btkostner)
- * @param {String} email - user's email (blake@elementary.io)
- * @param {Object} avatar - gravatar url
- * @param {Object} github - {
- *   {String} id - github account id
- *   {String} acceses - github oauth access code
- *   {String} refresh - github oauth refresh code
- * }
- * @param {String} right - user's permission scheme
- * @param {Object} date - {
- *    {Date} joined - date when user account was first created
- *    {Date} visited - last login date of user
- *    {Date} left - date when user deactivated account
- * }
- * @param {Array} projects - all projects the user has initalized in houston
+ * @type {object} - User database schema
+ *
+ * @property {String} username - user's username (btkostner)
+ * @property {String} email - user's email (blake@elementary.io)
+ * @property {Object} avatar - gravatar url
+ *
+ * @property {Object} github - object holding github records
+ * @property {String} github.id - github account id
+ * @property {String} github.acceses - github oauth access code
+ * @property {String} github.refresh - github oauth refresh code
+ *
+ * @property {String} right - user's permission scheme
+ * @property {Object} notify - boolean keys for notifications
+ * @property {Boolean} notify.beta - true if we should notify about beta launch
+ *
+ * @property {Object} date - object of dates
+ * @property {Date} date.joined - date when user account was first created
+ * @property {Date} date.visited - last login date of user
+ * @property {Date} date.left - date when user deactivated account
+ *
+ * @property {Array} projects - all projects the user has initalized in houston
  */
 export const schema = new db.Schema({
   username: String,
@@ -40,6 +46,12 @@ export const schema = new db.Schema({
     type: String,
     default: 'USER',
     enum: ['USER', 'BETA', 'REVIEW', 'ADMIN']
+  },
+  notify: {
+    beta: {
+      type: Boolean,
+      default: false
+    }
   },
 
   date: {

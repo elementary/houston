@@ -51,3 +51,45 @@ nav#secondary {
         justify-content: flex-end;
     }
 }
+
+.form {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+}
+
+.form--horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.form__block {
+    align-items: stretch;
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    flex: 1 1 auto;
+    margin: 12px;
+}
+
+.form__error {
+    color: #da4d45;
+    font-size: 14px;
+    text-align: center;
+}
+
+.form__label {
+    align-self: center;
+    flex: 0 0 auto;
+    margin: 12px;
+}
+
+.form__input {
+    flex: 1 1 auto;
+}
+
+.form__button {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 8px 16px;
+}

@@ -9,8 +9,9 @@ import co from 'co'
 import convert from 'koa-convert'
 import Koa from 'koa'
 import koaStatic from 'koa-static'
-import parser from 'raw-body'
 import path from 'path'
+import qs from 'qs'
+import rawBody from 'raw-body'
 import session from 'koa-session'
 import view from 'koa-views'
 
@@ -75,7 +76,7 @@ app.use(async (ctx, next) => {
     // Because the only difference between a permission error and a beta error
     // is the wording. I regret nothing about this implementation.
     if (error.status === 403 && error.message.toLowerCase().indexOf('beta') !== 0) {
-      return ctx.render('beta')
+      return ctx.redirect('/beta')
     }
 
     const pkg = {
@@ -101,17 +102,37 @@ app.use(async (ctx, next) => {
   }
 })
 
-// Body parsing middleware
+// Body parsing middleware, because every other package likes to overwrite the
+// body object, making raw body hashing impossible. FFS
+// @see https://github.com/koajs/bodyparser/blob/master/index.js
 app.use(async (ctx, next) => {
-  ctx.request.rawBody = await parser(ctx.req).then((buf) => buf.toString())
+  ctx.request.rawBody = await rawBody(ctx.req).then((buf) => buf.toString())
+
+  const jsonTypes = [
+    'application/json',
+    'application/json-patch+json',
+    'application/vnd.api+json',
+    'application/csp-report'
+  ]
+
+  const formTypes = [
+    'application/x-www-form-urlencoded'
+  ]
 
   try {
-    ctx.request.body = JSON.parse(ctx.request.rawBody)
+    if (ctx.request.is(jsonTypes)) {
+      ctx.request.body = JSON.parse(ctx.request)
+    } else if (ctx.request.is(formTypes)) {
+      ctx.request.body = qs.parse(ctx.request.rawBody)
+    }
   } catch (err) {
-    ctx.request.body = ctx.request.rawBody
+    log.error('Unable to parse body request')
+    log.error(err)
   }
 
-  await next()
+  if (ctx.request.body == null) ctx.request.body = {}
+
+  return next()
 })
 
 // Start Passport
