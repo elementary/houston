@@ -3,6 +3,11 @@
 * This file is part of houston.elementary.io *
 *********************************************/
 
+.alert h3,
+.alert p {
+    margin: 12px 0;
+}
+
 /*************************
 * Floating Action Button *
 *************************/
