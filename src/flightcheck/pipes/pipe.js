@@ -250,7 +250,7 @@ export default class Pipe extends events.EventEmitter {
     const logStream = fs.createWriteStream(logFile)
 
     return new Promise((resolve, reject) => {
-      docker.run(dockerImage, cmd, logStream, options, (err, data, container) => {
+      docker.run(`${dockerImage}:latest`, cmd, logStream, options, (err, data, container) => {
         if (err) return reject(err)
 
         return resolve({
