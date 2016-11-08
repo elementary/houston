@@ -1,6 +1,7 @@
 /**
  * houston/service/aptly.js
  * Repository handles with aptly api
+ * NOTE: hard coded architecture and distribution
  *
  * @exports {Function} upload - Uploads a package to aptly server
  * @exports {Function} review - Sends package to review repo
@@ -13,6 +14,9 @@ import Mistake from 'lib/mistake'
 import request from 'lib/request'
 
 const log = new Log('service:aptly')
+
+const arch = 'amd64'
+const dist = 'xenial'
 
 /**
  * ensureEnabled
@@ -32,12 +36,11 @@ function ensureEnabled () {
  * Uploads a package to aptly in review repository
  *
  * @param {String} project - name of project package being uploaded
- * @param {String} arch - package architecture
  * @param {String} version - semver version of pacakge
  * @param {Buffer} file - actual file to upload
  * @returns {Void}
  */
-export function upload (project, arch, version, file) {
+export function upload (project, version, file) {
   ensureEnabled()
 
   return request
@@ -55,11 +58,10 @@ export function upload (project, arch, version, file) {
  * Adds packages from upload directory to repository
  *
  * @param {String} project - name of project package being uploaded
- * @param {String} arch - package architecture
  * @param {String} version - semver version of pacakge
  * @returns {Array} - Aptly package keys
  */
-const ingest = (project, arch, version) => {
+const ingest = (project, version) => {
   ensureEnabled()
 
   return Promise.try(() => {
@@ -159,10 +161,9 @@ const move = (pkg, repoFrom, repoTo) => {
  * Takes a snapshot of repo and publishes it
  *
  * @param {String} repo - Package keys
- * @param {Array} dist - Distributions to publish
  * @returns {Promise} - Empty promise of success
  */
-const publish = async (repo, dist) => {
+const publish = async (repo) => {
   ensureEnabled()
 
   const name = new Date()
@@ -175,9 +176,10 @@ const publish = async (repo, dist) => {
     Name: name,
     Description: 'Automated Houston publish'
   })
-  .then(() => Promise.each(dist, (d) => {
-    return request
-    .put(`${config.aptly.url}/publish/${repo}/${d}`)
+
+  try {
+    await request
+    .put(`${config.aptly.url}/publish/${repo}/${dist}`)
     .send({
       Snapshots: [{
         Component: 'main',
@@ -188,10 +190,7 @@ const publish = async (repo, dist) => {
         Passphrase: config.aptly.passphrase
       }
     })
-    .then((d) => d, (error) => {
-      throw new Mistake(500, error)
-    })
-  }), (error) => {
+  } catch (error) {
     if (error.statusCode === 400) {
       throw new Mistake(500, 'Snapshot already exists in aptly', error)
     } else if (error.statusCode === 404) {
@@ -199,7 +198,7 @@ const publish = async (repo, dist) => {
     }
 
     throw new Mistake(500, error)
-  })
+  }
 }
 
 /**
@@ -209,18 +208,16 @@ const publish = async (repo, dist) => {
  *
  * @param {String} project - name of project package being uploaded
  * @param {String} version - package version
- * @param {Array} arch - architecture of pacakges to publish
- * @param {Array} dist - Distributions to publish to
  * @returns {Array} - Package keys successfully moved
  */
-export async function review (project, version, arch, dist) {
+export async function review (project, version) {
   ensureEnabled()
 
   const keys = await Promise.each(arch, (arch) => {
-    return ingest(project, arch, version)
+    return ingest(project, version)
   })
 
-  await publish(config.aptly.review, dist)
+  await publish(config.aptly.review)
 
   return keys
 }
@@ -231,12 +228,11 @@ export async function review (project, version, arch, dist) {
  * 2) Publishes stable repository
  *
  * @param {Array} pkg - Package keys
- * @param {Array} dist - Distributions to publish to
  * @returns {Promise} - Empty promise of success
  */
-export function stable (pkg, dist) {
+export function stable (pkg) {
   ensureEnabled()
 
   return move(pkg, config.aptly.review, config.aptly.stable)
-  .then(() => publish(config.aptly.stable, dist))
+  .then(() => publish(config.aptly.stable))
 }
