@@ -78,6 +78,39 @@ const getRights = async function (user) {
 }
 
 /**
+ * upsertUser
+ * Takes a GitHub user profile from passport and upserts it to the database
+ *
+ * @param {String} access - GitHub access code
+ * @param {String} refresh - GitHub refresh token
+ * @param {Object} profile - passport GitHub profile object
+ * @returns {Object} - database saved user object
+ */
+const upsertUser = async function (access, refresh, profile) {
+  let user = await User.findOne({
+    'github.id': profile.id
+  })
+
+  if (user == null) {
+    const mappedUser = {
+      username: profile.username,
+      'github.id': profile.id,
+      'github.access': access,
+      'github.refresh': refresh,
+      'date.visited': new Date()
+    }
+
+    if (profile.emails != null) mappedUser.email = profile.emails[0].value
+    if (profile.photos != null) mappedUser.avatar = profile.photos[0].value
+
+    user = await User.create(mappedUser)
+  }
+
+  await getRights(user)
+  return user
+}
+
+/**
  * strategy
  * Passport configuration for GitHub
  */
@@ -86,27 +119,9 @@ export const strategy = new github.Strategy({
   clientSecret: config.github.secret,
   callbackURL: `${config.server.url}/auth/github/callback`
 }, (access, refresh, profile, done) => {
-  const mappedUser = {
-    username: profile.username,
-    'github.id': profile.id,
-    'github.access': access,
-    'github.refresh': refresh,
-    'date.visited': new Date()
-  }
-
-  if (profile.emails != null) mappedUser.email = profile.emails[0].value
-  if (profile.photos != null) mappedUser.avatar = profile.photos[0].value
-
-  User.findOneAndUpdate({
-    username: mappedUser.username
-  }, mappedUser, {
-    upsert: true,
-    new: true,
-    setDefaultsOnInsert: true
-  })
-  .then((user) => getRights(user))
+  upsertUser(access, refresh, profile)
   .then((user) => done(null, user))
-  .catch((error) => done(error))
+  .catch((err) => done(err))
 })
 
 // Koa server routes used for authentication
