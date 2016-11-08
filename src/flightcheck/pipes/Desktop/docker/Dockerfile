@@ -2,11 +2,9 @@
 # Builds an ubuntu base with desktop-file-utils for validating desktop files
 # Build with `docker build -t flightcheck-desktop-util .`
 #
-# TODO: Move this to a unique repository?
-#
-# Version: 1.0.0
+# Version: 1.0.1
 
-FROM ubuntu:xenial
+FROM elementary/docker:loki
 
 MAINTAINER elementary
 

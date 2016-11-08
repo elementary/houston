@@ -2,11 +2,9 @@
 # Builds an ubuntu base with appstreamcli for validating appstream files
 # Build with `docker build -t flightcheck-appdata-util .`
 #
-# TODO: Move this to a unique repository?
-#
-# Version: 1.0.1
+# Version: 1.0.2
 
-FROM ubuntu:xenial
+FROM elementary/docker:loki
 
 MAINTAINER elementary
 
