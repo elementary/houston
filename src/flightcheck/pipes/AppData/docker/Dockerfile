@@ -1,5 +1,5 @@
 # Houston appdata docker file
-# Builds an ubuntu base with liftoff for packaging debian applications
+# Builds an ubuntu base with appstreamcli for validating appstream files
 # Build with `docker build -t flightcheck-appdata-util .`
 #
 # TODO: Move this to a unique repository?

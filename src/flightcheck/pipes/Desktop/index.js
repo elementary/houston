@@ -7,7 +7,10 @@
 
 import path from 'path'
 
+import Log from 'lib/log'
 import Pipe from 'flightcheck/pipes/pipe'
+
+const log = new Log('flightcheck:Desktop')
 
 /**
  * Desktop
@@ -37,21 +40,30 @@ export default class Desktop extends Pipe {
    * @returns {Void}
    */
   async code (p = 'repository/data') {
-    const desktopPath = path.join(p, `${this.pipeline.build.name}.desktop`)
+    const desktopName = `${this.pipeline.build.name}.desktop`
+    const desktopPath = path.join(p, desktopName)
+    const buildPath = path.join(this.pipeline.build.dir, p)
+
     const file = await this.file(desktopPath, 'ini')
 
     if (!await file.exists()) {
       return this.log('error', 'Desktop/existance.md', `${this.pipeline.build.name}.desktop`)
     }
 
-    try {
-      this.data.desktop = await file.read()
-    } catch (e) {
-      return this.log('error', 'Desktop/parse.md', e)
-    }
+    const returned = await this.docker('util', [desktopName], buildPath)
 
-    if (this.data.desktop['Desktop Entry'] == null) {
-      return this.log('error', 'AppHub/entry.md')
+    if (returned.exit !== 0) {
+      try {
+        const file = await this.file(returned.log)
+        const log = await file.read()
+
+        return this.log('error', 'Desktop/invalid.md', log)
+      } catch (e) {
+        log.debug('Unable to fetch log of failed Desktop validation')
+        log.debug(e)
+
+        return this.log('error', 'Desktop/error.md')
+      }
     }
   }
 }
