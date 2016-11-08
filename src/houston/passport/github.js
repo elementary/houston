@@ -78,6 +78,39 @@ const getRights = async function (user) {
 }
 
 /**
+ * upsertUser
+ * Takes a GitHub user profile from passport and upserts it to the database
+ *
+ * @param {String} access - GitHub access code
+ * @param {String} refresh - GitHub refresh token
+ * @param {Object} profile - passport GitHub profile object
+ * @returns {Object} - database saved user object
+ */
+const upsertUser = async function (access, refresh, profile) {
+  let user = await User.findOne({
+    'github.id': profile.id
+  })
+
+  if (user == null) {
+    const mappedUser = {
+      username: profile.username,
+      'github.id': profile.id,
+      'github.access': access,
+      'github.refresh': refresh,
+      'date.visited': new Date()
+    }
+
+    if (profile.emails != null) mappedUser.email = profile.emails[0].value
+    if (profile.photos != null) mappedUser.avatar = profile.photos[0].value
+
+    user = await User.create(mappedUser)
+  }
+
+  await getRights(user)
+  return user
+}
+
+/**
  * strategy
  * Passport configuration for GitHub
  */
@@ -86,30 +119,7 @@ export const strategy = new github.Strategy({
   clientSecret: config.github.secret,
   callbackURL: `${config.server.url}/auth/github/callback`
 }, (access, refresh, profile, done) => {
-  // Yes, an async promise constructor. Don't judge.
-  new Promise(async (resolve, reject) => {
-    let user = await User.findOne({
-      'github.id': profile.id
-    })
-
-    if (user == null) {
-      const mappedUser = {
-        username: profile.username,
-        'github.id': profile.id,
-        'github.access': access,
-        'github.refresh': refresh,
-        'date.visited': new Date()
-      }
-
-      if (profile.emails != null) mappedUser.email = profile.emails[0].value
-      if (profile.photos != null) mappedUser.avatar = profile.photos[0].value
-
-      user = await User.create(mappedUser)
-    }
-
-    await getRights(user)
-    return resolve(user)
-  })
+  upsertUser(access, refresh, profile)
   .then((user) => done(null, user))
   .catch((err) => done(err))
 })
