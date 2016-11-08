@@ -11,9 +11,12 @@ import Promise from 'bluebird'
 import * as github from 'service/github'
 import * as policy from 'houston/policy'
 import Cycle from 'houston/model/cycle'
+import Log from 'lib/log'
 import Project from 'houston/model/project'
+import User from 'houston/model/user'
 
 const route = new Router()
+const log = new Log('controller:dashboard')
 
 /**
  * GET /
@@ -45,6 +48,10 @@ route.get('/dashboard', policy.isRole('beta'), async (ctx, next) => {
   return ctx.render('dashboard', { title: 'Dashboard', projects })
 })
 
+/**
+ * GET /reviews
+ * Shows all the outstanding reviews
+ */
 route.get('/reviews', policy.isRole('review'), async (ctx, next) => {
   const cycles = await Cycle.find({
     type: 'RELEASE',
@@ -54,6 +61,66 @@ route.get('/reviews', policy.isRole('review'), async (ctx, next) => {
   .exec()
 
   return ctx.render('review', { title: 'Reviews', cycles })
+})
+
+/**
+ * GET /beta
+ * Shows a beta signup page
+ */
+route.get('/beta', policy.isRole('user'), async (ctx, next) => {
+  ctx.state.title = 'Beta'
+
+  if (policy.ifRole(ctx.state.user, 'beta')) {
+    return ctx.render('beta/congratulations')
+  }
+
+  return ctx.render('beta/form', {
+    email: ctx.state.user.email,
+    isBeta: ctx.state.user.notify.beta
+  })
+})
+
+/**
+ * POST /beta
+ * Ensures user's email is set for beta
+ */
+route.post('/beta', policy.isRole('user'), async (ctx, next) => {
+  ctx.state.title = 'Beta'
+
+  if (typeof ctx.request.body.email !== 'string') {
+    log.debug('/beta called without body email')
+
+    ctx.status = 406
+    return ctx.render('beta/form', {
+      email: ctx.state.user.email,
+      isBeta: ctx.state.user.notify.beta
+    })
+  }
+
+  const email = ctx.request.body.email
+
+  // And here is a very simple email regex test because life is too short for
+  // yet another npm package
+  if (!/([a-z0-9]+)@([a-z0-9]+)\.([a-z]+)/i.test(email)) {
+    log.debug('/beta called with invalid email address')
+
+    ctx.status = 406
+    return ctx.render('beta/form', {
+      email,
+      isBeta: ctx.state.user.notify.beta,
+      error: 'Invalid email address'
+    })
+  }
+
+  await User.findByIdAndUpdate(ctx.state.user._id, {
+    email,
+    'notify.beta': true
+  })
+
+  return ctx.render('beta/form', {
+    email,
+    isBeta: true
+  })
 })
 
 export default route
