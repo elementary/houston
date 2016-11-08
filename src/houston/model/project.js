@@ -19,8 +19,6 @@ import releaseSchema from './release'
  * @param {String} tag - git branch to consider master (defaults to master)
  * @param {Object} apphub - the object representation of the apphub file
  * @param {Number} downloads - the number of downloads the current project has
- * @param {Array} dists - list of disributions to build for
- * @param {Array} archs - list of architectures to build for
  * @param {Object} github - {
  *   {Number} id - github id of project
  *   {String} owner - username for github repo (can also be an organization)
