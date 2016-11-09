@@ -3,11 +3,10 @@
 # Build with `docker build -t flightcheck-liftoff-liftoff .`
 #
 # TODO: Add liftoff to repository
-# TODO: Move this to a unique repository?
 #
 # Version: 1.0.3
 
-FROM ubuntu:xenial
+FROM elementary/docker:loki
 
 MAINTAINER elementary
 
