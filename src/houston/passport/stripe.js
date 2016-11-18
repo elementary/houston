@@ -110,20 +110,18 @@ router.get('/enable/:project', policy.isRole('beta'), async (ctx, next) => {
     overwrite: true
   })
 
-  const appDefaults = {
-    'stripe_user[email]': ctx.user.email,
-    'stripe_user[physical_product]': false,
-    'stripe_user[product_category]': 'software',
-    'stripe_user[url]': `https://github.com/${ctx.user.username}`
-  }
-
-  const authUrl = auth.getAuthorizeUrl(Object.assign({
+  const authUrl = auth.getAuthorizeUrl({
     client_id: config.stripe.client,
     response_type: 'code',
     redirect_uri: `${config.server.url}/auth/stripe/callback`,
     scope: ['read_write'],
-    always_prompt: true
-  }, appDefaults))
+    always_prompt: true,
+
+    'stripe_user[email]': ctx.user.email,
+    'stripe_user[physical_product]': false,
+    'stripe_user[product_category]': 'software',
+    'stripe_user[url]': `https://github.com/${ctx.user.username}`
+  })
 
   return ctx.redirect(authUrl)
 })
