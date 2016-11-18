@@ -37,6 +37,7 @@ route.get('/dashboard', policy.isRole('beta'), async (ctx, next) => {
   const databaseProjects = await Project.find({
     'github.id': { $in: githubProjects }
   })
+  .populate('stripe.user')
 
   const projects = await Promise.resolve(databaseProjects)
   .map(async (project) => {
@@ -58,7 +59,12 @@ route.get('/reviews', policy.isRole('review'), async (ctx, next) => {
     _status: 'REVIEW'
   })
   .populate('project')
-  .exec()
+
+  // We can manually set the project status instead of calling the DB again
+  cycles.map((cycle) => {
+    cycle.project.status = 'REVIEW'
+    return cycle
+  })
 
   return ctx.render('review', { title: 'Reviews', cycles })
 })

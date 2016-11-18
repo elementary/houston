@@ -1,4 +1,5 @@
 extends /layout/main
+include /partials/project
 
 block head
   link(rel="stylesheet", type="text/css", media="all", href="/styles/dashboard.css")
@@ -12,13 +13,4 @@ block body
   else
     each cycle in cycles
       div.repo-wrap: div.repo
-        div
-          if cycle.project.apphub.icon != null
-            img(src="data:image/svg+xml;base64," + cycle.project.apphub.icon).app-icon
-          else
-            img(src="/images/application-default-icon.png").app-icon
-          div
-            p #{cycle.name} #{cycle.version}
-            p.subtext: a(href="https://github.com/" + cycle.project.github.fullName)= cycle.project.github.fullName
-        div.right
-          include /partials/review
+          +project(cycle.project, true, false)
