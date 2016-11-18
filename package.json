@@ -38,6 +38,7 @@
     "monq": "^0.3.4",
     "nodegit": "^0.14.1",
     "nunjucks": "^2.4.2",
+    "oauth": "^0.9.14",
     "passport-github": "^1.1.0",
     "pluralize": "^1.2.1",
     "postcss-cssnext": "^2.8.0",

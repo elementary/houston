@@ -9,9 +9,10 @@
 import passport from 'koa-passport'
 import Router from 'koa-router'
 
-import User from 'houston/model/user'
 import * as github from './github'
+import * as stripe from './stripe'
 import Log from 'lib/log'
+import User from 'houston/model/user'
 
 const log = new Log('passport')
 
@@ -58,3 +59,4 @@ router.get('/logout', (ctx) => {
 })
 
 router.use(github.router.routes(), github.router.allowedMethods())
+router.use(stripe.router.routes(), stripe.router.allowedMethods())
