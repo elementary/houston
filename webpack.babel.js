@@ -32,18 +32,18 @@ export default {
     loaders: [
       {
         test: /\.js$/,
-        loader: 'babel',
+        loader: 'babel-loader',
         exclude: /node_modules/
       },
       {
         test: /\.css$/,
         use: [
-          'style',
+          'style-loader',
           {
-            loader: 'css',
+            loader: 'css-loader',
             options: { importLoaders: 1 }
           }, {
-            loader: 'postcss',
+            loader: 'postcss-loader',
             options: { plugins: [cssnext({ browsers })] }
           }]
       }
@@ -55,7 +55,6 @@ export default {
       name: 'common',
       minChunks: 4
     }),
-    new webpack.optimize.DedupePlugin(),
     new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.optimize.UglifyJsPlugin({
       minimize: true,
