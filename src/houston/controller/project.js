@@ -30,6 +30,10 @@ route.get('/cycle', async (ctx, next) => {
     throw new ctx.Mistake(404, 'Project not found')
   }
 
+  if (!policy.ifMember(project, ctx.user)) {
+    throw new ctx.Mistake(403, 'You do not have permission to cycle this project')
+  }
+
   if (project.releases.length < 1) {
     throw new ctx.Mistake(400, 'The project has no releases to cycle')
   }
