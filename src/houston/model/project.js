@@ -13,24 +13,35 @@ import db from 'lib/database'
 import releaseSchema from './release'
 
 /**
- * @param {String} name - project name (repo name by default)
- * @param {String} type - future use to determine types of tests to run
- * @param {String} repo - git repo code is hosted in
- * @param {String} tag - git branch to consider master (defaults to master)
- * @param {Object} apphub - the object representation of the apphub file
- * @param {Number} downloads - the number of downloads the current project has
- * @param {Object} github - {
- *   {Number} id - github id of project
- *   {String} owner - username for github repo (can also be an organization)
- *   {String} name - repository name in github
- *   {String} token - token of user with contributor access to the project
- *   {String} label - label to assign all houston issues to in GitHub issue tracking
- * }
- * @param {String} _status - internal status of project in houston
- * @param {Error} mistake - mistake class error if any occured
- * @param {Object} owner - houston user that initalizized the project in houston
- * @param {Array} releases - all releases for the project in order of version
- * @param {Array} cycles - all non release cycles for the project
+ * @type {object} - Project database schema
+ *
+ * @property {String} name - project name (repo name by default)
+ * @property {String} type - future use to determine types of tests to run
+ * @property {String} repo - git repo code is hosted in
+ * @property {String} tag - git branch to consider master (defaults to master)
+ *
+ * @property {Object} apphub - the object representation of the apphub file
+ * @property {Number} downloads - the number of downloads the current project has
+ *
+ * @property {Object} github - all data related to the project's GitHub repository
+ * @property {Number} github.id - github id of project
+ * @property {String} github.owner - username for github repo (can also be an organization)
+ * @property {String} github.name - repository name in github
+ * @property {String} github.token - token of user with contributor access to the project
+ * @property {String} github.label - label to assign all houston issues to in GitHub issue tracking
+ *
+ * @property {Object} stripe - all data related to the project's linked stripe account
+ * @property {Object} stripe.enabled - the current state of stripe payments for the project
+ * @property {String} stripe.id - stripe id for the account
+ * @property {String} stripe.key - a public key for client side stripe actions
+ * @property {String} stripe.token - a private key for destructive stripe actions
+ *
+ * @property {String} _status - internal status of project in houston
+ * @property {Error} mistake - mistake class error if any occured
+ *
+ * @property {Object} owner - houston user that initalizized the project in houston
+ * @property {Array} releases - all releases for the project in order of version
+ * @property {Array} cycles - all non release cycles for the project
  */
 export const schema = new db.Schema({
   name: {
@@ -85,6 +96,21 @@ export const schema = new db.Schema({
       default: 'AppHub'
     },
     installation: Number
+  },
+
+  stripe: {
+    enabled: {
+      type: Boolean,
+      default: false
+    },
+    user: {
+      type: db.Schema.Types.ObjectId,
+      ref: 'user'
+    },
+    id: String,
+    access: String,
+    refresh: String,
+    public: String
   },
 
   _status: {
@@ -172,6 +198,10 @@ schema.methods.toNormal = async function () {
   delete ret['package']['icon']
   delete ret['github']['token']
   delete ret['github']['secret']
+  delete ret['stripe']['user']
+  delete ret['stripe']['id']
+  delete ret['stripe']['access']
+  delete ret['stripe']['refresh']
   delete ret['mistake']
 
   return ret
