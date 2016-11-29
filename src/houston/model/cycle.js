@@ -180,6 +180,14 @@ schema.methods.setStatus = function (status) {
  * @returns {Void}
  */
 schema.methods.doFlightcheck = async function () {
+  const project = await db.model('project').findOne({
+    'cycles': this._id
+  })
+
+  if (project == null) {
+    throw new Error('Unable to get project for flightcheck data')
+  }
+
   return sender.add('release', {
     id: this._id,
     auth: this.installation,
@@ -187,19 +195,28 @@ schema.methods.doFlightcheck = async function () {
     tag: this.tag,
     name: this.name,
     version: this.version,
-    changelog: this.changelog.reverse()
+    changelog: this.changelog.reverse(),
+    stripe: project.stripe
   })
 }
 
 /**
  * Sends test data to flightcheck before save. Reports error on creation
  */
-schema.pre('save', function (next) {
-  if (!this.isNew) return next()
+schema.post('save', async function (doc, next) {
+  if (doc['_status'] !== 'QUEUE') return
 
-  return this.doFlightcheck()
-  .then(() => next())
-  .catch((error) => next(error))
+  try {
+    await this.doFlightcheck()
+  } catch (err) {
+    return db.model('cycle').findByIdAndUpdate(doc._id, {
+      '_status': 'ERROR',
+      'mistake': new Error('Unable to run flightcheck')
+    })
+    .then(() => next(err))
+  }
+
+  return next()
 })
 
 export { schema }

@@ -217,7 +217,8 @@ schema.methods.createCycle = async function (type) {
 
   const updates = {
     $addToSet: {
-      'releases.$.cycles': cycle._id
+      'releases.$.cycles': cycle._id,
+      'cycles': cycle._id
     }
   }
 

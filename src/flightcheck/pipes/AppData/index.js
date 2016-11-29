@@ -33,7 +33,7 @@ export default class AppData extends Pipe {
     const appdataPath = path.join(p, appdataName)
     const buildPath = path.join(this.pipeline.build.dir, p)
 
-    const file = await this.file(appdataPath)
+    const file = await this.file(appdataPath, 'xml')
 
     if (!await file.exists()) {
       return this.log('warn', 'AppData/existance.md', `${this.pipeline.build.name}.appdata.xml`)
@@ -53,6 +53,20 @@ export default class AppData extends Pipe {
 
         return this.log('warn', 'AppData/invalid.md')
       }
+    }
+
+    this.data = await file.read()
+
+    if (this.pipeline.build.stripe != null) {
+      if (this.data['custom'] == null) this.data['custom'] = {}
+
+      this.data['custom']['houston_stripe_pub'] = this.pipeline.build.stripe
+    }
+
+    try {
+      await file.save(this.data)
+    } catch (err) {
+      log.warn('Unable to save custom stripe tag to AppData')
     }
   }
 }
