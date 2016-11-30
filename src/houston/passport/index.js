@@ -12,7 +12,7 @@ import Router from 'koa-router'
 import * as github from './github'
 import * as stripe from './stripe'
 import Log from 'lib/log'
-import User from 'houston/model/user'
+import User from 'lib/database/user'
 
 const log = new Log('passport')
 

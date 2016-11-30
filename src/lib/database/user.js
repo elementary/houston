@@ -1,12 +1,12 @@
 /**
- * houston/model/user.js
+ * lib/database/user.js
  * Mongoose modal and schema for user accounts
  *
  * @exports {Object} schema - user database schema
  * @exports {Object} default - user database model
  */
 
-import db from 'lib/database'
+import db from './connection'
 
 /**
  * @type {object} - User database schema

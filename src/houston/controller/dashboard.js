@@ -10,10 +10,10 @@ import Promise from 'bluebird'
 
 import * as github from 'service/github'
 import * as policy from 'houston/policy'
-import Cycle from 'houston/model/cycle'
+import Cycle from 'lib/database/cycle'
 import Log from 'lib/log'
-import Project from 'houston/model/project'
-import User from 'houston/model/user'
+import Project from 'lib/database/project'
+import User from 'lib/database/user'
 
 const route = new Router()
 const log = new Log('controller:dashboard')

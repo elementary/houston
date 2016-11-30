@@ -12,7 +12,7 @@ import syslogd from 'syslogd'
 
 import config from 'lib/config'
 import Log from 'lib/log'
-import Project from 'houston/model/project'
+import Project from 'lib/database/project'
 
 const log = new Log('service:download')
 

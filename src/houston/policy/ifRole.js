@@ -5,7 +5,7 @@
  * @exports {Function} - Checks user rights
  */
 
-import { schema } from 'houston/model/user'
+import { schema } from 'lib/database/user'
 import config from 'lib/config'
 import Log from 'lib/log'
 import Mistake from 'lib/mistake'
