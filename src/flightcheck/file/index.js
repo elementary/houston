@@ -1,5 +1,5 @@
 /**
- * flightcheck/file.js
+ * flightcheck/file/index.js
  * A high level class for file interaction
  *
  * @exports {Class} File - high level interaction of files
