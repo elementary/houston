@@ -5,12 +5,10 @@
  * @exports {Class} File - high level interaction of files
  */
 
-import assert from 'assert'
 import path from 'path'
 import Promise from 'bluebird'
 
 import * as fsHelpers from 'lib/helpers/fs'
-import * as parses from './parsers'
 
 const fs = Promise.promisifyAll(require('fs'))
 
@@ -24,19 +22,13 @@ export default class File {
    * Creates a file class
    *
    * @param {String} p - Path to the file
-   * @param {String} [type=raw] - Type of parser to use for file
-   * @param {String} [encoding=utf-8] - File encoding to use for the file
    */
-  constructor (p, type = 'raw', encoding = 'utf-8') {
-    assert(p, 'File requires a path')
+  constructor (p) {
+    if (typeof p !== 'string') {
+      throw new Error('File requires a path')
+    }
 
     this.path = path.resolve(p)
-    this.type = type
-    this.options = { encoding }
-
-    if (type !== 'raw') {
-      assert(parses[type], `File type "${type}" does not exist`)
-    }
   }
 
   /**
@@ -53,44 +45,30 @@ export default class File {
 
   /**
    * read
-   * Reads file from path and parses it if type is set
+   * Reads file
    *
-   * @param {String} [type=this.type] - file type to parse as
-   * @returns {Object} - javascript object reporesentation of file
+   * @returns {String} - file output or null if it does not exist
    */
-  async read (type = this.type) {
+  async read () {
     if (!await this.exists()) return null
 
-    const raw = await fs.readFileAsync(this.path, this.options)
-
-    if (type !== 'raw') {
-      // If it's a file with only whitespace charactors (no real data)
-      if (!/\S/.test(raw)) return {}
-
-      return parses[type].read(raw)
-    } else {
-      return raw
-    }
+    return fs.readFileAsync(this.path, { encoding: 'utf8' })
   }
 
   /**
    * write
-   * Writes javascript object to file
+   * Writes to file
    *
-   * @param {Object} data - data to write to file
-   * @param {String} [type=this.type] - file type to write as
+   * @param {String} data - data to write to file
+   *
    * @returns {Void}
    */
-  async write (data, type = this.type) {
-    if (type !== 'raw') assert(data, 'File requires something to write')
-
-    let output = data
-
-    if (type !== 'raw') {
-      output = await parses[type].write(data)
+  async write (data) {
+    if (typeof data !== 'string') {
+      throw new Error('File requires data to write')
     }
 
     await fsHelpers.mkdirp(path.dirname(this.path))
-    await fs.writeFileAsync(this.path, output)
+    await fs.writeFileAsync(this.path, data)
   }
 }

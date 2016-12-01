@@ -45,7 +45,7 @@ export default class DebianControl extends Pipe {
    */
   async code (p = 'repository/debian') {
     const controlPath = path.join(p, 'control')
-    const file = await this.file(controlPath, 'colon')
+    const file = await this.parsable(controlPath, 'colon')
 
     if (!await file.exists()) {
       return this.log('error', 'Debian/Control/existance.md')
