@@ -1,0 +1,50 @@
+/**
+ * test/flightcheck/file/index.js
+ * Tests general File class methods
+ */
+
+import test from 'ava'
+import path from 'path'
+import Promise from 'bluebird'
+
+import alias from 'root/.alias'
+import File from 'flightcheck/file'
+
+const fs = Promise.promisifyAll(require('fs'))
+
+test.beforeEach('setup directories', (t) => {
+  t.context.fixtures = path.resolve(__dirname, 'fixtures')
+  t.context.build = path.resolve(alias.resolve.alias['build'], 'test', 'flightcheck', 'file', 'index')
+})
+
+test('able to create simple File', (t) => {
+  t.notThrows(() => new File('path'))
+})
+
+test('able to check existance of a file', async (t) => {
+  const one = new File(path.join(t.context.fixtures, 'test1.txt'))
+  const two = new File(path.join(t.context.fixtures, 'neverexistant.txt'))
+
+  t.true(await one.exists())
+  t.false(await two.exists())
+})
+
+test('able to read a file', async (t) => {
+  const one = new File(path.join(t.context.fixtures, 'test1.txt'))
+
+  const data = await one.read()
+
+  t.is(data, 'this is a simple text file\n')
+})
+
+test('able to write a file', async (t) => {
+  const onePath = path.join(t.context.build, 'test1.txt')
+  const one = new File(onePath)
+
+  const data = 'this is some write test data\n'
+
+  await one.write(data)
+
+  const two = await fs.readFileAsync(onePath, { encoding: 'utf8' })
+  t.is(two, data)
+})

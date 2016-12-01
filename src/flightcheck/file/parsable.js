@@ -54,7 +54,7 @@ export default class Parsable extends File {
    * @returns {Void}
    */
   async stringify (data) {
-    if (typeof data !== 'string') {
+    if (typeof data !== 'object') {
       throw new Error('File requires data to stringify')
     }
 
