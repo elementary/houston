@@ -61,7 +61,7 @@ app.use(async (ctx, next) => {
   ctx.state.config = config
   ctx.state.helper = helpers
 
-  ctx.state.title = 'Houston'
+  ctx.state.title = 'Developer'
   await next()
 })
 
