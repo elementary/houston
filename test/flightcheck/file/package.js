@@ -9,17 +9,18 @@ import test from 'ava'
 
 import alias from 'root/.alias'
 import mockConfig from 'test/fixtures/config'
-import Package from 'flightcheck/file/package'
 
 test.beforeEach('setup', (t) => {
   mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
+
+  t.context.Package = require(path.resolve(alias.resolve.alias['flightcheck'], 'file', 'package')).default
 })
 
 test('able to create simple Package', (t) => {
-  t.notThrows(() => new Package('testing', 'deb'))
-  t.notThrows(() => new Package('testing', 'superawesomepack'))
-  t.notThrows(() => new Package('testing', 'deb', 'amd64', 'xenial'))
+  t.notThrows(() => new t.context.Package('testing', 'deb'))
+  t.notThrows(() => new t.context.Package('testing', 'superawesomepack'))
+  t.notThrows(() => new t.context.Package('testing', 'deb', 'amd64', 'xenial'))
 
-  t.throws(() => new Package('testing'))
-  t.throws(() => new Package('testing', 'n'))
+  t.throws(() => new t.context.Package('testing'))
+  t.throws(() => new t.context.Package('testing', 'n'))
 })
