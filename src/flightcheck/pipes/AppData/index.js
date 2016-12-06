@@ -7,6 +7,7 @@
 
 import path from 'path'
 
+import config from 'lib/config'
 import Log from 'lib/log'
 import Pipe from 'flightcheck/pipes/pipe'
 
@@ -55,18 +56,27 @@ export default class AppData extends Pipe {
       }
     }
 
-    this.data = await file.read()
-
     if (this.pipeline.build.stripe != null) {
-      if (this.data['custom'] == null) this.data['custom'] = {}
+      log.debug('Saving donation url to appstream file')
+      this.data = await file.read()
 
-      this.data['custom']['houston_stripe_pub'] = this.pipeline.build.stripe
-    }
+      let i = 0
+      if (this.data['component']['url'] != null) i = this.data['component']['url'].length
 
-    try {
-      await file.save(this.data)
-    } catch (err) {
-      log.warn('Unable to save custom stripe tag to AppData')
+      this.data['component']['url'][i] = {
+        '_': `${config.server.url}/purchase/${this.pipeline.build.stripe}`,
+        '$': {
+          type: 'donation'
+        }
+      }
+
+      try {
+        await file.write(this.data)
+      } catch (err) {
+        log.warn('Unable to save donation url to AppData')
+        log.warn(err)
+        log.report(err, this.pipeline.build)
+      }
     }
   }
 }
