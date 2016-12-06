@@ -212,7 +212,8 @@ schema.methods.createCycle = async function (type) {
     name: this.project.name,
     version: this.version,
     type,
-    changelog: await this.createChangelog()
+    changelog: await this.createChangelog(),
+    stripe: this.project.stripe.public
   })
 
   const updates = {

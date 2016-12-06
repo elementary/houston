@@ -26,6 +26,8 @@ const sender = new atc.Sender('cycle')
  * @param {Array} packages - array of aptly package keys
  * @param {String} _status - current status of cycle without influence of builds
  * @param {Object} mistake - mistake class error if any occured
+ *
+ * @property {String} stripe - Stripe public key to be inserted during build
  */
 const schema = new db.Schema({
   project: {
@@ -86,7 +88,9 @@ const schema = new db.Schema({
     default: 'QUEUE',
     enum: ['QUEUE', 'RUN', 'REVIEW', 'FINISH', 'FAIL', 'ERROR']
   },
-  mistake: Object
+  mistake: Object,
+
+  stripe: String
 })
 
 /**
@@ -180,14 +184,6 @@ schema.methods.setStatus = function (status) {
  * @returns {Void}
  */
 schema.methods.doFlightcheck = async function () {
-  const project = await db.model('project').findOne({
-    'cycles': this._id
-  })
-
-  if (project == null) {
-    throw new Error('Unable to get project for flightcheck data')
-  }
-
   return sender.add('release', {
     id: this._id,
     auth: this.installation,
@@ -196,27 +192,19 @@ schema.methods.doFlightcheck = async function () {
     name: this.name,
     version: this.version,
     changelog: this.changelog.reverse(),
-    stripe: project.stripe
+    stripe: this.stripe
   })
 }
 
 /**
  * Sends test data to flightcheck before save. Reports error on creation
  */
-schema.post('save', async function (doc, next) {
-  if (doc['_status'] !== 'QUEUE') return
+schema.pre('save', function (next) {
+  if (!this.isNew) return next()
 
-  try {
-    await this.doFlightcheck()
-  } catch (err) {
-    return db.model('cycle').findByIdAndUpdate(doc._id, {
-      '_status': 'ERROR',
-      'mistake': new Error('Unable to run flightcheck')
-    })
-    .then(() => next(err))
-  }
-
-  return next()
+  return this.doFlightcheck()
+  .then(() => next())
+  .catch((error) => next(error))
 })
 
 export { schema }
