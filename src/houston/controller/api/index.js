@@ -3,63 +3,76 @@
  * Welcome to the wonderful world of JSON apis
  *
  * @see http://jsonapi.org/
+ *
  * @exports {Object} - Koa router
  */
 
 import Router from 'koa-router'
 
-import Log from 'lib/log'
-import Mistake from 'lib/mistake'
+import APIError from './error'
+
 import popularity from './popularity'
 import projects from './projects'
-
-const log = new Log('controller:api')
 
 const route = new Router({
   prefix: '/api'
 })
 
 /**
- * /api/*
- * Does header checks and sets for all api calls
+ * ANY /api/*
+ * Adds some common things like links types to any API request.
  */
 route.use(async (ctx, next) => {
-  if (ctx.request.is('application/vnd.api+json') === false) {
-    ctx.status = 415
-    return
-  }
+  await next()
 
-  if (ctx.request.accepts('application/vnd.api+json') !== 'application/vnd.api+json') {
-    ctx.status = 406
-    return
-  }
+  ctx.type = 'application/vnd.api+json'
 
+  if (ctx.body == null) ctx.body = {}
+
+  if (ctx.body['links'] == null) ctx.body['links'] = {}
+  if (ctx.body['links']['self'] == null) ctx.body['links']['self'] = ctx.request.href
+
+  if (ctx.body['jsonapi'] == null) ctx.body['jsonapi'] = {}
+  if (ctx.body['jsonapi']['version'] == null) ctx.body['jsonapi']['version'] = '1.0'
+})
+
+/**
+ * ANY /api/*
+ * Handles any errors that occur in the API routes, and converts them to JSON
+ * API output
+ */
+route.use(async (ctx, next) => {
   try {
     await next()
   } catch (err) {
-    if (err.status == null || err.status[0] >= 5) log.error(err)
+    let apierr = null
 
-    if (err.mistake && err.expose) {
-      ctx.status = err.status
-      ctx.body = { errors: [{
-        status: err.status,
-        title: err.message
-      }]}
+    if (err instanceof APIError) {
+      apierr = err
     } else {
-      ctx.status = 500
-      ctx.body = { errors: [{
-        status: 500,
-        title: 'Houston has encountered an error'
-      }]}
+      apierr = new APIError(500, 'Internal Server Error')
     }
+
+    ctx.status = apierr.status
+    ctx.body = { errors: [apierr.toAPI()] }
+    return
+  }
+})
+
+/**
+ * ANY /api/*
+ * Does header checks for all incoming requests
+ */
+route.use((ctx, next) => {
+  if (ctx.request.is('application/vnd.api+json') === false) {
+    throw new APIError(415, 'Invalid Request', 'Request needs to be "application/vnd.api+json"')
   }
 
-  if (ctx.body != null && ctx.body['links'] == null) ctx.body['links'] = {}
+  if (ctx.request.accepts('application/vnd.api+json') !== 'application/vnd.api+json') {
+    throw new APIError(406, 'Invalid Request', 'Request needs to accept "application/vnd.api+json"')
+  }
 
-  if (ctx.body != null && ctx.body['links']['self'] == null) ctx.body['links']['self'] = ctx.request.href
-
-  ctx.type = 'application/vnd.api+json'
-  return
+  return next()
 })
 
 // Load all api paths here
@@ -67,11 +80,9 @@ route.use(popularity.routes(), popularity.allowedMethods())
 route.use(projects.routes(), projects.allowedMethods())
 
 /**
- * /api/*
+ * ANY /api/*
  * 404 page for api urls
  */
-route.all('*', (ctx) => {
-  throw new Mistake(404, 'Page not found', true)
-})
+route.all('*', () => { throw new APIError(404, 'Endpoint Not Found') })
 
 export default route

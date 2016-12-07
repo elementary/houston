@@ -158,26 +158,14 @@ app.use((ctx) => {
 })
 
 // Error logging
-app.on('error', async (error, ctx, next) => {
+app.on('error', async (error, ctx) => {
   if (app.env === 'test') return
-
-  // Sentry error logging
-  app.on('error', (err) => log.report(err))
 
   if (/4.*/.test(error.status)) {
     log.debug(`${ctx.method} ${ctx.status} ${ctx.url} |> ${error.message}`)
   } else {
     log.error(error)
-  }
-
-  try {
-    await next()
-  } catch (err) {
-    ctx.status = 500
-
-    // TODO: add server monkey email address for emergency dispatching
-    ctx.body = "Houston has failed epically. But don't worry, our server monkey has been dispatched"
-    return
+    log.report(error)
   }
 })
 

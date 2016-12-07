@@ -21,7 +21,9 @@ export class ServiceError extends Error {
    */
   constructor (msg) {
     super(msg)
+    Error.captureStackTrace(this, this.constructor)
 
+    this.name = 'ServiceError'
     this.code = 'SRCERR'
   }
 }
