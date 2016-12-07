@@ -83,6 +83,8 @@ route.use(projects.routes(), projects.allowedMethods())
  * ANY /api/*
  * 404 page for api urls
  */
-route.all('*', () => { throw new APIError(404, 'Endpoint Not Found') })
+route.all('*', () => {
+  throw new APIError(404, 'Endpoint Not Found')
+})
 
 export default route
