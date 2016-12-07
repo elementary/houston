@@ -8,8 +8,9 @@
 import Router from 'koa-router'
 
 import api from './api'
-import dashboard from './dashboard'
 import hooks from './hook'
+
+import dashboard from './dashboard'
 import project from './project'
 import purchase from './purchase'
 
