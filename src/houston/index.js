@@ -106,7 +106,12 @@ app.use(async (ctx, next) => {
 // body object, making raw body hashing impossible. FFS
 // @see https://github.com/koajs/bodyparser/blob/master/index.js
 app.use(async (ctx, next) => {
-  ctx.request.rawBody = await rawBody(ctx.req).then((buf) => buf.toString())
+  ctx.request.rawBody = await rawBody(ctx.req, {
+    length: this.req.headers['content-length'],
+    limit: '1mb'
+  })
+  .then((buf) => buf.toString())
+  .catch((err) => { throw new Mistake(500, err.message) })
 
   const jsonTypes = [
     'application/json',
