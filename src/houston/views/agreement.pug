@@ -1,0 +1,18 @@
+extends /layout/main
+
+block body
+  div.row
+    div.column.alert
+      h1 Terms of Service
+      p By accepting the terms of this agreement you signify your understanding of the following:
+      ul
+        li elementary LLC. will facilitate voluntary payment for software that you have marked for monetization at the cost of 30% of sales revenue, plus processing fees.
+        li Revenue will be paid out to you at a schedule as determined by Stripe.
+        li You are responsible for reporting taxable income as required by your local government.
+        li elementary LLC. does not guarantee that software you have marked for monetization will not be downloaded at no cost.
+        li You agree that you own the rights to commercially re-distribute software you have marked for monetization.
+        li elementary LLC. has the right to remove your software from AppCenter and discontinue service at any time.
+        li You agree to Stripe's <a href="https://stripe.com/us/connect-account/legal">legal agreement</a>.
+    div.row
+      a(href="/auth/logout").button Cancel
+      a(href="/agreement/accept").button.suggested-action Accept

@@ -54,13 +54,13 @@ html
             li: a(href="https://github.com/integration/appcenter", target="_blank") Manage Apps…
 
           if policy.ifRole(user, 'review')
-          ul
-            li: a(href="/dashboard")
-              i.fa.fa-bar-chart
-              span  Dashboard
-            li: a(href="/reviews")
-              i.fa.fa-check-square-o
-              span  Reviews
+            ul
+              li: a(href="/dashboard")
+                i.fa.fa-bar-chart
+                span  Dashboard
+              li: a(href="/reviews")
+                i.fa.fa-check-square-o
+                span  Reviews
 
           ul
             // We can re/move this after beta is over
