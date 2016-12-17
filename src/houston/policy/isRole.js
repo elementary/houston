@@ -5,13 +5,13 @@
  * @exports {Function} - Koa route middleware
  */
 
-import { schema } from 'houston/model/user'
 import ifRole from './ifRole'
+import PermError from './error'
 
 /**
  * Checks user rights
  *
- * @param {String|Number} role - role to check against
+ * @param {String} role - role to check against
  * @returns {Function} - Koa route middleware
  */
 export default (role) => {
@@ -22,12 +22,7 @@ export default (role) => {
     }
 
     if (ifRole(ctx.user, role)) return next()
-    const possibilities = schema.tree.right.enum
 
-    if (role === possibilities.indexOf('BETA')) {
-      throw new ctx.Mistake(403, 'Houston is currently in beta')
-    }
-
-    throw new ctx.Mistake(403, 'You shall not pass')
+    throw new PermError.FromRight(ctx.state.user, role)
   }
 }

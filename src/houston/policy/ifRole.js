@@ -8,39 +8,37 @@
 import { schema } from 'houston/model/user'
 import config from 'lib/config'
 import Log from 'lib/log'
-import Mistake from 'lib/mistake'
 
-const log = new Log('policy')
+const log = new Log('policy:ifRole')
+const possibilities = schema.tree.right.enum
 
 /**
  * Checks user rights
  *
  * @param {Object} user - user model from database
- * @param {String|Number} role - role to check against
+ * @param {String} role - role to check against
  * @returns {Boolean} - does the user have or is greater than requested role
  */
 export default (user, role) => {
-  const possibilities = schema.tree.right.enum
   const userRole = possibilities.indexOf(user.right)
+  const needRole = possibilities.indexOf(role.toUpperCase())
 
-  if (typeof role === 'string') {
-    role = possibilities.indexOf(role.toUpperCase())
-  }
-
-  if (role > possibilities.length || role < 0) {
-    throw new Mistake(500, `Invalid isRole policy of ${role}`)
+  // a super failsafe for permissions in case of an invalid role given
+  if (needRole < 0 || needRole > possibilities.length - 1) {
+    log.error(`Invalid user role "${role}", denying all access!`)
+    return false
   }
 
   if (!config.rights) {
-    log.debug(`User rights disabled, letting ${user.username} access "${possibilities[role]}" section`)
+    log.debug(`User rights disabled, allowing ${user.username} access to "${possibilities[needRole]}" section`)
     return true
   }
 
-  if (userRole >= role) {
-    log.debug(`${user.username} is a "${possibilities[userRole]}", allowing access to "${possibilities[role]}" section`)
+  if (userRole >= needRole) {
+    log.debug(`${user.username} is a "${possibilities[userRole]}", allowing access to "${possibilities[needRole]}" section`)
     return true
   }
 
-  log.debug(`${user.username} is a "${possibilities[userRole]}", denying access to "${possibilities[role]}" section`)
+  log.debug(`${user.username} is a "${possibilities[userRole]}", denying access to "${possibilities[needRole]}" section`)
   return false
 }

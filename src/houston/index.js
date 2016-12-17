@@ -24,6 +24,7 @@ import controllers from './controller'
 import db from 'lib/database'
 import Log from 'lib/log'
 import Mistake from 'lib/mistake'
+import PermError from './policy/error'
 
 const app = new Koa()
 const log = new Log('server')
@@ -66,18 +67,11 @@ app.use(async (ctx, next) => {
 })
 
 // Error pages
-// eslint-disable-next-line consistent-return
 app.use(async (ctx, next) => {
   try {
     await next()
   } catch (error) {
     ctx.app.emit('error', error, ctx)
-
-    // Because the only difference between a permission error and a beta error
-    // is the wording. I regret nothing about this implementation.
-    if (error.status === 403 && error.message.toLowerCase().indexOf('beta') !== 0) {
-      return ctx.redirect('/beta')
-    }
 
     const pkg = {
       status: 500,
@@ -85,17 +79,32 @@ app.use(async (ctx, next) => {
       title: 'Houston has encountered an error'
     }
 
-    if (error.mistake && typeof error.status === 'number') {
-      pkg.status = error.status
+    if (error instanceof PermError) {
+      if (error.code === 'PERMERRRGT' && error.user.right === 'USER') {
+        return ctx.redirect('/beta')
+      }
+
+      if (error.code === 'PERMERRAGR') {
+        return ctx.redirect('/agreement')
+      }
+
+      pkg.status = 403
+      if (error.code === 'PERMERRACC') {
+        pkg.title = 'You do not have sufficient permission on the third party service'
+      } else {
+        pkg.title = 'You do not have sufficient permission'
+      }
     }
 
-    if (error.expose || app.env === 'development') {
-      pkg.title = error.message || 'Houston has encountered an error'
+    if (error instanceof Mistake) {
+      pkg.status = error.status || 500
+
+      if (error.expose || config.env === 'development') {
+        pkg.title = error.message
+      }
     }
 
-    if (app.env === 'development') {
-      pkg.detail = error.stack
-    }
+    if (config.env === 'development') pkg.detail = error.stack
 
     ctx.status = pkg.status
     return ctx.render('error', { error: pkg })
