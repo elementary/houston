@@ -21,7 +21,7 @@ export default (role) => {
       return ctx.redirect('/auth/github')
     }
 
-    if (ifRole(ctx.user, role)) return next()
+    if (ifRole(ctx.state.user, role)) return next()
 
     throw new PermError.FromRight(ctx.state.user, role)
   }
