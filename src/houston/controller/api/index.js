@@ -10,6 +10,7 @@
 import Router from 'koa-router'
 
 import APIError from './error'
+import PermError from 'houston/policy/error'
 
 import popularity from './popularity'
 import projects from './projects'
@@ -49,6 +50,16 @@ route.use(async (ctx, next) => {
 
     if (err instanceof APIError) {
       apierr = err
+    } else if (err instanceof PermError) {
+      let title = 'You do not have sufficient permission'
+
+      if (err.code === 'PERMERRACC') {
+        title = 'You do not have sufficient permission on the third party service'
+      } else if (err.code === '') {
+        title = 'You need to agree to TOS agreement'
+      }
+
+      apierr = new APIError(403, title)
     } else {
       apierr = new APIError(500, 'Internal Server Error')
     }
