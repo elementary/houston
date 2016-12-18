@@ -5,6 +5,8 @@
  * @exports {Function} - Koa route middleware
  */
 
+import PermError from './error'
+
 /**
  * Checks user agreement notify property
  *
@@ -23,5 +25,5 @@ export default (ctx, next) => {
     return next()
   }
 
-  return ctx.redirect('/agreement')
+  throw new PermError.FromAgreement(ctx.state.user)
 }
