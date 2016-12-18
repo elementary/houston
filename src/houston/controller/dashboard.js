@@ -30,8 +30,8 @@ route.get('', (ctx) => {
  * GET /dashboard
  * Shows all projects
  */
-route.get('/dashboard', policy.isRole('BETA'), async (ctx, next) => {
-  const githubProjects = await github.getRepos(ctx.user.github.access)
+route.get('/dashboard', policy.isRole('BETA'), policy.isAgreement, async (ctx, next) => {
+  const githubProjects = await github.getRepos(ctx.state.user.github.access)
   .map((repo) => repo.github.id)
 
   const databaseProjects = await Project.find({
@@ -53,7 +53,7 @@ route.get('/dashboard', policy.isRole('BETA'), async (ctx, next) => {
  * GET /reviews
  * Shows all the outstanding reviews
  */
-route.get('/reviews', policy.isRole('REVIEW'), async (ctx, next) => {
+route.get('/reviews', policy.isRole('REVIEW'), policy.isAgreement, async (ctx, next) => {
   const cycles = await Cycle.find({
     type: 'RELEASE',
     _status: 'REVIEW'
@@ -82,7 +82,8 @@ route.get('/beta', policy.isRole('USER'), async (ctx, next) => {
 
   return ctx.render('beta/form', {
     email: ctx.state.user.email,
-    isBeta: ctx.state.user.notify.beta
+    isBeta: ctx.state.user.notify.beta,
+    hideUser: true
   })
 })
 
@@ -99,7 +100,8 @@ route.post('/beta', policy.isRole('USER'), async (ctx, next) => {
     ctx.status = 406
     return ctx.render('beta/form', {
       email: ctx.state.user.email,
-      isBeta: ctx.state.user.notify.beta
+      isBeta: ctx.state.user.notify.beta,
+      hideUser: true
     })
   }
 
@@ -114,7 +116,8 @@ route.post('/beta', policy.isRole('USER'), async (ctx, next) => {
     return ctx.render('beta/form', {
       email,
       isBeta: ctx.state.user.notify.beta,
-      error: 'Invalid email address'
+      error: 'Invalid email address',
+      hideUser: true
     })
   }
 
@@ -125,7 +128,8 @@ route.post('/beta', policy.isRole('USER'), async (ctx, next) => {
 
   return ctx.render('beta/form', {
     email,
-    isBeta: true
+    isBeta: true,
+    hideUser: true
   })
 })
 
