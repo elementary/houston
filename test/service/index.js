@@ -13,9 +13,10 @@ test('ServiceError is an error', (t) => {
   t.true(one instanceof Error)
 })
 
-test('ServiceError has correct error code', (t) => {
+test('ServiceError has correct error properties', (t) => {
   const one = new service.ServiceError('testing')
 
+  t.is(one.name, 'ServiceError')
   t.is(one.code, 'SRCERR')
 })
 

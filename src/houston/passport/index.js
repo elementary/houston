@@ -40,12 +40,6 @@ export function setup (server) {
   server.use(passport.initialize())
   server.use(passport.session())
 
-  server.use(async (ctx, next) => {
-    ctx.state.user = (ctx.passport.user != null) ? ctx.passport.user : null
-    ctx.user = (ctx.passport.user != null) ? ctx.passport.user : null
-    await next()
-  })
-
   log.debug('Passport setup complete')
 }
 

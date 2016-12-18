@@ -30,7 +30,7 @@ route.get('/cycle', async (ctx, next) => {
     throw new ctx.Mistake(404, 'Project not found')
   }
 
-  if (!policy.ifMember(project, ctx.user)) {
+  if (!policy.ifMember(project, ctx.state.user)) {
     throw new ctx.Mistake(403, 'You do not have permission to cycle this project')
   }
 
