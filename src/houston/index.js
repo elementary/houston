@@ -170,12 +170,24 @@ app.use((ctx) => {
 app.on('error', async (error, ctx) => {
   if (app.env === 'test') return
 
-  if (/4.*/.test(error.status)) {
-    log.debug(`${ctx.method} ${ctx.status} ${ctx.url} |> ${error.message}`)
-  } else {
-    log.error(error)
-    log.report(error)
+  if (error instanceof PermError) {
+    log.debug(error.toString())
+    return
   }
+
+  if (error instanceof Mistake) {
+    if (error.status[0] >= 5) {
+      log.error(error)
+      log.report(error)
+    } else {
+      log.debug(error)
+    }
+
+    return
+  }
+
+  log.error(error)
+  log.report(error)
 })
 
 // Launching server
