@@ -15,7 +15,7 @@ const route = new Router()
  * GET /agreement
  * Shows the TOS agreement page
  */
-route.get('/agreement', policy.isRole('beta'), (ctx) => {
+route.get('/agreement', policy.isRole('BETA'), (ctx) => {
   return ctx.render('agreement')
 })
 
@@ -23,9 +23,9 @@ route.get('/agreement', policy.isRole('beta'), (ctx) => {
  * GET /agreement/accept
  * Accepts the latest TOS agreement
  */
-route.get('/agreement/accept', policy.isRole('beta'), async (ctx) => {
-  ctx.user.notify.agreement = false
-  await ctx.user.save()
+route.get('/agreement/accept', policy.isRole('BETA'), async (ctx) => {
+  ctx.state.user.notify.agreement = false
+  await ctx.state.user.save()
 
   if (ctx.session.originalUrl != null) {
     return ctx.redirect(ctx.session.originalUrl)

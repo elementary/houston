@@ -30,8 +30,8 @@ route.get('', (ctx) => {
  * GET /dashboard
  * Shows all projects
  */
-route.get('/dashboard', policy.isRole('beta'), policy.isAgreement, async (ctx, next) => {
-  const githubProjects = await github.getRepos(ctx.user.github.access)
+route.get('/dashboard', policy.isRole('BETA'), policy.isAgreement, async (ctx, next) => {
+  const githubProjects = await github.getRepos(ctx.state.user.github.access)
   .map((repo) => repo.github.id)
 
   const databaseProjects = await Project.find({
@@ -53,7 +53,7 @@ route.get('/dashboard', policy.isRole('beta'), policy.isAgreement, async (ctx, n
  * GET /reviews
  * Shows all the outstanding reviews
  */
-route.get('/reviews', policy.isRole('review'), policy.isAgreement, async (ctx, next) => {
+route.get('/reviews', policy.isRole('REVIEW'), policy.isAgreement, async (ctx, next) => {
   const cycles = await Cycle.find({
     type: 'RELEASE',
     _status: 'REVIEW'
@@ -73,7 +73,7 @@ route.get('/reviews', policy.isRole('review'), policy.isAgreement, async (ctx, n
  * GET /beta
  * Shows a beta signup page
  */
-route.get('/beta', policy.isRole('user'), async (ctx, next) => {
+route.get('/beta', policy.isRole('USER'), async (ctx, next) => {
   ctx.state.title = 'Beta'
 
   if (policy.ifRole(ctx.state.user, 'beta')) {
@@ -91,7 +91,7 @@ route.get('/beta', policy.isRole('user'), async (ctx, next) => {
  * POST /beta
  * Ensures user's email is set for beta
  */
-route.post('/beta', policy.isRole('user'), async (ctx, next) => {
+route.post('/beta', policy.isRole('USER'), async (ctx, next) => {
   ctx.state.title = 'Beta'
 
   if (typeof ctx.request.body.email !== 'string') {

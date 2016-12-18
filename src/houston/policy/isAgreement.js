@@ -14,12 +14,12 @@
  * @returns {Void} - runs next()
  */
 export default (ctx, next) => {
-  if (!ctx.isAuthenticated() || ctx.user == null) {
+  if (!ctx.isAuthenticated() || ctx.state.user == null) {
     ctx.session.originalUrl = ctx.request.url
     return ctx.redirect('/auth/github')
   }
 
-  if (ctx.user.notify.agreement === false) {
+  if (ctx.state.user.notify.agreement === false) {
     return next()
   }
 
