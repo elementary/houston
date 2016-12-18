@@ -24,7 +24,7 @@ test('returns an accurate function', (t) => {
 
   t.notThrows(new Promise((resolve, reject) => {
     one({
-      user: { right: 'USER' },
+      state: { user: { right: 'USER' } },
       isAuthenticated: () => true
     }, () => resolve())
   }))
@@ -39,7 +39,7 @@ test('does not allow invalid users', (t) => {
 
   t.throws(new Promise((resolve, reject) => {
     one({
-      user: { right: 'USER' },
+      state: { user: { right: 'USER' } },
       isAuthenticated: () => true
     }, () => resolve())
   }))
