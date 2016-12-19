@@ -17,11 +17,15 @@ const route = new Router({
 
 // Checks for project existance in database when a payment paramiter is in url
 route.param('project', async (n, ctx, next) => {
-  let name = 'Unknown'
+  let name = null
   try {
     name = nameify(n)
   } catch (err) {
-    throw new APIError.FromParameter(400, 'Invalid Project Name', 'project')
+    throw new APIError(400, 'Invalid Project Name')
+  }
+
+  if (name == null) {
+    throw new APIError(400, 'Invalid Project Name')
   }
 
   ctx.project = await Project.findOne({ name })
