@@ -120,7 +120,7 @@ app.use(async (ctx, next) => {
   ]
 
   try {
-    if (/\S*/.test(ctx.request.rawBody) === false) {
+    if (/\S/.test(ctx.request.rawBody)) {
       if (ctx.request.is(jsonTypes)) {
         ctx.request.body = JSON.parse(ctx.request.rawBody)
       } else if (ctx.request.is(formTypes)) {
