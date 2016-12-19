@@ -11,6 +11,7 @@ import Router from 'koa-router'
 
 import APIError from './error'
 
+import payment from './payment'
 import popularity from './popularity'
 import projects from './projects'
 
@@ -76,6 +77,7 @@ route.use((ctx, next) => {
 })
 
 // Load all api paths here
+route.use(payment.routes(), payment.allowedMethods())
 route.use(popularity.routes(), popularity.allowedMethods())
 route.use(projects.routes(), projects.allowedMethods())
 
