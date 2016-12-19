@@ -9,10 +9,29 @@ import Router from 'koa-router'
 
 import { nameify } from './helpers'
 import APIError from './error'
+import config from 'lib/config'
+import Log from 'lib/log'
 import Project from 'houston/model/project'
 
+const log = new Log('controller:api:payment')
 const route = new Router({
   prefix: '/payment'
+})
+
+// Checks that stripe configuration is enabled for any payment endpoint
+route.all('*', (ctx, next) => {
+  if (
+    config.stripe === false ||
+    config.stripe.client === false ||
+    config.stripe.secret === false ||
+    config.stripe.public === false
+  ) {
+    log.debug('Received a request while disabled. Returning 503')
+
+    throw new APIError(503, 'Service Unavailable')
+  }
+
+  return next()
 })
 
 // Checks for project existance in database when a payment paramiter is in url
