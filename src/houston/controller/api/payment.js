@@ -145,9 +145,8 @@ route.post('/:project', async (ctx) => {
     return
   }
 
-  let res = null
   try {
-    res = await stripe.postCharge(ctx.project.stripe.id, token, amount, currency, `Payment for ${ctx.project.name}`)
+    await stripe.postCharge(ctx.project.stripe.id, token, amount, currency, `Payment for ${ctx.project.name}`)
   } catch (err) {
     // TODO: error message compairing is bad. Switch this to a specific code or something
     if (err instanceof stripe.StripeError && err.message.indexOf('Expired token') !== -1) {
@@ -166,7 +165,7 @@ route.post('/:project', async (ctx) => {
     data: {
       name: ctx.project.name,
       key: ctx.project.stripe.public,
-      amount: res['amount']
+      amount
     }
   }
 })

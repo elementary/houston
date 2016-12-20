@@ -152,13 +152,18 @@ export function getCut (amount) {
  * @param {String} [description] - an optional description to attach to the charge
  *
  * @throws {StripeError} - when unable to create charge
- * @returns {Object} - raw Stripe response after the charge
+ * @returns {String} - Stripe charge ID
  */
 export function postCharge (account, token, amount, currency, description) {
   paramAssert(account, 'string', 'postCharge', 'account')
   paramAssert(token, 'string', 'postCharge', 'token')
   paramAssert(amount, 'number', 'postCharge', 'amount')
   paramAssert(currency, 'string', 'postCharge', 'currency')
+
+  if (!config.stripe || !config.stripe.client || !config.stripe.secret || !config.stripe.public) {
+    log.debug('Config prohibits posting to Stripe. Not posting charge')
+    return Promise.resolve('')
+  }
 
   if (account.startsWith('acct_') === false) {
     throw new StripeError('Invalid destination for postCharge')
@@ -187,7 +192,7 @@ export function postCharge (account, token, amount, currency, description) {
     description,
     source: token
   })
-  .then((res) => res.body)
+  .then((res) => res.body.id)
   .catch((err, res) => {
     throw errorCheck(err, res, 'postCharge')
   })
