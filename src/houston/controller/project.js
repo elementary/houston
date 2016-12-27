@@ -21,7 +21,7 @@ const route = new Router({
  *
  * @param {String} project - project name
  */
-route.get('/cycle', async (ctx, next) => {
+route.get('/cycle', policy.isRole('BETA'), policy.isAgreement, async (ctx, next) => {
   const project = await Project.findOne({
     name: ctx.params.project
   })
@@ -53,7 +53,7 @@ route.get('/cycle', async (ctx, next) => {
  * @param {String} project - project name
  * @param {String} fate - yes or no approval for latest release review
  */
-route.get('/review/:fate', policy.isRole('review'), async (ctx, next) => {
+route.get('/review/:fate', policy.isRole('REVIEW'), async (ctx, next) => {
   ctx.project = await Project.findOne({
     name: ctx.params.project
   }).exec()
