@@ -30,6 +30,13 @@ module.exports.github = {
   hook: false
 }
 
+// https://dashboard.stripe.com/account/apikeys
+module.exports.stripe = {
+  client: 'ca_189s189v1s8d1v89s1dv91sd9vw4ef84',
+  secret: 'sk_test_hF23f23ra42cru8902m3umSN',
+  public: 'pk_test_c32j0239j9tg8902j3f90238'
+}
+
 // GitHub identifiers for admin, reviewer, and beta groups
 module.exports.rights = {
   beta: 'elementary',

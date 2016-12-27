@@ -30,13 +30,14 @@ route.get('', (ctx) => {
  * GET /dashboard
  * Shows all projects
  */
-route.get('/dashboard', policy.isRole('beta'), async (ctx, next) => {
-  const githubProjects = await github.getRepos(ctx.user.github.access)
+route.get('/dashboard', policy.isRole('BETA'), policy.isAgreement, async (ctx, next) => {
+  const githubProjects = await github.getRepos(ctx.state.user.github.access)
   .map((repo) => repo.github.id)
 
   const databaseProjects = await Project.find({
     'github.id': { $in: githubProjects }
   })
+  .populate('stripe.user')
 
   const projects = await Promise.resolve(databaseProjects)
   .map(async (project) => {
@@ -52,13 +53,18 @@ route.get('/dashboard', policy.isRole('beta'), async (ctx, next) => {
  * GET /reviews
  * Shows all the outstanding reviews
  */
-route.get('/reviews', policy.isRole('review'), async (ctx, next) => {
+route.get('/reviews', policy.isRole('REVIEW'), policy.isAgreement, async (ctx, next) => {
   const cycles = await Cycle.find({
     type: 'RELEASE',
     _status: 'REVIEW'
   })
   .populate('project')
-  .exec()
+
+  // We can manually set the project status instead of calling the DB again
+  cycles.map((cycle) => {
+    cycle.project.status = 'REVIEW'
+    return cycle
+  })
 
   return ctx.render('review', { title: 'Reviews', cycles })
 })
@@ -67,7 +73,7 @@ route.get('/reviews', policy.isRole('review'), async (ctx, next) => {
  * GET /beta
  * Shows a beta signup page
  */
-route.get('/beta', policy.isRole('user'), async (ctx, next) => {
+route.get('/beta', policy.isRole('USER'), async (ctx, next) => {
   ctx.state.title = 'Beta'
 
   if (policy.ifRole(ctx.state.user, 'beta')) {
@@ -76,7 +82,8 @@ route.get('/beta', policy.isRole('user'), async (ctx, next) => {
 
   return ctx.render('beta/form', {
     email: ctx.state.user.email,
-    isBeta: ctx.state.user.notify.beta
+    isBeta: ctx.state.user.notify.beta,
+    hideUser: true
   })
 })
 
@@ -84,7 +91,7 @@ route.get('/beta', policy.isRole('user'), async (ctx, next) => {
  * POST /beta
  * Ensures user's email is set for beta
  */
-route.post('/beta', policy.isRole('user'), async (ctx, next) => {
+route.post('/beta', policy.isRole('USER'), async (ctx, next) => {
   ctx.state.title = 'Beta'
 
   if (typeof ctx.request.body.email !== 'string') {
@@ -93,7 +100,8 @@ route.post('/beta', policy.isRole('user'), async (ctx, next) => {
     ctx.status = 406
     return ctx.render('beta/form', {
       email: ctx.state.user.email,
-      isBeta: ctx.state.user.notify.beta
+      isBeta: ctx.state.user.notify.beta,
+      hideUser: true
     })
   }
 
@@ -108,7 +116,8 @@ route.post('/beta', policy.isRole('user'), async (ctx, next) => {
     return ctx.render('beta/form', {
       email,
       isBeta: ctx.state.user.notify.beta,
-      error: 'Invalid email address'
+      error: 'Invalid email address',
+      hideUser: true
     })
   }
 
@@ -119,7 +128,8 @@ route.post('/beta', policy.isRole('user'), async (ctx, next) => {
 
   return ctx.render('beta/form', {
     email,
-    isBeta: true
+    isBeta: true,
+    hideUser: true
   })
 })
 
