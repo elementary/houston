@@ -136,5 +136,6 @@ router.get('/', passport.authenticate('github', {
 router.get('/callback', passport.authenticate('github'), (ctx, next) => {
   const path = ctx.session.originalUrl || '/dashboard'
   ctx.session.originalUrl = null
+
   return ctx.redirect(path)
 })
