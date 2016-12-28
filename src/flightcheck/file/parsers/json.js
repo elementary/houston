@@ -1,5 +1,5 @@
 /**
- * flightcheck/parsers/json.js
+ * flightcheck/file/parsers/json.js
  * Probably the smallest file you will see in this project
  *
  * @exports {Function} read - reads a JSON string

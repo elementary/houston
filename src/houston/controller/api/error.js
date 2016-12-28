@@ -7,8 +7,6 @@
  * @exports {APIError} default - A error helper class to be used in /api/ routes
  */
 
-import config from 'lib/config'
-
 /**
  * APIError
  * A error helper class to be used in /api/ routes
@@ -37,14 +35,6 @@ class APIError extends Error {
     this.title = title
     this.detail = detail
     this.source = null
-
-    this.meta = {
-      time: new Date(),
-      version: config.houston.version,
-      environment: config.env
-    }
-
-    if (config.houston.commit !== '.gitless') this.meta['commit'] = config.houston.commit
   }
 
   /**
@@ -104,14 +94,12 @@ class APIError extends Error {
    * @returns {Object} - the error as defined by JSON API
    */
   toAPI () {
-    const output = {
-      status: this.status,
-      title: this.title,
-      meta: this.meta
-    }
+    const output = {}
 
     if (this.id != null) output['id'] = this.id
     if (this.code != null) output['code'] = this.code
+    if (this.status != null) output['status'] = this.status
+    if (this.title != null) output['title'] = this.title
     if (this.detail != null) output['detail'] = this.detail
     if (this.source != null) output['source'] = this.source
 
