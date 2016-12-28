@@ -1,5 +1,5 @@
 /**
- * flightcheck/parsers/ini.js
+ * flightcheck/file/parsers/ini.js
  * Uses ini package for parsing files
  *
  * @exports {Function} read - reads a ini string

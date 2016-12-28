@@ -1,5 +1,5 @@
 /**
- * flightcheck/parsers/colon.js
+ * flightcheck/file/parsers/colon.js
  * Parses colon seperated lists like the Debian control file
  *
  * @exports {Function} read - reads a colon string

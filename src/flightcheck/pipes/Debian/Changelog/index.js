@@ -45,7 +45,7 @@ export default class DebianChangelog extends Pipe {
    */
   async code (p = 'repository/debian', d = 'xenial') {
     const changelogPath = path.join(p, 'changelog')
-    const file = await this.file(changelogPath, 'raw')
+    const file = await this.file(changelogPath)
 
     if (this.pipeline.build.changelog.length !== 0) {
       this.data.changelog = this.pipeline.build.changelog
