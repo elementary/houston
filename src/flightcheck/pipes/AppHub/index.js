@@ -53,7 +53,7 @@ export default class AppHub extends Pipe {
    */
   async code (p = 'repository') {
     const apphubPath = path.join(p, '.apphub')
-    const file = await this.file(apphubPath, 'json')
+    const file = await this.parsable(apphubPath, 'json')
 
     if (!await file.exists()) {
       return this.log('info', 'AppHub/existance.md')
@@ -61,7 +61,7 @@ export default class AppHub extends Pipe {
 
     let contents = null
     try {
-      contents = await file.read()
+      contents = await file.parse()
     } catch (e) {
       return this.log('error', 'AppHub/parse.md', e)
     }

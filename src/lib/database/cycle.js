@@ -1,5 +1,5 @@
 /**
- * houston/model/cycle.js
+ * lib/database/cycle.js
  * Mongoose schema for cycles
  *
  * @exports {Object} - cycle database model
@@ -9,7 +9,7 @@
 import semver from 'semver'
 
 import * as atc from 'lib/atc'
-import db from 'lib/database'
+import db from './connection'
 
 const sender = new atc.Sender('cycle')
 

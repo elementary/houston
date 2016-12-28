@@ -1,12 +1,12 @@
 /**
- * houston/model/user.js
+ * lib/database/user.js
  * Mongoose modal and schema for user accounts
  *
  * @exports {Object} schema - user database schema
  * @exports {Object} default - user database model
  */
 
-import db from 'lib/database'
+import db from './connection'
 
 // AGREEMENTDATE is the date the current TOS was created
 const AGREEMENTDATE = new Date(2016, 12, 8)

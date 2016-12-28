@@ -12,7 +12,7 @@ import semver from 'semver'
 import * as github from 'service/github'
 import config from 'lib/config'
 import Log from 'lib/log'
-import Project from 'houston/model/project'
+import Project from 'lib/database/project'
 
 const log = new Log('controller:hook:github')
 const route = new Router({
