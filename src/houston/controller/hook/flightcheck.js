@@ -4,9 +4,9 @@
  */
 
 import * as atc from 'lib/atc'
-import Cycle from 'houston/model/cycle'
+import Cycle from 'lib/database/cycle'
 import Log from 'lib/log'
-import Project from 'houston/model/project'
+import Project from 'lib/database/project'
 
 const log = new Log('controller:hook:flightcheck')
 const worker = new atc.Worker('cycle')

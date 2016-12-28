@@ -12,7 +12,7 @@ import Router from 'koa-router'
 import * as github from './github'
 import * as stripe from './stripe'
 import Log from 'lib/log'
-import User from 'houston/model/user'
+import User from 'lib/database/user'
 
 const log = new Log('passport')
 
@@ -39,12 +39,6 @@ export function setup (server) {
 
   server.use(passport.initialize())
   server.use(passport.session())
-
-  server.use(async (ctx, next) => {
-    ctx.state.user = (ctx.passport.user != null) ? ctx.passport.user : null
-    ctx.user = (ctx.passport.user != null) ? ctx.passport.user : null
-    await next()
-  })
 
   log.debug('Passport setup complete')
 }

@@ -1,5 +1,5 @@
 /**
- * houston/model/release.js
+ * lib/database/release.js
  * Mongoose schema for cycles
  *
  * @exports {Object} - Houston database schema
@@ -8,7 +8,7 @@
 import semver from 'semver'
 
 import * as dotNotation from 'lib/helpers/dotNotation'
-import db from 'lib/database'
+import db from './connection'
 
 /**
  * @param {String} version -semver version of release

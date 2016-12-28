@@ -16,7 +16,7 @@ import Router from 'koa-router'
 import * as policy from 'houston/policy'
 import config from 'lib/config'
 import Log from 'lib/log'
-import Project from 'houston/model/project'
+import Project from 'lib/database/project'
 
 const log = new Log('passport:stripe')
 
@@ -44,7 +44,7 @@ router.get('/callback', policy.isRole('beta'), async (ctx, next) => {
     log.debug('Stripe oauth callback on a mysterious project')
   }
 
-  if (!policy.ifMember(project, ctx.user)) {
+  if (!policy.ifMember(project, ctx.state.user)) {
     throw new ctx.Mistake(403, 'You do not have access to this project')
   }
 
@@ -75,7 +75,7 @@ router.get('/callback', policy.isRole('beta'), async (ctx, next) => {
 
   await project.update({
     'stripe.enabled': true,
-    'stripe.user': ctx.user._id,
+    'stripe.user': ctx.state.user._id,
     'stripe.id': data.results['stripe_user_id'],
     'stripe.access': data.access,
     'stripe.refresh': data.refresh,
@@ -100,7 +100,7 @@ router.get('/enable/:project', policy.isRole('beta'), async (ctx, next) => {
     throw new ctx.Mistake(404, 'Project not found')
   }
 
-  if (!policy.ifMember(project, ctx.user)) {
+  if (!policy.ifMember(project, ctx.state.user)) {
     throw new ctx.Mistake(403, 'You do not have access to this project')
   }
 
@@ -117,10 +117,10 @@ router.get('/enable/:project', policy.isRole('beta'), async (ctx, next) => {
     scope: ['read_write'],
     always_prompt: true,
 
-    'stripe_user[email]': ctx.user.email,
+    'stripe_user[email]': ctx.state.user.email,
     'stripe_user[physical_product]': false,
     'stripe_user[product_category]': 'software',
-    'stripe_user[url]': `https://github.com/${ctx.user.username}`
+    'stripe_user[url]': `https://github.com/${ctx.state.user.username}`
   })
 
   return ctx.redirect(authUrl)
@@ -141,7 +141,7 @@ router.get('/disable/:project', policy.isRole('beta'), async (ctx, next) => {
     throw new ctx.Mistake(404, 'Project not found')
   }
 
-  if (!policy.ifMember(project, ctx.user)) {
+  if (!policy.ifMember(project, ctx.state.user)) {
     throw new ctx.Mistake(403, 'You do not have access to this project')
   }
 

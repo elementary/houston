@@ -24,6 +24,7 @@ import controllers from './controller'
 import db from 'lib/database'
 import Log from 'lib/log'
 import Mistake from 'lib/mistake'
+import PermError from './policy/error'
 
 const app = new Koa()
 const log = new Log('server')
@@ -66,18 +67,11 @@ app.use(async (ctx, next) => {
 })
 
 // Error pages
-// eslint-disable-next-line consistent-return
 app.use(async (ctx, next) => {
   try {
     await next()
   } catch (error) {
     ctx.app.emit('error', error, ctx)
-
-    // Because the only difference between a permission error and a beta error
-    // is the wording. I regret nothing about this implementation.
-    if (error.status === 403 && error.message.toLowerCase().indexOf('beta') !== 0) {
-      return ctx.redirect('/beta')
-    }
 
     const pkg = {
       status: 500,
@@ -85,17 +79,32 @@ app.use(async (ctx, next) => {
       title: 'Houston has encountered an error'
     }
 
-    if (error.mistake && typeof error.status === 'number') {
-      pkg.status = error.status
+    if (error instanceof PermError) {
+      if (error.code === 'PERMERRRGT' && error.user.right === 'USER') {
+        return ctx.redirect('/beta')
+      }
+
+      if (error.code === 'PERMERRAGR') {
+        return ctx.redirect('/agreement')
+      }
+
+      pkg.status = 403
+      if (error.code === 'PERMERRACC') {
+        pkg.title = 'You do not have sufficient permission on the third party service'
+      } else {
+        pkg.title = 'You do not have sufficient permission'
+      }
     }
 
-    if (error.expose || app.env === 'development') {
-      pkg.title = error.message || 'Houston has encountered an error'
+    if (error instanceof Mistake) {
+      pkg.status = error.status || 500
+
+      if (error.expose || config.env === 'development') {
+        pkg.title = error.message
+      }
     }
 
-    if (app.env === 'development') {
-      pkg.detail = error.stack
-    }
+    if (config.env === 'development') pkg.detail = error.stack
 
     ctx.status = pkg.status
     return ctx.render('error', { error: pkg })
@@ -106,7 +115,12 @@ app.use(async (ctx, next) => {
 // body object, making raw body hashing impossible. FFS
 // @see https://github.com/koajs/bodyparser/blob/master/index.js
 app.use(async (ctx, next) => {
-  ctx.request.rawBody = await rawBody(ctx.req).then((buf) => buf.toString())
+  ctx.request.rawBody = await rawBody(ctx.req, {
+    length: ctx.req.headers['content-length'],
+    limit: '1mb'
+  })
+  .then((buf) => buf.toString())
+  .catch((err) => { throw new Mistake(500, err.message) })
 
   const jsonTypes = [
     'application/json',
@@ -120,10 +134,12 @@ app.use(async (ctx, next) => {
   ]
 
   try {
-    if (ctx.request.is(jsonTypes)) {
-      ctx.request.body = JSON.parse(ctx.request.rawBody)
-    } else if (ctx.request.is(formTypes)) {
-      ctx.request.body = qs.parse(ctx.request.rawBody)
+    if (/\S/.test(ctx.request.rawBody)) {
+      if (ctx.request.is(jsonTypes)) {
+        ctx.request.body = JSON.parse(ctx.request.rawBody)
+      } else if (ctx.request.is(formTypes)) {
+        ctx.request.body = qs.parse(ctx.request.rawBody)
+      }
     }
   } catch (err) {
     log.error('Unable to parse body request')
@@ -158,27 +174,27 @@ app.use((ctx) => {
 })
 
 // Error logging
-app.on('error', async (error, ctx, next) => {
+app.on('error', async (error, ctx) => {
   if (app.env === 'test') return
 
-  // Sentry error logging
-  app.on('error', (err) => log.report(err))
-
-  if (/4.*/.test(error.status)) {
-    log.debug(`${ctx.method} ${ctx.status} ${ctx.url} |> ${error.message}`)
-  } else {
-    log.error(error)
-  }
-
-  try {
-    await next()
-  } catch (err) {
-    ctx.status = 500
-
-    // TODO: add server monkey email address for emergency dispatching
-    ctx.body = "Houston has failed epically. But don't worry, our server monkey has been dispatched"
+  if (error instanceof PermError) {
+    log.debug(error.toString())
     return
   }
+
+  if (error instanceof Mistake) {
+    if (error.status[0] >= 5) {
+      log.error(error)
+      log.report(error)
+    } else {
+      log.debug(error)
+    }
+
+    return
+  }
+
+  log.error(error)
+  log.report(error)
 })
 
 // Launching server

@@ -1,5 +1,5 @@
 /**
- * houston/model/project.js
+ * lib/database/project.js
  * Mongoose model and schema for projects
  *
  * @exports {Object} - project database model
@@ -9,7 +9,7 @@
 import semver from 'semver'
 
 import * as github from 'service/github'
-import db from 'lib/database'
+import db from './connection'
 import releaseSchema from './release'
 
 /**

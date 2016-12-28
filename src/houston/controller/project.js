@@ -9,7 +9,7 @@ import Router from 'koa-router'
 
 import * as aptly from 'houston/service/aptly'
 import * as policy from 'houston/policy'
-import Project from 'houston/model/project'
+import Project from 'lib/database/project'
 
 const route = new Router({
   prefix: '/project/:project'
@@ -21,7 +21,7 @@ const route = new Router({
  *
  * @param {String} project - project name
  */
-route.get('/cycle', async (ctx, next) => {
+route.get('/cycle', policy.isRole('BETA'), policy.isAgreement, async (ctx, next) => {
   const project = await Project.findOne({
     name: ctx.params.project
   })
@@ -30,7 +30,7 @@ route.get('/cycle', async (ctx, next) => {
     throw new ctx.Mistake(404, 'Project not found')
   }
 
-  if (!policy.ifMember(project, ctx.user)) {
+  if (!policy.ifMember(project, ctx.state.user)) {
     throw new ctx.Mistake(403, 'You do not have permission to cycle this project')
   }
 
@@ -53,7 +53,7 @@ route.get('/cycle', async (ctx, next) => {
  * @param {String} project - project name
  * @param {String} fate - yes or no approval for latest release review
  */
-route.get('/review/:fate', policy.isRole('review'), async (ctx, next) => {
+route.get('/review/:fate', policy.isRole('REVIEW'), async (ctx, next) => {
   ctx.project = await Project.findOne({
     name: ctx.params.project
   }).exec()

@@ -1,5 +1,5 @@
 /**
- * flightcheck/parsers/index.js
+ * flightcheck/file/parsers/index.js
  * Index for all avalible parses
  *
  * @exports {Object} colon - Parses colon seperated lists like the Debian control file

@@ -10,7 +10,7 @@ import Router from 'koa-router'
 
 import * as policy from 'houston/policy'
 import db from 'lib/database'
-import Project from 'houston/model/project'
+import Project from 'lib/database/project'
 
 const route = new Router({
   prefix: '/projects'
@@ -51,7 +51,7 @@ route.param('pId', async (id, ctx, next) => {
       return
     }
 
-    const permission = await policy.ifMember(ctx.project, ctx.user)
+    const permission = await policy.ifMember(ctx.project, ctx.state.user)
 
     if (!permission) {
       ctx.status = 403

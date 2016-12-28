@@ -1,38 +1,70 @@
 /**
  * entry.js
- * Simple wrapper for babel
+ * Simple wrapper for babel and CLI commands
  */
 
-import path from 'path'
+// Disable eslint no-console rule so everything looks like a normal cli program
+/* eslint-disable no-console */
 
+// Polyfill all of the new and fun javascript features for lesser versions
+// TODO: remove the need for polyfill
 require('babel-polyfill')
 
 // The code forced me to overwrite native functions. I'm sorry
+// TODO: move all promise logic to async native, to remove the need for bluebird
+// @see https://github.com/elementary/houston/issues/189
 global.Promise = require('bluebird')
 
-// Find the script we want run
-var currentIndex = -1
-for (var i = 0; i < process.argv.length; i++) {
-  var stringI = process.argv[i].indexOf(path.basename(__filename))
-  if (stringI >= 0) {
-    currentIndex = i
-  }
-}
+import program from 'commander'
 
-if (currentIndex < 0) {
-  // eslint-disable-next-line no-console
-  console.error("You probably forgot to run entry with the file ending 'entry.js'")
-  throw new Error('could not find entry.js')
-}
+import config from 'lib/config'
+import Pipeline from 'flightcheck/pipeline'
 
-var script = process.argv[currentIndex + 1]
+// TODO: allow options for port and other common config options
+program
+  .version(config.houston.version)
 
-if (script === 'flightcheck') {
-  require('./flightcheck')
-} else if (script === 'houston') {
-  require('./houston')
-} else if (script === 'strongback') {
-  require('./strongback')
-} else {
-  require('../test')
+program
+  .command('houston')
+  .description('starts the houston web server')
+  .action(() => {
+    require('./houston')
+  })
+
+program
+  .command('flightcheck')
+  .description('starts flightcheck to listen for requests from houston')
+  .action(() => {
+    require('./flightcheck/houston')
+  })
+
+program
+  .command('build <repo> <tag> [auth]')
+  .description('runs a single build with flightcheck')
+  .action((repo, tag, auth, opt) => {
+    if (opt == null) {
+      opt = auth
+      auth = null
+    }
+
+    if (repo == null || tag == null) {
+      program.help()
+      process.exit(1)
+    }
+
+    const pipeline = new Pipeline({ repo, tag, auth })
+
+    pipeline.start()
+    .catch((err) => {
+      console.error(err)
+      process.exit(2)
+    })
+  })
+
+program
+  .parse(process.argv)
+
+if (!program.args.length) {
+  program.help()
+  process.exit(1)
 }

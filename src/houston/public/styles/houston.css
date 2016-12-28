@@ -93,3 +93,12 @@ nav#secondary {
     margin: 0;
     padding: 8px 16px;
 }
+
+.scrollbox {
+    overflow-y: scroll;
+    max-height: 70vh;
+}
+
+.two-thirds.action-area {
+    text-align: right;
+}

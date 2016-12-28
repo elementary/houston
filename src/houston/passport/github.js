@@ -13,7 +13,7 @@ import Router from 'koa-router'
 import config from 'lib/config'
 import Log from 'lib/log'
 import request from 'lib/request'
-import User from 'houston/model/user'
+import User from 'lib/database/user'
 
 const log = new Log('passport:github')
 
@@ -136,5 +136,6 @@ router.get('/', passport.authenticate('github', {
 router.get('/callback', passport.authenticate('github'), (ctx, next) => {
   const path = ctx.session.originalUrl || '/dashboard'
   ctx.session.originalUrl = null
+
   return ctx.redirect(path)
 })

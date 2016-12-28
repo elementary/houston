@@ -8,9 +8,9 @@
 import { getPermission } from 'service/github'
 import config from 'lib/config'
 import Log from 'lib/log'
-import Mistake from 'lib/mistake'
+import PermError from './error'
 
-const log = new Log('policy')
+const log = new Log('policy:ifMember')
 
 /**
  * Checks user rights against GitHub
@@ -21,14 +21,16 @@ const log = new Log('policy')
  */
 export default function (project, user) {
   if (project.github == null) {
-    throw new Mistake(500, 'Project has no github data for ifMember check')
+    log.warn(`${project.name} has no GitHub data to authenticate against. Denying access.`)
+    throw new PermError.FromAccess(user)
   }
   if (user.github == null) {
-    throw new Mistake(500, 'User has no github data for ifMember check')
+    log.warn(`${user.username} has no GitHub data to authenticate against. Denying access.`)
+    throw new PermError.FromAccess(user)
   }
 
   if (!config.rights) {
-    log.debug(`User rights disabled, letting ${user.username} access ${project.name} section`)
+    log.debug(`User rights disabled, allowing ${user.username} to access ${project.name} project`)
     return true
   }
 
