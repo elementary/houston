@@ -61,7 +61,7 @@ app.use(async (ctx, next) => {
   ctx.state.config = config
   ctx.state.helper = helpers
 
-  ctx.state.title = 'Houston'
+  ctx.state.title = 'Developer'
   await next()
 })
 
@@ -106,7 +106,12 @@ app.use(async (ctx, next) => {
 // body object, making raw body hashing impossible. FFS
 // @see https://github.com/koajs/bodyparser/blob/master/index.js
 app.use(async (ctx, next) => {
-  ctx.request.rawBody = await rawBody(ctx.req).then((buf) => buf.toString())
+  ctx.request.rawBody = await rawBody(ctx.req, {
+    length: this.req.headers['content-length'],
+    limit: '1mb'
+  })
+  .then((buf) => buf.toString())
+  .catch((err) => { throw new Mistake(500, err.message) })
 
   const jsonTypes = [
     'application/json',
@@ -120,10 +125,12 @@ app.use(async (ctx, next) => {
   ]
 
   try {
-    if (ctx.request.is(jsonTypes)) {
-      ctx.request.body = JSON.parse(ctx.request.rawBody)
-    } else if (ctx.request.is(formTypes)) {
-      ctx.request.body = qs.parse(ctx.request.rawBody)
+    if (/\S/.test(ctx.request.rawBody)) {
+      if (ctx.request.is(jsonTypes)) {
+        ctx.request.body = JSON.parse(ctx.request.rawBody)
+      } else if (ctx.request.is(formTypes)) {
+        ctx.request.body = qs.parse(ctx.request.rawBody)
+      }
     }
   } catch (err) {
     log.error('Unable to parse body request')
@@ -158,26 +165,14 @@ app.use((ctx) => {
 })
 
 // Error logging
-app.on('error', async (error, ctx, next) => {
+app.on('error', async (error, ctx) => {
   if (app.env === 'test') return
-
-  // Sentry error logging
-  app.on('error', (err) => log.report(err))
 
   if (/4.*/.test(error.status)) {
     log.debug(`${ctx.method} ${ctx.status} ${ctx.url} |> ${error.message}`)
   } else {
     log.error(error)
-  }
-
-  try {
-    await next()
-  } catch (err) {
-    ctx.status = 500
-
-    // TODO: add server monkey email address for emergency dispatching
-    ctx.body = "Houston has failed epically. But don't worry, our server monkey has been dispatched"
-    return
+    log.report(error)
   }
 })
 

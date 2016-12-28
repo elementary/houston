@@ -51,7 +51,7 @@ route.param('pId', async (id, ctx, next) => {
       return
     }
 
-    const permission = await policy.ifMember(ctx.project, ctx.user)
+    const permission = await policy.ifMember(ctx.project, ctx.state.user)
 
     if (!permission) {
       ctx.status = 403

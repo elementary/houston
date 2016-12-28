@@ -21,7 +21,7 @@ export default (role) => {
       return ctx.redirect('/auth/github')
     }
 
-    if (ifRole(ctx.user, role)) return next()
+    if (ifRole(ctx.state.user, role)) return next()
     const possibilities = schema.tree.right.enum
 
     if (role === possibilities.indexOf('BETA')) {
