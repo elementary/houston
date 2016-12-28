@@ -13,9 +13,12 @@ import Promise from 'bluebird'
 
 import * as helpers from 'lib/helpers'
 import config from 'lib/config'
-import File from 'flightcheck/file'
 import Log from 'lib/log'
 import render from 'lib/render'
+
+import File from 'flightcheck/file'
+import Package from 'flightcheck/file/package'
+import Parsable from 'flightcheck/file/parsable'
 
 const fs = Promise.promisifyAll(require('fs'))
 
@@ -135,15 +138,39 @@ export default class Pipe extends events.EventEmitter {
 
   /**
    * file
-   * Returns file as a string
+   * Returns a new File
    *
    * @param {String} p - file path relative to the pipeline directory
-   * @param {String} [type=raw] - Type of parser to use for file
-   * @param {String} [encoding=utf-8] - File encoding to use for the file
    * @returns {File} - new File class for requested file
    */
-  async file (p, type = 'raw', encoding = 'utf-8') {
-    return new File(path.join(this.pipeline.build.dir, p), type, encoding)
+  file (p) {
+    return new File(path.join(this.pipeline.build.dir, p))
+  }
+
+  /**
+   * parsable
+   * Returns a new Parsable
+   *
+   * @param {String} p - file path relative to the pipeline directory
+   * @param {String} t - Parsable file type
+   * @returns {Parsable} - new Parsable class for requested file
+   */
+  parsable (p, t) {
+    return new Parsable(path.join(this.pipeline.build.dir, p), t)
+  }
+
+  /**
+   * package
+   * Returns a new Package
+   *
+   * @param {String} p - Path to the package
+   * @param {String} t - Package type based on extension without the dot (deb)
+   * @param {String} a - Architecture for the package
+   * @param {String} d - Distribution for the package
+   * @returns {Package} - new Package class for requested file
+   */
+  package (p, t, a, d) {
+    return new Package(path.join(this.pipeline.build.dir, p), t, a, d)
   }
 
   /**

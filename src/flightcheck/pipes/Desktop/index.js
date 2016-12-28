@@ -44,10 +44,12 @@ export default class Desktop extends Pipe {
     const desktopPath = path.join(p, desktopName)
     const buildPath = path.join(this.pipeline.build.dir, p)
 
-    const file = await this.file(desktopPath, 'ini')
+    const file = await this.parsable(desktopPath, 'ini')
 
     if (!await file.exists()) {
       return this.log('error', 'Desktop/existance.md', `${this.pipeline.build.name}.desktop`)
+    } else {
+      this.data.desktop = file.parse()
     }
 
     const returned = await this.docker('util', [desktopName], buildPath)

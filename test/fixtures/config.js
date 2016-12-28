@@ -53,7 +53,7 @@ module.exports.socket = {
   private: 'butseriouslydontworryboutitok?ok.goodokbye'
 }
 
-module.exports.log = 'debug'
+module.exports.log = false
 
 module.exports.flightcheck = {
   directory: '/tmp/flightcheck',
