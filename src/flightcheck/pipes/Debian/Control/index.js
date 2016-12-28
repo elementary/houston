@@ -45,7 +45,7 @@ export default class DebianControl extends Pipe {
    */
   async code (p = 'repository/debian') {
     const controlPath = path.join(p, 'control')
-    const file = await this.file(controlPath, 'colon')
+    const file = await this.parsable(controlPath, 'colon')
 
     if (!await file.exists()) {
       return this.log('error', 'Debian/Control/existance.md')
@@ -53,7 +53,7 @@ export default class DebianControl extends Pipe {
 
     let contents = null
     try {
-      contents = await file.read()
+      contents = await file.parse()
     } catch (e) {
       return this.log('error', 'Debian/Control/parse.md', e)
     }
@@ -105,6 +105,6 @@ export default class DebianControl extends Pipe {
     }
 
     this.data.control = lintedControl
-    await file.write(this.data.control)
+    await file.stringify(this.data.control)
   }
 }

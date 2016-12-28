@@ -1,11 +1,11 @@
 /**
- * test/flightcheck/parsers/colon.js
+ * test/flightcheck/file/parsers/colon.js
  * Tests the ability to read and write from a colon seperated file
  */
 
 import test from 'ava'
 
-import * as colon from 'flightcheck/parsers/colon'
+import * as colon from 'flightcheck/file/parsers/colon'
 
 test('can read a file', async (t) => {
   const one = await colon.read(`
