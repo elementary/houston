@@ -11,6 +11,7 @@ import Router from 'koa-router'
 
 import APIError from './error'
 import Log from 'lib/log'
+import PermError from 'houston/policy/error'
 import config from 'lib/config'
 
 import payment from './payment'
@@ -59,6 +60,16 @@ route.use(async (ctx, next) => {
 
     if (err instanceof APIError) {
       apierr = err
+    } else if (err instanceof PermError) {
+      let title = 'You do not have sufficient permission'
+
+      if (err.code === 'PERMERRACC') {
+        title = 'You do not have sufficient permission on the third party service'
+      } else if (err.code === 'PERMERRAGR') {
+        title = 'You need to agree to TOS agreement'
+      }
+
+      apierr = new APIError(403, title)
     } else {
       log.error(`Error while processing API route ${ctx.request.href}`)
       log.error(err)

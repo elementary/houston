@@ -76,7 +76,7 @@ route.get('/reviews', policy.isRole('REVIEW'), policy.isAgreement, async (ctx, n
 route.get('/beta', policy.isRole('USER'), async (ctx, next) => {
   ctx.state.title = 'Beta'
 
-  if (policy.ifRole(ctx.state.user, 'beta')) {
+  if (policy.ifRole(ctx.state.user, 'BETA')) {
     return ctx.render('beta/congratulations')
   }
 
