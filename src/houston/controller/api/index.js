@@ -10,6 +10,7 @@
 import Router from 'koa-router'
 
 import APIError from './error'
+import config from 'lib/config'
 
 import popularity from './popularity'
 import projects from './projects'
@@ -28,6 +29,12 @@ route.use(async (ctx, next) => {
   ctx.type = 'application/vnd.api+json'
 
   if (ctx.body == null) ctx.body = {}
+
+  if (ctx.body['meta'] == null) ctx.body['meta'] = {}
+  if (ctx.body['meta']['date'] == null) ctx.body['meta']['date'] = new Date().toISOString()
+  if (ctx.body['meta']['version'] == null) ctx.body['meta']['version'] = config.houston.version
+  if (ctx.body['meta']['environment'] == null) ctx.body['meta']['environment'] = config.env
+  if (ctx.body['meta']['commit'] == null && config.houston.commit !== '.gitless') ctx.body['meta']['commit'] = config.houston.commit
 
   if (ctx.body['links'] == null) ctx.body['links'] = {}
   if (ctx.body['links']['self'] == null) ctx.body['links']['self'] = ctx.request.href
