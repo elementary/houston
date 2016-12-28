@@ -10,11 +10,14 @@
 import Router from 'koa-router'
 
 import APIError from './error'
+import Log from 'lib/log'
 import config from 'lib/config'
 
+import payment from './payment'
 import popularity from './popularity'
 import projects from './projects'
 
+const log = new Log('controller:api')
 const route = new Router({
   prefix: '/api'
 })
@@ -57,6 +60,12 @@ route.use(async (ctx, next) => {
     if (err instanceof APIError) {
       apierr = err
     } else {
+      log.error(`Error while processing API route ${ctx.request.href}`)
+      log.error(err)
+      log.report(err, {
+        url: ctx.request.href
+      })
+
       apierr = new APIError(500, 'Internal Server Error')
     }
 
@@ -83,6 +92,7 @@ route.use((ctx, next) => {
 })
 
 // Load all api paths here
+route.use(payment.routes(), payment.allowedMethods())
 route.use(popularity.routes(), popularity.allowedMethods())
 route.use(projects.routes(), projects.allowedMethods())
 

@@ -125,10 +125,12 @@ app.use(async (ctx, next) => {
   ]
 
   try {
-    if (ctx.request.is(jsonTypes)) {
-      ctx.request.body = JSON.parse(ctx.request.rawBody)
-    } else if (ctx.request.is(formTypes)) {
-      ctx.request.body = qs.parse(ctx.request.rawBody)
+    if (/\S/.test(ctx.request.rawBody)) {
+      if (ctx.request.is(jsonTypes)) {
+        ctx.request.body = JSON.parse(ctx.request.rawBody)
+      } else if (ctx.request.is(formTypes)) {
+        ctx.request.body = qs.parse(ctx.request.rawBody)
+      }
     }
   } catch (err) {
     log.error('Unable to parse body request')
