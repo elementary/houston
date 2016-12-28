@@ -107,7 +107,7 @@ app.use(async (ctx, next) => {
 // @see https://github.com/koajs/bodyparser/blob/master/index.js
 app.use(async (ctx, next) => {
   ctx.request.rawBody = await rawBody(ctx.req, {
-    length: this.req.headers['content-length'],
+    length: ctx.req.headers['content-length'],
     limit: '1mb'
   })
   .then((buf) => buf.toString())
