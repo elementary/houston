@@ -12,7 +12,7 @@ import * as stripe from 'service/stripe'
 import APIError from './error'
 import config from 'lib/config'
 import Log from 'lib/log'
-import Project from 'houston/model/project'
+import Project from 'lib/database/project'
 
 const log = new Log('controller:api:payment')
 const route = new Router({
