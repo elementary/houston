@@ -1,5 +1,5 @@
 /**
- * flightcheck/parsers/xml.js
+ * flightcheck/file/parsers/xml.js
  * Parses and writes simple xml files.
  *
  * @exports {Function} read - reads a XML string

@@ -1,11 +1,11 @@
 /**
- * test/flightcheck/parsers/xml.js
+ * test/flightcheck/file/parsers/xml.js
  * Tests the ability to read and write from a xml file
  */
 
 import test from 'ava'
 
-import * as xml from 'flightcheck/parsers/xml'
+import * as xml from 'flightcheck/file/parsers/xml'
 
 test('can read a file', async (t) => {
   const one = await xml.read(`
