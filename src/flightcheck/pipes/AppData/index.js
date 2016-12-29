@@ -7,7 +7,6 @@
 
 import path from 'path'
 
-import config from 'lib/config'
 import Log from 'lib/log'
 import Pipe from 'flightcheck/pipes/pipe'
 
@@ -34,7 +33,7 @@ export default class AppData extends Pipe {
     const appdataPath = path.join(p, appdataName)
     const buildPath = path.join(this.pipeline.build.dir, p)
 
-    const file = await this.file(appdataPath, 'xml')
+    const file = await this.parsable(appdataPath, 'xml')
 
     if (!await file.exists()) {
       return this.log('warn', 'AppData/existance.md', `${this.pipeline.build.name}.appdata.xml`)
@@ -57,23 +56,25 @@ export default class AppData extends Pipe {
     }
 
     if (this.pipeline.build.stripe != null) {
-      log.debug('Saving donation url to appstream file')
-      this.data = await file.read()
+      log.debug('Saving AppCenter Stripe key')
+      this.data = await file.parse()
 
-      let i = 0
-      if (this.data['component']['url'] != null) i = this.data['component']['url'].length
+      if (this.data['component']['custom'] == null) this.data['component']['custom'] = {}
+      if (this.data['component']['custom']['value'] == null) this.data['component']['custom']['value'] = []
 
-      this.data['component']['url'][i] = {
-        '_': `${config.server.url}/purchase/${this.pipeline.build.stripe}`,
+      const i = this.data['component']['custom']['value'].length
+
+      this.data['component']['custom']['value'][i] = {
+        '_': this.pipeline.build.stripe,
         '$': {
-          type: 'donation'
+          key: 'x-appcenter-stripe'
         }
       }
 
       try {
-        await file.write(this.data)
+        await file.stringify(this.data)
       } catch (err) {
-        log.warn('Unable to save donation url to AppData')
+        log.warn('Unable to save AppCenter Stripe key to AppData')
         log.warn(err)
         log.report(err, this.pipeline.build)
       }
