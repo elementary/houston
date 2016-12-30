@@ -1,0 +1,102 @@
+/**
+ * telemetry/server.js
+ * Starts a syslog server for nginx to send download statistics
+ *
+ * NOTE: the telemetry server requires a special format for syslog messages:
+ * $remote_addr|$status|$request_filename|$body_bytes_sent|$http_user_agent|$request_time
+ *
+ * @exports {Object} default - a syslog server to call listen on
+ */
+
+import path from 'path'
+import semver from 'semver'
+import syslogd from 'syslogd'
+
+import config from 'lib/config'
+import Log from 'lib/log'
+import Project from 'lib/database/project'
+
+const log = new Log('telemetry')
+
+/**
+ * parseMessage
+ * Splits the nginx syslog message to usable data
+ *
+ * @param {String} message - syslog message
+ *
+ * @returns {Object} - parsed usable data
+ * @returns {String} client - IP address of client
+ * @returns {String} status - Status of the download
+ * @returns {String} path - Full path of downloaded file
+ * @returns {String} file - File name of the file downloaded
+ * @returns {String} ext - File extension
+ * @returns {String} bytes - The amount of bytes sent during download
+ * @returns {String} time - The amount of time it took to download
+ */
+export function parseMessage (message) {
+  const arr = message.msg.split('|')
+
+  return {
+    client: arr[0],
+    status: arr[1],
+    path: arr[2],
+    file: path.basename(arr[2]),
+    ext: path.extname(arr[2]),
+    bytes: arr[3],
+    time: arr[4]
+  }
+}
+
+/**
+ * handleMessage
+ * Handles the Syslog messages sent by the download Server
+ *
+ * TODO: we might want to consider adding an IP origin filter to avoid bad eggs
+ * TODO: add some unique test, probably with client's ip address
+ *
+ * @param {Object} message - syslog message
+ *
+ * @return {Void}
+ */
+export async function handleMessage (message) {
+  const data = parseMessage(message)
+  const [name, version] = data.file.split('_')
+
+  if (data.ext !== '.deb') return
+  if (data.status !== 'OK') return
+
+  if (semver.valid(version) === false) {
+    log.debug('Received invalid semver version')
+  }
+
+  await Project.update({
+    name,
+    'releases.version': version
+  }, {
+    $inc: {
+      'downloads': 1,
+      'releases.$.downloads': 1
+    }
+  })
+
+  log.debug(`Successful download of ${name}#${version}`)
+}
+
+/**
+ * listen
+ * Starts a syslog server to handle nginx logs
+ *
+ * @param {String} [port] - port to listen to
+ *
+ * @return {Void}
+ */
+export function listen (port = config.telemetry.port) {
+  syslogd(handleMessage).listen(port, (err) => {
+    if (err) {
+      log.error('Unable to start telemetry server')
+      throw new Error(err)
+    } else {
+      log.info(`Telemetry server started on port ${port}`)
+    }
+  })
+}

@@ -75,6 +75,7 @@
     "start": "node build/entry.js",
     "flightcheck": "node build/entry.js flightcheck",
     "houston": "node build/entry.js houston",
+    "telemetry": "node build/entry.js telemetry",
     "build": "gulp build",
     "build:watch": "gulp watch",
     "clean": "gulp clean",
