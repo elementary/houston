@@ -32,9 +32,11 @@ import releaseSchema from './release'
  *
  * @property {Object} stripe - all data related to the project's linked stripe account
  * @property {Object} stripe.enabled - the current state of stripe payments for the project
+ * @property {Object} stripe.user - User ID for who last set the oauth info
  * @property {String} stripe.id - stripe id for the account
- * @property {String} stripe.key - a public key for client side stripe actions
- * @property {String} stripe.token - a private key for destructive stripe actions
+ * @property {String} stripe.access - a private key for destructive stripe actions
+ * @property {String} stripe.refresh - refresh key used for oauth when access key is stale
+ * @property {String} stripe.public - a public key for client side stripe actions
  *
  * @property {String} _status - internal status of project in houston
  * @property {Error} mistake - mistake class error if any occured
@@ -304,7 +306,8 @@ schema.methods.createCycle = async function (type) {
     name: this.name,
     version: this.release.latest.version,
     type,
-    changelog: await this.release.latest.createChangelog()
+    changelog: await this.release.latest.createChangelog(),
+    stripe: this.stripe.public
   })
 
   await this.update({ $addToSet: { 'cycles': cycle._id } })
