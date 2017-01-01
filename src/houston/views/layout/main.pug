@@ -39,12 +39,17 @@ html
         ul
           li: a(href="https://elementary.io", class="logomark")
             include /partials/svg-logomark
-          li: a(href="http://blog.elementary.io") Blog
           li: a(href="https://elementary.io/support") Support
-          li: a(href="https://elementary.io/store") Store
-        ul.right
           li: a(href="/") Developer
           li: a(href="https://elementary.io/get-involved") Get Involved
+          li: a(href="https://elementary.io/store") Store
+        ul.right
+            li: a(href="https://www.facebook.com/elementaryos", target="_blank", title="Facebook"): i.fa.fa-facebook
+            li: a(href="https://plus.google.com/+elementary", target="_blank", title="Google+"): i.fa.fa-google-plus
+            li: a(href="https://medium.com/elementaryos", target="_blank", title="Medium"): i.fa.fa-medium
+            li: a(href="https://www.reddit.com/r/elementaryos", target="_blank", title="Reddit"): i.fa.fa-reddit
+            li: a(href="https://elementaryos.stackexchange.com", target="_blank", title="StackExchange"): i.fa.fa-stack-exchange
+            li: a(href="https://twitter.com/elementary", target="_blank", title="Twitter"): i.fa.fa-twitter
 
     if user && !hideUser
       nav#secondary
@@ -76,16 +81,10 @@ html
 
     footer
       div: p Copyright © 2016 elementary LLC.
-        a(href="https://elementary.io/team") Team
-        a(href="https://elementary.io/brand") Brand
-        a(href="https://elementary.io/privacy-policy") Privacy Policy
       ul
-        li: a(href="https://www.facebook.com/elementaryos", target="_blank", title="Facebook"): i.fa.fa-facebook
-        li: a(href="https://plus.google.com/+elementary", target="_blank", title="Google+"): i.fa.fa-google-plus
-        li: a(href="https://medium.com/elementaryos", target="_blank", title="Medium"): i.fa.fa-medium
-        li: a(href="https://www.reddit.com/r/elementaryos", target="_blank", title="Reddit"): i.fa.fa-reddit
-        li: a(href="https://elementaryos.stackexchange.com", target="_blank", title="StackExchange"): i.fa.fa-stack-exchange
-        li: a(href="https://twitter.com/elementary", target="_blank", title="Twitter"): i.fa.fa-twitter
+        li: a(href="https://elementary.io/brand") Brand
+        li: a(href="https://elementary.io/privacy-policy") Privacy Policy
+        li: a(href="https://elementary.io/team") Team
 
       script(type="text/javascript", src="https://cdn.jsdelivr.net/g/jquery")
       script(type="text/javascript", src="/scripts/common.js")
