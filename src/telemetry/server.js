@@ -36,7 +36,7 @@ const server = syslogd(handleMessage)
  * @returns {String} time - The amount of time it took to download
  */
 export function parseMessage (message) {
-  const arr = message.msg.split('|')
+  const arr = message.split('|')
 
   return {
     client: arr[0],
@@ -44,8 +44,8 @@ export function parseMessage (message) {
     path: arr[2],
     file: path.basename(arr[2]),
     ext: path.extname(arr[2]),
-    bytes: arr[3],
-    time: arr[4]
+    bytes: Number(arr[3]),
+    time: Number(arr[5])
   }
 }
 
@@ -61,7 +61,7 @@ export function parseMessage (message) {
  * @return {Void}
  */
 export async function handleMessage (message) {
-  const data = parseMessage(message)
+  const data = parseMessage(message.msg)
   const [name, version] = data.file.split('_')
 
   if (data.ext !== '.deb') return
@@ -81,7 +81,7 @@ export async function handleMessage (message) {
     }
   })
 
-  log.debug(`Successful download of ${name}#${version}`)
+  log.debug(`Added download of ${name}#${version}`)
 }
 
 server.server.on('listening', () => {
