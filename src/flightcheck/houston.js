@@ -40,7 +40,8 @@ worker.register('release', async (param) => {
       name: param.name,
       source: 'github',
       changelog,
-      auth: param.auth
+      auth: param.auth,
+      stripe: param.stripe
     })
   } catch (err) {
     log.error(`Flightcheck received an error while trying to create Pipeline for ${param.id}`)

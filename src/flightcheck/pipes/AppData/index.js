@@ -33,7 +33,7 @@ export default class AppData extends Pipe {
     const appdataPath = path.join(p, appdataName)
     const buildPath = path.join(this.pipeline.build.dir, p)
 
-    const file = await this.file(appdataPath)
+    const file = await this.parsable(appdataPath, 'xml')
 
     if (!await file.exists()) {
       return this.log('warn', 'AppData/existance.md', `${this.pipeline.build.name}.appdata.xml`)
@@ -52,6 +52,31 @@ export default class AppData extends Pipe {
         log.debug(e)
 
         return this.log('warn', 'AppData/invalid.md')
+      }
+    }
+
+    if (this.pipeline.build.stripe != null) {
+      log.debug('Saving AppCenter Stripe key')
+      this.data = await file.parse()
+
+      if (this.data['component']['custom'] == null) this.data['component']['custom'] = {}
+      if (this.data['component']['custom']['value'] == null) this.data['component']['custom']['value'] = []
+
+      const i = this.data['component']['custom']['value'].length
+
+      this.data['component']['custom']['value'][i] = {
+        '_': this.pipeline.build.stripe,
+        '$': {
+          key: 'x-appcenter-stripe'
+        }
+      }
+
+      try {
+        await file.stringify(this.data)
+      } catch (err) {
+        log.warn('Unable to save AppCenter Stripe key to AppData')
+        log.warn(err)
+        log.report(err, this.pipeline.build)
       }
     }
   }
