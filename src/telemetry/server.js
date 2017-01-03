@@ -6,17 +6,19 @@
  * $remote_addr|$status|$request_filename|$body_bytes_sent|$http_user_agent|$request_time
  *
  * @exports {Object} default - a syslog server to call listen on
+ * @exports {Function} parseMessage - Parses a raw syslogd message to usable parts
+ * @exports {Function} handleMessage - Adds package download information to database
  */
 
 import path from 'path'
 import semver from 'semver'
 import syslogd from 'syslogd'
 
-import config from 'lib/config'
 import Log from 'lib/log'
 import Project from 'lib/database/project'
 
 const log = new Log('telemetry')
+const server = syslogd(handleMessage)
 
 /**
  * parseMessage
@@ -82,21 +84,17 @@ export async function handleMessage (message) {
   log.debug(`Successful download of ${name}#${version}`)
 }
 
-/**
- * listen
- * Starts a syslog server to handle nginx logs
- *
- * @param {String} [port] - port to listen to
- *
- * @return {Void}
- */
-export function listen (port = config.telemetry.port) {
-  syslogd(handleMessage).listen(port, (err) => {
-    if (err) {
-      log.error('Unable to start telemetry server')
-      throw new Error(err)
-    } else {
-      log.info(`Telemetry server started on port ${port}`)
-    }
-  })
-}
+server.server.on('listening', () => {
+  log.info(`Listening on ${server.port}`)
+})
+
+server.server.on('error', (err) => {
+  log.error(err)
+  log.report(err)
+})
+
+server.server.on('close', () => {
+  log.debug('Closing')
+})
+
+export default server

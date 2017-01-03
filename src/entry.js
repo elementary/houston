@@ -39,7 +39,14 @@ program
   .description('starts nginx syslog server for download statistics')
   .option('-p, --port <port>', 'Port to listen on', config.telemetry.port)
   .action((opts) => {
-    require('./telemetry/server').listen(opts.port)
+    const telemetry = require('./telemetry/server').default
+
+    telemetry.server.on('error', (err) => {
+      console.error(err)
+      process.exit(1)
+    })
+
+    telemetry.listen(opts.port)
   })
 
 program
