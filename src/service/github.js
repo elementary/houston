@@ -238,7 +238,7 @@ export function castRelease (release) {
  */
 export async function generateJWT (exp = moment().add(1, 'minutes').toDate()) {
   paramAssert(exp.getTime, 'function', 'generateJWT', 'expiration date')
-  paramAssert(config.github.integration.id, 'number', 'generateJWT', 'integration ID')
+  paramAssert(config.get('github.integration.id'), 'number', 'generateJWT', 'integration ID')
 
   const key = await new Promise((resolve, reject) => {
     log.debug('Reading integration key')
@@ -253,7 +253,7 @@ export async function generateJWT (exp = moment().add(1, 'minutes').toDate()) {
   const payload = {
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(exp.getTime() / 1000),
-    iss: config.github.integration.id
+    iss: config.get('github.integration.id')
   }
 
   return new Promise((resolve, reject) => {
@@ -279,7 +279,7 @@ export async function generateJWT (exp = moment().add(1, 'minutes').toDate()) {
  */
 export async function generateToken (inst, user) {
   paramAssert(inst, 'number', 'generateToken', 'installation ID')
-  paramAssert(config.github.integration.id, 'number', 'generateToken', 'integration ID')
+  paramAssert(config.get('github.integration.id'), 'number', 'generateToken', 'integration ID')
 
   const cachedToken = getToken(inst, user)
   if (cachedToken != null) {
@@ -535,7 +535,7 @@ export function getAssets (owner, repo, release, token) {
  * @returns {Object} - raw GitHub response body object
  */
 export function postLabel (owner, repo, token, label) {
-  if (!config.github.post) {
+  if (!config.get('github.post')) {
     log.debug('Config prohibits posting to GitHub. Not posting label')
     return Promise.resolve(label) // like it happened minus the url key
   }
@@ -578,7 +578,7 @@ export function postLabel (owner, repo, token, label) {
  * @returns {Number} - GitHub issue number
  */
 export function postIssue (owner, repo, token, issue) {
-  if (!config.github.post) {
+  if (!config.get('github.post')) {
     log.debug('Config prohibits posting to GitHub. Not posting issue')
     return Promise.resolve(0)
   }
@@ -620,7 +620,7 @@ export function postIssue (owner, repo, token, issue) {
  * @returns {Number} - GitHub asset number
  */
 export async function postFile (owner, repo, release, token, file) {
-  if (!config.github.post) {
+  if (!config.get('github.post')) {
     log.debug('Config prohibits posting to GitHub. Not posting file')
     return 0
   }
