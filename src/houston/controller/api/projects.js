@@ -9,7 +9,7 @@ import semver from 'semver'
 import Router from 'koa-router'
 
 import * as policy from 'houston/policy'
-import db from 'lib/database'
+import db from 'lib/database/connection'
 import Project from 'lib/database/project'
 
 const route = new Router({
