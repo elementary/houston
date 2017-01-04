@@ -33,7 +33,7 @@ export function smartPath (directory, relative = module.parent.filename) {
     return path.resolve(relative, directory)
   }
 
-  return path.resolve(config.houston.root, directory)
+  return path.resolve(config.get('houston.root'), directory)
 }
 
 /**

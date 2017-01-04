@@ -11,7 +11,7 @@ import monq from 'monq'
 
 import config from 'lib/config'
 
-const client = monq(config.database)
+const client = monq(config.get('database'))
 
 /**
  * Worker

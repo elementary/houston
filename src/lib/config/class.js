@@ -40,6 +40,7 @@ export default class Config {
    * @return {Boolean} - true if it exists
    */
   has (key) {
+    if (_.get(this.current, key) == null) return false
     return _.has(this.current, key)
   }
 
@@ -105,6 +106,7 @@ export default class Config {
       this.default('server.port', Number(port))
     }
 
+    this.set('houston.root', alias.resolve.alias['root'])
     this.set('houston.version', pkg.version)
 
     try {
