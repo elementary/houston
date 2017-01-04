@@ -21,7 +21,7 @@ const route = new Router({
 
 // Checks that stripe configuration is enabled for any payment endpoint
 route.all('*', (ctx, next) => {
-  if (config.has('stripe')) {
+  if (!config.true('stripe.post')) {
     log.debug('Received a request while disabled. Returning 503')
 
     throw new APIError(503, 'Service Unavailable')

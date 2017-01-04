@@ -71,7 +71,7 @@ export default class ElementaryAptly extends Pipe {
 
     if (files.length < 1) return
 
-    if (!config.has('aptly.url')) return this.log('debug', 'Elementary/Aptly/disabled.md')
+    if (!config.true('aptly.post')) return this.log('debug', 'Elementary/Aptly/disabled.md')
 
     const apphub = await this.require('AppHub')
 

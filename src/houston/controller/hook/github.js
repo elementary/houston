@@ -72,7 +72,7 @@ const processInstallations = async (installation, additions = [], removals = [])
  * Checks config for GitHub hook enabled
  */
 route.all('/', (ctx, next) => {
-  if (config.has('github.hook')) return next()
+  if (config.true('github.hook')) return next()
 
   log.debug('Received a hook while disabled. Returning 503')
 

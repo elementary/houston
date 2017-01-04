@@ -26,7 +26,7 @@ const dist = 'xenial'
  * @throws {Mistake} - if aptly is currently disabled
  */
 function ensureEnabled () {
-  if (!config.has('aptly.url')) {
+  if (!config.true('aptly.post')) {
     throw new Mistake(503, 'Aptly is currently disabled')
   }
 }

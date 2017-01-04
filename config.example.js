@@ -1,6 +1,7 @@
 /**
  * config.js
- * Stores configuration for all parts of Houston
+ * Stores configuration for all parts of Houston. This file needs to be able to
+ * to be loaded nativly by node. No babel transcoding!
  *
  * @exports {Object} default - Houston configuration
  */
@@ -24,17 +25,20 @@ module.exports.github = {
   },
 
   // Post data to GitHub?
-  post: false,
+  post: true,
 
   // Enable GitHub hooks?
-  hook: false
+  hook: true
 }
 
 // https://dashboard.stripe.com/account/apikeys
 module.exports.stripe = {
   client: 'ca_189s189v1s8d1v89s1dv91sd9vw4ef84',
   secret: 'sk_test_hF23f23ra42cru8902m3umSN',
-  public: 'pk_test_c32j0239j9tg8902j3f90238'
+  public: 'pk_test_c32j0239j9tg8902j3f90238',
+
+  // Post data to Stripe? Enable to allow making payments.
+  post: true
 }
 
 // GitHub identifiers for admin, reviewer, and beta groups
@@ -50,7 +54,10 @@ module.exports.aptly = {
 
   // Repository names
   review: 'review',
-  stable: 'houston'
+  stable: 'houston',
+
+  // Post data to Aptly repository?
+  post: true
 }
 
 module.exports.database = 'mongodb://localhost/houston-dev'
