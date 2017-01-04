@@ -124,7 +124,7 @@ const Log = class {
    * @returns {Void}
    */
   report (err, data) {
-    if (this.sentry != null) {
+    if (this.reporter != null) {
       sentry.captureException(err, data)
     } else {
       this.info('Reporter disabled. Not sending error')
