@@ -88,6 +88,8 @@ const loadConfigOptions = () => {
     missingKeys.forEach((k) => console.error(`  ${k}`))
     process.exit(1)
   }
+
+  config.immutable = true
 }
 
 program
