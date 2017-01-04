@@ -26,7 +26,7 @@ const dist = 'xenial'
  * @throws {Mistake} - if aptly is currently disabled
  */
 function ensureEnabled () {
-  if (!config.aptly || !config.aptly.url) {
+  if (!config.has('aptly.url')) {
     throw new Mistake(503, 'Aptly is currently disabled')
   }
 }
@@ -44,7 +44,7 @@ export function upload (project, version, file) {
   ensureEnabled()
 
   return request
-  .post(`${config.aptly.url}/files`)
+  .post(`${config.get('aptly.url')}/files`)
   .attach('file', file, `${project}_${arch}_${version}.deb`)
   .then((data) => {
     log.debug(`Added ${data.body.length} packages of ${project} to repository`)
@@ -65,7 +65,7 @@ const ingest = (project, version) => {
   ensureEnabled()
 
   return Promise.try(() => {
-    return request.post(`${config.aptly.url}/repos/${config.aptly.review}/file/${project}_${arch}_${version}.deb`)
+    return request.post(`${config.get('aptly.url')}/repos/${config.get('aptly.review')}/file/${project}_${arch}_${version}.deb`)
     .then((data) => data.body.Report.Added)
     .catch((error) => {
       if (error.statusCode === 404) {
@@ -80,7 +80,7 @@ const ingest = (project, version) => {
     log.debug(`Ingested ${data.length} packages of ${project}`)
 
     return request
-    .get(`${config.aptly.url}/repos/${config.aptly.review}/packages`)
+    .get(`${config.get('aptly.url')}/repos/${config.get('aptly.review')}/packages`)
     .query({ q: `${project} (= ${version})` })
     .then((data) => data.body)
   })
@@ -98,7 +98,7 @@ const add = (pkg, repo) => {
   ensureEnabled()
 
   return request
-  .post(`${config.aptly.url}/repos/${repo}/packages`)
+  .post(`${config.get('aptly.url')}/repos/${repo}/packages`)
   .send({
     PackageRefs: pkg
   })
@@ -125,7 +125,7 @@ const remove = (pkg, repo) => {
   ensureEnabled()
 
   return request
-  .delete(`${config.aptly.url}/repos/${repo}/packages`)
+  .delete(`${config.get('aptly.url')}/repos/${repo}/packages`)
   .send({
     PackageRefs: pkg
   })
@@ -171,7 +171,7 @@ const publish = async (repo) => {
   .toString()
 
   await request
-  .post(`${config.aptly.url}/repos/${repo}/snapshots`)
+  .post(`${config.get('aptly.url')}/repos/${repo}/snapshots`)
   .send({
     Name: name,
     Description: 'Automated Houston publish'
@@ -179,7 +179,7 @@ const publish = async (repo) => {
 
   try {
     await request
-    .put(`${config.aptly.url}/publish/${repo}/${dist}`)
+    .put(`${config.get('aptly.url')}/publish/${repo}/${dist}`)
     .send({
       Snapshots: [{
         Component: 'main',
@@ -187,7 +187,7 @@ const publish = async (repo) => {
       }],
       Signing: {
         Batch: true,
-        Passphrase: config.aptly.passphrase
+        Passphrase: config.get('aptly.passphrase')
       }
     })
   } catch (error) {
@@ -217,7 +217,7 @@ export async function review (project, version) {
     return ingest(project, version)
   })
 
-  await publish(config.aptly.review)
+  await publish(config.get('aptly.review'))
 
   return keys
 }
@@ -233,6 +233,6 @@ export async function review (project, version) {
 export function stable (pkg) {
   ensureEnabled()
 
-  return move(pkg, config.aptly.review, config.aptly.stable)
-  .then(() => publish(config.aptly.stable))
+  return move(pkg, config.get('aptly.review'), config.get('aptly.stable'))
+  .then(() => publish(config.get('aptly.stable')))
 }

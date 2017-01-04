@@ -36,9 +36,9 @@ route.use(async (ctx, next) => {
 
   if (ctx.body['meta'] == null) ctx.body['meta'] = {}
   if (ctx.body['meta']['date'] == null) ctx.body['meta']['date'] = new Date().toISOString()
-  if (ctx.body['meta']['version'] == null) ctx.body['meta']['version'] = config.houston.version
-  if (ctx.body['meta']['environment'] == null) ctx.body['meta']['environment'] = config.env
-  if (ctx.body['meta']['commit'] == null && config.houston.commit !== '.gitless') ctx.body['meta']['commit'] = config.houston.commit
+  if (ctx.body['meta']['version'] == null) ctx.body['meta']['version'] = config.get('houston.version')
+  if (ctx.body['meta']['environment'] == null) ctx.body['meta']['environment'] = config.get('env')
+  if (ctx.body['meta']['commit'] == null && config.has('houston.commit')) ctx.body['meta']['commit'] = config.get('houston.commit')
 
   if (ctx.body['links'] == null) ctx.body['links'] = {}
   if (ctx.body['links']['self'] == null) ctx.body['links']['self'] = ctx.request.href

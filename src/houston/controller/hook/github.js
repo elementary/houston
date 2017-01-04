@@ -72,7 +72,7 @@ const processInstallations = async (installation, additions = [], removals = [])
  * Checks config for GitHub hook enabled
  */
 route.all('/', (ctx, next) => {
-  if (config.github.hook) return next()
+  if (config.has('github.hook')) return next()
 
   log.debug('Received a hook while disabled. Returning 503')
 
@@ -86,7 +86,7 @@ route.all('/', (ctx, next) => {
  * Checks for accurate webhook secret
  */
 route.all('/', async (ctx, next) => {
-  if (config.github.integration.secret == null || !config.github.integration.secret) {
+  if (!config.has('github.integration.secret')) {
     log.warn('Using insecure settings. Please setup integration webhook secret')
     return next()
   }
@@ -100,7 +100,7 @@ route.all('/', async (ctx, next) => {
   }
 
   const hash = crypto
-  .createHmac('sha1', config.github.integration.secret)
+  .createHmac('sha1', config.get('github.integration.secret'))
   .update(ctx.request.rawBody)
   .digest('hex')
 
