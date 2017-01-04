@@ -71,7 +71,7 @@ export default class ElementaryAptly extends Pipe {
 
     if (files.length < 1) return
 
-    if (!config.aptly || !config.aptly.url) return this.log('debug', 'Elementary/Aptly/disabled.md')
+    if (!config.has('aptly.url')) return this.log('debug', 'Elementary/Aptly/disabled.md')
 
     const apphub = await this.require('AppHub')
 
@@ -85,7 +85,7 @@ export default class ElementaryAptly extends Pipe {
       log.debug('ElementaryAptly is trying to check for existing packages')
 
       existingKeys = await request
-      .get(`${config.aptly.url}/repos/${config.aptly.review}/packages`)
+      .get(`${config.get('aptly.url')}/repos/${config.get('aptly.review')}/packages`)
       .query({
         q: `${this.pipeline.build.name} (= ${this.pipeline.build.version})`
       })
@@ -106,7 +106,7 @@ export default class ElementaryAptly extends Pipe {
       log.debug(`ElementaryAptly is uploading ${files} files to aptly`)
 
       let req = request
-      .post(`${config.aptly.url}/files/${this.pipeline.build.name}`)
+      .post(`${config.get('aptly.url')}/files/${this.pipeline.build.name}`)
 
       files.forEach((file) => {
         req = req.attach(file, path.join(this.pipeline.build.dir, file))
@@ -124,10 +124,10 @@ export default class ElementaryAptly extends Pipe {
       log.debug('ElementaryAptly is grabbing package keys')
 
       await request
-      .post(`${config.aptly.url}/repos/${config.aptly.review}/file/${this.pipeline.build.name}`)
+      .post(`${config.get('aptly.url')}/repos/${config.get('aptly.review')}/file/${this.pipeline.build.name}`)
 
       this.data.publishedKeys = await request
-      .get(`${config.aptly.url}/repos/${config.aptly.review}/packages`)
+      .get(`${config.get('aptly.url')}/repos/${config.get('aptly.review')}/packages`)
       .query({
         q: `${this.pipeline.build.name} (= ${this.pipeline.build.version})`
       })
@@ -145,7 +145,7 @@ export default class ElementaryAptly extends Pipe {
       .toString()
 
       await request
-      .post(`${config.aptly.url}/repos/${config.aptly.review}/snapshots`)
+      .post(`${config.get('aptly.url')}/repos/${config.get('aptly.review')}/snapshots`)
       .send({
         Name: timestamp,
         Description: `${this.pipeline.build.name} version bump to ${this.pipeline.build.version}`
@@ -155,7 +155,7 @@ export default class ElementaryAptly extends Pipe {
         log.debug(`ElementaryAptly is updating snapshot for ${dist} repository`)
 
         return request
-        .put(`${config.aptly.url}/publish/${config.aptly.review}/${dist}`)
+        .put(`${config.get('aptly.url')}/publish/${config.get('aptly.review')}/${dist}`)
         .send({
           Snapshots: [{
             Component: 'main',
@@ -163,7 +163,7 @@ export default class ElementaryAptly extends Pipe {
           }],
           Signing: {
             Batch: true,
-            Passphrase: config.aptly.passphrase
+            Passphrase: config.get('aptly.passphrase')
           }
         })
       })

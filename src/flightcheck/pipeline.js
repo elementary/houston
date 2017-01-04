@@ -116,7 +116,7 @@ export default class Pipeline extends events.EventEmitter {
     }
 
     // Setup some dynamic variables
-    this.build.dir = path.join(config.flightcheck.directory, 'projects', this.build.name)
+    this.build.dir = path.join(config.get('flightcheck.directory'), 'projects', this.build.name)
 
     // A list of all running / already ran pipes
     this.pipes = []
@@ -165,7 +165,7 @@ export default class Pipeline extends events.EventEmitter {
    * @return {Void}
    */
   async teardown () {
-    if (config.env !== 'development') {
+    if (config.get('env') !== 'development') {
       await fsHelper.rmp(this.build.dir)
       return
     }

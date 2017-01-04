@@ -15,7 +15,7 @@ const log = new Log('flightcheck')
 const worker = new atc.Worker('cycle')
 const sender = new atc.Sender('cycle')
 
-log.info(`Running in ${config.env} configuration`)
+log.info(`Running in ${config.get('env')} configuration`)
 
 worker.on('error', (err) => {
   log.error('Flightcheck errored')

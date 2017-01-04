@@ -44,8 +44,8 @@ export default class GitHubIssue extends Pipe {
       return this.log('debug', 'GitHub/Issue/unsupported.md')
     }
 
-    if (this.pipeline.build.auth == null || !config.github.post) {
-      return this.log('debug', 'GitHub/Issue/disabled.md', !config.github.post)
+    if (this.pipeline.build.auth == null || !config.has('github.post') || config.get('github.post') === false) {
+      return this.log('debug', 'GitHub/Issue/disabled.md', !config.get('github.post'))
     }
 
     const apphub = await this.require('AppHub')

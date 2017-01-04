@@ -57,7 +57,7 @@ export default class Liftoff extends Pipe {
     log.debug('Running liftoff')
 
     const buildPath = path.join(this.pipeline.build.dir, p)
-    const cacheDir = path.join(config.flightcheck.directory, 'liftoff', 'cache')
+    const cacheDir = path.join(config.get('flightcheck.directory'), 'liftoff', 'cache')
     await fsHelper.mkdirp(cacheDir)
 
     log.debug(`Using cache directory: ${cacheDir}`)
