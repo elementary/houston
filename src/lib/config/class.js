@@ -56,6 +56,18 @@ export default class Config {
   }
 
   /**
+   * true
+   * Returns true if the value is true, else false if the value does not exist
+   *
+   * @param {String} key - a dot seperated key value for configuration
+   * @returns {Boolean} - true if value is true, else false if doesn't exist
+   */
+  true (key) {
+    if (!this.has(key)) return false
+    return (this.get(key) === true)
+  }
+
+  /**
    * set
    * Sets the configuration value
    *

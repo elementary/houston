@@ -14,6 +14,7 @@ import pkg from 'root/package.json'
 test.beforeEach((t) => {
   t.context.config = new Config()
   t.context.config.current['env'] = 'production'
+  t.context.config.current['github'] = {post: true}
   t.context.config.current['server'] = {url: 'https://developer.elementary.io'}
   t.context.config.current['rights'] = false
 })
@@ -33,6 +34,15 @@ test('get accuratly returns a value', (t) => {
   t.is(config.get('env'), 'production')
   t.is(config.get('server.url'), 'https://developer.elementary.io')
   t.is(config.get('nonexistant'), undefined)
+})
+
+test('true accuratly returns a boolean', (t) => {
+  const config = t.context.config
+
+  t.true(config.get('github.post'))
+  t.false(config.true('env'))
+  t.false(config.true('rights'))
+  t.false(config.true('doesnot.exist.posting.wanted'))
 })
 
 test('set accuratly sets a configuration value', (t) => {
