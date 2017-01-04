@@ -55,31 +55,31 @@ test('default only sets value if it does not exist', (t) => {
   t.not(config.get('env'), 'testing')
 })
 
-test('loadedGenerated sets default environment to production', async (t) => {
+test('loadedGenerated sets default environment to production', (t) => {
   const config = new Config()
-  await config.loadGenerated()
+  config.loadGenerated()
 
   t.is(config.get('env'), 'production')
 })
 
-test('loadedGenerated sets server port from url without port', async (t) => {
+test('loadedGenerated sets server port from url without port', (t) => {
   const config = t.context.config
-  await config.loadGenerated()
+  config.loadGenerated()
 
   t.is(config.get('server.port'), 80)
 })
 
-test('loadedGenerated sets server port from url with port', async (t) => {
+test('loadedGenerated sets server port from url with port', (t) => {
   const config = t.context.config
   config.set('server.url', 'http://localhost:3000')
-  await config.loadGenerated()
+  config.loadGenerated()
 
   t.is(config.get('server.port'), 3000)
 })
 
-test('loadedGenerated sets houston version', async (t) => {
+test('loadedGenerated sets houston version', (t) => {
   const config = t.context.config
-  await config.loadGenerated()
+  config.loadGenerated()
 
   t.is(config.get('houston.version'), pkg.version)
 })
@@ -107,12 +107,12 @@ test('loadedGenerated sets houston commit', async (t) => {
 test('loadFile throws error if file does not exist', (t) => {
   const config = new Config()
 
-  t.throws(config.loadFile(path.resolve(__dirname, 'nonexistant.js')))
+  t.throws(() => config.loadFile(path.resolve(__dirname, 'nonexistant.js')))
 })
 
-test('loadFile loads file accuratly', async (t) => {
+test('loadFile loads file accuratly', (t) => {
   const config = new Config()
-  await config.loadFile(path.resolve(alias.resolve.alias['test'], 'fixtures', 'config.js'))
+  config.loadFile(path.resolve(alias.resolve.alias['test'], 'fixtures', 'config.js'))
 
   t.is(config.get('env'), 'test')
 })

@@ -1,9 +1,12 @@
 /**
  * lib/config/class.js
  * A simple application configuration class
+ * NOTE: this file has synchronous file class to allow usage at top of stack
  *
  * @exports {Class} default - a config class
  */
+
+/* eslint-disable no-sync */
 
 import _ from 'lodash'
 import fs from 'fs'
@@ -91,7 +94,7 @@ export default class Config {
    *
    * @return {Boolean} - true if generated configuration was set
    */
-  async loadGenerated () {
+  loadGenerated () {
     if (this.immutable) return false
 
     this.default('env', 'production')
@@ -104,25 +107,15 @@ export default class Config {
 
     this.set('houston.version', pkg.version)
 
-    const gitPath = path.resolve(alias.resolve.alias['root'], '.git', 'ORIG_HEAD')
-    const gitExists = await new Promise((resolve) => {
-      fs.stat(gitPath, (err, stats) => {
-        if (err) return resolve(false)
+    try {
+      const gitPath = path.resolve(alias.resolve.alias['root'], '.git', 'ORIG_HEAD')
+      const gitExists = fs.statSync(gitPath).isFile()
 
-        return resolve(stats.isFile())
-      })
-    })
+      if (!gitExists) throw new Error()
 
-    if (gitExists) {
-      const gitCommit = await new Promise((resolve, reject) => {
-        fs.readFile(gitPath, { encoding: 'utf8' }, (err, data) => {
-          if (err) return reject(err)
-          return resolve(data.trim())
-        })
-      })
-
+      const gitCommit = fs.readFileSync(gitPath, { encoding: 'utf8' }).trim()
       this.set('houston.commit', gitCommit)
-    }
+    } catch (e) {}
 
     return true
   }
@@ -135,20 +128,12 @@ export default class Config {
    * @throws {Error} - if file does not exist
    * @return {Boolean} - true if configuration file was loaded
    */
-  async loadFile (path) {
+  loadFile (path) {
     if (this.immutable) return false
 
-    await new Promise((resolve, reject) => {
-      fs.stat(path, (err, stats) => {
-        if (err) return reject(err)
-
-        if (stats.isFile() === false) {
-          return reject(new Error('Configuration path is not a file'))
-        }
-
-        return resolve(stats)
-      })
-    })
+    if (!fs.statSync(path).isFile()) {
+      throw new Error('Configuration path is not a file')
+    }
 
     const loadedConfiguration = require(path)
 
