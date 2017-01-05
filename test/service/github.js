@@ -3,27 +3,19 @@
  * Tests GitHub third party functions
  */
 
-import _ from 'lodash'
 import fs from 'fs'
 import jwt from 'jsonwebtoken'
-import mock from 'mock-require'
 import moment from 'moment'
 import nock from 'nock'
 import path from 'path'
 import test from 'ava'
 
+import { mockConfig } from 'test/helpers'
 import * as fixture from './fixtures/github'
 import alias from 'root/.alias'
-import mockConfig from 'test/fixtures/config'
+import config from 'lib/config'
 
 const publicKey = path.resolve(alias.resolve.alias['test'], 'fixtures', 'github', 'public.pem')
-
-// Manually enable GitHub posting
-const override = {
-  github: {
-    post: true
-  }
-}
 
 test.before((t) => {
   // This will capture any incoming data and put it to a file.
@@ -38,7 +30,8 @@ test.before((t) => {
 })
 
 test.beforeEach((t) => {
-  mock(path.resolve(alias.resolve.alias['root'], 'config.js'), _.merge(mockConfig, override))
+  mockConfig()
+  config.set('github.post', true)
 
   t.context.config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
   t.context.github = require(path.resolve(alias.resolve.alias['service'], 'github'))
@@ -82,8 +75,8 @@ test('Can generate an accurate JWT', async (t) => {
 
   t.is(typeof three, 'object')
   t.is(typeof four, 'object')
-  t.is(three.iss, config.github.integration.id)
-  t.is(four.iss, config.github.integration.id)
+  t.is(three.iss, config.get('github.integration.id'))
+  t.is(four.iss, config.get('github.integration.id'))
   t.true(three.iat < new Date().getTime())
   t.true(four.iat < new Date().getTime())
   t.true(three.exp > Math.floor(Date.now() / 1000))

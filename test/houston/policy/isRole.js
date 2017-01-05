@@ -3,15 +3,15 @@
  * Tests isRole for security
  */
 
-import mock from 'mock-require'
 import path from 'path'
 import test from 'ava'
 
+import { mockConfig } from 'test/helpers'
 import alias from 'root/.alias'
-import mockConfig from 'test/fixtures/config'
 
 test.beforeEach('setup configuration mock', (t) => {
-  mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
+  mockConfig()
+
   t.context.isRole = require(path.resolve(alias.resolve.alias['houston'], 'policy', 'isRole')).default
 })
 

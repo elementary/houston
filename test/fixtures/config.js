@@ -24,7 +24,8 @@ module.exports.github = {
 module.exports.stripe = {
   client: 'ca_189s189v1s8d1v89s1dv91sd9vw4ef84',
   secret: 'sk_test_hF23f23ra42cru8902m3umSN',
-  public: 'pk_test_c32j0239j9tg8902j3f90238'
+  public: 'pk_test_c32j0239j9tg8902j3f90238',
+  post: false
 }
 
 module.exports.rights = {
@@ -38,7 +39,8 @@ module.exports.aptly = {
   passphrase: 'testing',
   review: 'review',
   stable: 'houston',
-  public: '2Rm7LJ5gXK7qRQpC6FfdxGLTTbMUnSrh'
+  public: '2Rm7LJ5gXK7qRQpC6FfdxGLTTbMUnSrh',
+  post: false
 }
 
 module.exports.database = 'mongodb://localhost/houston-test'
@@ -53,7 +55,8 @@ module.exports.socket = {
   private: 'butseriouslydontworryboutitok?ok.goodokbye'
 }
 
-module.exports.log = false
+module.exports.log = null
+module.exports.sentry = null
 
 module.exports.flightcheck = {
   directory: '/tmp/flightcheck',

@@ -4,15 +4,13 @@
  */
 
 import test from 'ava'
-import mock from 'mock-require'
 import path from 'path'
 
+import { mockConfig } from 'test/helpers'
 import alias from 'root/.alias'
 
-import mockConfig from 'test/fixtures/config.js'
-
 test.beforeEach('setup configuration mock', async (t) => {
-  mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
+  mockConfig()
 
   t.context.atc = require(path.resolve(alias.resolve.alias['lib'], 'atc'))
   t.context.config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
