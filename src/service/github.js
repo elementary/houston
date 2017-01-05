@@ -243,7 +243,7 @@ export async function generateJWT (exp = moment().add(1, 'minutes').toDate()) {
   const key = await new Promise((resolve, reject) => {
     log.debug('Reading integration key')
 
-    fs.readFile(config.github.integration.key, (err, data) => {
+    fs.readFile(config.get('github.integration.key'), (err, data) => {
       if (err) return reject(err)
       return resolve(data)
     })
