@@ -21,6 +21,7 @@ import * as passport from './passport'
 import * as policy from './policy'
 import config from 'lib/config'
 import controllers from './controller'
+import db from 'lib/database/connection'
 import Log from 'lib/log'
 import Mistake from 'lib/mistake'
 import PermError from './policy/error'
@@ -195,6 +196,8 @@ app.on('error', async (error, ctx) => {
   log.error(error)
   log.report(error)
 })
+
+db.connect(config.database)
 
 // Launching server
 app.listen(config.server.port)
