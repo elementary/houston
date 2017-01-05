@@ -103,7 +103,7 @@ export default class Config {
   /**
    * loadGenerated
    * Attempts to load generated or un-human configuration values like git commit,
-   * default environment, and infered values
+   * default environment, and inferred values
    *
    * @return {Boolean} - true if generated configuration was set
    */
