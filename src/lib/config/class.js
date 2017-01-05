@@ -12,7 +12,9 @@ import _ from 'lodash'
 import fs from 'fs'
 import path from 'path'
 
+import { toDot } from 'lib/helpers/dotNotation'
 import alias from 'root/.alias'
+import example from 'root/config.example.js'
 import pkg from 'root/package.json'
 
 /**
@@ -201,27 +203,6 @@ export default class Config {
    * @return {String[]} - a list of key values missing from configuration
    */
   check () {
-    const missingKeys = []
-
-    /**
-     * add
-     * Convenient function to check if key exists and add to array of missing Keys
-     *
-     * @param {String} key - key value to check exists
-     * @return {Void}
-     */
-    const add = (key) => {
-      if (!this.has(key)) missingKeys.push(key)
-    }
-
-    add('database')
-    add('env')
-    add('flightcheck.directory')
-    add('flightcheck.docker')
-    add('rights')
-    add('server.secret')
-    add('server.url')
-
-    return missingKeys
+    return _.difference(Object.keys(toDot(example)), Object.keys(toDot(this.current)))
   }
 }
