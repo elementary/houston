@@ -7,3 +7,11 @@
 [libs]
 
 [options]
+module.name_mapper='root/\(.*\)'->'<PROJECT_ROOT>/\1'
+module.name_mapper='branding/\(.*\)'->'<PROJECT_ROOT>/branding/\1'
+module.name_mapper='build/\(.*\)'->'<PROJECT_ROOT>/build/\1'
+module.name_mapper='flightcheck/\(.*\)'->'<PROJECT_ROOT>/src/flightcheck/\1'
+module.name_mapper='houston/\(.*\)'->'<PROJECT_ROOT>/src/houston/\1'
+module.name_mapper='lib/\(.*\)'->'<PROJECT_ROOT>/src/lib/\1'
+module.name_mapper='service/\(.*\)'->'<PROJECT_ROOT>/src/service/\1'
+module.name_mapper='test/\(.*\)'->'<PROJECT_ROOT>/test/\1'
