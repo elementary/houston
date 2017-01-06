@@ -3,18 +3,17 @@
  * Tests general Parsable class methods
  */
 
-import mock from 'mock-require'
 import path from 'path'
 import Promise from 'bluebird'
 import test from 'ava'
 
+import { mockConfig } from 'test/helpers'
 import alias from 'root/.alias'
-import mockConfig from 'test/fixtures/config'
 
 const fs = Promise.promisifyAll(require('fs'))
 
 test.beforeEach('setup', (t) => {
-  mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
+  mockConfig()
 
   t.context.Parsable = require(path.resolve(alias.resolve.alias['flightcheck'], 'file', 'parsable')).default
 

@@ -14,7 +14,7 @@ import Log from 'lib/log'
 
 const log = new Log('service:stripe')
 
-const auth = new Buffer(`${config.stripe.secret}:`).toString('base64')
+const auth = new Buffer(`${config.get('stripe.secret')}:`).toString('base64')
 const api = domain('https://api.stripe.com/v1')
 .use((req) => {
   req.set('Authorization', `Basic ${auth}`)
@@ -160,7 +160,7 @@ export function postCharge (account, token, amount, currency, description) {
   paramAssert(amount, 'number', 'postCharge', 'amount')
   paramAssert(currency, 'string', 'postCharge', 'currency')
 
-  if (!config.stripe || !config.stripe.client || !config.stripe.secret || !config.stripe.public) {
+  if (!config.get('stripe.post')) {
     log.debug('Config prohibits posting to Stripe. Not posting charge')
     return Promise.resolve('')
   }

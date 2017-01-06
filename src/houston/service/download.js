@@ -61,12 +61,12 @@ export function handleMessage (message) {
  * @return {Void}
  */
 export function startSyslog () {
-  syslogd(handleMessage).listen(config.downloads.port, (err) => {
+  syslogd(handleMessage).listen(config.get('downloads.port'), (err) => {
     if (err) {
       log.error('Unable to start downloads syslog server')
       throw new Error(err)
     } else {
-      log.info(`Downloads syslog server listening on ${config.downloads.port}`)
+      log.info(`Downloads syslog server listening on ${config.get('downloads.port')}`)
     }
   })
 }

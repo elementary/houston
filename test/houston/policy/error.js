@@ -3,12 +3,11 @@
  * Tests the houston policy error class
  */
 
-import mock from 'mock-require'
 import path from 'path'
 import test from 'ava'
 
+import { mockConfig } from 'test/helpers'
 import alias from 'root/.alias'
-import mockConfig from 'test/fixtures/config'
 
 const fakeUserOne = {
   username: 'pleb',
@@ -17,7 +16,7 @@ const fakeUserOne = {
 }
 
 test.beforeEach((t) => {
-  mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
+  mockConfig()
 
   t.context.PermError = require(path.resolve(alias.resolve.alias['houston'], 'policy', 'error')).default
 })

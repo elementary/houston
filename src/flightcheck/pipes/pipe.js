@@ -22,7 +22,7 @@ import Parsable from 'flightcheck/file/parsable'
 
 const fs = Promise.promisifyAll(require('fs'))
 
-const docker = new Docker({ socketPath: config.flightcheck.docker })
+const docker = new Docker({ socketPath: config.get('flightcheck.docker') })
 const log = new Log('flightcheck:Pipe')
 
 /**
@@ -200,8 +200,10 @@ export default class Pipe extends events.EventEmitter {
 
     issue.body += `Pipe: ${this.name}\n`
     issue.body += `Pipe time: ${new Date()}\n`
-    issue.body += `Houston version: ${config.houston.version} (${config.houston.commit})\n`
-    issue.body += `Houston env: ${config.env}\n`
+    issue.body += `Houston version: ${config.get('houston.version')}`
+    if (config.has('houston.commit')) issue.body += ` (${config.get('houston.commit')})`
+    issue.body += '\n'
+    issue.body += `Houston env: ${config.get('env')}\n`
 
     issue.body += '-->'
 

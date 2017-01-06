@@ -30,7 +30,7 @@ const log = new Log('server')
 
 // Setup App configuration
 app.name = 'Houston'
-app.env = config.env
+app.env = config.get('env')
 
 // Download Tracking syslog Server
 download.startSyslog()
@@ -98,12 +98,12 @@ app.use(async (ctx, next) => {
     if (error instanceof Mistake) {
       pkg.status = error.status || 500
 
-      if (error.expose || config.env === 'development') {
+      if (error.expose || config.get('env') === 'development') {
         pkg.title = error.message
       }
     }
 
-    if (config.env === 'development') pkg.detail = error.stack
+    if (config.get('env') === 'development') pkg.detail = error.stack
 
     ctx.status = pkg.status
     return ctx.render('error', { error: pkg })
@@ -151,7 +151,7 @@ app.use(async (ctx, next) => {
 })
 
 // Start Passport
-app.keys = [config.server.secret]
+app.keys = [config.get('server.secret')]
 app.use(convert(session(app)))
 
 passport.setup(app)
@@ -197,7 +197,7 @@ app.on('error', async (error, ctx) => {
 })
 
 // Launching server
-app.listen(config.server.port)
-log.info(`Houston listening on ${config.server.port} in ${app.env} configuration`)
+app.listen(config.get('server.port'))
+log.info(`Houston listening on ${config.get('server.port')} in ${config.get('env')} configuration`)
 
 export default { app }

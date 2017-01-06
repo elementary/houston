@@ -51,12 +51,12 @@ const getMembership = function (member, user) {
  * @return {Object} - updated user object
  */
 const getRights = async function (user) {
-  if (config.rights) {
+  if (config.has('rights')) {
     let right = 'USER'
 
-    const beta = await getMembership(config.rights.beta, user)
-    const review = await getMembership(config.rights.review, user)
-    const admin = await getMembership(config.rights.admin, user)
+    const beta = await getMembership(config.get('rights.beta'), user)
+    const review = await getMembership(config.get('rights.review'), user)
+    const admin = await getMembership(config.get('rights.admin'), user)
 
     if (admin) {
       right = 'ADMIN'
@@ -115,9 +115,9 @@ const upsertUser = async function (access, refresh, profile) {
  * Passport configuration for GitHub
  */
 export const strategy = new github.Strategy({
-  clientID: config.github.client,
-  clientSecret: config.github.secret,
-  callbackURL: `${config.server.url}/auth/github/callback`
+  clientID: config.get('github.client'),
+  clientSecret: config.get('github.secret'),
+  callbackURL: `${config.get('server.url')}/auth/github/callback`
 }, (access, refresh, profile, done) => {
   upsertUser(access, refresh, profile)
   .then((user) => done(null, user))

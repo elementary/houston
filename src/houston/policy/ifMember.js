@@ -29,7 +29,7 @@ export default function (project, user) {
     throw new PermError.FromAccess(user)
   }
 
-  if (!config.rights) {
+  if (!config.has('rights')) {
     log.debug(`User rights disabled, allowing ${user.username} to access ${project.name} project`)
     return true
   }

@@ -23,7 +23,7 @@ const log = new Log('passport:stripe')
 const url = 'https://connect.stripe.com/'
 const urlAuth = 'oauth/authorize'
 const urlToken = 'oauth/token'
-const auth = new OAuth2(config.stripe.client, config.stripe.secret, url, urlAuth, urlToken, null)
+const auth = new OAuth2(config.get('stripe.client'), config.get('stripe.secret'), url, urlAuth, urlToken, null)
 
 // Koa server routes used for authentication
 export const router = new Router({
@@ -32,7 +32,7 @@ export const router = new Router({
 
 // NOTE: here be dragons. Really big mockup like dragons that breath fire.
 router.get('/callback', policy.isRole('beta'), async (ctx, next) => {
-  if (config.stripe == null) {
+  if (!config.has('stripe')) {
     log.debug('Stripe callback called while configuration disabled')
     return new ctx.Mistake(503, 'Stripe disabled')
   }
@@ -52,7 +52,7 @@ router.get('/callback', policy.isRole('beta'), async (ctx, next) => {
   const data = await new Promise((resolve, reject) => {
     auth.getOAuthAccessToken(code, {
       grant_type: 'authorization_code',
-      redirect_uri: `${config.server.url}/auth/stripe/callback`
+      redirect_uri: `${config.get('server.url')}/auth/stripe/callback`
     }, (err, access, refresh, results) => {
       if (err) return reject(err)
       return resolve({
@@ -86,7 +86,7 @@ router.get('/callback', policy.isRole('beta'), async (ctx, next) => {
 })
 
 router.get('/enable/:project', policy.isRole('beta'), async (ctx, next) => {
-  if (config.stripe == null) {
+  if (!config.has('stripe')) {
     log.debug('Stripe enable called while configuration disabled')
     return new ctx.Mistake(503, 'Stripe disabled')
   }
@@ -111,9 +111,9 @@ router.get('/enable/:project', policy.isRole('beta'), async (ctx, next) => {
   })
 
   const authUrl = auth.getAuthorizeUrl({
-    client_id: config.stripe.client,
+    client_id: config.get('stripe.client'),
     response_type: 'code',
-    redirect_uri: `${config.server.url}/auth/stripe/callback`,
+    redirect_uri: `${config.get('server.url')}/auth/stripe/callback`,
     scope: ['read_write'],
     always_prompt: true,
 
@@ -127,7 +127,7 @@ router.get('/enable/:project', policy.isRole('beta'), async (ctx, next) => {
 })
 
 router.get('/disable/:project', policy.isRole('beta'), async (ctx, next) => {
-  if (config.stripe == null) {
+  if (!config.has('stripe')) {
     log.debug('Stripe disable called while configuration disabled')
     return new ctx.Mistake(503, 'Stripe disabled')
   }

@@ -11,14 +11,14 @@ import _ from 'lodash'
 import * as helpers from './helpers'
 import config from './config'
 
-const nun = nunjucks.configure(config.houston.root, {
+const nun = nunjucks.configure(config.get('houston.root'), {
   autoescape: true,
   throwOnUndefined: false,
   trimBlocks: true,
   lstripBlocks: true
 })
 
-nun.addGlobal('config', config)
+nun.addGlobal('config', config.current)
 
 nun.addFilter('debianTime', helpers.debian.time)
 nun.addFilter('langChop', helpers.lang.chop)

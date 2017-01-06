@@ -29,7 +29,7 @@ export default (user, role) => {
     return false
   }
 
-  if (!config.rights) {
+  if (!config.has('rights')) {
     log.debug(`User rights disabled, allowing ${user.username} access to "${possibilities[needRole]}" section`)
     return true
   }

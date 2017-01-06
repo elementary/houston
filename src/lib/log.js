@@ -16,30 +16,30 @@ import config from './config'
 const namespace = 'houston'
 
 let sentry = null
-if (config.sentry) {
-  sentry = new raven.Client(config.sentry, {
-    environment: config.env,
-    release: config.houston.version,
-    tags: { commit: config.houston.comment }
+if (config.has('sentry')) {
+  sentry = new raven.Client(config.get('sentry'), {
+    environment: config.get('env'),
+    release: config.get('houston.version'),
+    tags: { commit: config.get('houston.commit') }
   })
 
-  sentry.patchGlobal()
+  sentry.install()
 }
 
 // Set the default log level for the app and possibly other libraries
 if (process.env.DEBUG == null) {
   /* eslint-disable no-fallthrough */
   switch (true) {
-    case (config.log === 'debug'):
+    case (config.get('log') === 'debug'):
       Debug.enable(`${namespace}:debug`)
       Debug.enable(`${namespace}:*:debug`)
-    case (config.log === 'info'):
+    case (config.get('log') === 'info'):
       Debug.enable(`${namespace}:info`)
       Debug.enable(`${namespace}:*:info`)
-    case (config.log === 'warn'):
+    case (config.get('log') === 'warn'):
       Debug.enable(`${namespace}:warn`)
       Debug.enable(`${namespace}:*:warn`)
-    case (config.log === 'error'):
+    case (config.get('log') === 'error'):
       Debug.enable(`${namespace}:error`)
       Debug.enable(`${namespace}:*:error`)
   }

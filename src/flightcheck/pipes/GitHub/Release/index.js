@@ -46,8 +46,8 @@ export default class GitHubRelease extends Pipe {
       return this.log('debug', 'GitHub/Release/unsupported.md')
     }
 
-    if (this.pipeline.build.auth == null || !config.github.post) {
-      return this.log('debug', 'GitHub/Release/disabled.md', !config.github.post)
+    if (this.pipeline.build.auth == null || !config.get('github.post')) {
+      return this.log('debug', 'GitHub/Release/disabled.md', !config.get('github.post'))
     }
 
     log.debug(`GitHubRelease has ${files.length} files to publish`)

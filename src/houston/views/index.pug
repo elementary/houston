@@ -13,7 +13,7 @@ block body
   section.hero.dark: div
     img(src='/images/system-software-install.svg', alt='AppCenter icon')
     h1 Publish in AppCenter
-        sup BETA 
+        sup BETA
     h4 An open, pay-what-you-want app store for indie developers
     if user
       a(href='/dashboard').button.suggested-action Welcome Back
@@ -21,7 +21,7 @@ block body
     else
       a(href='/dashboard').button.suggested-action Log In with GitHub
         i.fa.fa-github
-    p.small-label Version #{config.houston.version}
+    p.small-label Version #{config.get('houston.version')}
 
   section.grid
     a(href='https://elementary.io/docs/code/getting-started').third

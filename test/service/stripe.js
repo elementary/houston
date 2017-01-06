@@ -3,14 +3,13 @@
  * Tests Stripe API functions
  */
 
-import mock from 'mock-require'
 import nock from 'nock'
 import path from 'path'
 import test from 'ava'
 
+import { mockConfig } from 'test/helpers'
 import * as fixture from './fixtures/stripe'
 import alias from 'root/.alias'
-import mockConfig from 'test/fixtures/config'
 
 test.before((t) => {
   // This will capture any incoming data and put it to a file.
@@ -25,7 +24,7 @@ test.before((t) => {
 })
 
 test.beforeEach((t) => {
-  mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
+  mockConfig()
 
   t.context.config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
   t.context.stripe = require(path.resolve(alias.resolve.alias['service'], 'stripe'))
