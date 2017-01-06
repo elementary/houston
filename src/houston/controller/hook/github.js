@@ -37,14 +37,14 @@ const processInstallations = async (installation, additions = [], removals = [])
 
   additions.forEach((repo) => {
     const promise = async () => {
-      const foundProject = await Project.findOne({ name: repo.name })
+      const foundProject = await Project.findByDomain(repo.name.domain)
 
       if (foundProject != null) {
         log.info('Trying to add a repository that already exists in database')
         return
       }
 
-      repo.releases = await github.getReleases(repo.github.owner, repo.github.name, token)
+      repo.releases = await github.getReleases(repo.github.owner, repo.github.repo, token)
 
       repo.releases = repo.releases
       .filter((release) => (release.version != null))
@@ -227,9 +227,8 @@ route.post('/', async (ctx, next) => {
 
   log.debug('Processing new release')
 
-  const project = await Project.findOne({
-    'github.id': ctx.request.body.repository.id
-  })
+  const id = Project.sanatize(ctx.request.body.repository.id)
+  const project = await Project.findOne({ 'github.id': id })
 
   if (project == null) {
     log.debug('Unable to process new release for unknown project')
@@ -240,7 +239,7 @@ route.post('/', async (ctx, next) => {
   }
 
   const currentRelease = project.releases.find((release) => {
-    return (release.github.id === ctx.request.body.release.id)
+    return (release.github.id === id)
   })
 
   if (currentRelease != null) {

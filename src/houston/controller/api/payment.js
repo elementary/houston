@@ -48,13 +48,13 @@ route.param('project', async (n, ctx, next) => {
     throw new APIError(400, 'Invalid Project Name')
   }
 
-  ctx.project = await Project.findOne({ name })
+  ctx.project = await Project.findByDomain(name)
 
   if (ctx.project == null) {
     throw new APIError(404, 'Project Not Found', `${name} project was not found`)
   }
 
-  if (ctx.project.stripe.enabled === false) {
+  if (ctx.project.stripe.enable === false) {
     throw new APIError(400, 'Project Not Enabled', `${name} project does not have payments enabled`)
   }
 
@@ -69,7 +69,7 @@ route.get('/:project', async (ctx) => {
   ctx.status = 200
   ctx.body = {
     data: {
-      name: ctx.project.name,
+      name: ctx.project.name.domain,
       key: ctx.project.stripe.public
     }
   }
@@ -146,14 +146,14 @@ route.post('/:project', async (ctx) => {
   }
 
   try {
-    await stripe.postCharge(ctx.project.stripe.id, token, amount, currency, `Payment for ${ctx.project.name}`)
+    await stripe.postCharge(ctx.project.stripe.id, token, amount, currency, `Payment for ${ctx.project.name.domain}`)
   } catch (err) {
     // TODO: error message compairing is bad. Switch this to a specific code or something
     if (err instanceof stripe.StripeError && err.message.indexOf('Expired token') !== -1) {
       throw new APIError.FromPointer(400, 'Expired Token', '/data/attributes/token', 'The given token has already been used')
     }
 
-    log.error(`Error while creating charge for ${ctx.project.name}`)
+    log.error(`Error while creating charge for ${ctx.project.name.domain}`)
     log.error(err)
     log.report(err)
 
@@ -163,7 +163,7 @@ route.post('/:project', async (ctx) => {
   ctx.status = 200
   ctx.body = {
     data: {
-      name: ctx.project.name,
+      name: ctx.project.name.domain,
       key: ctx.project.stripe.public,
       amount
     }

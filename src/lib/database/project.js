@@ -4,7 +4,7 @@
  *
  * @exports {Object} default - project database model
  * @exports {Object} schema - project database schema
- * @exports {Project} class - a class to create projects
+ * @exports {Project} Project - a class to create projects
  */
 
 import db from './connection'
@@ -22,13 +22,14 @@ import releaseSchema from './release'
  * @property {String} name.desktop - the name given by the developer used on the desktop
  * @property {String} name.domain - the RDNN generated name for the project
  *
+ * @property {String} type - the type of project
+ *
+ * @property {String} icon - svg of the project's icon at 64px standard size
+ * @property {Error} error - any error that occured during project methods
+ *
  * @property {Object} repository - code hosting information for the project
  * @property {String} repository.url - URL for hosted code
  * @property {String} repository.tag - tag for main branch of code
- *
- * @property {String} type - the type of project
- *
- * @property {Error} error - any error that occured during project methods
  *
  * @property {Object} github - holds data about project relationship to GitHub
  * @property {Number} github.id - GitHub repository id
@@ -66,6 +67,14 @@ export const schema = new db.Schema({
     }
   },
 
+  type: {
+    type: String,
+    default: 'Application'
+  },
+
+  icon: String,
+  error: Object,
+
   repository: {
     url: {
       type: String,
@@ -82,13 +91,6 @@ export const schema = new db.Schema({
       default: 'master'
     }
   },
-
-  type: {
-    type: String,
-    default: 'Application'
-  },
-
-  error: Object,
 
   github: {
     id: {
@@ -142,6 +144,7 @@ schema.set('toJSON', {
   transform: (doc, ret) => {
     ret.id = ret._id
     delete ret['_id']
+    delete ret['icon']
     delete ret['error']
     delete ret['github']['installation']
     delete ret['stripe']['id']
@@ -188,6 +191,19 @@ schema.virtual('github.name').get(function () {
  * holds everything valuable to houston
  */
 export class Project extends Master {
+
+  /**
+   * findByDomain
+   * Finds a Project by the RDNN name
+   *
+   * @param {String} name - RDNN name of Project
+   *
+   * @async
+   * @returns {Project} - a matching Project
+   */
+  static findByDomain (name) {
+    return this.findOne({ 'name.domain': name })
+  }
 
   /**
    * getSelfStatus
@@ -274,10 +290,10 @@ export class Project extends Master {
    * @returns {Cycle} - the latest cycle for the project. Includes release cycles
    */
   async findCycle () {
-    return this.model('cycle')
+    return db.model('cycle')
     .findOne({ project: this._id })
     .sort({ 'created_at': -1 })
   }
 }
 
-export default db.model(Project, schema, 'project')
+export default db.model(Project, schema)

@@ -169,8 +169,8 @@ test('Can get list of repos', async (t) => {
   const one = await github.getRepos('testingToken')
 
   t.is(typeof one, 'object')
-  t.is(one[0].name, 'com.github.elementary.test1')
-  t.is(one[0].repo, 'https://github.com/elementary/test1.git')
+  t.is(one[0].name['domain'], 'com.github.elementary.test1')
+  t.is(one[0].repository['url'], 'https://github.com/elementary/test1.git')
   t.is(one[0].github.id, 1)
   t.is(typeof one[0].github.integration, 'undefined')
 })

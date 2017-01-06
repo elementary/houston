@@ -188,15 +188,19 @@ export function castProject (project, installation) {
   }
 
   return {
-    name: `com.github.${owner}.${repo}`,
-    repo: project.git_url,
-    tag: project.default_branch,
+    name: {
+      domain: `com.github.${owner}.${repo}`
+    },
+    repository: {
+      url: project.git_url,
+      tag: project.default_branch
+    },
     github: {
       id: project.id,
       owner: project.owner.login,
-      name: project.name,
-      private: project.private,
-      installation
+      repo: project.name,
+      installation,
+      private: project.private
     }
   }
 }

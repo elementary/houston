@@ -1,15 +1,12 @@
 mixin project(project, status, stripe)
   div
-    if project.apphub.icon != null
-      img(src="data:image/svg+xml;base64," + project.apphub.icon).app-icon
+    if project.icon != null
+      img(src="data:image/svg+xml;base64," + project.icon).app-icon
     else
       img(src="/images/application-default-icon.png").app-icon
     div
-      if project.release.latest
-        p #{project.github.fullName} #{project.release.latest.version}
-      else
-        p #{project.github.fullName}
-      p.subtext: a(href="https://github.com/" + project.github.fullName, target="_blank")= project.name
+      p #{project.name.human}
+      p.subtext: a(href="https://github.com/" + project.github.name, target="_blank")= project.github.name
   div.right
     if status === true
       if project.status === 'NEW'

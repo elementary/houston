@@ -6,7 +6,6 @@
 import * as atc from 'lib/atc'
 import Cycle from 'lib/database/cycle'
 import Log from 'lib/log'
-import Project from 'lib/database/project'
 
 const log = new Log('controller:hook:flightcheck')
 const worker = new atc.Worker('cycle')
@@ -56,15 +55,6 @@ worker.register('finish', async (param) => {
   })
 
   const errors = param.logs.filter((l) => (l.level === 'error'))
-
-  if (param.apphub !== null) {
-    log.debug(`Updating ${cycle.name} project apphub object`)
-
-    await Project.findByIdAndUpdate(cycle.project, {
-      'apphub': param.apphub,
-      'github.label': param.apphub.log.label
-    })
-  }
 
   if (errors.length > 0) {
     log.debug(`Failing ${cycle.name} due to error logs`)

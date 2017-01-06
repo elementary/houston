@@ -47,7 +47,6 @@ export function handleMessage (message) {
     'releases.version': filename[1]
   }, {
     $inc: {
-      'downloads': 1,
       'releases.$.downloads': 1
     }
   })
