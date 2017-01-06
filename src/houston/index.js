@@ -20,7 +20,6 @@ import * as passport from './passport'
 import * as policy from './policy'
 import config from 'lib/config'
 import controllers from './controller'
-import db from 'lib/database'
 import Log from 'lib/log'
 import Mistake from 'lib/mistake'
 import PermError from './policy/error'
@@ -196,10 +195,5 @@ app.on('error', async (error, ctx) => {
 // Launching server
 app.listen(config.server.port)
 log.info(`Houston listening on ${config.server.port} in ${app.env} configuration`)
-
-app.on('close', () => {
-  db.disconnect()
-  log.info('And now my watch has ended')
-})
 
 export default { app }

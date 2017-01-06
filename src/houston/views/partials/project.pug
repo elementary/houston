@@ -5,7 +5,10 @@ mixin project(project, status, stripe)
     else
       img(src="/images/application-default-icon.png").app-icon
     div
-      p #{project.github.fullName} #{project.release.latest.version}
+      if project.release.latest
+        p #{project.github.fullName} #{project.release.latest.version}
+      else
+        p #{project.github.fullName}
       p.subtext: a(href="https://github.com/" + project.github.fullName, target="_blank")= project.name
   div.right
     if status === true
