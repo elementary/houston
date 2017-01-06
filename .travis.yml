@@ -1,7 +1,12 @@
+sudo: required
+
 language: node_js
 
 git:
   depth: 1
+
+before_install:
+  - docker pull mongo
 
 script:
   - npm run build
@@ -9,6 +14,7 @@ script:
   - npm run test
 
 services:
+  - docker
   - mongodb
 
 addons:
