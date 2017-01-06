@@ -8,14 +8,27 @@
  /* eslint-disable no-useless-escape */
 
 import test from 'ava'
+import mock from 'mock-require'
+import path from 'path'
 
-import Master from 'lib/database/master'
+import alias from 'root/.alias'
+import mockConfig from 'test/fixtures/config'
+
+test.beforeEach((t) => {
+  mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
+
+  t.context.Master = require(path.resolve(alias.resolve.alias['lib'], 'database', 'master')).default
+})
 
 test('sanatize does nothing with regular text', (t) => {
+  const Master = t.context.Master
+
   t.is(Master.sanatize('$%\9sethisistext☺'), '$%\9sethisistext☺')
 })
 
 test('sanatize strips object like text', (t) => {
+  const Master = t.context.Master
+
   const one = Master.sanatize({
     $or: null,
     $and: undefined,
