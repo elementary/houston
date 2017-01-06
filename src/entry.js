@@ -18,6 +18,7 @@ global.Promise = require('bluebird')
 import program from 'commander'
 
 import config from 'lib/config'
+import database from 'lib/database/connection'
 import Pipeline from 'flightcheck/pipeline'
 
 // TODO: allow options for port and other common config options
@@ -28,6 +29,8 @@ program
   .command('houston')
   .description('starts the houston web server')
   .action(() => {
+    database.connect(config.database)
+
     require('./houston')
   })
 
