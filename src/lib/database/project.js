@@ -141,7 +141,7 @@ schema.set('toJSON', {
   virtuals: true,
   transform: (doc, ret) => {
     ret.id = ret._id
-    delete ret['id']
+    delete ret['_id']
     delete ret['error']
     delete ret['github']['installation']
     delete ret['stripe']['id']
