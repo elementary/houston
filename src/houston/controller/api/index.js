@@ -15,8 +15,6 @@ import PermError from 'houston/policy/error'
 import config from 'lib/config'
 
 import payment from './payment'
-import popularity from './popularity'
-import projects from './projects'
 
 const log = new Log('controller:api')
 const route = new Router({
@@ -104,8 +102,6 @@ route.use((ctx, next) => {
 
 // Load all api paths here
 route.use(payment.routes(), payment.allowedMethods())
-route.use(popularity.routes(), popularity.allowedMethods())
-route.use(projects.routes(), projects.allowedMethods())
 
 /**
  * ANY /api/*
