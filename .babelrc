@@ -12,6 +12,7 @@
     }],
 
     "transform-export-extensions",
+    "transform-flow-strip-types",
     "transform-regenerator",
 
     ["webpack-alias", {

@@ -1,6 +1,7 @@
 /**
  * service/stripe.js
  * Handles all communications to Stripe API
+ * @flow
  *
  * @exports {Object} default - superagent for communicating with Stripe
  * @exports {Class} StripeError - error related to communication with Stripe
@@ -36,28 +37,10 @@ export class StripeError extends service.ServiceError {
    *
    * @param {String} msg - message to put on the error
    */
-  constructor (msg) {
+  constructor (msg: string) {
     super(msg)
 
     this.code = 'STPERR'
-  }
-}
-
-/**
- * paramAssert
- * Checks function paramiters
- *
- * @param {*} val - value to assert
- * @param {String} type - javascript typeof value to check for
- * @param {String} fn - function name
- * @param {String} name - value name to put in log
- * @throws {GitHubError} - value does not pass assert check
- * @returns {Void}
- */
-const paramAssert = (val, type, fn, name) => {
-  if (typeof val !== type) {
-    log.error(`GitHub service tried to ${fn} without a ${name}`)
-    throw new StripeError(`Unable to ${fn} without a ${name}`)
   }
 }
 
@@ -71,7 +54,7 @@ const paramAssert = (val, type, fn, name) => {
  * @param {String} [fo] - additional info to put in error for tracking
  * @returns {GitHubError} - a parsed error from Stripe
  */
-const errorCheck = (err, res, fn, fo) => {
+const errorCheck = (err: Object, res: ?Object, fn: string, fo: ?string): StripeError => {
   const errorString = `on Stripe service ${(fo != null) ? `${fn} for ${fo}` : fn}`
 
   if (err.status === 401) {
@@ -122,9 +105,7 @@ const errorCheck = (err, res, fn, fo) => {
  * @returns {Number} developer - the amount of money remaining for the developer
  * @returns {Number} total - the total amount of money
  */
-export function getCut (amount) {
-  paramAssert(amount, 'number', 'getCut', 'amount')
-
+export function getCut (amount: number): Object {
   const out = {}
 
   out['stripe'] = Math.ceil((amount * 0.029) + 30)
@@ -154,12 +135,7 @@ export function getCut (amount) {
  * @throws {StripeError} - when unable to create charge
  * @returns {String} - Stripe charge ID
  */
-export function postCharge (account, token, amount, currency, description) {
-  paramAssert(account, 'string', 'postCharge', 'account')
-  paramAssert(token, 'string', 'postCharge', 'token')
-  paramAssert(amount, 'number', 'postCharge', 'amount')
-  paramAssert(currency, 'string', 'postCharge', 'currency')
-
+export function postCharge (account: string, token: string, amount: number, currency: string, description: ?string): Promise<string> {
   if (!config.stripe || !config.stripe.client || !config.stripe.secret || !config.stripe.public) {
     log.debug('Config prohibits posting to Stripe. Not posting charge')
     return Promise.resolve('')
