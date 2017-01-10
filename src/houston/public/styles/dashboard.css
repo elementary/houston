@@ -128,14 +128,13 @@
     margin: 10px;
 }
 
-@media only screen and (min-width: 500px) {
+@media only screen and (min-width: 900px) {
     .repo {
         align-items: center;
         flex-direction: row;
         justify-content: space-between;
         margin: auto;
-        max-width: 600px;
-        min-width: 400px;
+        max-width: 900px;
         text-align: left;
         width: 80%;
     }
