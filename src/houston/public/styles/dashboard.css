@@ -57,54 +57,23 @@
 * Repo list *
 ************/
 
-.repo-wrap {
+.repo {
     color: #333;
     display: block;
     padding: 24px;
 }
 
-.repo-wrap:nth-of-type(even) {
+.repo:nth-of-type(even) {
     background-color: #fafafa;
 }
 
-.repo {
+.repo__container {
+    align-content: center;
     display: flex;
     flex-direction: column;
+    margin: auto;
     text-align: center;
     width: 100%;
-}
-
-.repo > div {
-    margin: 12px auto;
-}
-
-.repo > div > div {
-    margin-top: 8px;
-}
-
-.repo .button {
-    font-size: 12px;
-    padding: 6px 12px;
-    position: relative;
-}
-
-.repo .button {
-    margin: auto 12px;
-}
-
-.repo .fab {
-    margin: auto;
-}
-
-.repo p {
-    margin: 0;
-    padding-bottom: 3px;
-    text-align: center;
-    white-space: nowrap;
-}
-
-.repo .button > p {
-    padding-bottom: 0;
 }
 
 .repo p a {
@@ -117,41 +86,70 @@
     opacity: 1;
 }
 
-.repo .app-icon {
+.repo__icon,
+.repo__body,
+.repo__action {
+    padding: 4px;
+}
+
+.repo__icon .app-icon {
     height: 64px;
     vertical-align: middle;
     width: 64px;
 }
 
-.repo > .right > * {
-    display: inline-block;
-    margin: 10px;
+.repo__body p {
+    margin: 0;
+    overflow: hidden;
+    padding: 2px 0;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-@media only screen and (min-width: 500px) {
-    .repo {
-        align-items: center;
+.repo__action {
+    align-content: center;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+}
+
+.repo__action .button {
+    font-size: 12px;
+    padding: 6px 12px;
+    position: relative;
+}
+
+.repo__action .button,
+.repo__action .fab {
+    margin: 6px;
+}
+
+@media only screen and (min-width: 600px) {
+    .repo__container {
         flex-direction: row;
-        justify-content: space-between;
-        margin: auto;
-        max-width: 600px;
-        min-width: 400px;
+        flex-wrap: nowrap;
+        max-width: 700px;
         text-align: left;
-        width: 80%;
     }
 
-    .repo > div {
-        margin: 0;
+    .repo__icon,
+    .repo__action {
+        flex: 0 0 auto;
     }
 
-    .repo > div > div {
-        display: inline-block;
-        margin: 0 0 0 8px;
-        vertical-align: middle;
+    .repo__body {
+        flex: 1 1 auto;
+        min-width: 0;
     }
 
-    .repo p {
+    .repo__body p {
         text-align: left;
+    }
+
+    .repo__action > a {
+        align-self: center;
     }
 }
 
