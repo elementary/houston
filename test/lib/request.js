@@ -34,7 +34,7 @@ test('Can prefix a domain url', async (t) => {
   t.is(three.body.key, 'value2')
 })
 
-test('Can use methods for each domain request', async (t) => {
+test('Can use methods for each domain request', (t) => {
   const one = request.domain('http://nope.com')
   .use((req) => {
     req.url = 'http://testing.com'
