@@ -84,7 +84,7 @@ export const schema = new db.Schema({
 schema.virtual('notify.agreement').get(function () {
   if (this.date.agreement == null) return true
 
-  return this.date.agreement.getTime() > AGREEMENTDATE.getTime()
+  return this.date.agreement.getTime() < AGREEMENTDATE.getTime()
 })
 
 /**
