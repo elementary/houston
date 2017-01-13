@@ -148,7 +148,7 @@
         text-align: left;
     }
 
-    .repo__action > a {
+    .repo__action > * {
         align-self: center;
     }
 }
