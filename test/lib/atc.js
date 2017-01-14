@@ -11,7 +11,7 @@ import alias from 'root/.alias'
 
 import mockConfig from 'test/fixtures/config.js'
 
-test.beforeEach('setup configuration mock', async (t) => {
+test.beforeEach('setup configuration mock', (t) => {
   mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
 
   t.context.atc = require(path.resolve(alias.resolve.alias['lib'], 'atc'))
@@ -43,7 +43,7 @@ test('Sender can get an item in the queue', async (t) => {
   t.deepEqual(one.params, two.params)
 })
 
-test('Worker can register a function', async (t) => {
+test('Worker can register a function', (t) => {
   const worker = new t.context.atc.Worker('test')
 
   t.notThrows(() => {

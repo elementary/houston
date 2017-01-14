@@ -2,6 +2,7 @@
  * lib/log.js
  * Creates a simple, multi environment, namespaced log class
  * NOTE: our global namespace is "houston"
+ * @flow
  *
  * @see https://github.com/visionmedia/debug
  *
@@ -48,16 +49,18 @@ if (process.env.DEBUG == null) {
 
 /**
  * Creates a new Log class
+ *
+ * @property {Object} upstream - Holds upstream debug library instances
  */
 const Log = class {
+  upstream: Object
 
   /**
    * Creates a new log subclass
    *
    * @param {String} name - log namespace
    */
-  constructor (name) {
-    // This stores all of our upstream Debug instances
+  constructor (name: string) {
     this.upstream = {}
 
     const prefix = (name == null) ? namespace : `${namespace}:${name}`
@@ -66,9 +69,6 @@ const Log = class {
     this.upstream.info = Debug(`${prefix}:info`)
     this.upstream.warn = Debug(`${prefix}:warn`)
     this.upstream.error = Debug(`${prefix}:error`)
-
-    // Setup sentry passthrough
-    this.reporter = sentry
   }
 
   /**
@@ -78,7 +78,7 @@ const Log = class {
    * @param {...*} args - anything to send to upstream Debug library
    * @returns {Void}
    */
-  debug (...args) {
+  debug (...args: any) {
     this.upstream.debug(...args)
   }
 
@@ -89,7 +89,7 @@ const Log = class {
    * @param {...*} args - anything to send to upstream Debug library
    * @returns {Void}
    */
-  info (...args) {
+  info (...args: any) {
     this.upstream.info(...args)
   }
 
@@ -100,7 +100,7 @@ const Log = class {
    * @param {...*} args - anything to send to upstream Debug library
    * @returns {Void}
    */
-  warn (...args) {
+  warn (...args: any) {
     this.upstream.warn(...args)
   }
 
@@ -111,7 +111,7 @@ const Log = class {
    * @param {...*} args - anything to send to upstream Debug library
    * @returns {Void}
    */
-  error (...args) {
+  error (...args: any) {
     this.upstream.error(...args)
   }
 
@@ -120,11 +120,11 @@ const Log = class {
    * Sends a report to third party error logging service
    *
    * @param {Error} err - an error to capture
-   * @param {Object} data - any extra data to send along with error
+   * @param {Object} [data] - any extra data to send along with error
    * @returns {Void}
    */
-  report (err, data) {
-    if (this.reporter != null) {
+  report (err: Error, data: ?Object) {
+    if (sentry != null) {
       sentry.captureException(err, data)
     } else {
       this.info('Reporter disabled. Not sending error')
@@ -141,7 +141,6 @@ const log = new Log('lib:log')
 
 process.on('unhandledRejection', (reason, promise) => {
   log.warn(`Unhandled rejection at ${promise._fulfillmentHandler0}\n`, reason)
-
   log.report(reason)
 })
 

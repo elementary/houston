@@ -9,7 +9,7 @@
 import db from './connection'
 
 // AGREEMENTDATE is the date the current TOS was created
-const AGREEMENTDATE = new Date(2016, 12, 8)
+const AGREEMENTDATE = new Date(2017, 1, 13)
 
 /**
  * @type {object} - User database schema
@@ -84,7 +84,7 @@ export const schema = new db.Schema({
 schema.virtual('notify.agreement').get(function () {
   if (this.date.agreement == null) return true
 
-  return this.date.agreement.getTime() > AGREEMENTDATE.getTime()
+  return this.date.agreement.getTime() < AGREEMENTDATE.getTime()
 })
 
 /**
