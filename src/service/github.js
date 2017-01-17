@@ -11,6 +11,7 @@
  * @exports {Function} castRelease - Casts a GitHub release for internal use
  * @exports {Function} generateJWT - Generates JWT bearer token
  * @exports {Function} generateToken - Generates GitHub authentication token
+ * @exports {Function} getRepo - Fetches a repository by GitHub ID
  * @exports {Function} getRepos - Fetches all repos the token has access to
  * @exports {Function} getReleases - Fetches all releases a repo has
  * @exports {Function} getPermission - Checks callaborator status on repository
@@ -254,7 +255,7 @@ export async function generateJWT (exp: Date = moment().add(1, 'minutes').toDate
  * @throws {GitHubError} - on an error
  * @returns {String} - GitHub token to use for authentication
  */
-export async function generateToken (inst: number, user: number): Promise<string> {
+export async function generateToken (inst: number, user: ?number): Promise<string> {
   const cachedToken = getToken(inst, user)
   if (cachedToken != null) {
     log.debug(`Using cached token key for installation #${inst}`)
@@ -292,6 +293,30 @@ export async function generateToken (inst: number, user: number): Promise<string
     log.error('GitHub token generation returned an unexpected body')
     throw new GitHubError('Unable to generate authentication token')
   }
+}
+
+/**
+ * getRepo
+ * Fetches a single repository
+ *
+ * @see https://developer.github.com/v3/repos/#get
+ *
+ * @param {String} owner - GitHub owner name
+ * @param {String} repo - GitHub repository name
+ * @param {String} token - GitHub authentication token
+ *
+ * @async
+ * @throws {GitHubError} - on an error
+ * @returns {Object} - A single Project like GitHub object
+ */
+export function getRepo (owner: string, repo: string, token: string): Promise<Object> {
+  return api
+  .get(`/repos/${owner}/${repo}`)
+  .set('Authorization', `token ${token}`)
+  .then((res) => castProject(res.body))
+  .catch((err, res) => {
+    throw errorCheck(err, res, 'getRepos')
+  })
 }
 
 /**
