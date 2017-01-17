@@ -192,8 +192,4 @@ app.on('error', async (error, ctx) => {
   log.report(error)
 })
 
-// Launching server
-app.listen(config.server.port)
-log.info(`Houston listening on ${config.server.port} in ${app.env} configuration`)
-
-export default { app }
+export default app
