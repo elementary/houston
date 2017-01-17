@@ -315,4 +315,26 @@ schema.methods.createCycle = async function (type) {
   return cycle
 }
 
+/**
+ * Removes all cycles when deleteing a project
+ *
+ * @param {Object} this - Document getting removed
+ * @param {Function} next - Calls next middleware
+ * @returns {void}
+ */
+schema.pre('remove', async function (next) {
+  const cycleID = []
+
+  cycleID.push(...this.cycles)
+  this.releases.forEach((release) => cycleID.push(...release.cycles))
+
+  const cycles = await db.model('cycle').find({
+    _id: { $in: cycleID }
+  })
+
+  await Promise.each(cycles, (cycle) => cycle.remove())
+
+  next()
+})
+
 export default db.model('project', schema)
