@@ -21,6 +21,7 @@ module.exports = {
       'houston': path.resolve(__dirname, 'src', 'houston'),
       'lib': path.resolve(__dirname, 'src', 'lib'),
       'service': path.resolve(__dirname, 'src', 'service'),
+      'telemetry': path.resolve(__dirname, 'src', 'telemetry'),
 
       'test': path.resolve(__dirname, 'test')
     }
