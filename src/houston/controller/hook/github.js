@@ -46,10 +46,11 @@ export async function createInstallation (installation: number): Promise<Project
  * @returns {Promise[]} - A promise of removed Projects from database
  */
 export async function deleteInstallation (installation: number): Promise<> {
-  const token = await github.generateToken(installation)
-  const repositories = await github.getInstallations(token)
+  const projects = await Project.find({
+    'github.installation': installation
+  })
 
-  const promises = repositories.map((repo) => deleteRepository(repo.github.id))
+  const promises = projects.map((project) => project.delete())
 
   return Promise.all(promises)
 }
