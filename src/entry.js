@@ -21,9 +21,12 @@ import config from 'lib/config'
 import database from 'lib/database/connection'
 import Pipeline from 'flightcheck/pipeline'
 
-// TODO: allow options for port and other common config options
 program
-  .version(config.houston.version)
+  .command('flightcheck')
+  .description('starts flightcheck to listen for requests from houston')
+  .action(() => {
+    require('./flightcheck/houston')
+  })
 
 program
   .command('houston')
@@ -37,10 +40,18 @@ program
   })
 
 program
-  .command('flightcheck')
-  .description('starts flightcheck to listen for requests from houston')
-  .action(() => {
-    require('./flightcheck/houston')
+  .command('telemetry')
+  .description('starts nginx syslog server for download statistics')
+  .option('-p, --port <port>', 'Port to listen on', config.telemetry.port)
+  .action((opts) => {
+    const telemetry = require('./telemetry/server').default
+
+    telemetry.server.on('error', (err) => {
+      console.error(err)
+      process.exit(1)
+    })
+
+    telemetry.listen(opts.port)
   })
 
 program
@@ -67,6 +78,7 @@ program
   })
 
 program
+  .version(config.houston.version)
   .parse(process.argv)
 
 if (!program.args.length) {

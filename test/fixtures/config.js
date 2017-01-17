@@ -60,6 +60,6 @@ module.exports.flightcheck = {
   docker: '/var/run/docker.sock'
 }
 
-module.exports.downloads = {
+module.exports.telemetry = {
   port: 3001
 }
