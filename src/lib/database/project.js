@@ -329,7 +329,7 @@ schema.pre('remove', async function (next) {
   this.releases.forEach((release) => cycleID.push(...release.cycles))
 
   const cycles = await db.model('cycle').find({
-    _id: { $id: cycleID }
+    _id: { $in: cycleID }
   })
 
   await Promise.each(cycles, (cycle) => cycle.remove())
