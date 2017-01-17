@@ -74,7 +74,11 @@ module.exports.flightcheck = {
   docker: '/var/run/docker.sock'
 }
 
-// Nginx repository syslog server
-module.exports.downloads = {
+/**
+ * telemetry
+ * A syslog server for nginx to record download statistics. This is an optional,
+ * but highly recommended component.
+ */
+module.exports.telemetry = {
   port: 3001
 }

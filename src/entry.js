@@ -18,24 +18,40 @@ global.Promise = require('bluebird')
 import program from 'commander'
 
 import config from 'lib/config'
+import database from 'lib/database/connection'
 import Pipeline from 'flightcheck/pipeline'
-
-// TODO: allow options for port and other common config options
-program
-  .version(config.houston.version)
-
-program
-  .command('houston')
-  .description('starts the houston web server')
-  .action(() => {
-    require('./houston')
-  })
 
 program
   .command('flightcheck')
   .description('starts flightcheck to listen for requests from houston')
   .action(() => {
     require('./flightcheck/houston')
+  })
+
+program
+  .command('houston')
+  .description('starts the houston web server')
+  .option('-p, --port <port>', 'Port to listen on', config.server.port)
+  .action((opts) => {
+    const app = require('./houston').default
+
+    database.connect(config.database)
+    app.listen(opts.port)
+  })
+
+program
+  .command('telemetry')
+  .description('starts nginx syslog server for download statistics')
+  .option('-p, --port <port>', 'Port to listen on', config.telemetry.port)
+  .action((opts) => {
+    const telemetry = require('./telemetry/server').default
+
+    telemetry.server.on('error', (err) => {
+      console.error(err)
+      process.exit(1)
+    })
+
+    telemetry.listen(opts.port)
   })
 
 program
@@ -62,6 +78,7 @@ program
   })
 
 program
+  .version(config.houston.version)
   .parse(process.argv)
 
 if (!program.args.length) {
