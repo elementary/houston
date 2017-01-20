@@ -19,24 +19,25 @@ import db from './connection'
  * cycle. hour holds 24 indexes starting at 0, each representing the 24 hours in
  * a day. An hour record should only last 24 hours, before being removed and a
  * new one being created for the new day. On pushing new download numbers, 4
- * records will be upserted, one for each increment.
- *
- * @type {db}
+ * records will be upserted, one for each increment type.
  */
 const schema = new db.Schema({
-  release: db.Types.ObjectId,
+  release: {
+    type: db.Schema.ObjectId,
+    ref: 'release'
+  },
   expireAt: Date,
 
   current: {
     total: Number // Stores the total amount for the current increment pool
   },
 
-  increment: String, // Stores the increment type (ex year, month, day, or hour)
+  type: String, // Stores the increment type (ex year, month, day, or hour)
   // Only one of the below will exist for every record
-  year: [Number], // Stores values per year at year index (ex 2016, 2017, etc)
-  month: [Number], // Stores values per month at indexes 0 - 11
-  day: [Number], // Stores values per day at indexes 1 - 31
-  hour: [Number] // Stores values per hour at indexes 0 - 23
+  year: Object, // Stores values per year at year key (ex 2016, 2017, etc)
+  month: Object, // Stores values per month at key 0 - 11
+  day: Object, // Stores values per day at key 1 - 31
+  hour: Object // Stores values per hour at key 0 - 23
 })
 
 /**
@@ -49,18 +50,18 @@ const schema = new db.Schema({
  * @return {void}
  */
 schema.statics.push = function (id: db.Types.ObjectId, count: Number): Promise<> {
-  const currentYear = moment().UTC().get('year')
-  const currentMonth = moment().UTC().get('month')
-  const currentDay = moment().UTC().get('day')
-  const currentHour = moment().UTC().get('hour')
+  const currentYear = moment.utc().get('year')
+  const currentMonth = moment.utc().get('month')
+  const currentDay = moment.utc().get('date')
+  const currentHour = moment.utc().get('hour')
 
-  const endOfYear = moment().UTC().endOf('year')
-  const endOfMonth = moment().UTC().endOf('month')
-  const endOfDay = moment().UTC().endOf('day')
+  const endOfYear = moment.utc().endOf('year')
+  const endOfMonth = moment.utc().endOf('month')
+  const endOfDay = moment.utc().endOf('day')
 
   const yearIncrement = this.update({
     'release': id,
-    'increment': 'year'
+    'type': 'year'
   }, {
     $inc: {
       'current.total': count,
@@ -70,7 +71,7 @@ schema.statics.push = function (id: db.Types.ObjectId, count: Number): Promise<>
 
   const monthIncrement = this.update({
     'release': id,
-    'increment': 'month'
+    'type': 'month'
   }, {
     $set: {
       'expireAt': endOfYear
@@ -83,7 +84,7 @@ schema.statics.push = function (id: db.Types.ObjectId, count: Number): Promise<>
 
   const dayIncrement = this.update({
     'release': id,
-    'increment': 'day'
+    'type': 'day'
   }, {
     $set: {
       'expireAt': endOfMonth
@@ -96,7 +97,7 @@ schema.statics.push = function (id: db.Types.ObjectId, count: Number): Promise<>
 
   const hourIncrement = this.update({
     'release': id,
-    'increment': 'hour'
+    'type': 'hour'
   }, {
     $set: {
       'expireAt': endOfDay
