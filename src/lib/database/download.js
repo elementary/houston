@@ -55,9 +55,9 @@ schema.statics.push = function (id: db.Types.ObjectId, count: Number): Promise<>
   const currentDay = moment.utc().get('date')
   const currentHour = moment.utc().get('hour')
 
-  const endOfYear = moment.utc().endOf('year')
-  const endOfMonth = moment.utc().endOf('month')
-  const endOfDay = moment.utc().endOf('day')
+  const endOfYear = moment.utc().endOf('year').toDate()
+  const endOfMonth = moment.utc().endOf('month').toDate()
+  const endOfDay = moment.utc().endOf('day').toDate()
 
   const yearIncrement = this.update({
     'release': id,
