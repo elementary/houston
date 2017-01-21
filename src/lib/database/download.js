@@ -41,7 +41,7 @@ const schema = new db.Schema({
 })
 
 /**
- * push
+ * incrementByRelease
  * Increments download count of release
  *
  * @async
@@ -49,7 +49,7 @@ const schema = new db.Schema({
  * @param {Number} count - Amount to increment by
  * @return {void}
  */
-schema.statics.push = function (id: db.Types.ObjectId, count: Number): Promise<> {
+schema.statics.incrementByRelease = function (id: db.Types.ObjectId, count: Number): Promise<> {
   const currentYear = moment.utc().get('year')
   const currentMonth = moment.utc().get('month')
   const currentDay = moment.utc().get('date')
@@ -114,6 +114,85 @@ schema.statics.push = function (id: db.Types.ObjectId, count: Number): Promise<>
     dayIncrement,
     hourIncrement
   ])
+}
+
+/**
+ * findYear
+ * Finds download record for latest year increment
+ *
+ * @async
+ * @param {ObjectId} id - Database ID of release
+ * @return {Download} - Latest year increment for given release
+ */
+schema.statics.findYear = function (id: db.Types.ObjectId): Promise<?Object> {
+  return this.findOne({
+    release: id,
+    type: 'year'
+  })
+  .sort('expireAt', 1)
+}
+
+/**
+ * findMonth
+ * Finds download record for latest month increment
+ *
+ * @async
+ * @param {ObjectId} id - Database ID of release
+ * @return {Download} - Latest month increment for given release
+ */
+schema.statics.findMonth = function (id: db.Types.ObjectId): Promise<?Object> {
+  return this.findOne({
+    release: id,
+    type: 'month'
+  })
+  .sort('expireAt', 1)
+}
+
+/**
+ * findDay
+ * Finds download record for latest day increment
+ *
+ * @async
+ * @param {ObjectId} id - Database ID of release
+ * @return {Download} - Latest day increment for given release
+ */
+schema.statics.findDay = function (id: db.Types.ObjectId): Promise<?Object> {
+  return this.findOne({
+    release: id,
+    type: 'day'
+  })
+  .sort('expireAt', 1)
+}
+
+/**
+ * findHour
+ * Finds download record for latest hour increment
+ *
+ * @async
+ * @param {ObjectId} id - Database ID of release
+ * @return {Download} - Latest hour increment for given release
+ */
+schema.statics.findHour = function (id: db.Types.ObjectId): Promise<?Object> {
+  return this.findOne({
+    release: id,
+    type: 'hour'
+  })
+  .sort('expireAt', 1)
+}
+
+/**
+ * findTotal
+ * Finds the latest total download count for release
+ *
+ * @async
+ * @param {ObjectId} id - Database ID of release
+ * @return {Number} - Latest total amount of downloads
+ */
+schema.statics.findTotal = async function (id: db.Types.ObjectId): Promise<number> {
+  const year = await this.findYear(id)
+
+  if (year == null) return 0
+  return year.current.total
 }
 
 export { schema }

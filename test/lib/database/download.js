@@ -32,25 +32,26 @@ test.after.always((t) => {
   return stopContainer(container)
 })
 
-test('push increments all types', async (t) => {
+test('incrementByRelease() increments all types', async (t) => {
   const release = db.Types.ObjectId()
 
-  await Download.push(release, 1)
+  await Download.incrementByRelease(release, 1)
 
-  const result = await Download.find({})
+  const result = await Download.find({ release })
 
+  t.is(result.length, 4)
   t.not(result.find((r) => (r.type === 'year')), null)
   t.not(result.find((r) => (r.type === 'month')), null)
   t.not(result.find((r) => (r.type === 'day')), null)
   t.not(result.find((r) => (r.type === 'hour')), null)
 })
 
-test('push sets current amount on year increment', async (t) => {
+test('incrementByRelease() sets current amount on year increment', async (t) => {
   const release = db.Types.ObjectId()
 
-  await Download.push(release, 1)
+  await Download.incrementByRelease(release, 1)
 
-  const result = await Download.find({})
+  const result = await Download.find({ release })
 
   const currentYear = moment.utc().get('year')
   const yearResult = result.find((r) => (r.type === 'year'))
@@ -59,12 +60,12 @@ test('push sets current amount on year increment', async (t) => {
   t.is(yearResult.year[currentYear], 1)
 })
 
-test('push sets current amount on month increment', async (t) => {
+test('incrementByRelease() sets current amount on month increment', async (t) => {
   const release = db.Types.ObjectId()
 
-  await Download.push(release, 1)
+  await Download.incrementByRelease(release, 1)
 
-  const result = await Download.find({})
+  const result = await Download.find({ release })
 
   const currentMonth = moment.utc().get('month')
   const endOfYear = moment.utc().endOf('year').toDate()
@@ -75,12 +76,12 @@ test('push sets current amount on month increment', async (t) => {
   t.is(monthResult.expireAt.getTime(), endOfYear.getTime())
 })
 
-test('push sets current amount on day increment', async (t) => {
+test('incrementByRelease() sets current amount on day increment', async (t) => {
   const release = db.Types.ObjectId()
 
-  await Download.push(release, 1)
+  await Download.incrementByRelease(release, 1)
 
-  const result = await Download.find({})
+  const result = await Download.find({ release })
 
   const currentDay = moment.utc().get('date')
   const endOfMonth = moment.utc().endOf('month').toDate()
@@ -91,12 +92,12 @@ test('push sets current amount on day increment', async (t) => {
   t.is(dayResult.expireAt.getTime(), endOfMonth.getTime())
 })
 
-test('push sets current amount on hour increment', async (t) => {
+test('incrementByRelease() sets current amount on hour increment', async (t) => {
   const release = db.Types.ObjectId()
 
-  await Download.push(release, 1)
+  await Download.incrementByRelease(release, 1)
 
-  const result = await Download.find({})
+  const result = await Download.find({ release })
 
   const currentHour = moment.utc().get('hour')
   const endOfDay = moment.utc().endOf('day').toDate()
