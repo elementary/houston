@@ -3,33 +3,26 @@
  * Tests Download model functions and schema
  */
 
+import { serial as test } from 'ava'
 import mock from 'mock-require'
 import moment from 'moment'
 import path from 'path'
-import test from 'ava'
 
-import { startContainer, stopContainer } from 'test/helpers/database'
 import alias from 'root/.alias'
 import mockConfig from 'test/fixtures/config'
 
-let config = null
-let container = null
-let db = null
-let Download = null
+mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
 
-test.before(async (t) => {
-  mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
+const config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
+const db = require(path.resolve(alias.resolve.alias['lib'], 'database', 'connection.js')).default
+const Download = require(path.resolve(alias.resolve.alias['lib'], 'database', 'download')).default
 
-  config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
-  container = await startContainer(config.flightcheck.docker)
-  db = require(path.resolve(alias.resolve.alias['lib'], 'database', 'connection')).default
-  Download = require(path.resolve(alias.resolve.alias['lib'], 'database', 'download')).default
-
-  db.connect(container.mongo)
+test.before((t) => {
+  db.connect(config.database)
 })
 
-test.after.always((t) => {
-  return stopContainer(container)
+test.after((t) => {
+  db.connection.close()
 })
 
 test('incrementByRelease() increments all types', async (t) => {
