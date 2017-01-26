@@ -82,8 +82,7 @@ route.get('/beta', policy.isRole('USER'), async (ctx, next) => {
 
   return ctx.render('beta/form', {
     email: ctx.state.user.email,
-    isBeta: ctx.state.user.notify.beta,
-    hideUser: true
+    isBeta: ctx.state.user.notify.beta
   })
 })
 
@@ -100,8 +99,7 @@ route.post('/beta', policy.isRole('USER'), async (ctx, next) => {
     ctx.status = 406
     return ctx.render('beta/form', {
       email: ctx.state.user.email,
-      isBeta: ctx.state.user.notify.beta,
-      hideUser: true
+      isBeta: ctx.state.user.notify.beta
     })
   }
 
@@ -116,8 +114,7 @@ route.post('/beta', policy.isRole('USER'), async (ctx, next) => {
     return ctx.render('beta/form', {
       email,
       isBeta: ctx.state.user.notify.beta,
-      error: 'Invalid email address',
-      hideUser: true
+      error: 'Invalid email address'
     })
   }
 
@@ -128,8 +125,7 @@ route.post('/beta', policy.isRole('USER'), async (ctx, next) => {
 
   return ctx.render('beta/form', {
     email,
-    isBeta: true,
-    hideUser: true
+    isBeta: true
   })
 })
 
