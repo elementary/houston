@@ -53,6 +53,8 @@ const tokenCache: Array<Object> = []
  */
 const getToken = (inst: number, user: ?number = null): ?string => {
   const foundIndex = tokenCache.findIndex((a) => {
+    if (a == null) return false // the actual fuck
+
     return (a.inst === inst && a.user === user)
   })
 
