@@ -34,16 +34,13 @@ test('authenticates based on right', (t) => {
 test('returns false on invalid user', (t) => {
   const ifRole = t.context.ifRole
 
-  const one = ifRole({ right: 'DORK' }, 'USER')
-  const two = ifRole({ right: 'ADMIM' }, 'ADMIN')
-
-  t.false(one)
-  t.false(two)
+  t.false(ifRole({ right: 'DORK' }, 'USER'))
+  t.false(ifRole({ right: 'ADMIM' }, 'ADMIN'))
 })
 
-test('fails on invalid code', (t) => {
+test('returns false on invalid code', (t) => {
   const ifRole = t.context.ifRole
 
-  t.throws(() => ifRole({ right: 'BETA' }, 'DORK'))
-  t.throws(() => ifRole({ right: 'ADMIN' }, 'REGULAR'))
+  t.false(ifRole({ right: 'BETA' }, 'DORK'))
+  t.false(ifRole({ right: 'ADMIN' }, 'REGULAR'))
 })

@@ -10,10 +10,10 @@ import Promise from 'bluebird'
 
 import * as github from 'service/github'
 import * as policy from 'houston/policy'
-import Cycle from 'houston/model/cycle'
+import Cycle from 'lib/database/cycle'
 import Log from 'lib/log'
-import Project from 'houston/model/project'
-import User from 'houston/model/user'
+import Project from 'lib/database/project'
+import User from 'lib/database/user'
 
 const route = new Router()
 const log = new Log('controller:dashboard')
@@ -76,14 +76,13 @@ route.get('/reviews', policy.isRole('REVIEW'), policy.isAgreement, async (ctx, n
 route.get('/beta', policy.isRole('USER'), async (ctx, next) => {
   ctx.state.title = 'Beta'
 
-  if (policy.ifRole(ctx.state.user, 'beta')) {
+  if (policy.ifRole(ctx.state.user, 'BETA')) {
     return ctx.render('beta/congratulations')
   }
 
   return ctx.render('beta/form', {
     email: ctx.state.user.email,
-    isBeta: ctx.state.user.notify.beta,
-    hideUser: true
+    isBeta: ctx.state.user.notify.beta
   })
 })
 
@@ -100,8 +99,7 @@ route.post('/beta', policy.isRole('USER'), async (ctx, next) => {
     ctx.status = 406
     return ctx.render('beta/form', {
       email: ctx.state.user.email,
-      isBeta: ctx.state.user.notify.beta,
-      hideUser: true
+      isBeta: ctx.state.user.notify.beta
     })
   }
 
@@ -116,8 +114,7 @@ route.post('/beta', policy.isRole('USER'), async (ctx, next) => {
     return ctx.render('beta/form', {
       email,
       isBeta: ctx.state.user.notify.beta,
-      error: 'Invalid email address',
-      hideUser: true
+      error: 'Invalid email address'
     })
   }
 
@@ -128,8 +125,7 @@ route.post('/beta', policy.isRole('USER'), async (ctx, next) => {
 
   return ctx.render('beta/form', {
     email,
-    isBeta: true,
-    hideUser: true
+    isBeta: true
   })
 })
 

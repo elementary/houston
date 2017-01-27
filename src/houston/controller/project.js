@@ -9,7 +9,7 @@ import Router from 'koa-router'
 
 import * as aptly from 'houston/service/aptly'
 import * as policy from 'houston/policy'
-import Project from 'houston/model/project'
+import Project from 'lib/database/project'
 
 const route = new Router({
   prefix: '/project/:project'

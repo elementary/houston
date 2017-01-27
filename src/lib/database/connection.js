@@ -7,16 +7,18 @@
 
 import mongoose from 'mongoose'
 
-import config from './config'
-import Log from './log'
+import Log from 'lib/log'
 
 const log = new Log('lib:database')
 
 mongoose.Promise = global.Promise
 
-mongoose.connect(config.database)
+mongoose.connection.on('error', (msg) => {
+  log.error('Database error')
+  log.error(msg)
 
-mongoose.connection.on('error', (msg) => log.error(msg))
+  log.report(msg)
+})
 
 mongoose.connection.once('open', () => log.info('Connected to database'))
 

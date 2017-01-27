@@ -13,7 +13,7 @@ import Router from 'koa-router'
 import config from 'lib/config'
 import Log from 'lib/log'
 import request from 'lib/request'
-import User from 'houston/model/user'
+import User from 'lib/database/user'
 
 const log = new Log('passport:github')
 

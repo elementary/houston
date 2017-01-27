@@ -1,15 +1,16 @@
 /**
- * houston/model/user.js
+ * lib/database/user.js
  * Mongoose modal and schema for user accounts
  *
  * @exports {Object} schema - user database schema
  * @exports {Object} default - user database model
  */
 
-import db from 'lib/database'
+import db from './connection'
 
 // AGREEMENTDATE is the date the current TOS was created
-const AGREEMENTDATE = new Date(2016, 12, 8)
+// NOTE: JavaScript's month starts at zero
+const AGREEMENTDATE = new Date(2017, 0, 13)
 
 /**
  * @type {object} - User database schema
@@ -84,7 +85,7 @@ export const schema = new db.Schema({
 schema.virtual('notify.agreement').get(function () {
   if (this.date.agreement == null) return true
 
-  return this.date.agreement.getTime() > AGREEMENTDATE.getTime()
+  return (this.date.agreement.getTime() < AGREEMENTDATE.getTime())
 })
 
 /**

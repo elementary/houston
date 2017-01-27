@@ -1,6 +1,6 @@
 /**
- * flightcheck/interfaces/houston.js
- * Will connect flightcheck to houston for tests
+ * flightcheck/houston.js
+ * Listens to requests from houston
  */
 
 import assert from 'assert'
@@ -8,7 +8,7 @@ import assert from 'assert'
 import * as atc from 'lib/atc'
 import config from 'lib/config'
 import Log from 'lib/log'
-import Pipeline from 'flightcheck/pipeline'
+import Pipeline from './pipeline'
 
 const log = new Log('flightcheck')
 
@@ -40,7 +40,8 @@ worker.register('release', async (param) => {
       name: param.name,
       source: 'github',
       changelog,
-      auth: param.auth
+      auth: param.auth,
+      stripe: param.stripe
     })
   } catch (err) {
     log.error(`Flightcheck received an error while trying to create Pipeline for ${param.id}`)

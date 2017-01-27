@@ -10,10 +10,13 @@
 import Router from 'koa-router'
 
 import APIError from './error'
+import Log from 'lib/log'
+import PermError from 'houston/policy/error'
+import config from 'lib/config'
 
-import popularity from './popularity'
-import projects from './projects'
+import payment from './payment'
 
+const log = new Log('controller:api')
 const route = new Router({
   prefix: '/api'
 })
@@ -28,6 +31,12 @@ route.use(async (ctx, next) => {
   ctx.type = 'application/vnd.api+json'
 
   if (ctx.body == null) ctx.body = {}
+
+  if (ctx.body['meta'] == null) ctx.body['meta'] = {}
+  if (ctx.body['meta']['date'] == null) ctx.body['meta']['date'] = new Date().toISOString()
+  if (ctx.body['meta']['version'] == null) ctx.body['meta']['version'] = config.houston.version
+  if (ctx.body['meta']['environment'] == null) ctx.body['meta']['environment'] = config.env
+  if (ctx.body['meta']['commit'] == null && config.houston.commit !== '.gitless') ctx.body['meta']['commit'] = config.houston.commit
 
   if (ctx.body['links'] == null) ctx.body['links'] = {}
   if (ctx.body['links']['self'] == null) ctx.body['links']['self'] = ctx.request.href
@@ -49,7 +58,23 @@ route.use(async (ctx, next) => {
 
     if (err instanceof APIError) {
       apierr = err
+    } else if (err instanceof PermError) {
+      let title = 'You do not have sufficient permission'
+
+      if (err.code === 'PERMERRACC') {
+        title = 'You do not have sufficient permission on the third party service'
+      } else if (err.code === 'PERMERRAGR') {
+        title = 'You need to agree to TOS agreement'
+      }
+
+      apierr = new APIError(403, title)
     } else {
+      log.error(`Error while processing API route ${ctx.request.href}`)
+      log.error(err)
+      log.report(err, {
+        url: ctx.request.href
+      })
+
       apierr = new APIError(500, 'Internal Server Error')
     }
 
@@ -76,8 +101,7 @@ route.use((ctx, next) => {
 })
 
 // Load all api paths here
-route.use(popularity.routes(), popularity.allowedMethods())
-route.use(projects.routes(), projects.allowedMethods())
+route.use(payment.routes(), payment.allowedMethods())
 
 /**
  * ANY /api/*

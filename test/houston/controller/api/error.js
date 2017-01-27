@@ -4,28 +4,19 @@
  */
 
 import _ from 'lodash'
-import mock from 'mock-require'
-import path from 'path'
 import test from 'ava'
 
-import alias from 'root/.alias'
-import mockConfig from 'test/fixtures/config'
-
-test.beforeEach((t) => {
-  mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
-
-  t.context.APIError = require(path.resolve(alias.resolve.alias['houston'], 'controller', 'api', 'error')).default
-})
+import APIError from 'houston/controller/api/error'
 
 test('inherits from Error class', (t) => {
-  const one = new t.context.APIError(500, 'Server error')
+  const one = new APIError(500, 'Server error')
 
   t.true(one instanceof Error)
 })
 
 test('can be created with optional details', (t) => {
-  const one = new t.context.APIError(404, 'Page not found')
-  const two = new t.context.APIError(500, 'Server error', 'please try again')
+  const one = new APIError(404, 'Page not found')
+  const two = new APIError(500, 'Server error', 'please try again')
 
   t.is(one.status, 404)
   t.is(one.title, 'Page not found')
@@ -37,7 +28,7 @@ test('can be created with optional details', (t) => {
 })
 
 test('can be created with pointer source', (t) => {
-  const one = new t.context.APIError.FromPointer(500, 'Server error', '/data')
+  const one = new APIError.FromPointer(500, 'Server error', '/data')
 
   t.is(one.status, 500)
   t.is(one.title, 'Server error')
@@ -45,7 +36,7 @@ test('can be created with pointer source', (t) => {
 })
 
 test('can be created with parameter source', (t) => {
-  const one = new t.context.APIError.FromParameter(500, 'Server error', 'project')
+  const one = new APIError.FromParameter(500, 'Server error', 'project')
 
   t.is(one.status, 500)
   t.is(one.title, 'Server error')
@@ -53,8 +44,8 @@ test('can be created with parameter source', (t) => {
 })
 
 test('toAPI follows JSON API formatting', (t) => {
-  const one = new t.context.APIError(500, 'testing')
-  const two = new t.context.APIError.FromParameter(500, 'testing', 'test')
+  const one = new APIError(500, 'testing')
+  const two = new APIError.FromParameter(500, 'testing', 'test')
 
   const three = one.toAPI()
   const four = two.toAPI()

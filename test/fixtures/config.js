@@ -53,13 +53,13 @@ module.exports.socket = {
   private: 'butseriouslydontworryboutitok?ok.goodokbye'
 }
 
-module.exports.log = 'debug'
+module.exports.log = false
 
 module.exports.flightcheck = {
   directory: '/tmp/flightcheck',
   docker: '/var/run/docker.sock'
 }
 
-module.exports.downloads = {
+module.exports.telemetry = {
   port: 3001
 }

@@ -3,6 +3,7 @@
  * Handles all communication with GitHub api
  * NOTE: This file uses GitHub early-access integrations. Things may change
  * NOTE: GitHub api requires the use of a custom `Accept` header while in early-access
+ * @flow
  *
  * @exports {Object} default - superagent for communicating with GitHub
  * @exports {Class} GitHubError - error related to communication with GitHub
@@ -10,6 +11,7 @@
  * @exports {Function} castRelease - Casts a GitHub release for internal use
  * @exports {Function} generateJWT - Generates JWT bearer token
  * @exports {Function} generateToken - Generates GitHub authentication token
+ * @exports {Function} getRepo - Fetches a repository by GitHub ID
  * @exports {Function} getRepos - Fetches all repos the token has access to
  * @exports {Function} getReleases - Fetches all releases a repo has
  * @exports {Function} getPermission - Checks callaborator status on repository
@@ -39,7 +41,7 @@ const api = domain('https://api.github.com')
 export default api
 
 // This is a poor man's cache for GitHub authentication tokens
-const tokenCache = []
+const tokenCache: Array<Object> = []
 
 /**
  * getToken
@@ -49,8 +51,10 @@ const tokenCache = []
  * @param {Number} [user] - optional GitHub user id
  * @return {String} - GitHub token or null for non-existant
  */
-const getToken = (inst, user = null) => {
+const getToken = (inst: number, user: ?number = null): ?string => {
   const foundIndex = tokenCache.findIndex((a) => {
+    if (a == null) return false // the actual fuck
+
     return (a.inst === inst && a.user === user)
   })
 
@@ -60,7 +64,7 @@ const getToken = (inst, user = null) => {
     return null
   }
 
-  if (foundIndex !== -1) return tokenCache[foundIndex]
+  if (foundIndex !== -1) return tokenCache[foundIndex]['token']
   return null
 }
 
@@ -75,14 +79,7 @@ const getToken = (inst, user = null) => {
  * @throws {GitHubError} - invalid arguments
  * @returns {Void}
  */
-const setToken = (inst, token, exp, user = null) => {
-  if (typeof token !== 'string') {
-    throw new GitHubError('Unable to setToken without a token parameter')
-  }
-  if (typeof exp.getTime !== 'function') {
-    throw new GitHubError('Unable to setToken without a exp parameter')
-  }
-
+const setToken = (inst: number, token: string, exp: Date, user: ?number = null): void => {
   tokenCache.push({ inst, token, exp, user })
 }
 
@@ -99,7 +96,7 @@ export class GitHubError extends service.ServiceError {
    *
    * @param {String} msg - message to put on the error
    */
-  constructor (msg) {
+  constructor (msg: string) {
     super(msg)
 
     this.code = 'GTHERR'
@@ -107,34 +104,16 @@ export class GitHubError extends service.ServiceError {
 }
 
 /**
- * paramAssert
- * Checks function paramiters
- *
- * @param {*} val - value to assert
- * @param {String} type - javascript typeof value to check for
- * @param {String} fn - function name
- * @param {String} name - value name to put in log
- * @throws {GitHubError} - value does not pass assert check
- * @returns {Void}
- */
-const paramAssert = (val, type, fn, name) => {
-  if (typeof val !== type) {
-    log.error(`GitHub service tried to ${fn} without a ${name}`)
-    throw new GitHubError(`Unable to ${fn} without a ${name}`)
-  }
-}
-
-/**
  * errorCheck
  * Checks generatic GitHub status codes for a more descriptive error
  *
- * @param {Error} err - superagent error to check
+ * @param {Object} err - superagent error to check
  * @param {Object} [res] - GitHub response object
  * @param {String} fn - function name on error
  * @param {String} [fo] - additional info to put in error for tracking
  * @returns {GitHubError} - a parsed error from GitHub
  */
-const errorCheck = (err, res, fn, fo) => {
+const errorCheck = (err: Object, res: ?Object, fn: string, fo: ?string): GitHubError => {
   const errorString = `on GitHub service ${(fo != null) ? `${fn} for ${fo}` : fn}`
 
   if (err.status === 401) {
@@ -176,7 +155,7 @@ const errorCheck = (err, res, fn, fo) => {
  * @param {Number} [installation] - GitHub installation number
  * @returns {Object} - a mapped project object
  */
-export function castProject (project, installation) {
+export function castProject (project: Object, installation: ?Number): Object {
   const owner = service.nameify(project.owner.login)
   const repo = service.nameify(project.name)
 
@@ -208,7 +187,7 @@ export function castProject (project, installation) {
  * @param {Object} release - GitHub API release object
  * @returns {Object} - a mapped release object
  */
-export function castRelease (release) {
+export function castRelease (release: Object): Object {
   const version = semver.valid(release.tag_name)
 
   return {
@@ -233,13 +212,12 @@ export function castRelease (release) {
  * @see https://developer.github.com/early-access/integrations/authentication/#as-an-integration
  *
  * @param {Date} [exp=1 minute from now] - date to expire on
+ *
+ * @async
  * @throws {GitHubError} - on an error
  * @returns {String} - JWT bearer token to authenticate with
  */
-export async function generateJWT (exp = moment().add(1, 'minutes').toDate()) {
-  paramAssert(exp.getTime, 'function', 'generateJWT', 'expiration date')
-  paramAssert(config.github.integration.id, 'number', 'generateJWT', 'integration ID')
-
+export async function generateJWT (exp: Date = moment().add(1, 'minutes').toDate()): Promise<string> {
   const key = await new Promise((resolve, reject) => {
     log.debug('Reading integration key')
 
@@ -274,17 +252,16 @@ export async function generateJWT (exp = moment().add(1, 'minutes').toDate()) {
  *
  * @param {Number} inst - GitHub organization installation ID
  * @param {Number} [user] - optional GitHub user id to generate token on behalf of
+ *
+ * @async
  * @throws {GitHubError} - on an error
  * @returns {String} - GitHub token to use for authentication
  */
-export async function generateToken (inst, user) {
-  paramAssert(inst, 'number', 'generateToken', 'installation ID')
-  paramAssert(config.github.integration.id, 'number', 'generateToken', 'integration ID')
-
+export async function generateToken (inst: number, user: ?number): Promise<string> {
   const cachedToken = getToken(inst, user)
   if (cachedToken != null) {
     log.debug(`Using cached token key for installation #${inst}`)
-    return cachedToken.token
+    return cachedToken
   }
 
   const JWT = await generateJWT()
@@ -321,6 +298,30 @@ export async function generateToken (inst, user) {
 }
 
 /**
+ * getRepo
+ * Fetches a single repository
+ *
+ * @see https://developer.github.com/v3/repos/#get
+ *
+ * @param {String} owner - GitHub owner name
+ * @param {String} repo - GitHub repository name
+ * @param {String} token - GitHub authentication token
+ *
+ * @async
+ * @throws {GitHubError} - on an error
+ * @returns {Object} - A single Project like GitHub object
+ */
+export function getRepo (owner: string, repo: string, token: string): Promise<Object> {
+  return api
+  .get(`/repos/${owner}/${repo}`)
+  .set('Authorization', `token ${token}`)
+  .then((res) => castProject(res.body))
+  .catch((err, res) => {
+    throw errorCheck(err, res, 'getRepos')
+  })
+}
+
+/**
  * getRepos
  * Fetches all repos the token has access to
  *
@@ -328,13 +329,12 @@ export async function generateToken (inst, user) {
  *
  * @param {String} token - GitHub authentication token
  * @param {String} [sort] - what to sort the repos by
+ *
+ * @async
  * @throws {GitHubError} - on an error
  * @returns {Object}[] - a list of mapped GitHub projects
  */
-export function getRepos (token, sort = 'pushed') {
-  paramAssert(token, 'string', 'getRepos', 'token')
-  paramAssert(sort, 'string', 'getRepos', 'sort')
-
+export function getRepos (token: string, sort: string = 'pushed'): Promise<Array<Object>> {
   const req = api
   .get('/user/repos')
   .set('Authorization', `token ${token}`)
@@ -356,13 +356,12 @@ export function getRepos (token, sort = 'pushed') {
  * @param {String} owner - GitHub user / organization that ownes the repo
  * @param {String} repo - GitHub repo name
  * @param {String} [token] - GitHub authentication token
+ *
+ * @async
  * @throws {GitHubError} - on an error
  * @returns {Object}[] - a list of mapped GitHub releases
  */
-export function getReleases (owner, repo, token) {
-  paramAssert(owner, 'string', 'getReleases', 'owner')
-  paramAssert(repo, 'string', 'getReleases', 'repo')
-
+export function getReleases (owner: string, repo: string, token: ?string): Promise<Array<Object>> {
   let req = api
   .get(`/repos/${owner}/${repo}/releases`)
 
@@ -386,14 +385,11 @@ export function getReleases (owner, repo, token) {
  * @param {String} tag - Git tag to lookup
  * @param {String} [token] - GitHub authentication token
  *
+ * @async
  * @throws {GitHubError} - on an error
  * @returns {Object} - a mapped GitHub release
  */
-export function getReleaseByTag (owner, repo, tag, token) {
-  paramAssert(owner, 'string', 'getReleaseByTag', 'owner')
-  paramAssert(repo, 'string', 'getReleaseByTag', 'repo')
-  paramAssert(tag, 'string', 'getReleaseByTag', 'tag')
-
+export function getReleaseByTag (owner: string, repo: string, tag: string, token: ?string): Promise<Object> {
   let req = api
   .get(`/repos/${owner}/${repo}/releases/tags/${tag}`)
 
@@ -414,12 +410,12 @@ export function getReleaseByTag (owner, repo, tag, token) {
  *
  * @param {String} token - token for GitHub authentication
  * @param {String} [user] - GitHub ID of user to cross reference for
+ *
+ * @async
  * @throws {GitHubError} - on an error
  * @returns {Object[]} - List of casted repositories
  */
-export function getInstallations (token, user) {
-  paramAssert(token, 'string', 'getInstallations', 'token')
-
+export function getInstallations (token: string, user: ?string): Promise<Object> {
   return api
   .get('/installation/repositories')
   .set('Authorization', `token ${token}`)
@@ -439,14 +435,12 @@ export function getInstallations (token, user) {
  * @param {String} repo - GitHub repository
  * @param {String} username - GitHub username
  * @param {String} [token] - token for GitHub authentication
+ *
+ * @async
  * @throws {GitHubError} - on an error
  * @returns {Boolean} - true if user is a collaborator of repository
  */
-export function getPermission (owner, repo, username, token) {
-  paramAssert(owner, 'string', 'getPermission', 'owner')
-  paramAssert(repo, 'string', 'getPermission', 'repo')
-  paramAssert(username, 'string', 'getPermission', 'username')
-
+export function getPermission (owner: string, repo: string, username: string, token: ?string): Promise<Boolean> {
   let req = api
   .get(`/repos/${owner}/${repo}/collaborators/${username}`)
 
@@ -468,15 +462,11 @@ export function getPermission (owner, repo, username, token) {
  * @param {String} label - GitHub label name
  * @param {String} token - token for GitHub authentication
  *
+ * @async
  * @throws {GitHubError} - on an error
  * @returns {Object} - raw GitHub response body object
  */
-export function getLabel (owner, repo, label, token) {
-  paramAssert(owner, 'string', 'getLabel', 'owner')
-  paramAssert(repo, 'string', 'getLabel', 'repo')
-  paramAssert(label, 'string', 'getLabel', 'label')
-  paramAssert(token, 'string', 'getLabel', 'token')
-
+export function getLabel (owner: string, repo: string, label: string, token: string): Promise<Object> {
   return api
   .get(`/repos/${owner}/${repo}/labels/${label}`)
   .set('Authorization', `token ${token}`)
@@ -497,14 +487,11 @@ export function getLabel (owner, repo, label, token) {
  * @param {String} release - GitHub release ID
  * @param {String} [token] - GitHub authentication token
  *
+ * @async
  * @throws {GitHubError} - on an error
  * @returns {Object} - raw GitHub response body object
  */
-export function getAssets (owner, repo, release, token) {
-  paramAssert(owner, 'string', 'getAssets', 'owner')
-  paramAssert(repo, 'string', 'getAssets', 'repo')
-  paramAssert(release, 'number', 'getAssets', 'release')
-
+export function getAssets (owner: string, repo: string, release: string, token: ?string): Promise<Object> {
   let req = api
   .get(`/repos/${owner}/${repo}/releases/${release}/assets`)
 
@@ -531,21 +518,15 @@ export function getAssets (owner, repo, release, token) {
  * @param {String} label.name - label name
  * @param {String} label.color - label color in 6 hex code
  *
+ * @async
  * @throws {GitHubError} - on an error
  * @returns {Object} - raw GitHub response body object
  */
-export function postLabel (owner, repo, token, label) {
+export function postLabel (owner: string, repo: string, token: string, label: Object): Promise<Object> {
   if (!config.github.post) {
     log.debug('Config prohibits posting to GitHub. Not posting label')
     return Promise.resolve(label) // like it happened minus the url key
   }
-
-  paramAssert(owner, 'string', 'postLabel', 'owner')
-  paramAssert(repo, 'string', 'postLabel', 'repo')
-  paramAssert(token, 'string', 'postLabel', 'token')
-  paramAssert(label, 'object', 'postLabel', 'label')
-  paramAssert(label.name, 'string', 'postLabel', 'label name')
-  paramAssert(label.color, 'string', 'postLabel', 'label color')
 
   return api
   .post(`/repos/${owner}/${repo}/labels`)
@@ -574,20 +555,15 @@ export function postLabel (owner, repo, token, label) {
  * @param {String[]} [issue.labels] - GitHub labels to attach to issue
  * @param {String[]} [issue.assignees] - GitHub users to assign to issue
  *
+ * @async
  * @throws {GitHubError} - on an error
  * @returns {Number} - GitHub issue number
  */
-export function postIssue (owner, repo, token, issue) {
+export function postIssue (owner: string, repo: string, token: string, issue: Object): Promise<number> {
   if (!config.github.post) {
     log.debug('Config prohibits posting to GitHub. Not posting issue')
     return Promise.resolve(0)
   }
-
-  paramAssert(owner, 'string', 'postIssue', 'owner')
-  paramAssert(repo, 'string', 'postIssue', 'repo')
-  paramAssert(token, 'string', 'postIssue', 'token')
-  paramAssert(issue, 'object', 'postIssue', 'issue')
-  paramAssert(issue.title, 'string', 'postIssue', 'issue title')
 
   return api
   .post(`/repos/${owner}/${repo}/issues`)
@@ -616,22 +592,15 @@ export function postIssue (owner, repo, token, issue) {
  * @param {String} [file.label] - special label to put next to title on GitHub
  * @param {String} file.path - full path to file that should be uploaded
  *
+ * @async
  * @throws {GitHubError} - on an error
  * @returns {Number} - GitHub asset number
  */
-export async function postFile (owner, repo, release, token, file) {
+export async function postFile (owner: string, repo: string, release: number, token: string, file: Object): Promise<number> {
   if (!config.github.post) {
     log.debug('Config prohibits posting to GitHub. Not posting file')
     return 0
   }
-
-  paramAssert(owner, 'string', 'postFile', 'owner')
-  paramAssert(repo, 'string', 'postFile', 'repo')
-  paramAssert(release, 'number', 'postFile', 'release')
-  paramAssert(token, 'string', 'postFile', 'token')
-  paramAssert(file, 'object', 'postFile', 'file')
-  paramAssert(file.name, 'string', 'postFile', 'file title')
-  paramAssert(file.path, 'string', 'postFile', 'file path')
 
   const filePath = file.path
   delete file.path

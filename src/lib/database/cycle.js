@@ -1,5 +1,5 @@
 /**
- * houston/model/cycle.js
+ * lib/database/cycle.js
  * Mongoose schema for cycles
  *
  * @exports {Object} - cycle database model
@@ -9,7 +9,7 @@
 import semver from 'semver'
 
 import * as atc from 'lib/atc'
-import db from 'lib/database'
+import db from './connection'
 
 const sender = new atc.Sender('cycle')
 
@@ -26,6 +26,8 @@ const sender = new atc.Sender('cycle')
  * @param {Array} packages - array of aptly package keys
  * @param {String} _status - current status of cycle without influence of builds
  * @param {Object} mistake - mistake class error if any occured
+ *
+ * @property {String} stripe - Stripe public key to be inserted during build
  */
 const schema = new db.Schema({
   project: {
@@ -86,7 +88,9 @@ const schema = new db.Schema({
     default: 'QUEUE',
     enum: ['QUEUE', 'RUN', 'REVIEW', 'FINISH', 'FAIL', 'ERROR']
   },
-  mistake: Object
+  mistake: Object,
+
+  stripe: String
 })
 
 /**
@@ -187,7 +191,8 @@ schema.methods.doFlightcheck = async function () {
     tag: this.tag,
     name: this.name,
     version: this.version,
-    changelog: this.changelog.reverse()
+    changelog: this.changelog.reverse(),
+    stripe: this.stripe
   })
 }
 

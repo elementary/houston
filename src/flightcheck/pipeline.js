@@ -51,6 +51,8 @@ export default class Pipeline extends events.EventEmitter {
    *   {Date} changelog[].date - Date release was pushed
    *   {String} changelog[].version - Semver version of release '2.9.0'
    *   {String} [auth] - Authentication to use with source. Needed for posting logs and builds
+   *
+   *   {String} [stripe] - Public stripe key to attach to AppData file
    * }
    */
   constructor (build = {}) {
@@ -64,7 +66,9 @@ export default class Pipeline extends events.EventEmitter {
       source: build.source,
       version: build.version || semver.valid(build.tag),
       changelog: build.changelog || [],
-      auth: build.auth
+      auth: build.auth,
+
+      stripe: build.stripe
     }
 
     // Check manditory variables first!
