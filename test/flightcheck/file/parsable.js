@@ -23,7 +23,7 @@ test.beforeEach('setup', (t) => {
 })
 
 test('able to create simple File', (t) => {
-  t.notThrows(() => new t.context.Parsable('path', 'json'))
+  t.notThrows(() => new t.context.Parsable('path', undefined, 'json'))
 
   t.throws(() => new t.context.Parsable('path'))
   t.throws(() => new t.context.Parsable('path', undefined, 'failformat'))
