@@ -7,6 +7,7 @@
 
 import path from 'path'
 
+import File from 'flightcheck/file'
 import Pipe from 'flightcheck/pipes/pipe'
 
 /**
@@ -40,9 +41,9 @@ export default class Build extends Pipe {
    * @returns {Void}
    */
   async code (p = 'repository') {
-    const debianFile = await this.file(path.join(p, 'debian', 'control'))
+    const debianFile = new File(path.join(this.pipeline.build.dir, p, 'debian', 'control'))
 
-    if (await debianFile.exists()) {
+    if (await debianFile.exists() != null) {
       this.data.types.push('debian')
     }
 

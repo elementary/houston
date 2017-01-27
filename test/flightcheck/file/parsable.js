@@ -26,11 +26,11 @@ test('able to create simple File', (t) => {
   t.notThrows(() => new t.context.Parsable('path', 'json'))
 
   t.throws(() => new t.context.Parsable('path'))
-  t.throws(() => new t.context.Parsable('path', 'failformat'))
+  t.throws(() => new t.context.Parsable('path', undefined, 'failformat'))
 })
 
 test('able to parse a file', async (t) => {
-  const one = new t.context.Parsable(path.join(t.context.fixtures, 'test2.json'), 'json')
+  const one = new t.context.Parsable(path.join(t.context.fixtures, 'test2.json'), undefined, 'json')
 
   const data = await one.parse()
 

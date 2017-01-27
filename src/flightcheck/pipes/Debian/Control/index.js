@@ -7,6 +7,7 @@
 
 import path from 'path'
 
+import Parsable from 'flightcheck/file/parsable'
 import Pipe from 'flightcheck/pipes/pipe'
 
 /**
@@ -44,10 +45,10 @@ export default class DebianControl extends Pipe {
    * @returns {Void}
    */
   async code (p = 'repository/debian') {
-    const controlPath = path.join(p, 'control')
-    const file = await this.parsable(controlPath, 'colon')
+    const controlPath = path.join(this.pipeline.build.dir, p, 'control')
+    const file = new Parsable(controlPath, undefined, 'colon')
 
-    if (!await file.exists()) {
+    if (await file.exists() == null) {
       return this.log('error', 'Debian/Control/existance.md')
     }
 

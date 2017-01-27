@@ -30,8 +30,8 @@ test('able to check existance of a file', async (t) => {
   const one = new t.context.File(path.join(t.context.fixtures, 'test1.txt'))
   const two = new t.context.File(path.join(t.context.fixtures, 'neverexistant.txt'))
 
-  t.true(await one.exists())
-  t.false(await two.exists())
+  t.is(await one.exists(), null)
+  t.not(await two.exists(), null)
 })
 
 test('able to read a file', async (t) => {
