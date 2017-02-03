@@ -11,6 +11,6 @@
  * ApplicationError
  * A master error for all other errors to extend on
  *
- * @extends Error
+ * @extends {Error}
  */
 export class ApplicationError extends Error {}

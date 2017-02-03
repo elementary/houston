@@ -10,6 +10,7 @@ import { ApplicationError } from './application'
  * ServiceError
  * An error relating to communication of third party services
  *
+ * @extends {ApplicationError}
  * @property {String} service - Name of service error is from
  */
 export class ServiceError extends ApplicationError {
@@ -33,6 +34,7 @@ export class ServiceError extends ApplicationError {
  * ServiceRequestError
  * A general HTTP error from third party service
  *
+ * @extends {ServiceError}
  * @property {Number} status - HTTP status code of request
  */
 export class ServiceRequestError extends ServiceError {
@@ -57,6 +59,7 @@ export class ServiceRequestError extends ServiceError {
  * ServiceLimitError
  * An error relating to rate limiting on third party services
  *
+ * @extends {ServiceError}
  * @property {Date} expire - Date when more requests will be available
  */
 export class ServiceLimitError extends ServiceError {

@@ -19,12 +19,11 @@ import view from 'koa-views'
 import * as error from './error'
 import * as helpers from 'lib/helpers'
 import * as passport from './passport'
+import * as permissionError from 'lib/error/permission'
 import * as policy from './policy'
 import config from 'lib/config'
 import controllers from './controller'
 import Log from 'lib/log'
-import Mistake from 'lib/mistake'
-import PermError from './policy/error'
 
 const app = new Koa()
 const log = new Log('server')
@@ -52,7 +51,6 @@ app.use(convert(view(path.join(__dirname, 'views'), {
 
 app.use(async (ctx, next) => {
   ctx.render = co.wrap(ctx.render)
-  ctx.Mistake = Mistake
 
   ctx.state.basedir = path.normalize(`${__dirname}/views`)
   ctx.state.policy = policy
@@ -70,31 +68,15 @@ app.use(async (ctx, next) => {
   } catch (err) {
     ctx.app.emit('error', err, ctx)
 
-    let output: error.Friendly = {
-      status: 500,
-      message: 'An error occured',
-      detail: null
+    if (err instanceof permissionError.PermissionAgreementError) {
+      return ctx.redirect('/agreement')
     }
 
-    if (err instanceof PermError) {
-      if (err.code === 'PERMERRRGT' && err.user.right === 'USER') {
-        return ctx.redirect('/beta')
-      }
-
-      if (err.code === 'PERMERRAGR') {
-        return ctx.redirect('/agreement')
-      }
-
-      output.status = 403
-      if (err.code === 'PERMERRACC') {
-        output.message = 'You do not have sufficient permission on the third party service'
-      } else {
-        output.message = 'You do not have sufficient permission'
-      }
-    } else {
-      output = error.toFriendly(err)
+    if (err instanceof permissionError.PermissionRightError && err.user.right === 'USER') {
+      return ctx.redirect('/beta')
     }
 
+    const output = error.toFriendly(err)
     ctx.status = output.status
     return ctx.render('error', { error: output })
   }
@@ -109,7 +91,7 @@ app.use(async (ctx, next) => {
     limit: '1mb'
   })
   .then((buf) => buf.toString())
-  .catch((err) => { throw new Mistake(500, err.message) })
+  .catch((err) => { throw new Error(500, err.message) })
 
   const jsonTypes = [
     'application/json',
@@ -163,27 +145,16 @@ app.use((ctx) => {
 })
 
 // Error logging
-app.on('error', async (error, ctx) => {
+app.on('error', async (err, ctx) => {
   if (app.env === 'test') return
 
-  if (error instanceof PermError) {
-    log.debug(error.toString())
+  if (err instanceof permissionError.PermissionError) {
+    log.debug(err.toString())
     return
   }
 
-  if (error instanceof Mistake) {
-    if (error.status[0] >= 5) {
-      log.error(error)
-      log.report(error)
-    } else {
-      log.debug(error)
-    }
-
-    return
-  }
-
-  log.error(error)
-  log.report(error)
+  log.error(err)
+  log.report(err)
 })
 
 export default app

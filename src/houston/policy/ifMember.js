@@ -1,14 +1,17 @@
 /**
  * houston/policy/ifMember.js
  * Tests current user's GitHub access to repository
+ * @flow
+ *
+ * TODO: database models with flow
  *
  * @exports {Function} - Checks user rights against GitHub
  */
 
+import { ApplicationError } from 'lib/error/application'
 import { getPermission } from 'service/github'
 import config from 'lib/config'
 import Log from 'lib/log'
-import PermError from './error'
 
 const log = new Log('policy:ifMember')
 
@@ -19,14 +22,14 @@ const log = new Log('policy:ifMember')
  * @param {Object} user - Database object of user
  * @returns {Boolean} - true if the user have access to repository
  */
-export default function (project, user) {
+export default function (project: Object, user: Object) {
   if (project.github == null) {
     log.warn(`${project.name} has no GitHub data to authenticate against. Denying access.`)
-    throw new PermError.FromAccess(user)
+    throw new ApplicationError('Project has no GitHub data')
   }
   if (user.github == null) {
     log.warn(`${user.username} has no GitHub data to authenticate against. Denying access.`)
-    throw new PermError.FromAccess(user)
+    throw new ApplicationError('User has no GitHub data')
   }
 
   if (!config.rights) {

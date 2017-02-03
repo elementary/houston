@@ -9,6 +9,7 @@
 
 import config from 'lib/config'
 
+import * as permission from 'lib/error/permission'
 import * as service from 'lib/error/service'
 
 /**
@@ -37,14 +38,21 @@ export function toFriendly (error: Error): Friendly {
     detail: null
   }
 
-  if (error instanceof service.ServiceError) {
-    output.status = 500
-    output.message = `Error talking to ${error.service}`
-  }
-
-  if (error instanceof service.ServiceLimitError) {
+  if (error instanceof permission.PermissionRightError) {
+    output.status = 400
+    output.message = `You do not have the needed "${error.right.toLowerCase()}" permission`
+  } else if (error instanceof permission.PermissionAgreementError) {
+    output.status = 400
+    output.message = 'You need to agree with the TOS'
+  } else if (error instanceof permission.PermissionError) {
+    output.status = 400
+    output.message = 'You do not have correct permissions'
+  } else if (error instanceof service.ServiceLimitError) {
     output.status = 503
     output.message = `Too many requests to ${error.service}`
+  } else if (error instanceof service.ServiceError) {
+    output.status = 500
+    output.message = `Error talking to ${error.service}`
   }
 
   if (config.env === 'development') {
