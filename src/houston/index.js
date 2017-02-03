@@ -1,6 +1,7 @@
 /**
  * houston/index.js
  * Starts Houston's Web Interface
+ * @flow
  *
  * @exports {Object} app - Koa server object
  */
@@ -15,6 +16,7 @@ import rawBody from 'raw-body'
 import session from 'koa-session'
 import view from 'koa-views'
 
+import * as error from './error'
 import * as helpers from 'lib/helpers'
 import * as passport from './passport'
 import * as policy from './policy'
@@ -65,44 +67,36 @@ app.use(async (ctx, next) => {
 app.use(async (ctx, next) => {
   try {
     await next()
-  } catch (error) {
-    ctx.app.emit('error', error, ctx)
+  } catch (err) {
+    ctx.app.emit('error', err, ctx)
 
-    const pkg = {
+    let output: error.Friendly = {
       status: 500,
-      detail: null,
-      title: 'Houston has encountered an error'
+      message: 'An error occured',
+      detail: null
     }
 
-    if (error instanceof PermError) {
-      if (error.code === 'PERMERRRGT' && error.user.right === 'USER') {
+    if (err instanceof PermError) {
+      if (err.code === 'PERMERRRGT' && err.user.right === 'USER') {
         return ctx.redirect('/beta')
       }
 
-      if (error.code === 'PERMERRAGR') {
+      if (err.code === 'PERMERRAGR') {
         return ctx.redirect('/agreement')
       }
 
-      pkg.status = 403
-      if (error.code === 'PERMERRACC') {
-        pkg.title = 'You do not have sufficient permission on the third party service'
+      output.status = 403
+      if (err.code === 'PERMERRACC') {
+        output.message = 'You do not have sufficient permission on the third party service'
       } else {
-        pkg.title = 'You do not have sufficient permission'
+        output.message = 'You do not have sufficient permission'
       }
+    } else {
+      output = error.toFriendly(err)
     }
 
-    if (error instanceof Mistake) {
-      pkg.status = error.status || 500
-
-      if (error.expose || config.env === 'development') {
-        pkg.title = error.message
-      }
-    }
-
-    if (config.env === 'development') pkg.detail = error.stack
-
-    ctx.status = pkg.status
-    return ctx.render('error', { error: pkg })
+    ctx.status = output.status
+    return ctx.render('error', { error: output })
   }
 })
 
