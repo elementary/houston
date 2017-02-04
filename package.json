@@ -72,7 +72,8 @@
     "flow-bin": "^0.37.4",
     "mock-require": "^2.0.0",
     "nock": "^9.0.2",
-    "stylelint": "^7.6.0"
+    "stylelint": "^7.6.0",
+    "supertest": "^3.0.0"
   },
   "scripts": {
     "start": "node build/entry.js",
