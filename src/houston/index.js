@@ -16,6 +16,7 @@ import rawBody from 'raw-body'
 import session from 'koa-session'
 import view from 'koa-views'
 
+import * as controllerError from 'lib/error/controller'
 import * as error from './error'
 import * as helpers from 'lib/helpers'
 import * as passport from './passport'
@@ -135,13 +136,7 @@ app.use(controllers.routes(), controllers.allowedMethods())
 
 // 404 page
 app.use((ctx) => {
-  ctx.status = 404
-
-  return ctx.render('error', { error: {
-    status: 404,
-    title: 'Page not found',
-    detail: ''
-  }})
+  throw new controllerError.ControllerError(404, 'Page not found')
 })
 
 // Error logging
@@ -149,6 +144,11 @@ app.on('error', async (err, ctx) => {
   if (app.env === 'test') return
 
   if (err instanceof permissionError.PermissionError) {
+    log.debug(err.toString())
+    return
+  }
+
+  if (err instanceof controllerError.ControllerError && err.status.toString()[0] < 5) {
     log.debug(err.toString())
     return
   }

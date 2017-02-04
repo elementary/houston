@@ -9,6 +9,7 @@
 
 import config from 'lib/config'
 
+import * as controller from 'lib/error/controller'
 import * as permission from 'lib/error/permission'
 import * as service from 'lib/error/service'
 
@@ -38,7 +39,10 @@ export function toFriendly (error: Error): Friendly {
     detail: null
   }
 
-  if (error instanceof permission.PermissionRightError) {
+  if (error instanceof controller.ControllerError) {
+    output.status = error.status
+    output.message = error.friendly
+  } else if (error instanceof permission.PermissionRightError) {
     output.status = 400
     output.message = `You do not have the needed "${error.right.toLowerCase()}" permission`
   } else if (error instanceof permission.PermissionAgreementError) {
