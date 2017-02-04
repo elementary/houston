@@ -15,6 +15,10 @@
  * @exports {Function} getRepos - Fetches all repos the token has access to
  * @exports {Function} getReleases - Fetches all releases a repo has
  * @exports {Function} getPermission - Checks callaborator status on repository
+ * @exports {Function} getLabel - Returns GitHub label for repository
+ * @exports {Function} getAssets - Returns raw GitHub array of release assets
+ * @exports {Function} getOrgPermission - Gets user permission to organization
+ * @exports {Function} getTeamPermission - Get user permission to team
  * @exports {Function} postLabel - Creates a label on GitHub repository
  * @exports {Function} postIssue - Creates an issue on GitHub repository
  * @exports {Function} postFile - Creates a file for a release asset
@@ -476,6 +480,65 @@ export function getAssets (owner: string, repo: string, release: string, token: 
   return req
   .then((res) => res.body)
   .catch((err, res) => {
+    throw errorCheck(err, res)
+  })
+}
+
+/**
+ * getOrgPermission
+ * Gets user permission to organization
+ *
+ * @see https://developer.github.com/v3/orgs/members/#check-membership
+ *
+ * @param {String} organization - Name of GitHub organization to get permission of
+ * @param {User} user - User to get permission for
+ *
+ * @async
+ * @throws {ServiceError} - on an error
+ * @returns {Boolean} - True if user belongs to organization
+ */
+export function getOrgPermission (organization: string, user: Object): Promise<Boolean> {
+  return api
+  .get(`/orgs/${organization}/members/${user.username}`)
+  .set('Authorization', `token ${user.github.access}`)
+  .then((data) => {
+    if (data.status === 204) return true
+
+    return false
+  })
+  .catch((err, res) => {
+    if (err.status === 404) return false
+
+    throw errorCheck(err, res)
+  })
+}
+
+/**
+ * getTeamPermission
+ * Gets user permission to organization
+ *
+ * @see https://developer.github.com/v3/orgs/teams/#get-team-membership
+ *
+ * @param {Number} team - ID for GitHub team
+ * @param {User} user - User to get permission for
+ *
+ * @async
+ * @throws {ServiceError} - on an error
+ * @returns {Boolean} - True if user belongs to team
+ */
+export function getTeamPermission (team: number, user: Object): Promise<Boolean> {
+  return api
+  .get(`/teams/${team.toString()}/memberships/${user.username}`)
+  .set('Authorization', `token ${user.github.access}`)
+  .then((data) => {
+    if (data.status !== 200) return true
+    if (data.body == null || data.body.state == null) return false
+
+    return (data.body.state === 'active')
+  })
+  .catch((err, res) => {
+    if (err.status === 404) return false
+
     throw errorCheck(err, res)
   })
 }
