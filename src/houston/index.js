@@ -1,6 +1,7 @@
 /**
  * houston/index.js
  * Starts Houston's Web Interface
+ * @flow
  *
  * @exports {Object} app - Koa server object
  */
@@ -15,14 +16,15 @@ import rawBody from 'raw-body'
 import session from 'koa-session'
 import view from 'koa-views'
 
+import * as controllerError from 'lib/error/controller'
+import * as error from './error'
 import * as helpers from 'lib/helpers'
 import * as passport from './passport'
+import * as permissionError from 'lib/error/permission'
 import * as policy from './policy'
 import config from 'lib/config'
 import controllers from './controller'
 import Log from 'lib/log'
-import Mistake from 'lib/mistake'
-import PermError from './policy/error'
 
 const app = new Koa()
 const log = new Log('server')
@@ -50,7 +52,6 @@ app.use(convert(view(path.join(__dirname, 'views'), {
 
 app.use(async (ctx, next) => {
   ctx.render = co.wrap(ctx.render)
-  ctx.Mistake = Mistake
 
   ctx.state.basedir = path.normalize(`${__dirname}/views`)
   ctx.state.policy = policy
@@ -65,44 +66,20 @@ app.use(async (ctx, next) => {
 app.use(async (ctx, next) => {
   try {
     await next()
-  } catch (error) {
-    ctx.app.emit('error', error, ctx)
+  } catch (err) {
+    ctx.app.emit('error', err, ctx)
 
-    const pkg = {
-      status: 500,
-      detail: null,
-      title: 'Houston has encountered an error'
+    if (err instanceof permissionError.PermissionAgreementError) {
+      return ctx.redirect('/agreement')
     }
 
-    if (error instanceof PermError) {
-      if (error.code === 'PERMERRRGT' && error.user.right === 'USER') {
-        return ctx.redirect('/beta')
-      }
-
-      if (error.code === 'PERMERRAGR') {
-        return ctx.redirect('/agreement')
-      }
-
-      pkg.status = 403
-      if (error.code === 'PERMERRACC') {
-        pkg.title = 'You do not have sufficient permission on the third party service'
-      } else {
-        pkg.title = 'You do not have sufficient permission'
-      }
+    if (err instanceof permissionError.PermissionRightError && err.user.right === 'USER') {
+      return ctx.redirect('/beta')
     }
 
-    if (error instanceof Mistake) {
-      pkg.status = error.status || 500
-
-      if (error.expose || config.env === 'development') {
-        pkg.title = error.message
-      }
-    }
-
-    if (config.env === 'development') pkg.detail = error.stack
-
-    ctx.status = pkg.status
-    return ctx.render('error', { error: pkg })
+    const output = error.toFriendly(err)
+    ctx.status = output.status
+    return ctx.render('error', { error: output })
   }
 })
 
@@ -115,7 +92,7 @@ app.use(async (ctx, next) => {
     limit: '1mb'
   })
   .then((buf) => buf.toString())
-  .catch((err) => { throw new Mistake(500, err.message) })
+  .catch((err) => { throw new Error(500, err.message) })
 
   const jsonTypes = [
     'application/json',
@@ -159,37 +136,25 @@ app.use(controllers.routes(), controllers.allowedMethods())
 
 // 404 page
 app.use((ctx) => {
-  ctx.status = 404
-
-  return ctx.render('error', { error: {
-    status: 404,
-    title: 'Page not found',
-    detail: ''
-  }})
+  throw new controllerError.ControllerError(404, 'Page not found')
 })
 
 // Error logging
-app.on('error', async (error, ctx) => {
+app.on('error', async (err, ctx) => {
   if (app.env === 'test') return
 
-  if (error instanceof PermError) {
-    log.debug(error.toString())
+  if (err instanceof permissionError.PermissionError) {
+    log.debug(err.toString())
     return
   }
 
-  if (error instanceof Mistake) {
-    if (error.status[0] >= 5) {
-      log.error(error)
-      log.report(error)
-    } else {
-      log.debug(error)
-    }
-
+  if (err instanceof controllerError.ControllerError && err.status.toString()[0] < 5) {
+    log.debug(err.toString())
     return
   }
 
-  log.error(error)
-  log.report(error)
+  log.error(err)
+  log.report(err)
 })
 
 export default app

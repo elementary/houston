@@ -46,14 +46,6 @@ test.beforeEach((t) => {
   // A note to the smart people. Don't use nock cleanAll() here.
 })
 
-test('GitHubError has correct error code', (t) => {
-  const github = t.context.github
-
-  const one = new github.GitHubError('testing')
-
-  t.is(one.code, 'GTHERR')
-})
-
 test('Can generate an accurate JWT', async (t) => {
   const config = t.context.config
   const github = t.context.github

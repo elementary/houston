@@ -7,19 +7,6 @@ import test from 'ava'
 
 import * as service from 'service'
 
-test('ServiceError is an error', (t) => {
-  const one = new service.ServiceError('testing')
-
-  t.true(one instanceof Error)
-})
-
-test('ServiceError has correct error properties', (t) => {
-  const one = new service.ServiceError('testing')
-
-  t.is(one.name, 'ServiceError')
-  t.is(one.code, 'SRCERR')
-})
-
 test('nameify converts as expected', (t) => {
   const one = service.nameify('avalidname')
   const two = service.nameify('not.a.valid.name')

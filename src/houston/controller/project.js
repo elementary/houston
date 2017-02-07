@@ -8,6 +8,7 @@
 import Router from 'koa-router'
 
 import * as aptly from 'houston/service/aptly'
+import * as error from 'lib/error/controller'
 import * as policy from 'houston/policy'
 import Project from 'lib/database/project'
 
@@ -27,20 +28,20 @@ route.get('/cycle', policy.isRole('BETA'), policy.isAgreement, async (ctx, next)
   })
 
   if (project == null) {
-    throw new ctx.Mistake(404, 'Project not found')
+    throw new error.ControllerError(404, 'Project not found')
   }
 
   if (!policy.ifMember(project, ctx.state.user)) {
-    throw new ctx.Mistake(403, 'You do not have permission to cycle this project')
+    throw new error.ControllerError(403, 'You do not have permission to cycle this project')
   }
 
   if (project.releases.length < 1) {
-    throw new ctx.Mistake(400, 'The project has no releases to cycle')
+    throw new error.ControllerError(400, 'The project has no releases to cycle')
   }
 
   await project.createCycle('RELEASE')
   .catch((err) => {
-    throw new ctx.Mistake(500, 'An error occured while creating a new release cycle', err, true)
+    throw new error.ControllerError(500, 'An error occured while creating a new release cycle', err, true)
   })
 
   return ctx.redirect('/dashboard')
@@ -59,22 +60,22 @@ route.get('/review/:fate', policy.isRole('REVIEW'), async (ctx, next) => {
   }).exec()
 
   if (ctx.project == null) {
-    throw new ctx.Mistake(404, 'Project not found')
+    throw new error.ControllerError(404, 'Project not found')
   }
 
   if (ctx.project.releases.length < 1) {
-    throw new ctx.Mistake(400, 'The project has no releases', true)
+    throw new error.ControllerError(400, 'The project has no releases', true)
   }
 
   const release = await ctx.project.release.latest
   const status = await release.getStatus()
 
   if (status !== 'REVIEW') {
-    throw new ctx.Mistake(400, 'Release is not awaiting review', true)
+    throw new error.ControllerError(400, 'Release is not awaiting review', true)
   }
 
   if (ctx.params.fate !== 'yes' && ctx.params.fate !== 'no') {
-    throw new ctx.Mistake(400, `${ctx.project.name}'s fate is binary'`, true)
+    throw new error.ControllerError(400, `${ctx.project.name}'s fate is binary'`, true)
   }
 
   const cycle = await release.cycle.latest
