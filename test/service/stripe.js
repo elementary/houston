@@ -33,15 +33,6 @@ test.beforeEach((t) => {
   // A note to the smart people. Don't use nock cleanAll() here.
 })
 
-test('StripeError is an accurate error class', (t) => {
-  const stripe = t.context.stripe
-
-  const one = new stripe.StripeError('testing')
-
-  t.is(one.code, 'STPERR')
-  t.true(new stripe.StripeError() instanceof Error)
-})
-
 test('getCut has accurate math', (t) => {
   const stripe = t.context.stripe
 

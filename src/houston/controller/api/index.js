@@ -9,14 +9,12 @@
 
 import Router from 'koa-router'
 
-import APIError from './error'
-import Log from 'lib/log'
-import PermError from 'houston/policy/error'
+import { ControllerError } from 'lib/error/controller'
+import { toAPI } from './error'
 import config from 'lib/config'
 
 import payment from './payment'
 
-const log = new Log('controller:api')
 const route = new Router({
   prefix: '/api'
 })
@@ -54,32 +52,12 @@ route.use(async (ctx, next) => {
   try {
     await next()
   } catch (err) {
-    let apierr = null
+    ctx.app.emit('error', err, ctx)
 
-    if (err instanceof APIError) {
-      apierr = err
-    } else if (err instanceof PermError) {
-      let title = 'You do not have sufficient permission'
+    const API = toAPI(err)
 
-      if (err.code === 'PERMERRACC') {
-        title = 'You do not have sufficient permission on the third party service'
-      } else if (err.code === 'PERMERRAGR') {
-        title = 'You need to agree to TOS agreement'
-      }
-
-      apierr = new APIError(403, title)
-    } else {
-      log.error(`Error while processing API route ${ctx.request.href}`)
-      log.error(err)
-      log.report(err, {
-        url: ctx.request.href
-      })
-
-      apierr = new APIError(500, 'Internal Server Error')
-    }
-
-    ctx.status = apierr.status
-    ctx.body = { errors: [apierr.toAPI()] }
+    ctx.status = API.status
+    ctx.body = { errors: [API] }
     return
   }
 })
@@ -90,11 +68,11 @@ route.use(async (ctx, next) => {
  */
 route.use((ctx, next) => {
   if (ctx.request.is('application/vnd.api+json') === false) {
-    throw new APIError(415, 'Invalid Request', 'Request needs to be "application/vnd.api+json"')
+    throw new ControllerError(415, 'Request needs to be "application/vnd.api+json"')
   }
 
   if (ctx.request.accepts('application/vnd.api+json') !== 'application/vnd.api+json') {
-    throw new APIError(406, 'Invalid Request', 'Request needs to accept "application/vnd.api+json"')
+    throw new ControllerError(406, 'Request needs to accept "application/vnd.api+json"')
   }
 
   return next()
@@ -108,7 +86,7 @@ route.use(payment.routes(), payment.allowedMethods())
  * 404 page for api urls
  */
 route.all('*', () => {
-  throw new APIError(404, 'Endpoint Not Found')
+  throw new ControllerError(404, 'Endpoint not found')
 })
 
 export default route

@@ -1,12 +1,15 @@
 /**
  * houston/policy/isRole.js
  * Tests current user's right for use in middleware
+ * @flow
  *
  * @exports {Function} - Koa route middleware
  */
 
+import Koa from 'koa'
+
 import ifRole from './ifRole'
-import PermError from './error'
+import { PermissionRightError } from 'lib/error/permission'
 
 /**
  * Checks user rights
@@ -14,8 +17,8 @@ import PermError from './error'
  * @param {String} role - role to check against
  * @returns {Function} - Koa route middleware
  */
-export default (role) => {
-  return (ctx, next) => {
+export default (role: string) => {
+  return (ctx: Koa.Context, next: Koa.Middleware) => {
     if (!ctx.isAuthenticated()) {
       ctx.session.originalUrl = ctx.request.url
       return ctx.redirect('/auth/github')
@@ -23,6 +26,6 @@ export default (role) => {
 
     if (ifRole(ctx.state.user, role)) return next()
 
-    throw new PermError.FromRight(ctx.state.user, role)
+    throw new PermissionRightError(ctx.state.user, role)
   }
 }
