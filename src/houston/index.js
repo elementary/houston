@@ -15,7 +15,6 @@ import rawBody from 'raw-body'
 import session from 'koa-session'
 import view from 'koa-views'
 
-import * as download from './service/download.js'
 import * as helpers from 'lib/helpers'
 import * as passport from './passport'
 import * as policy from './policy'
@@ -31,9 +30,6 @@ const log = new Log('server')
 // Setup App configuration
 app.name = 'Houston'
 app.env = config.env
-
-// Download Tracking syslog Server
-download.startSyslog()
 
 // App logging
 app.use(async (ctx, next) => {
@@ -196,8 +192,4 @@ app.on('error', async (error, ctx) => {
   log.report(error)
 })
 
-// Launching server
-app.listen(config.server.port)
-log.info(`Houston listening on ${config.server.port} in ${app.env} configuration`)
-
-export default { app }
+export default app

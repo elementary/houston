@@ -1,6 +1,7 @@
 /**
  * houston/controller/hook/github.js
  * Handles all GitHub inputs
+ * @flow
  *
  * @exports {Object} - Koa router
  */
@@ -20,51 +21,94 @@ const route = new Router({
 })
 
 /**
- * processInstallations
- * Processes the addition and removal of installations from GitHub hooks
+ * createInstallation
+ * Adds integration and all current installed repos to database
  *
- * @param {Number} installation - GitHub installation number
- * @param {Object[]} [additions] - all installations that have been added
- * @param {Object[]} [removals] - all installations that have been removed
- *
- * @returns {Promise} - a promise of a bunch of work that needs to be done
+ * @async
+ * @param {number} installation - ID of GitHub integration installation
+ * @returns {Project[]} - A list of all Projects in the database
  */
-const processInstallations = async (installation, additions = [], removals = []) => {
+export async function createInstallation (installation: number): Promise<Project> {
   const token = await github.generateToken(installation)
-  const promises = []
+  const repositories = await github.getInstallations(token)
 
-  log.info(`Adding ${additions.length} repositories`)
-
-  additions.forEach((repo) => {
-    const promise = async () => {
-      const foundProject = await Project.findByDomain(repo.name.domain)
-
-      if (foundProject != null) {
-        log.info('Trying to add a repository that already exists in database')
-        return
-      }
-
-      repo.releases = await github.getReleases(repo.github.owner, repo.github.repo, token)
-
-      repo.releases = repo.releases
-      .filter((release) => (release.version != null))
-      .sort((a, b) => semver(a.version, b.version))
-
-      if (repo.releases.length > 0) {
-        repo._status = 'DEFER'
-      } else {
-        repo._status = 'NEW'
-      }
-
-      return Project.create(repo)
-    }
-
-    promises.push(promise())
-  })
-
-  // TODO: setup removing projects on GitHub hook event
+  const promises = repositories.map((repo) => createRepository(repo, installation))
 
   return Promise.all(promises)
+}
+
+/**
+ * deleteInstallation
+ * Adds integration and all current installed repos to database
+ *
+ * @async
+ * @param {number} installation - ID of GitHub integration installation
+ * @returns {Promise[]} - A promise of removed Projects from database
+ */
+export async function deleteInstallation (installation: number): Promise<> {
+  const projects = await Project.find({
+    'github.installation': installation
+  })
+
+  const promises = projects.map((project) => project.delete())
+
+  return Promise.all(promises)
+}
+
+/**
+ * createRepository
+ * Adds a Project to the database based on GitHub repository
+ *
+ * @async
+ * @param {Object} repo - A Project like object to create
+ * @param {number} installation - GitHub installation ID
+ * @returns {Project} - The Project in the database
+ */
+export async function createRepository (repo: Object, installation: number): Promise<Project> {
+  const token = await github.generateToken(installation)
+  const project = await Project.findOne({ name: repo.name })
+
+  if (project != null) {
+    log.debug(`Project "${repo.name}" already exists in database`)
+    return project
+  }
+
+  log.debug(`Creating Project "${repo.name}" in database`)
+
+  repo.github.installation = installation
+  repo.releases = await github.getReleases(repo.github.owner, repo.github.name, token)
+
+  repo.releases = repo.releases
+  .filter((release) => (release.version != null))
+  .sort((a, b) => semver(a.version, b.version))
+
+  if (repo.releases.length > 0) {
+    repo._status = 'DEFER'
+  } else {
+    repo._status = 'NEW'
+  }
+
+  return Project.create(repo)
+}
+
+/**
+ * deleteRepository
+ * Adds a Project to the database based on GitHub repository
+ *
+ * @async
+ * @param {number} repo - GitHub ID for repository
+ * @returns {Promise} - The promise of removal
+ */
+export async function deleteRepository (repo: number): Promise<> {
+  const project = await Project.findOne({ 'github.id': repo })
+
+  if (project == null) {
+    log.debug(`Project "${repo}" does not exist in database`)
+    return null
+  }
+
+  log.debug(`Removing Project "${project.name}" from database`)
+  return project.remove()
 }
 
 /**
@@ -151,32 +195,54 @@ route.post('/', async (ctx, next) => {
   }
 
   const installationId = Number(ctx.request.body.installation.id)
+  if (isNaN(installationId)) {
+    ctx.status = 400
+    ctx.body = 'Error parsing installation number'
+    return
+  }
 
-  // TODO: need some logic for removing repos from the database
+  if (ctx.request.body.action === 'created') {
+    log.debug('Creating installation in database')
+
+    try {
+      await createInstallation(installationId)
+    } catch (err) {
+      log.error('Error while adding installation to database')
+      log.error(err)
+      log.report(err)
+
+      ctx.status = 500
+      ctx.body = 'Internal error while adding installation'
+      return
+    }
+
+    ctx.status = 200
+    ctx.body = 'Added installation'
+    return
+  }
+
   if (ctx.request.body.action === 'deleted') {
-    log.debug('Installation was delete, but we dont have that logic yet')
+    log.debug('Removing installation from database')
+
+    try {
+      await deleteInstallation(installationId)
+    } catch (err) {
+      log.error('Error while removing installation from database')
+      log.error(err)
+      log.report(err)
+
+      ctx.status = 500
+      ctx.body = 'Internal error while removing installation'
+      return
+    }
+
+    ctx.status = 200
+    ctx.body = 'Removed installation'
     return
   }
 
-  const token = await github.generateToken(installationId)
-  const repositories = await github.getInstallations(token)
-  .then((projects) => projects.map((project) => {
-    project.github.installation = installationId
-    return project
-  }))
-
-  try {
-    await processInstallations(installationId, repositories)
-  } catch (err) {
-    log.error('Error while handling installation addition / removal')
-    log.error(err)
-
-    ctx.status = 500
-    ctx.body = 'Internal error while adding and removing repositories'
-    return
-  }
-
-  ctx.status = 200
+  ctx.status = 404
+  ctx.body = 'Unknown action'
   return
 })
 
@@ -200,21 +266,82 @@ route.post('/', async (ctx, next) => {
   }
 
   const installationId = Number(ctx.request.body.installation.id)
-  const additions = ctx.request.body.repositories_added.map((repo) => github.castProject(repo, installationId))
-  const removals = ctx.request.body.repositories_removed.map((repo) => github.castProject(repo, installationId))
-
-  try {
-    await processInstallations(installationId, additions, removals)
-  } catch (err) {
-    log.error('Error while handling installation addition / removal')
-    log.error(err)
-
-    ctx.status = 500
-    ctx.body = 'Internal error while adding and removing repositories'
+  if (isNaN(installationId)) {
+    ctx.status = 400
+    ctx.body = 'Error parsing installation number'
     return
   }
 
-  ctx.status = 200
+  if (ctx.request.body.action === 'added') {
+    if (!Array.isArray(ctx.request.body['repositories_added'])) {
+      ctx.status = 400
+      ctx.body = 'Error parsing repositories added'
+      return
+    }
+
+    log.debug('Adding repositories in database')
+
+    try {
+      const promises = ctx.request.body['repositories_added'].map((req) => {
+        return github.generateToken(installationId)
+        .then((token) => {
+          const [owner, repo] = req['full_name'].split('/')
+          return github.getRepo(owner, repo, token)
+        })
+        .then((repo) => createRepository(repo, installationId))
+      })
+      await Promise.all(promises)
+    } catch (err) {
+      log.error('Error while adding installation to database')
+      log.error(err)
+      log.report(err)
+
+      ctx.status = 500
+      ctx.body = 'Internal error while adding installation'
+      return
+    }
+
+    ctx.status = 200
+    ctx.body = 'Added installation'
+    return
+  }
+
+  if (ctx.request.body.action === 'removed') {
+    if (!Array.isArray(ctx.request.body['repositories_removed'])) {
+      ctx.status = 400
+      ctx.body = 'Error parsing repositories removed'
+      return
+    }
+
+    log.debug('Removing repositories in database')
+
+    try {
+      const promises = ctx.request.body['repositories_removed'].map((req) => {
+        const ID = Number(req.id)
+        if (ID == null || isNaN(ID)) {
+          throw new Error('Unable to parse repository ID')
+        }
+
+        return deleteRepository(ID)
+      })
+      await Promise.all(promises)
+    } catch (err) {
+      log.error('Error while adding installation to database')
+      log.error(err)
+      log.report(err)
+
+      ctx.status = 500
+      ctx.body = 'Internal error while adding installation'
+      return
+    }
+
+    ctx.status = 200
+    ctx.body = 'Removed installation'
+    return
+  }
+
+  ctx.status = 404
+  ctx.body = 'Unknown action'
   return
 })
 

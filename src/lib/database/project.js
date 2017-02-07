@@ -1,15 +1,24 @@
 /**
  * lib/database/project.js
  * Mongoose model and schema for projects
+ * @flow
  *
  * @exports {Object} default - project database model
+ * @exports {Type} status - All possible values for a Project status
  * @exports {Object} schema - project database schema
  * @exports {Project} Project - a class to create projects
  */
 
+import Promise from 'bluebird'
+import semver from 'semver'
+
 import db from './connection'
-import Master from './master'
-import releaseSchema from './release'
+import Download from './download'
+import Master, { status as masterStatus } from './master'
+import Release from './release'
+
+export type status = 'NEW' | 'DEFER' | 'ERROR'
+export type type = 'APPLICATION'
 
 /**
  * Schema for a project
@@ -69,7 +78,7 @@ export const schema = new db.Schema({
 
   type: {
     type: String,
-    default: 'Application'
+    default: 'APPLICATION'
   },
 
   icon: String,
@@ -131,7 +140,7 @@ export const schema = new db.Schema({
     }
   },
 
-  releases: [releaseSchema]
+  releases: [Release]
 })
 
 /**
@@ -150,6 +159,7 @@ schema.set('toJSON', {
     delete ret['stripe']['id']
     delete ret['stripe']['access']
     delete ret['stripe']['refresh']
+    return ret
   }
 })
 
@@ -201,7 +211,7 @@ export class Project extends Master {
    * @async
    * @returns {Project} - a matching Project
    */
-  static findByDomain (name) {
+  static findByDomain (name): Promise<Project> {
     return this.findOne({ 'name.domain': name })
   }
 
@@ -217,7 +227,7 @@ export class Project extends Master {
    * @async
    * @returns {String} - the status of the Project
    */
-  async getSelfStatus () {
+  async getSelfStatus (): Promise<status> {
     if (this.error != null) return 'ERROR'
 
     const release = await this.findRelease()
@@ -243,7 +253,7 @@ export class Project extends Master {
    * @async
    * @returns {String} - the status of the Project
    */
-  async getStatus () {
+  async getStatus (): Promise<masterStatus> {
     const status = await this.getSelfStatus()
     if (status !== 'DEFER') return status
 
@@ -260,7 +270,7 @@ export class Project extends Master {
    * @throws {Error} - if we are unable to set the status
    * @returns {Object} - mongoose update object
    */
-  async setStatus (status) {
+  async setStatus (status: masterStatus): Promise<void> {
     const current = await this.getSelfStatus()
     if (current !== 'DEFER') {
       throw new Error('Unable to set status manually of Project')
@@ -273,12 +283,12 @@ export class Project extends Master {
   /**
    * findRelease
    * Finds the latest release from the database
-   * TODO: sort by semver version
    *
    * @async
    * @returns {Release} - the latest release for the project
    */
-  async findRelease () {
+  async findRelease (): Promise<Release> {
+    this.releases.sort((a, b) => semver.compare(a.version, b.version))
     return this.releases[this.releases.length - 1]
   }
 
@@ -289,11 +299,51 @@ export class Project extends Master {
    * @async
    * @returns {Cycle} - the latest cycle for the project. Includes release cycles
    */
-  async findCycle () {
+  async findCycle (): Promise<Object> {
     return db.model('cycle')
     .findOne({ project: this._id })
     .sort({ 'created_at': -1 })
   }
+
+  /**
+   * getDownload
+   * Returns total download number
+   *
+   * @async
+   * @returns {Number} - Total amount of downloads for the Project
+   */
+  async getDownload (): Promise<number> {
+    const findPromises = this.releases
+    .map((release) => release._id)
+    .map((id) => Download.findTotal(id))
+
+    const totals = await Promise.all(findPromises)
+
+    return totals.reduce((a, b) => a + b)
+  }
 }
+
+/**
+ * Removes all cycles when deleteing a project
+ *
+ * @async
+ * @param {Object} this - Document getting removed
+ * @param {Function} next - Calls next middleware
+ * @returns {void}
+ */
+schema.pre('remove', async function (next) {
+  const cycleID = []
+
+  cycleID.push(...this.cycles)
+  this.releases.forEach((release) => cycleID.push(...release.cycles))
+
+  const cycles = await db.model('cycle').find({
+    _id: { $in: cycleID }
+  })
+
+  await Promise.each(cycles, (cycle) => cycle.remove())
+
+  return next()
+})
 
 export default db.model(Project, schema)

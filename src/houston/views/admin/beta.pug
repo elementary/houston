@@ -1,0 +1,19 @@
+extends /layout/main
+
+block head
+  link(rel="stylesheet", type="text/css", media="all", href="https://elementary.io/styles/team.css")
+
+block body
+  if users.length === 0
+    section.grid.alert: div.half
+      h3 Nobody is interested.
+      p Currently, nobody is on the wait list for beta invites.
+  else
+    div.grid
+      div.whole
+        div.team-directory
+          each u in users
+            div.member
+              div.member_photo(style="background-image: url(\"" + u.avatar + "\")")
+              h5.member_name= u.username
+              span.member_title= u.email

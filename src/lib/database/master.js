@@ -3,9 +3,12 @@
  * Master class all database models inherit from
  *
  * @exports {Class} default - a class for all other models to inherit from
+ * @exports {Type} status - All types a Project could be in
  */
 
 import db from './connection'
+
+export type status = 'NEW' | 'STANDBY' | 'QUEUE' | 'RUN' | 'REVIEW' | 'FINISH' | 'DEFER' | 'ERROR'
 
 /**
  * Master

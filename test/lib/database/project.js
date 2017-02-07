@@ -7,28 +7,21 @@ import test from 'ava'
 import mock from 'mock-require'
 import path from 'path'
 
-import { startContainer, stopContainer } from 'test/helpers/database'
 import alias from 'root/.alias'
 import mockConfig from 'test/fixtures/config'
 
-let config = null
-let container = null
-let db = null
-let Project = null
+mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
 
-test.before(async (t) => {
-  mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
+import config from 'lib/config'
+import db from 'lib/database/connection'
+import Project from 'lib/database/project'
 
-  config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
-  container = await startContainer(config.flightcheck.docker)
-  db = require(path.resolve(alias.resolve.alias['lib'], 'database', 'connection')).default
-  Project = require(path.resolve(alias.resolve.alias['lib'], 'database', 'project')).default
-
-  db.connect(container.mongo)
+test.before((t) => {
+  db.connect(config.database)
 })
 
-test.after.always(async (t) => {
-  await stopContainer(container)
+test.after((t) => {
+  db.connection.close()
 })
 
 test('toJSON moves _id field to id', (t) => {
@@ -142,13 +135,18 @@ test('getSelfStatus returns DEFER if releases exist', async (t) => {
 })
 
 test('findRelease returns the latest existing release', async (t) => {
-  const one = db.mongo.ObjectId()
-  const two = new Project({
-    releases: [{}, {}, {}, {
-      '_id': one
+  const one = new Project({
+    releases: [{
+      version: '0.0.1'
+    }, {
+      version: '0.3.2'
+    }, {
+      version: '0.2.1'
+    }, {
+      version: '0.3.1'
     }]
   })
-  const three = await two.findRelease()
+  const two = await one.findRelease()
 
-  t.true(three['_id'].equals(one))
+  t.is(two['version'], '0.3.2')
 })

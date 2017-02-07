@@ -1,0 +1,113 @@
+/**
+ * telemetry/server.js
+ * Starts a syslog server for nginx to send download statistics
+ * @flow
+ *
+ * NOTE: the telemetry server requires a special format for syslog messages:
+ * $remote_addr|$status|$request_filename|$body_bytes_sent|$http_user_agent|$request_time
+ *
+ * @exports {Object} default - a syslog server to call listen on
+ * @exports {Function} parseMessage - Parses a raw syslogd message to usable parts
+ * @exports {Function} handleMessage - Adds package download information to database
+ */
+
+import path from 'path'
+import semver from 'semver'
+import syslogd from 'syslogd'
+
+import Log from 'lib/log'
+import Project from 'lib/database/project'
+
+const log = new Log('telemetry')
+const server = syslogd(handleMessage)
+
+/**
+ * parseMessage
+ * Splits the nginx syslog message to usable data
+ *
+ * @param {String} message - syslog message
+ *
+ * @returns {Object} - parsed usable data
+ * @returns {String} client - IP address of client
+ * @returns {String} status - Status of the download
+ * @returns {String} path - Full path of downloaded file
+ * @returns {String} file - File name of the file downloaded
+ * @returns {String} ext - File extension
+ * @returns {String} bytes - The amount of bytes sent during download
+ * @returns {String} time - The amount of time it took to download
+ */
+export function parseMessage (message: string) {
+  const arr = message.split('|')
+
+  return {
+    client: arr[0],
+    status: arr[1],
+    path: arr[2],
+    file: path.basename(arr[2]),
+    ext: path.extname(arr[2]),
+    bytes: Number(arr[3]),
+    time: Number(arr[5])
+  }
+}
+
+/**
+ * handleMessage
+ * Handles the Syslog messages sent by the download Server
+ *
+ * TODO: we might want to consider adding an IP origin filter to avoid bad eggs
+ * TODO: add some unique test, probably with client's ip address
+ *
+ * @async
+ * @param {Object} message - syslog message
+ *
+ * @return {Void}
+ */
+export async function handleMessage (message: { msg: string }): Promise<> {
+  const data = parseMessage(message.msg)
+  const [name, version] = data.file.split('_')
+
+  if (data.ext !== '.deb') {
+    log.debug('Invalid file extension')
+    return
+  }
+
+  if (data.status !== 'OK') {
+    log.debug('Download did not complete')
+    return
+  }
+
+  if (semver.valid(version) === false) {
+    log.debug('Received invalid semver version')
+    return
+  }
+
+  const project = await Project.findByDomain(name)
+  if (project == null) {
+    log.debug('Project not found')
+    return
+  }
+
+  const release = project.releases.find((release) => (release.version === version))
+  if (release == null) {
+    log.debug('Release not found')
+    return
+  }
+
+  await release.incrementDownload(1)
+  log.debug(`Added download of ${name}#${version}`)
+}
+
+server.server.on('listening', () => {
+  log.info(`Listening on ${server.port}`)
+})
+
+server.server.on('error', (err) => {
+  log.error(err)
+  log.report(err)
+})
+
+server.server.on('close', () => {
+  log.debug('Closing')
+})
+
+export default server

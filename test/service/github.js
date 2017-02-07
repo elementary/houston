@@ -155,6 +155,22 @@ test('Uses token cache', async (t) => {
   }, 1000)
 })
 
+test('Can get single repo', async (t) => {
+  const github = t.context.github
+
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .get('/repos/elementary/test')
+  .reply(200, fixture.repo, fixture.header)
+
+  const one = await github.getRepo('elementary', 'test')
+
+  t.is(typeof one, 'object')
+  t.is(one.name['domain'], 'com.github.elementary.test')
+})
+
 test('Can get list of repos', async (t) => {
   const github = t.context.github
 
