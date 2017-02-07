@@ -10,21 +10,18 @@
  */
 
 import Debug from 'debug'
-import raven from 'raven'
+import Raven from 'raven'
 
 import config from './config'
 
 const namespace = 'houston'
 
-let sentry = null
 if (config.sentry) {
-  sentry = new raven.Client(config.sentry, {
+  Raven.config(config.sentry, {
     environment: config.env,
     release: config.houston.version,
     tags: { commit: config.houston.comment }
-  })
-
-  sentry.patchGlobal()
+  }).install()
 }
 
 // Set the default log level for the app and possibly other libraries
@@ -124,10 +121,8 @@ const Log = class {
    * @returns {Void}
    */
   report (err: Error, data: ?Object) {
-    if (sentry != null) {
-      sentry.captureException(err, data)
-    } else {
-      this.info('Reporter disabled. Not sending error')
+    if (Raven.isSetup()) {
+      Raven.captureException(err, data)
     }
   }
 }
@@ -144,5 +139,4 @@ process.on('unhandledRejection', (reason, promise) => {
   log.report(reason)
 })
 
-export { sentry }
 export default Log
