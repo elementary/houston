@@ -9,7 +9,7 @@
  */
 
 import { domain } from 'lib/request'
-import * as service from './index'
+import * as error from 'lib/error/service'
 import config from 'lib/config'
 import Log from 'lib/log'
 
@@ -25,68 +25,37 @@ const api = domain('https://api.stripe.com/v1')
 export default api
 
 /**
- * StripeError
- * a specific error related to communication with Stripe
- *
- * @extends ServiceError
- */
-export class StripeError extends service.ServiceError {
-
-  /**
-   * Creates a new GitHubError
-   *
-   * @param {String} msg - message to put on the error
-   */
-  constructor (msg: string) {
-    super(msg)
-
-    this.code = 'STPERR'
-  }
-}
-
-/**
  * errorCheck
  * Checks generatic Stripe status codes for a more descriptive error
  *
  * @param {Error} err - superagent error to check
  * @param {Object} [res] - Stripe response object
- * @param {String} fn - function name on error
- * @param {String} [fo] - additional info to put in error for tracking
- * @returns {GitHubError} - a parsed error from Stripe
+ * @returns {ServiceError} - a parsed error from Stripe
  */
-const errorCheck = (err: Object, res: ?Object, fn: string, fo: ?string): StripeError => {
-  const errorString = `on Stripe service ${(fo != null) ? `${fn} for ${fo}` : fn}`
-
+const errorCheck = (err: Object, res: ?Object): error.ServiceError => {
   if (err.status === 401) {
-    log.info(`Bad credentials ${errorString}`)
-    return new StripeError('Unauthorized credentials')
-  }
-
-  if (err.status === 402) {
-    log.info(`Request failed ${errorString}`)
-    return new StripeError('Request failed')
+    log.info(`Bad credentials`)
+    return new error.ServiceError('Stripe', 'Bad Credentials')
   }
 
   if (err.status === 429) {
     log.warn('Exceeding maximum number of authentication calls to Stripe')
-    return new StripeError('Exceeding maximum number of authentication calls')
+    return new error.ServiceLimitError('GitHub')
   }
 
-  if (err.status === 400 && err.response != null && err.response.body != null && err.response.body.error != null) {
-    if (err.response.body.error.message.indexOf('more than once') !== -1) {
-      log.debug('Request for token already used')
-      return new StripeError('Expired token')
+  if (res != null) {
+    if (res.body != null && res.body.error != null) {
+      log.error(res.body.error)
+
+      return new error.ServiceRequestError('Stripe', res.status, res.body.error)
     }
 
-    log.error(`Request failed ${errorString}`)
-    log.error(err.response.body.error.message)
-
-    return new StripeError('Request failed')
+    log.error(error.toString())
+    return new error.ServiceRequestError('Stripe', res.status, err.toString())
   }
 
-  log.error(`Error occured ${errorString}`)
   log.error(err)
-  return new StripeError('An error occured')
+  return new error.ServiceError('Stripe', err.toString())
 }
 
 /**
@@ -142,15 +111,15 @@ export function postCharge (account: string, token: string, amount: number, curr
   }
 
   if (account.startsWith('acct_') === false) {
-    throw new StripeError('Invalid destination for postCharge')
+    throw new error.ServiceError('Stripe', 'Invalid destination for postCharge')
   }
 
   if (token.startsWith('tok_') === false) {
-    throw new StripeError('Invalid token for postCharge')
+    throw new error.ServiceError('Stripe', 'Invalid token for postCharge')
   }
 
   if (currency !== 'USD') {
-    throw new StripeError('Only USD currency is allowed')
+    throw new error.ServiceError('Stripe', 'Only USD currency is allowed')
   }
 
   const cut = getCut(amount)
@@ -170,6 +139,6 @@ export function postCharge (account: string, token: string, amount: number, curr
   })
   .then((res) => res.body.id)
   .catch((err, res) => {
-    throw errorCheck(err, res, 'postCharge')
+    throw errorCheck(err, res)
   })
 }
