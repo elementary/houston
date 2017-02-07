@@ -1,11 +1,14 @@
 /**
  * houston/policy/isAgreement.js
  * Tests current user's acceptence of the TOS agreement
+ * @flow
  *
  * @exports {Function} - Koa route middleware
  */
 
-import PermError from './error'
+import koa from 'koa'
+
+import { PermissionAgreementError } from 'lib/error/permission'
 
 /**
  * Checks user agreement notify property
@@ -15,7 +18,7 @@ import PermError from './error'
  *
  * @returns {Void} - runs next()
  */
-export default (ctx, next) => {
+export default (ctx: koa.Context, next: koa.Middleware) => {
   if (!ctx.isAuthenticated() || ctx.state.user == null) {
     ctx.session.originalUrl = ctx.request.url
     return ctx.redirect('/auth/github')
@@ -25,5 +28,5 @@ export default (ctx, next) => {
     return next()
   }
 
-  throw new PermError.FromAgreement(ctx.state.user)
+  throw new PermissionAgreementError(ctx.state.user)
 }
