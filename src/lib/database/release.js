@@ -9,6 +9,7 @@ import semver from 'semver'
 
 import * as dotNotation from 'lib/helpers/dotNotation'
 import db from './connection'
+import Download from './download'
 
 /**
  * @param {String} version -semver version of release
@@ -37,7 +38,6 @@ const schema = new db.Schema({
     type: String,
     required: true
   }],
-  downloads: Number,
 
   github: {
     id: {
@@ -259,6 +259,18 @@ schema.methods.createChangelog = function () {
       version: release.version
     }
   })
+}
+
+/**
+ * incrementDownload
+ * Adds download counts to release
+ *
+ * @async
+ * @param {Number} count - Amount to increment by
+ * @return {void}
+ */
+schema.methods.incrementDownload = async function (count: Number): Promise<> {
+  return Download.incrementByRelease(this._id, count)
 }
 
 /**
