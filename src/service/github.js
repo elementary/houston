@@ -15,6 +15,10 @@
  * @exports {Function} getRepos - Fetches all repos the token has access to
  * @exports {Function} getReleases - Fetches all releases a repo has
  * @exports {Function} getPermission - Checks callaborator status on repository
+ * @exports {Function} getLabel - Returns GitHub label for repository
+ * @exports {Function} getAssets - Returns raw GitHub array of release assets
+ * @exports {Function} getOrgPermission - Gets user permission to organization
+ * @exports {Function} getTeamPermission - Get user permission to team
  * @exports {Function} postLabel - Creates a label on GitHub repository
  * @exports {Function} postIssue - Creates an issue on GitHub repository
  * @exports {Function} postFile - Creates a file for a release asset
@@ -26,6 +30,7 @@ import moment from 'moment'
 import semver from 'semver'
 
 import { domain, pagination } from 'lib/request'
+import * as error from 'lib/error/service'
 import * as service from './index'
 import config from 'lib/config'
 import Log from 'lib/log'
@@ -84,67 +89,42 @@ const setToken = (inst: number, token: string, exp: Date, user: ?number = null):
 }
 
 /**
- * GitHubError
- * a specific error related to communication with GitHub
- *
- * @extends ServiceError
- */
-export class GitHubError extends service.ServiceError {
-
-  /**
-   * Creates a new GitHubError
-   *
-   * @param {String} msg - message to put on the error
-   */
-  constructor (msg: string) {
-    super(msg)
-
-    this.code = 'GTHERR'
-  }
-}
-
-/**
  * errorCheck
  * Checks generatic GitHub status codes for a more descriptive error
  *
  * @param {Object} err - superagent error to check
  * @param {Object} [res] - GitHub response object
- * @param {String} fn - function name on error
- * @param {String} [fo] - additional info to put in error for tracking
- * @returns {GitHubError} - a parsed error from GitHub
+ * @returns {ServiceError} - a parsed error from GitHub
  */
-const errorCheck = (err: Object, res: ?Object, fn: string, fo: ?string): GitHubError => {
-  const errorString = `on GitHub service ${(fo != null) ? `${fn} for ${fo}` : fn}`
-
+const errorCheck = (err: Object, res: ?Object): error.ServiceError => {
   if (err.status === 401) {
-    log.info(`Bad credentials ${errorString}`)
-    return new GitHubError('Bad GitHub credentials')
+    log.info(`Bad credentials`)
+    return new error.ServiceError('GitHub', 'Bad Credentials')
   }
 
   if (err.status === 403) {
     log.warn('Exceeding maximum number of authentication calls to GitHub')
-    return new GitHubError('Exceeding maximum number of authentication calls to GitHub')
+
+    if (res != null && res.header != null && res.header['x-rate-limit-reset'] != null) {
+      return new error.ServiceLimitError('GitHub', new Date(res.header['x-ratelimit-reset'] * 1000))
+    }
+
+    return new error.ServiceLimitError('GitHub')
   }
 
-  if (res != null && res.header != null && res.header['x-ratelimit-remaining'] < 10) {
-    log.warn(`Rate limit remaining is at ${res.header['x-ratelimit-remaining']}`)
-    return new GitHubError('Low rate limit remaning')
+  if (res != null) {
+    if (res.body != null && res.body.message != null) {
+      log.error(res.body.message)
+
+      return new error.ServiceRequestError('GitHub', res.status, res.body.message)
+    }
+
+    log.error(error.toString())
+    return new error.ServiceRequestError('GitHub', res.status, err.toString())
   }
 
-  if (res != null && res.body != null && res.body.message != null) {
-    log.error(`${res.body.message} ${errorString}`)
-    return new GitHubError('A GitHub error occured')
-  }
-
-  if (res != null && res.status != null) {
-    log.error(`${res.status} ${errorString}`)
-    log.error(err)
-    return new GitHubError(`GitHub ${res.status} error`)
-  }
-
-  log.error(`Error occured ${errorString}`)
   log.error(err)
-  return new GitHubError('An error occured')
+  return new error.ServiceError('GitHub', err.toString())
 }
 
 /**
@@ -280,11 +260,11 @@ export async function generateToken (inst: number, user: ?number): Promise<strin
   .catch((err) => {
     if (err.status === '404') {
       log.error('Trying to generate GitHub token for an incorrect organization integration ID')
-      throw new GitHubError('Authentication denied')
+      throw new error.ServiceError('GitHub', 'Incorrect organization integration ID')
     }
 
     log.error(`Trying to generate GitHub token returned a ${err.status}`)
-    throw new GitHubError('Unable to generate authentication token')
+    throw new error.ServiceRequestError('GitHub', err.status, 'Unable to generate authentication token')
   })
 
   if (githubRes != null && githubRes.token != null && githubRes.expires_at != null) {
@@ -293,7 +273,7 @@ export async function generateToken (inst: number, user: ?number): Promise<strin
     return githubRes.token
   } else {
     log.error('GitHub token generation returned an unexpected body')
-    throw new GitHubError('Unable to generate authentication token')
+    throw new error.ServiceError('GitHub', 'Unable to generate authentication token')
   }
 }
 
@@ -343,7 +323,7 @@ export function getRepos (token: string, sort: string = 'pushed'): Promise<Array
   return pagination(req)
   .then((res) => res.body.map((project) => castProject(project)))
   .catch((err, res) => {
-    throw errorCheck(err, res, 'getRepos')
+    throw errorCheck(err, res)
   })
 }
 
@@ -370,7 +350,7 @@ export function getReleases (owner: string, repo: string, token: ?string): Promi
   return pagination(req)
   .then((res) => res.body.map((release) => castRelease(release)))
   .catch((err, res) => {
-    throw errorCheck(err, res, 'getReleases', `${owner}/${repo}`)
+    throw errorCheck(err, res)
   })
 }
 
@@ -398,7 +378,7 @@ export function getReleaseByTag (owner: string, repo: string, tag: string, token
   return req
   .then((res) => castRelease(res.body))
   .catch((err, res) => {
-    throw errorCheck(err, res, 'getReleaseByTag', `${owner}/${repo}#${tag}`)
+    throw errorCheck(err, res)
   })
 }
 
@@ -421,7 +401,7 @@ export function getInstallations (token: string, user: ?string): Promise<Object>
   .set('Authorization', `token ${token}`)
   .then((res) => res.body.repositories.map((repo) => castProject(repo)))
   .catch((err, res) => {
-    throw errorCheck(err, res, 'getInstallations')
+    throw errorCheck(err, res)
   })
 }
 
@@ -472,7 +452,7 @@ export function getLabel (owner: string, repo: string, label: string, token: str
   .set('Authorization', `token ${token}`)
   .then((res) => res.body)
   .catch((err, res) => {
-    throw errorCheck(err, res, 'getLabel', `${owner}/${repo}`)
+    throw errorCheck(err, res)
   })
 }
 
@@ -500,7 +480,66 @@ export function getAssets (owner: string, repo: string, release: string, token: 
   return req
   .then((res) => res.body)
   .catch((err, res) => {
-    throw errorCheck(err, res, 'getAssets', `${owner}/${repo}#${release}`)
+    throw errorCheck(err, res)
+  })
+}
+
+/**
+ * getOrgPermission
+ * Gets user permission to organization
+ *
+ * @see https://developer.github.com/v3/orgs/members/#check-membership
+ *
+ * @param {String} organization - Name of GitHub organization to get permission of
+ * @param {User} user - User to get permission for
+ *
+ * @async
+ * @throws {ServiceError} - on an error
+ * @returns {Boolean} - True if user belongs to organization
+ */
+export function getOrgPermission (organization: string, user: Object): Promise<Boolean> {
+  return api
+  .get(`/orgs/${organization}/members/${user.username}`)
+  .set('Authorization', `token ${user.github.access}`)
+  .then((data) => {
+    if (data.status === 204) return true
+
+    return false
+  })
+  .catch((err, res) => {
+    if (err.status === 404) return false
+
+    throw errorCheck(err, res)
+  })
+}
+
+/**
+ * getTeamPermission
+ * Gets user permission to organization
+ *
+ * @see https://developer.github.com/v3/orgs/teams/#get-team-membership
+ *
+ * @param {Number} team - ID for GitHub team
+ * @param {User} user - User to get permission for
+ *
+ * @async
+ * @throws {ServiceError} - on an error
+ * @returns {Boolean} - True if user belongs to team
+ */
+export function getTeamPermission (team: number, user: Object): Promise<Boolean> {
+  return api
+  .get(`/teams/${team.toString()}/memberships/${user.username}`)
+  .set('Authorization', `token ${user.github.access}`)
+  .then((data) => {
+    if (data.status !== 200) return true
+    if (data.body == null || data.body.state == null) return false
+
+    return (data.body.state === 'active')
+  })
+  .catch((err, res) => {
+    if (err.status === 404) return false
+
+    throw errorCheck(err, res)
   })
 }
 
@@ -534,7 +573,7 @@ export function postLabel (owner: string, repo: string, token: string, label: Ob
   .send(label)
   .then((res) => res.body)
   .catch((err, res) => {
-    throw errorCheck(err, res, 'postLabel', `${owner}/${repo}`)
+    throw errorCheck(err, res)
   })
 }
 
@@ -571,7 +610,7 @@ export function postIssue (owner: string, repo: string, token: string, issue: Ob
   .send(issue)
   .then((res) => res.body.number)
   .catch((err, res) => {
-    throw errorCheck(err, res, 'postIssue', `${owner}/${repo}`)
+    throw errorCheck(err, res)
   })
 }
 
@@ -607,7 +646,7 @@ export async function postFile (owner: string, repo: string, release: number, to
 
   await new Promise((resolve, reject) => {
     fs.stat(filePath, (err, stat) => {
-      const res = new GitHubError('Unable to postFile that does not exist')
+      const res = new error.ServiceError('GitHub', 'Unable to postFile that does not exist')
 
       if (err) {
         log.error('GitHub service tried to postFile that does not exist')
@@ -629,6 +668,6 @@ export async function postFile (owner: string, repo: string, release: number, to
   .attach('file', filePath, file.name)
   .then((res) => res.body.id)
   .catch((err, res) => {
-    throw errorCheck(err, res, 'postFile', `${owner}/${repo}#${release}`)
+    throw errorCheck(err, res)
   })
 }
