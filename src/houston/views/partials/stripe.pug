@@ -5,14 +5,13 @@ if config.stripe != null
         i.fa.fa-usd
         div.popover-container
           div.popover-content
-            h3 #{project.stripe.user.username} enabled Stripe
-            p Users will now be able to make payments in AppCenter.
-            p Click to disable Stripe payments for this project, taking effect next release.
+            h3 Disable Payments for #{project.name}
+            p #{project.stripe.user.username} has enabled payments. Disabling payments will take effect after the next release.
   else
     a(href="/auth/stripe/enable/" + project.name)
       div.fab.warn
         i.fa.fa-usd
         div.popover-container
           div.popover-content
-            h3 Enable payments for #{project.name}
-            p By connecting a Stripe account, you can accept payments on AppCenter for future releases.
+            h3 Enable Payments for #{project.name}
+            p Connect a Stripe account to accept payments for future releases.
