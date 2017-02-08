@@ -59,23 +59,14 @@ route.get('/review/:fate', policy.isRole('REVIEW'), async (ctx, next) => {
   const name = Project.sanatize(ctx.params.project)
   const project = await Project.findByDomain(name)
 
-<<<<<<< HEAD
   if (project == null) {
-    throw new ctx.Mistake(404, 'Project not found')
+    throw new error.ControllerError(404, 'Project not found')
   }
 
   const release = await project.findRelease()
 
   if (release == null) {
-    throw new ctx.Mistake(400, 'The project has no releases', true)
-=======
-  if (ctx.project == null) {
-    throw new error.ControllerError(404, 'Project not found')
-  }
-
-  if (ctx.project.releases.length < 1) {
     throw new error.ControllerError(400, 'The project has no releases', true)
->>>>>>> 65f929cb8d917c27a1535b003fa548797307fbec
   }
 
   const status = await release.getStatus()
