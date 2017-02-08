@@ -5,6 +5,9 @@ language: node_js
 git:
   depth: 1
 
+before_script:
+  - cp ./test/fixtures/config.js ./config.js
+
 script:
   - npm run build
   - npm run lint

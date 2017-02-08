@@ -126,7 +126,7 @@ route.post('/:project', async (ctx) => {
         errors.push(new error.ControllerPointerError(400, '/data/attributes/amount', 'Amount needs to be greater than 100'))
       }
     } catch (err) {
-      errors.push(new error.ControllerPointerError(400, '/data/attributes/amount', 'Error while converting'))
+      errors.push(new error.ControllerPointerError(400, '/data/attributes/amount', 'Error while converting amount type'))
     }
   }
 
