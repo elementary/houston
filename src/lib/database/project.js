@@ -1,15 +1,18 @@
 /**
  * lib/database/project.js
  * Mongoose model and schema for projects
+ * @flow
  *
  * @exports {Object} - project database model
  * @exports {Object} schema - project database schema
  */
 
+import Promise from 'bluebird'
 import semver from 'semver'
 
 import * as github from 'service/github'
 import db from './connection'
+import Download from './download'
 import releaseSchema from './release'
 
 /**
@@ -21,7 +24,6 @@ import releaseSchema from './release'
  * @property {String} tag - git branch to consider master (defaults to master)
  *
  * @property {Object} apphub - the object representation of the apphub file
- * @property {Number} downloads - the number of downloads the current project has
  *
  * @property {Object} github - all data related to the project's GitHub repository
  * @property {Number} github.id - github id of project
@@ -79,7 +81,6 @@ export const schema = new db.Schema({
     type: Object,
     default: {}
   },
-  downloads: Number,
 
   github: {
     id: {
@@ -313,6 +314,23 @@ schema.methods.createCycle = async function (type) {
   await this.update({ $addToSet: { 'cycles': cycle._id } })
 
   return cycle
+}
+
+/**
+ * findDownloadTotal
+ * Returns the total amount of downloads for the Project
+ *
+ * @async
+ * @return {Number} - Total amount of downloads for the Project
+ */
+schema.methods.findDownloadTotal = async function (): Promise<number> {
+  const releaseIDs = this.releases.map((release) => release._id)
+
+  const promises = []
+  releaseIDs.forEach((id) => promises.push(Download.findTotal(id)))
+  const totals = await Promise.all(promises)
+
+  return totals.reduce((a, b) => a + b)
 }
 
 /**

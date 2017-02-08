@@ -64,23 +64,34 @@ export async function handleMessage (message) {
   const data = parseMessage(message.msg)
   const [name, version] = data.file.split('_')
 
-  if (data.ext !== '.deb') return
-  if (data.status !== 'OK') return
+  if (data.ext !== '.deb') {
+    log.debug('Invalid file extension')
+    return
+  }
+
+  if (data.status !== 'OK') {
+    log.debug('Download did not complete')
+    return
+  }
 
   if (semver.valid(version) === false) {
     log.debug('Received invalid semver version')
+    return
   }
 
-  await Project.update({
-    name,
-    'releases.version': version
-  }, {
-    $inc: {
-      'downloads': 1,
-      'releases.$.downloads': 1
-    }
-  })
+  const project = await Project.findOne({ name })
+  if (project == null) {
+    log.debug('Project not found')
+    return
+  }
 
+  const release = project.releases.find((release) => (release.version === version))
+  if (release == null) {
+    log.debug('Release not found')
+    return
+  }
+
+  await release.incrementDownload(1)
   log.debug(`Added download of ${name}#${version}`)
 }
 

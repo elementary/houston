@@ -9,7 +9,7 @@
  */
 
 import { nameify as nameUpstream } from 'service'
-import APIError from './error'
+import * as error from 'lib/error/controller'
 
 /**
  * nameify
@@ -24,13 +24,13 @@ import APIError from './error'
  */
 export function nameify (str) {
   if (str == null) {
-    throw new APIError(400, 'Invalid Project Name')
+    throw new error.ControllerError(400, 'Invalid Project Name')
   }
 
   const splits = str.split('.')
 
   if (splits.length < 3) {
-    throw new APIError(400, 'Invalid Project Name')
+    throw new error.ControllerError(400, 'Invalid Project Name')
   }
 
   return splits.map((s) => nameUpstream(s)).join('.')
@@ -48,7 +48,7 @@ export function nameify (str) {
  */
 export function amountify (num) {
   if (num == null || /\S/.test(num) === false) {
-    throw new APIError(400, 'Invalid Number')
+    throw new error.ControllerError(400, 'Invalid Number')
   }
 
   let amount = 0
@@ -56,15 +56,15 @@ export function amountify (num) {
   try {
     amount = Number(num)
   } catch (err) {
-    throw new APIError(400, 'Invalid Number')
+    throw new error.ControllerError(400, 'Invalid Number')
   }
 
   if (isNaN(amount)) {
-    throw new APIError(400, 'Invalid Number')
+    throw new error.ControllerError(400, 'Invalid Number')
   }
 
   if (amount % 1 !== 0) {
-    throw new APIError(400, 'Invalid Amount')
+    throw new error.ControllerError(400, 'Invalid Amount')
   }
 
   return amount

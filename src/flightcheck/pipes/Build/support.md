@@ -6,4 +6,4 @@ Please make sure you are using a supported language and build system to
 continue.
 
 Currently AppHub is able to process these types of projects
-- Debian packages
+- Debian packages (requires `debian/control` file)
