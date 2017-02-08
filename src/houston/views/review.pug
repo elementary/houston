@@ -5,11 +5,11 @@ block head
   link(rel="stylesheet", type="text/css", media="all", href="/styles/dashboard.css")
 
 block body
-  if cycles.length === 0
+  if projects.length === 0
     div.row: div.column.alert
       h3 No reviews available
       p Consider how lucky you are that life has been good to you so far
       a(href="/dashboard").button.suggested-action Go to Dashboard
   else
-    each cycle in cycles
-      +project(cycle.project, true, false)
+    each p in projects
+      +project(p, true, false)

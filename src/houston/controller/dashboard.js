@@ -37,14 +37,11 @@ route.get('/dashboard', policy.isRole('BETA'), policy.isAgreement, async (ctx, n
   const databaseProjects = await Project.find({
     'github.id': { $in: githubProjects }
   })
-  .populate('stripe.user')
 
-  const projects = await Promise.resolve(databaseProjects)
-  .map(async (project) => {
-    project.status = await project.getStatus()
+  const promises = []
+  databaseProjects.forEach((project) => promises.push(project.getView()))
 
-    return project
-  })
+  const projects = await Promise.all(promises)
 
   return ctx.render('dashboard', { title: 'Dashboard', projects })
 })
@@ -60,13 +57,11 @@ route.get('/reviews', policy.isRole('REVIEW'), policy.isAgreement, async (ctx, n
   })
   .populate('project')
 
-  // We can manually set the project status instead of calling the DB again
-  cycles.map((cycle) => {
-    cycle.project.status = 'REVIEW'
-    return cycle
-  })
+  const promises = []
+  cycles.forEach((cycle) => promises.push(cycle.project.getView()))
+  const projects = await Promise.all(promises)
 
-  return ctx.render('review', { title: 'Reviews', cycles })
+  return ctx.render('review', { title: 'Reviews', projects })
 })
 
 /**

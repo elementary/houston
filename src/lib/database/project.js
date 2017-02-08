@@ -321,6 +321,39 @@ export class Project extends Master {
 
     return totals.reduce((a, b) => a + b)
   }
+
+  /**
+   * getView
+   * Returns all needed data for HTML views
+   *
+   * @async
+   * @returns {Object} - An object to pass to view layer
+   * @returns {String} status - Current Project style
+   * @returns {Object} Project - Current Project
+   * @returns {Object} stripeUser - User who enabled stripe last
+   * @returns {Object} Release - Possible latest Release
+   * @returns {Object} Cycle - Possible latest Cycle
+   */
+  async getView () {
+    const [status, release, cycle] = await Promise.all([
+      this.getStatus(),
+      this.findRelease(),
+      this.findCycle()
+    ])
+
+    let stripeUser = null
+    if (this.stripe.enable && this.stripe.user != null) {
+      stripeUser = await db.model('user').findById(this.stripe.user)
+    }
+
+    return {
+      status,
+      project: this,
+      stripeUser,
+      release,
+      cycle
+    }
+  }
 }
 
 /**

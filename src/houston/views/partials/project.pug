@@ -1,39 +1,39 @@
-mixin project(project, status, stripe)
+mixin project(view, status = true, stripe = false)
   .repo
     .repo__container
       div.repo__icon
-        if project.icon != null
-          img(src="data:image/svg+xml;base64," + project.icon).app-icon
+        if view.project.icon != null
+          img(src="data:image/svg+xml;base64," + view.project.icon).app-icon
         else
           img(src="/images/application-default-icon.png").app-icon
       div.repo__body
-        if project.release.latest
-          p #{project.name.human} #{project.release.latest.version}
+        if view.release
+          p #{view.project.name.human} #{view.release.version}
         else
-          p #{project.github.human}
-        p.subtext: a(href="https://github.com/" + project.github.name, target="_blank")= project.github.name
+          p #{view.project.github.human}
+        p.subtext: a(href="https://github.com/" + view.project.github.name, target="_blank")= view.project.github.name
       div.repo__action
         if status === true
-          if project.status === 'NEW'
+          if view.status === 'NEW'
             include /partials/status/new
-          if project.status === 'STANDBY'
+          if view.status === 'STANDBY'
             include /partials/status/standby
-          if project.status === 'QUEUE'
+          if view.status === 'QUEUE'
             include /partials/status/queue
-          if project.status === 'RUN'
+          if view.status === 'RUN'
             include /partials/status/run
 
-          if project.status === 'REVIEW'
+          if view.status === 'REVIEW'
             if policy.ifRole(user, 'review')
               include /partials/review
             else
               include /partials/status/review
 
-          if project.status === 'FINISH'
+          if view.status === 'FINISH'
             include /partials/status/finish
-          if project.status === 'FAIL'
+          if view.status === 'FAIL'
             include /partials/status/fail
-          if project.status === 'ERROR'
+          if view.status === 'ERROR'
             include /partials/status/error
 
         if stripe === true

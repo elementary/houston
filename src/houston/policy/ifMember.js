@@ -34,5 +34,5 @@ export default function (project, user) {
     return true
   }
 
-  return getPermission(project.github.owner, project.github.name, user.username, user.github.access)
+  return getPermission(project.github.owner, project.github.repo, user.username, user.github.access)
 }

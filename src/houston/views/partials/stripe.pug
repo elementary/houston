@@ -1,17 +1,17 @@
 if config.stripe != null
-  if project.stripe.enable
-    a(href="/auth/stripe/disable/" + project.name.domain)
+  if view.project.stripe.enable
+    a(href="/auth/stripe/disable/" + view.project.name.domain)
       div.fab.success
         i.fa.fa-usd
         div.popover-container
           div.popover-content
-            h3 Disable Payments for #{project.name.human}
-            p #{project.stripe.user.username} has enabled payments. Disabling payments will take effect after the next release.
+            h3 Disable Payments for #{view.project.name.human}
+            p #{view.stripeUser.username} has enabled payments. Disabling payments will take effect after the next release.
   else
-    a(href="/auth/stripe/enable/" + project.name.domain)
+    a(href="/auth/stripe/enable/" + view.project.name.domain)
       div.fab.warn
         i.fa.fa-usd
         div.popover-container
           div.popover-content
-            h3 Enable payments for #{project.name.human}
+            h3 Enable payments for #{view.project.name.human}
             p Connect a Stripe account to accept payments for future releases.

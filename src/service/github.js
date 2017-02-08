@@ -29,7 +29,6 @@ import { domain, pagination } from 'lib/request'
 import * as service from './index'
 import config from 'lib/config'
 import Log from 'lib/log'
-import Project from 'lib/database/project'
 
 const log = new Log('service:github')
 
@@ -156,7 +155,7 @@ const errorCheck = (err: Object, res: ?Object, fn: string, fo: ?string): GitHubE
  * @param {Number} [installation] - GitHub installation number
  * @returns {Project} - A hydrated Project model
  */
-export function castProject (project: Object, installation: ?Number): Project {
+export function castProject (project: Object, installation: ?Number): Object {
   const owner = service.nameify(project.owner.login)
   const repo = service.nameify(project.name)
 
@@ -167,7 +166,7 @@ export function castProject (project: Object, installation: ?Number): Project {
     project.git_url = `https://${project.git_url.substr(4)}`
   }
 
-  return Project.hydrate({
+  return {
     name: {
       domain: `com.github.${owner}.${repo}`
     },
@@ -182,7 +181,7 @@ export function castProject (project: Object, installation: ?Number): Project {
       installation,
       private: project.private
     }
-  })
+  }
 }
 
 /**
