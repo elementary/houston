@@ -7,9 +7,10 @@
 
 import Router from 'koa-router'
 
+import { toAPI } from './error'
+import * as error from 'lib/error/controller'
 import * as helper from './helpers'
 import * as stripe from 'service/stripe'
-import APIError from './error'
 import config from 'lib/config'
 import Log from 'lib/log'
 import Project from 'lib/database/project'
@@ -29,7 +30,7 @@ route.all('*', (ctx, next) => {
   ) {
     log.debug('Received a request while disabled. Returning 503')
 
-    throw new APIError(503, 'Service Unavailable')
+    throw new error.ControllerError(503, 'Service Unavailable')
   }
 
   return next()
@@ -41,21 +42,21 @@ route.param('project', async (n, ctx, next) => {
   try {
     name = helper.nameify(n)
   } catch (err) {
-    throw new APIError(400, 'Invalid Project Name')
+    throw new error.ControllerParameterError(400, 'project', 'Invalid project name')
   }
 
   if (name == null) {
-    throw new APIError(400, 'Invalid Project Name')
+    throw new error.ControllerParameterError(400, 'project', 'Invalid project name')
   }
 
   ctx.project = await Project.findByDomain(name)
 
   if (ctx.project == null) {
-    throw new APIError(404, 'Project Not Found', `${name} project was not found`)
+    throw new error.ControllerParameterError(404, 'project', `${name} project was not found`)
   }
 
   if (ctx.project.stripe.enable === false) {
-    throw new APIError(400, 'Project Not Enabled', `${name} project does not have payments enabled`)
+    throw new error.ControllerParameterError(400, 'project', `${name} project does not have payments enabled`)
   }
 
   await next()
@@ -88,7 +89,7 @@ route.get('/:project', async (ctx) => {
  */
 route.post('/:project', async (ctx) => {
   if (ctx.request.body.data == null) {
-    throw new APIError.FromPointer(400, 'Missing Data', '/data', 'The request does not contain a data object')
+    throw new error.ControllerPointerError(400, '/data', 'The request does not contain a data object')
   }
 
   const errors = []
@@ -98,41 +99,41 @@ route.post('/:project', async (ctx) => {
   let currency = null
 
   if (ctx.request.body.data.key == null || ctx.request.body.data.key === '') {
-    errors.push(new APIError.FromPointer(400, 'Missing Key', '/data/attributes/key'))
+    errors.push(new error.ControllerPointerError(400, '/data/attributes/key', 'Missing Key'))
   } else if (ctx.request.body.data.key.startsWith('pk_') === false) {
-    errors.push(new APIError.FromPointer(400, 'Invalid Key', '/data/attributes/key'))
+    errors.push(new error.ControllerPointerError(400, '/data/attributes/key', 'Invalid Key'))
   } else if (ctx.request.body.data.key !== ctx.project.stripe.public) {
-    errors.push(new APIError.FromPointer(400, 'Invalid Key', '/data/attributes/key', 'The given key does not match the one on file'))
+    errors.push(new error.ControllerPointerError(400, '/data/attributes/key', 'The given key does not match the one on file'))
   }
 
   if (ctx.request.body.data.token == null || ctx.request.body.data.token === '') {
-    errors.push(new APIError.FromPointer(400, 'Missing Token', '/data/attributes/token'))
+    errors.push(new error.ControllerPointerError(400, '/data/attributes/token', 'Missing Token'))
   } else if (ctx.request.body.data.token.startsWith('tok_') === false) {
-    errors.push(new APIError.FromPointer(400, 'Invalid Token', '/data/attributes/token'))
+    errors.push(new error.ControllerPointerError(400, '/data/attributes/token', 'Invalid Token'))
   } else {
     token = ctx.request.body.data.token
   }
 
   if (ctx.request.body.data.amount == null) {
-    errors.push(new APIError.FromPointer(400, 'Missing Amount', '/data/attributes/amount'))
+    errors.push(new error.ControllerPointerError(400, '/data/attributes/amount', 'Missing Amount'))
   } else {
     try {
       amount = helper.amountify(ctx.request.body.data.amount)
 
       if (amount < 0) {
-        errors.push(new APIError.FromPointer(400, 'Invalid Amount', '/data/attributes/amount', 'Amount needs to be a positive integer'))
+        errors.push(new error.ControllerPointerError(400, '/data/attributes/amount', 'Amount needs to be a positive integer'))
       } else if (amount < 100) {
-        errors.push(new APIError.FromPointer(400, 'Insufficient Amount', '/data/attributes/amount', 'Amount needs to be greater than 100'))
+        errors.push(new error.ControllerPointerError(400, '/data/attributes/amount', 'Amount needs to be greater than 100'))
       }
     } catch (err) {
-      errors.push(new APIError.FromPointer(400, 'Invalid Amount', '/data/attributes/amount', 'Error while converting'))
+      errors.push(new error.ControllerPointerError(400, '/data/attributes/amount', 'Error while converting'))
     }
   }
 
   if (ctx.request.body.data.currency == null) {
-    errors.push(new APIError.FromPointer(400, 'Missing Currency', '/data/attributes/currency'))
+    errors.push(new error.ControllerPointerError(400, '/data/attributes/currency', 'Missing Currency'))
   } else if (ctx.request.body.data.currency !== 'USD') {
-    errors.push(new APIError.FromPointer(400, 'Invalid Currency', '/data/attributes/currency', 'Only USD currency is allowed'))
+    errors.push(new error.ControllerPointerError(400, '/data/attributes/currency', 'Only USD currency is allowed'))
   } else {
     currency = ctx.request.body.data.currency
   }
@@ -140,7 +141,7 @@ route.post('/:project', async (ctx) => {
   if (errors.length !== 0) {
     ctx.status = 400
     ctx.body = {
-      errors: errors.map((e) => e.toAPI())
+      errors: errors.map((e) => toAPI(e))
     }
     return
   }
@@ -148,16 +149,11 @@ route.post('/:project', async (ctx) => {
   try {
     await stripe.postCharge(ctx.project.stripe.id, token, amount, currency, `Payment for ${ctx.project.name.domain}`)
   } catch (err) {
-    // TODO: error message compairing is bad. Switch this to a specific code or something
-    if (err instanceof stripe.StripeError && err.message.indexOf('Expired token') !== -1) {
-      throw new APIError.FromPointer(400, 'Expired Token', '/data/attributes/token', 'The given token has already been used')
-    }
-
     log.error(`Error while creating charge for ${ctx.project.name.domain}`)
     log.error(err)
     log.report(err)
 
-    throw new APIError(500, 'Unable To Charge')
+    throw err
   }
 
   ctx.status = 200
