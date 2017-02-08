@@ -1,9 +1,8 @@
 /**
  * lib/mistake.js
  * Helper for thowing errors with http status codes and data
- * TODO: this should be redone with named params
- * TODO: this should be broken up into smaller types of errors for each system,
- * one for database errors, service errors etc
+ *
+ * DEPRECATED: Replaced by more specific error classes in lib/error/
  *
  * @exports {Class} - Extension of Error class including http error code
  */

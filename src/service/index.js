@@ -8,32 +8,6 @@
  */
 
 /**
- * ServiceError
- * a specific error relating to communication of third party services
- *
- * @property {String} code - an specific code to check error references
- *
- * @extends Error
- */
-export class ServiceError extends Error {
-
-  code: string
-
-  /**
-   * Creates a new serviceError
-   *
-   * @param {String} msg - message to put on the error
-   */
-  constructor (msg: string) {
-    super(msg)
-    Error.captureStackTrace(this, this.constructor)
-
-    this.name = 'ServiceError'
-    this.code = 'SRCERR'
-  }
-}
-
-/**
  * nameify
  * Turns a string into a RDNN compatible segment. Replaces whitespace and
  * special characters with dashes
