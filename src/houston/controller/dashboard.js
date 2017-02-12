@@ -107,7 +107,7 @@ route.post('/beta', policy.isRole('USER'), async (ctx, next) => {
 
   // And here is a very simple email regex test because life is too short for
   // yet another npm package
-  if (!/([a-z0-9]+)@([a-z0-9]+)\.([a-z]+)/i.test(email)) {
+  if (!/.+@.+\..+/i.test(email)) {
     log.debug('/beta called with invalid email address')
 
     ctx.status = 406
