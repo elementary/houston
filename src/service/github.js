@@ -119,7 +119,7 @@ const errorCheck = (err: Object, res: ?Object): error.ServiceError => {
       return new error.ServiceRequestError('GitHub', res.status, res.body.message)
     }
 
-    log.error(error.toString())
+    log.error(err.toString())
     return new error.ServiceRequestError('GitHub', res.status, err.toString())
   }
 
