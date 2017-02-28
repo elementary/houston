@@ -9,7 +9,8 @@
  * @exports {Function} add - Adds packages to repository
  * @exports {Function} remove - Removes packages from repository
  * @exports {Function} move - Moves packages from repository to repository.
-
+ * @exports {Function} snapshot - Creates a snapshot of a local repository
+ * @exports {Function} publish - Takes a snapshot of repo and publishes it
  * @exports {Function} review - Sends package to review repo
  * @exports {Function} stable - Sends package to stable repo
  */
@@ -93,6 +94,27 @@ export function upload (project: string, version: string, file: string): Promise
 export function del (file: string): Promise<Object> {
   return api
   .delete(`/files/${file}`)
+  .then((data) => data.body)
+  .catch((err, res) => {
+    throw errorCheck(err, res)
+  })
+}
+
+/**
+ * get
+ * Finds package keys for package
+ *
+ * @param {String} repo - Name of repository to get package keys from
+ * @param {String} project - Name of project package being uploaded
+ * @param {String} version - Semver version of pacakge
+ *
+ * @async
+ * @returns {String[]} - A list of package keys
+ */
+export function get (repo: string, project: string, version: string): Promise<string[]> {
+  return api
+  .get(`/repos/${repo}/packages`)
+  .query({ q: `${project} (= ${version})` })
   .then((data) => data.body)
   .catch((err, res) => {
     throw errorCheck(err, res)

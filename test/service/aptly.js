@@ -57,6 +57,22 @@ test('Can delete files', async (t) => {
   t.is(typeof one, 'object')
 })
 
+test('Can get package key', async (t) => {
+  const aptly = t.context.aptly
+
+  nock('http://localhost:4321', { encodedQueryparams: true })
+  .replyContentLength()
+  .replyDate()
+  .get(`/repos/stable/packages`)
+  .query({ q: 'project (= 1.0.0)' })
+  .reply(200, ['test'])
+
+  const one = await aptly.get('stable', 'project', '1.0.0')
+
+  t.is(one.length, 1)
+  t.is(one[0], 'test')
+})
+
 test('Can add files', async (t) => {
   const aptly = t.context.aptly
 
