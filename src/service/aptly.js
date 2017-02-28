@@ -92,7 +92,7 @@ export function upload (project: string, version: string, file: string): Promise
  */
 export function del (file: string): Promise<Object> {
   return api
-  .post(`/files/${file}`)
+  .delete(`/files/${file}`)
   .then((data) => data.body)
   .catch((err, res) => {
     throw errorCheck(err, res)
@@ -196,18 +196,16 @@ export async function snapshot (repo: string): Promise<string> {
   .getTime()
   .toString()
 
-  await api
+  return api
   .post(`/repos/${repo}/snapshots`)
   .send({
     Name: name,
     Description: 'Automated Houston publish'
   })
-  .then((data) => data.body)
+  .then((data) => data.body.Name)
   .catch((err, res) => {
     throw errorCheck(err, res)
   })
-
-  return name
 }
 
 /**
@@ -219,7 +217,7 @@ export async function snapshot (repo: string): Promise<string> {
  * @async
  * @returns {String} - Name of the snapshot published
  */
-const publish = async (repo) => {
+export async function publish (repo: string): Promise<string> {
   const name = await snapshot(repo)
 
   return api
