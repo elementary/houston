@@ -8,6 +8,7 @@
 import path from 'path'
 import semver from 'semver'
 
+import File from 'flightcheck/file'
 import Pipe from 'flightcheck/pipes/pipe'
 import render from 'lib/render'
 
@@ -45,7 +46,7 @@ export default class DebianChangelog extends Pipe {
    */
   async code (p = 'repository/debian', d = 'xenial') {
     const changelogPath = path.join(p, 'changelog')
-    const file = await this.file(changelogPath)
+    const file = new File(path.resolve(this.pipeline.build.dir, changelogPath))
 
     if (this.pipeline.build.changelog.length !== 0) {
       this.data.changelog = this.pipeline.build.changelog
