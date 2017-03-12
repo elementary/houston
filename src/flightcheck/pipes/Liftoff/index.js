@@ -10,6 +10,7 @@ import Promise from 'bluebird'
 
 import * as fsHelper from 'lib/helpers/fs'
 import config from 'lib/config'
+import File from 'flightcheck/file'
 import Log from 'lib/log'
 import Pipe from 'flightcheck/pipes/pipe'
 
@@ -73,7 +74,7 @@ export default class Liftoff extends Pipe {
       log.debug(`Flightcheck returned ${returned.exit} exit code`)
 
       try {
-        const file = await this.file(returned.log)
+        const file = new File(returned.log)
         const log = await file.read()
         return this.log('error', 'Liftoff/failure.md', log)
       } catch (e) {

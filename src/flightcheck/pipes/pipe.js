@@ -16,10 +16,6 @@ import config from 'lib/config'
 import Log from 'lib/log'
 import render from 'lib/render'
 
-import File from 'flightcheck/file'
-import Package from 'flightcheck/file/package'
-import Parsable from 'flightcheck/file/parsable'
-
 const fs = Promise.promisifyAll(require('fs'))
 
 const docker = new Docker({ socketPath: config.flightcheck.docker })
@@ -134,43 +130,6 @@ export default class Pipe extends events.EventEmitter {
    */
   async require (name, ...args) {
     return this.pipeline.require(name, ...args)
-  }
-
-  /**
-   * file
-   * Returns a new File
-   *
-   * @param {String} p - file path relative to the pipeline directory
-   * @returns {File} - new File class for requested file
-   */
-  file (p) {
-    return new File(path.join(this.pipeline.build.dir, p))
-  }
-
-  /**
-   * parsable
-   * Returns a new Parsable
-   *
-   * @param {String} p - file path relative to the pipeline directory
-   * @param {String} t - Parsable file type
-   * @returns {Parsable} - new Parsable class for requested file
-   */
-  parsable (p, t) {
-    return new Parsable(path.join(this.pipeline.build.dir, p), t)
-  }
-
-  /**
-   * package
-   * Returns a new Package
-   *
-   * @param {String} p - Path to the package
-   * @param {String} t - Package type based on extension without the dot (deb)
-   * @param {String} a - Architecture for the package
-   * @param {String} d - Distribution for the package
-   * @returns {Package} - new Package class for requested file
-   */
-  package (p, t, a, d) {
-    return new Package(path.join(this.pipeline.build.dir, p), t, a, d)
   }
 
   /**

@@ -7,7 +7,9 @@
 
 import path from 'path'
 
+import File from 'flightcheck/file'
 import Log from 'lib/log'
+import Parsable from 'flightcheck/file/parsable'
 import Pipe from 'flightcheck/pipes/pipe'
 
 const log = new Log('flightcheck:Desktop')
@@ -41,22 +43,29 @@ export default class Desktop extends Pipe {
    */
   async code (p = 'repository/data') {
     const desktopName = `${this.pipeline.build.name}.desktop`
+    const globName = '**/*desktop'
+
     const desktopPath = path.join(p, desktopName)
-    const buildPath = path.join(this.pipeline.build.dir, p)
+    const globPath = path.join(p, globName)
 
-    const file = await this.parsable(desktopPath, 'ini')
+    const desktopAbsPath = path.join(this.pipeline.build.dir, desktopPath)
+    const globAbsPath = path.join(this.pipeline.build.dir, globPath)
 
-    if (!await file.exists()) {
-      return this.log('error', 'Desktop/existance.md', `${this.pipeline.build.name}.desktop`)
+    const file = new Parsable(desktopAbsPath, globAbsPath, 'ini')
+    const fileFound = await file.exists()
+
+    if (fileFound == null) {
+      return this.log('warn', 'AppData/existance.md', desktopName)
     } else {
-      this.data.desktop = file.parse()
+      this.data.desktop = await file.parse()
     }
 
-    const returned = await this.docker('util', [desktopName], buildPath)
+    const filePath = path.relative(this.pipeline.build.dir, fileFound)
+    const returned = await this.docker('util', [filePath])
 
     if (returned.exit !== 0) {
       try {
-        const file = await this.file(returned.log)
+        const file = new File(path.resolve(this.pipeline.build.dir, returned.log))
         const log = await file.read()
 
         return this.log('error', 'Desktop/invalid.md', log)

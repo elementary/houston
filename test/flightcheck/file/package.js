@@ -17,10 +17,7 @@ test.beforeEach('setup', (t) => {
 })
 
 test('able to create simple Package', (t) => {
-  t.notThrows(() => new t.context.Package('testing', 'deb'))
-  t.notThrows(() => new t.context.Package('testing', 'superawesomepack'))
-  t.notThrows(() => new t.context.Package('testing', 'deb', 'amd64', 'xenial'))
-
-  t.throws(() => new t.context.Package('testing'))
-  t.throws(() => new t.context.Package('testing', 'n'))
+  t.notThrows(() => new t.context.Package('testing.deb', undefined, 'deb'))
+  t.notThrows(() => new t.context.Package('testing.deb'))
+  t.notThrows(() => new t.context.Package('testing.deb', undefined, 'amd64', 'xenial'))
 })

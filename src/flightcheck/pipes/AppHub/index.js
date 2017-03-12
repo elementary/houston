@@ -8,6 +8,7 @@
 import path from 'path'
 
 import * as dot from 'lib/helpers/dotNotation'
+import Parsable from 'flightcheck/file/parsable'
 import Pipe from 'flightcheck/pipes/pipe'
 
 /**
@@ -53,9 +54,9 @@ export default class AppHub extends Pipe {
    */
   async code (p = 'repository') {
     const apphubPath = path.join(p, '.apphub')
-    const file = await this.parsable(apphubPath, 'json')
+    const file = new Parsable(apphubPath, undefined, 'json')
 
-    if (!await file.exists()) {
+    if (await file.exists() == null) {
       return this.log('info', 'AppHub/existance.md')
     }
 

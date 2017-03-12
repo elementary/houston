@@ -1,13 +1,16 @@
 /**
  * flightcheck/pipes/AppData/index.js
  * Checks for a valid appdata file
+ * @flow
  *
  * @exports {Pipe} - Checks for a valid appdata file
  */
 
 import path from 'path'
 
+import File from 'flightcheck/file'
 import Log from 'lib/log'
+import Parsable from 'flightcheck/file/parsable'
 import Pipe from 'flightcheck/pipes/pipe'
 
 const log = new Log('flightcheck:AppData')
@@ -23,27 +26,33 @@ export default class AppData extends Pipe {
   /**
    * code
    * Checks for a valid appdata file
-   * TODO: create a docker image for appstream-util
    *
-   * @param {String} p - folder holding the appdata file
+   * @param {String} [p] - folder holding the appdata file
    * @returns {Void}
    */
-  async code (p = 'repository/data') {
+  async code (p: string = 'repository/data') {
     const appdataName = `${this.pipeline.build.name}.appdata.xml`
+    const globName = '**/*appdata*xml'
+
     const appdataPath = path.join(p, appdataName)
-    const buildPath = path.join(this.pipeline.build.dir, p)
+    const globPath = path.join(p, globName)
 
-    const file = await this.parsable(appdataPath, 'xml')
+    const appdataAbsPath = path.join(this.pipeline.build.dir, appdataPath)
+    const globAbsPath = path.join(this.pipeline.build.dir, globPath)
 
-    if (!await file.exists()) {
-      return this.log('warn', 'AppData/existance.md', `${this.pipeline.build.name}.appdata.xml`)
+    const file = new Parsable(appdataAbsPath, globAbsPath)
+    const fileFound = await file.exists()
+
+    if (fileFound == null) {
+      return this.log('warn', 'AppData/existance.md', appdataName)
     }
 
-    const returned = await this.docker('util', ['validate', appdataName, '--no-color'], buildPath)
+    const filePath = path.relative(this.pipeline.build.dir, fileFound)
+    const returned = await this.docker('util', ['validate', filePath, '--no-color'])
 
     if (returned.exit !== 0) {
       try {
-        const file = await this.file(returned.log)
+        const file = new File(path.resolve(this.pipeline.build.dir, returned.log))
         const log = await file.read()
 
         return this.log('warn', 'AppData/invalid.md', log)
