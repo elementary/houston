@@ -81,6 +81,11 @@ export async function write (data) {
   Object.keys(data).forEach((key) => {
     const value = data[key]
 
+    if (key.toLowerCase() === 'homepage') {
+      str += `${key}: ${value}\n\n`
+      return
+    }
+
     if (typeof value === 'string') {
       str += `${key}: ${value}\n`
       return
