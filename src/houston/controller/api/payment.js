@@ -78,7 +78,6 @@ route.get('/:project', async (ctx) => {
   return
 })
 
-
 /**
  * POST /api/payment/:project
  * Creates a new payment for the project
