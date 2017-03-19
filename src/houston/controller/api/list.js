@@ -7,9 +7,6 @@
 
 import Router from 'koa-router'
 
-import { toAPI } from './error'
-import * as error from 'lib/error/controller'
-import * as helper from './helpers'
 import Project from 'lib/database/project'
 
 const route = new Router()
@@ -25,7 +22,7 @@ route.get('/newest', async (ctx) => {
       'releases._status': 'DEFER',
       'releases.date.published': { $exists: true }
     }},
-    { $sort: { 'releases.date.published': -1 }},
+    { $sort: { 'releases.date.published': -1 } },
     { $group: { _id: '$_id', 'name': { $first: '$name' }, 'release': { $first: '$releases' } } },
     { $sort: { 'release.date.published': -1 } },
     { $limit: 10 }
