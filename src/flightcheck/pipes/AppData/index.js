@@ -68,17 +68,16 @@ export default class AppData extends Pipe {
       log.debug('Saving AppCenter Stripe key')
       this.data = await file.parse()
 
-      if (this.data['component']['custom'] == null) this.data['component']['custom'] = {}
-      if (this.data['component']['custom']['value'] == null) this.data['component']['custom']['value'] = []
+      if (this.data['component']['custom'] == null) this.data['component']['custom'] = []
+      if (this.data['component']['custom'].length > 0) this.data['component']['custom'].push({})
+      if (this.data['component']['custom'][0]['value'] == null) this.data['component']['custom'][0]['value'] = []
 
-      const i = this.data['component']['custom']['value'].length
-
-      this.data['component']['custom']['value'][i] = {
+      this.data['component']['custom'][0]['value'].push({
         '_': this.pipeline.build.stripe,
         '$': {
           key: 'x-appcenter-stripe'
         }
-      }
+      })
 
       try {
         await file.stringify(this.data)
