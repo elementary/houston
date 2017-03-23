@@ -23,6 +23,8 @@ const AGREEMENTDATE = new Date(2017, 0, 13)
  * @property {String} github.id - github account id
  * @property {String} github.acceses - github oauth access code
  * @property {String} github.refresh - github oauth refresh code
+ * @property {Date} github.cache - Last time GitHub cache was updated
+ * @property {Object} github.projects - A cache of GitHub projects the user has
  *
  * @property {String} right - user's permission scheme
  * @property {Object} notify - boolean keys for notifications
@@ -45,7 +47,10 @@ export const schema = new db.Schema({
   github: {
     id: String,
     access: String,
-    refresh: String
+    refresh: String,
+
+    cache: Date,
+    projects: Object
   },
 
   right: {

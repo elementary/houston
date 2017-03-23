@@ -31,7 +31,7 @@ route.get('', (ctx) => {
  * Shows all projects
  */
 route.get('/dashboard', policy.isRole('BETA'), policy.isAgreement, async (ctx, next) => {
-  const githubProjects = await github.getRepos(ctx.state.user.github.access)
+  const githubProjects = await github.getReposForUser(ctx.state.user)
   .map((repo) => repo.github.id)
 
   const databaseProjects = await Project.find({
