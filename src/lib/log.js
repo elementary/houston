@@ -16,7 +16,7 @@ import config from './config'
 
 const namespace = 'houston'
 
-if (config.sentry) {
+if (config.sentry != null) {
   Raven.config(config.sentry, {
     environment: config.env,
     release: config.houston.version,
@@ -121,7 +121,7 @@ const Log = class {
    * @returns {Void}
    */
   report (err: Error, data: ?Object) {
-    if (Raven.isSetup()) {
+    if (config.sentry != null) {
       Raven.captureException(err, data)
     }
   }
