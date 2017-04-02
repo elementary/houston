@@ -378,6 +378,9 @@ route.post('/', async (ctx, next) => {
   await project.update({
     $addToSet: {
       releases: release
+    },
+    $set: {
+      status: 'DEFER'
     }
   })
 

@@ -74,7 +74,7 @@ export default class Liftoff extends Pipe {
       log.debug(`Flightcheck returned ${returned.exit} exit code`)
 
       try {
-        const file = new File(returned.log)
+        const file = new File(path.resolve(this.pipeline.build.dir, returned.log))
         const log = await file.read()
         return this.log('error', 'Liftoff/failure.md', log)
       } catch (e) {

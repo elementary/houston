@@ -35,7 +35,7 @@ program
   .action((opts) => {
     const app = require('./houston').default
 
-    database.connect(config.database)
+    database.connect(config.database, { server: { auto_reconnect: true } })
     app.listen(opts.port)
   })
 
@@ -51,6 +51,7 @@ program
       process.exit(1)
     })
 
+    database.connect(config.database, { server: { auto_reconnect: true } })
     telemetry.listen(opts.port)
   })
 

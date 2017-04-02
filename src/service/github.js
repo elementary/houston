@@ -13,6 +13,7 @@
  * @exports {Function} generateToken - Generates GitHub authentication token
  * @exports {Function} getRepo - Fetches a repository by GitHub ID
  * @exports {Function} getRepos - Fetches all repos the token has access to
+ * @exports {Function} getReposForUser - Fetches all repos for a given User
  * @exports {Function} getReleases - Fetches all releases a repo has
  * @exports {Function} getPermission - Checks callaborator status on repository
  * @exports {Function} getLabel - Returns GitHub label for repository
@@ -34,8 +35,12 @@ import * as error from 'lib/error/service'
 import * as service from './index'
 import config from 'lib/config'
 import Log from 'lib/log'
+import User from 'lib/database/user'
 
 const log = new Log('service:github')
+
+// Cache GitHub user repos for 12 hours
+const GITHUB_CACHE_TIME = 12 * 60 * 60 * 60 * 1000
 
 const api = domain('https://api.github.com')
 .use((req) => {
@@ -306,29 +311,49 @@ export function getRepo (owner: string, repo: string, token: string): Promise<Ob
 }
 
 /**
- * getRepos
- * Fetches all repos the token has access to
+ * getReposForUser
+ * Fetches all repos for a given User
  *
  * @see https://developer.github.com/v3/repos/#list-user-repositories
  *
- * @param {String} token - GitHub authentication token
+ * @param {User} user - User to find repositories for
  * @param {String} [sort] - what to sort the repos by
  *
  * @async
  * @throws {GitHubError} - on an error
  * @returns {Object}[] - a list of mapped GitHub projects
  */
-export function getRepos (token: string, sort: string = 'pushed'): Promise<Array<Object>> {
+export async function getReposForUser (user: User, sort: string = 'pushed'): Promise<Array<Object>> {
+  // Check user projects cache date
+  if (user.github != null && user.github.cache != null) {
+    if (moment().diff(user.github.cache) <= GITHUB_CACHE_TIME) {
+      if (user.github.projects != null && user.github.projects.length > 0) {
+        return user.github.projects
+      }
+    }
+  }
+
+  if (user.github.access == null) {
+    throw new error.ServiceError('GitHub', 'Unable to grab repositories for non GitHub user')
+  }
+
   const req = api
   .get('/user/repos')
-  .set('Authorization', `token ${token}`)
+  .set('Authorization', `token ${user.github.access}`)
   .query({ sort })
 
-  return pagination(req)
+  const projects = await pagination(req)
   .then((res) => res.body.map((project) => castProject(project)))
   .catch((err, res) => {
     throw errorCheck(err, res)
   })
+
+  await user.update({
+    'github.cache': new Date(),
+    'github.projects': projects
+  })
+
+  return projects
 }
 
 /**

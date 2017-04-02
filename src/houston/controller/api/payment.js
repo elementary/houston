@@ -87,7 +87,11 @@ route.get('/:project', async (ctx) => {
  * @param {Number} amount - the amount in cents to charge to the user
  * @param {String} currency - the currency the payment is in
  */
-route.post('/:project', async (ctx) => {
+route.post('/:project', async (ctx, next) => {
+  if (ctx.request.body == null) return next()
+  if (ctx.request.body === '') return next()
+  if (typeof ctx.request.body === 'object' && Object.keys(ctx.request.body).length < 1) return next()
+
   if (ctx.request.body.data == null) {
     throw new error.ControllerPointerError(400, '/data', 'The request does not contain a data object')
   }
@@ -126,7 +130,7 @@ route.post('/:project', async (ctx) => {
         errors.push(new error.ControllerPointerError(400, '/data/attributes/amount', 'Amount needs to be greater than 100'))
       }
     } catch (err) {
-      errors.push(new error.ControllerPointerError(400, '/data/attributes/amount', 'Error while converting'))
+      errors.push(new error.ControllerPointerError(400, '/data/attributes/amount', 'Error while converting amount type'))
     }
   }
 
@@ -160,6 +164,90 @@ route.post('/:project', async (ctx) => {
   ctx.body = {
     data: {
       name: ctx.project.name.domain,
+      key: ctx.project.stripe.public,
+      amount
+    }
+  }
+})
+
+/**
+ * POST /api/payment/:project
+ * Creates a new payment for the project with URL query keys. Used for AppCenter
+ *
+ * @param {String} key - stripe public key for payment
+ * @param {String} token - charge token for the payment
+ * @param {Number} amount - the amount in cents to charge to the user
+ * @param {String} currency - the currency the payment is in
+ */
+route.post('/:project', async (ctx) => {
+  const errors = []
+
+  let token = null
+  let amount = null
+  let currency = null
+
+  if (ctx.request.query.key == null || ctx.request.query.key === '') {
+    errors.push(new error.ControllerParameterError(400, 'key', 'Missing Key'))
+  } else if (ctx.request.query.key.startsWith('pk_') === false) {
+    errors.push(new error.ControllerParameterError(400, 'key', 'Invalid Key'))
+  } else if (ctx.request.query.key !== ctx.project.stripe.public) {
+    errors.push(new error.ControllerParameterError(400, 'key', 'The given key does not match the one on file'))
+  }
+
+  if (ctx.request.query.token == null || ctx.request.query.token === '') {
+    errors.push(new error.ControllerParameterError(400, 'token', 'Missing Token'))
+  } else if (ctx.request.query.token.startsWith('tok_') === false) {
+    errors.push(new error.ControllerParameterError(400, 'token', 'Invalid Token'))
+  } else {
+    token = ctx.request.query.token
+  }
+
+  if (ctx.request.query.amount == null) {
+    errors.push(new error.ControllerParameterError(400, 'amount', 'Missing Amount'))
+  } else {
+    try {
+      amount = helper.amountify(ctx.request.query.amount)
+
+      if (amount < 0) {
+        errors.push(new error.ControllerParameterError(400, 'amount', 'Amount needs to be a positive integer'))
+      } else if (amount < 100) {
+        errors.push(new error.ControllerParameterError(400, 'amount', 'Amount needs to be greater than 100'))
+      }
+    } catch (err) {
+      errors.push(new error.ControllerParameterError(400, 'amount', 'Error while converting amount type'))
+    }
+  }
+
+  if (ctx.request.query.currency == null) {
+    errors.push(new error.ControllerParameterError(400, 'currency', 'Missing Currency'))
+  } else if (ctx.request.query.currency !== 'USD') {
+    errors.push(new error.ControllerParameterError(400, 'currency', 'Only USD currency is allowed'))
+  } else {
+    currency = ctx.request.query.currency
+  }
+
+  if (errors.length !== 0) {
+    ctx.status = 400
+    ctx.body = {
+      errors: errors.map((e) => toAPI(e))
+    }
+    return
+  }
+
+  try {
+    await stripe.postCharge(ctx.project.stripe.id, token, amount, currency, `Payment for ${ctx.project.name}`)
+  } catch (err) {
+    log.error(`Error while creating charge for ${ctx.project.name}`)
+    log.error(err)
+    log.report(err)
+
+    throw err
+  }
+
+  ctx.status = 200
+  ctx.body = {
+    data: {
+      name: ctx.project.name,
       key: ctx.project.stripe.public,
       amount
     }

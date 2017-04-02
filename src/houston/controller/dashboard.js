@@ -31,7 +31,7 @@ route.get('', (ctx) => {
  * Shows all projects
  */
 route.get('/dashboard', policy.isRole('BETA'), policy.isAgreement, async (ctx, next) => {
-  const githubProjects = await github.getRepos(ctx.state.user.github.access)
+  const githubProjects = await github.getReposForUser(ctx.state.user)
   .map((repo) => repo.github.id)
 
   const databaseProjects = await Project.find({
@@ -102,7 +102,7 @@ route.post('/beta', policy.isRole('USER'), async (ctx, next) => {
 
   // And here is a very simple email regex test because life is too short for
   // yet another npm package
-  if (!/([a-z0-9]+)@([a-z0-9]+)\.([a-z]+)/i.test(email)) {
+  if (!/.+@.+\..+/i.test(email)) {
     log.debug('/beta called with invalid email address')
 
     ctx.status = 406

@@ -12,6 +12,7 @@ import nock from 'nock'
 import path from 'path'
 import test from 'ava'
 
+import { user as mockedUser } from 'test/lib/database/fixtures/user'
 import * as fixture from './fixtures/github'
 import alias from 'root/.alias'
 import mockConfig from 'test/fixtures/config'
@@ -25,6 +26,13 @@ const override = {
   }
 }
 
+mock(path.resolve(alias.resolve.alias['root'], 'config.js'), _.merge(mockConfig, override))
+
+const config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
+const db = require(path.resolve(alias.resolve.alias['lib'], 'database', 'connection.js')).default
+const User = require(path.resolve(alias.resolve.alias['lib'], 'database', 'user')).default
+const github = require(path.resolve(alias.resolve.alias['service'], 'github'))
+
 test.before((t) => {
   // This will capture any incoming data and put it to a file.
   // Use it for verifying we are testing real data.
@@ -35,21 +43,14 @@ test.before((t) => {
   // })
 
   nock.disableNetConnect() // Disables all real HTTP requests
+  db.connect(config.database)
 })
 
-test.beforeEach((t) => {
-  mock(path.resolve(alias.resolve.alias['root'], 'config.js'), _.merge(mockConfig, override))
-
-  t.context.config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
-  t.context.github = require(path.resolve(alias.resolve.alias['service'], 'github'))
-
-  // A note to the smart people. Don't use nock cleanAll() here.
+test.after((t) => {
+  db.connection.close()
 })
 
 test('Can generate an accurate JWT', async (t) => {
-  const config = t.context.config
-  const github = t.context.github
-
   const verify = (token) => new Promise((resolve, reject) => {
     fs.readFile(publicKey, (err, key) => {
       if (err) return reject(err)
@@ -83,8 +84,6 @@ test('Can generate an accurate JWT', async (t) => {
 })
 
 test('Can generate an accurate token', async (t) => {
-  const github = t.context.github
-
   nock('https://api.github.com:443', { encodedQueryparams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
@@ -102,8 +101,6 @@ test('Can generate an accurate token', async (t) => {
 })
 
 test('Uses token cache', async (t) => {
-  const github = t.context.github
-
   // NOTE: we only mock each endpoint ONCE. if you get to this point due to an
   // 'Unable to generate authentication token' it's most likely because the
   // cache failed and we are trying to connect to GitHub again.
@@ -148,8 +145,6 @@ test('Uses token cache', async (t) => {
 })
 
 test('Can get single repo', async (t) => {
-  const github = t.context.github
-
   nock('https://api.github.com:443', { encodedQueryparams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
@@ -163,9 +158,7 @@ test('Can get single repo', async (t) => {
   t.is(one.name['domain'], 'com.github.elementary.test')
 })
 
-test('Can get list of repos', async (t) => {
-  const github = t.context.github
-
+test('Can get list of repos for user', async (t) => {
   nock('https://api.github.com:443', { encodedQueryparams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
@@ -174,7 +167,8 @@ test('Can get list of repos', async (t) => {
   .query({ sort: 'pushed', page: 1 })
   .reply(200, fixture.repos, fixture.header)
 
-  const one = await github.getRepos('testingToken')
+  const user = await User.create(mockedUser)
+  const one = await github.getReposForUser(user)
 
   t.is(typeof one, 'object')
   t.is(one[0].name['domain'], 'com.github.elementary.test1')
@@ -183,9 +177,49 @@ test('Can get list of repos', async (t) => {
   t.is(typeof one[0].github.integration, 'undefined')
 })
 
-test('Can get list of releases', async (t) => {
-  const github = t.context.github
+test('getReposForUser updates user cache', async (t) => {
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .get('/user/repos')
+  .query({ sort: 'pushed', page: 1 })
+  .reply(200, fixture.repos, fixture.header)
 
+  const user = await User.create(mockedUser)
+  const one = await github.getReposForUser(user)
+  const updatedUser = await User.findById(user._id)
+
+  t.not(updatedUser.github.cache, user.github.cache)
+  t.is(updatedUser.github.projects.length, one.length)
+})
+
+test('getReposForUser uses user cache of projects', async (t) => {
+  nock('https://api.github.com:443', { encodedQueryparams: true })
+  .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
+  .replyContentLength()
+  .replyDate()
+  .get('/user/repos')
+  .query({ sort: 'pushed', page: 1 })
+  .reply(200, fixture.repos, fixture.header)
+
+  const user = await User.create(mockedUser)
+
+  const one = await github.getReposForUser(user)
+  const two = await User.findById(user._id)
+
+  t.not(two.github.cache, user.github.cache)
+  t.is(two.github.projects.length, one.length)
+
+  const three = await github.getReposForUser(two)
+  const four = await User.findById(user._id)
+
+  t.deepEqual(four.github.cache, two.github.cache)
+  t.is(four.github.projects.length, three.length)
+  t.deepEqual(four.github.projects, three)
+})
+
+test('Can get list of releases', async (t) => {
   nock('https://api.github.com:443', { encodedQueryparams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
@@ -203,8 +237,6 @@ test('Can get list of releases', async (t) => {
 })
 
 test('Can get a release by way of tag', async (t) => {
-  const github = t.context.github
-
   nock('https://api.github.com:443', { encodedQueryparams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
@@ -221,8 +253,6 @@ test('Can get a release by way of tag', async (t) => {
 })
 
 test('Can get accurate permissions', async (t) => {
-  const github = t.context.github
-
   nock('https://api.github.com:443', { encodedQueryParams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
@@ -247,8 +277,6 @@ test('Can get accurate permissions', async (t) => {
 })
 
 test('Can get a single label', async (t) => {
-  const github = t.context.github
-
   nock('https://api.github.com:443', { encodedQueryparams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
@@ -267,8 +295,6 @@ test('Can get a single label', async (t) => {
 })
 
 test('Can get release assets', async (t) => {
-  const github = t.context.github
-
   nock('https://api.github.com:443', { encodedQueryparams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
@@ -315,8 +341,6 @@ test('Can get release assets', async (t) => {
 })
 
 test('Can post a label', async (t) => {
-  const github = t.context.github
-
   nock('https://api.github.com:443', { encodedQueryParams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .matchHeader('Authorization', 'token testToken')
@@ -343,8 +367,6 @@ test('Can post a label', async (t) => {
 })
 
 test('Can post an issue', async (t) => {
-  const github = t.context.github
-
   nock('https://api.github.com:443', { encodedQueryparams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .matchHeader('Authorization', 'token testToken')
@@ -410,8 +432,6 @@ test('Can post an issue', async (t) => {
 })
 
 test('Can post a file', async (t) => {
-  const github = t.context.github
-
   nock('https://uploads.github.com:443', { encodedQueryparams: true })
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .matchHeader('Authorization', 'token testToken')

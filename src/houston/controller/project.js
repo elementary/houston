@@ -82,8 +82,11 @@ route.get('/review/:fate', policy.isRole('REVIEW'), async (ctx, next) => {
   const cycle = await release.cycle.latest
 
   if (ctx.params.fate === 'yes') {
-    await aptly.stable(cycle.packages)
-    await cycle.setStatus('FINISH')
+    await Promise.all([
+      aptly.stable(cycle.packages),
+      cycle.setStatus('FINISH'),
+      release.update({ 'date.published': new Date() })
+    ])
   } else {
     await cycle.setStatus('FAIL')
   }
