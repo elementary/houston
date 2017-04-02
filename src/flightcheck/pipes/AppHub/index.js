@@ -31,7 +31,7 @@ export default class AppHub extends Pipe {
     this.data = {
       log: {
         enabled: true,
-        label: 'AppHub',
+        label: 'AppCenter',
         color: '3a416f',
         level: 'warn'
       },

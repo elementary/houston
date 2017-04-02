@@ -12,7 +12,7 @@ If you need a short refresher on JSON, here is a simple example file:
 ```
 {
   "log": {
-    "label": "AppHub"
+    "label": "AppCenter"
   }
 }
 ```
