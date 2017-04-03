@@ -1,4 +1,4 @@
-Create a readable apphub file
+Create a readable AppCenter Dashboard file
 
 Congratulations, you successfully have a `.apphub` file! Well, not quite. It
 seems we ran into problems trying to parse it.
