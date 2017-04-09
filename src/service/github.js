@@ -35,12 +35,13 @@ import * as error from 'lib/error/service'
 import * as service from './index'
 import config from 'lib/config'
 import Log from 'lib/log'
+import Project from 'lib/database/project'
 import User from 'lib/database/user'
 
 const log = new Log('service:github')
 
-// Cache GitHub user repos for 12 hours
-const GITHUB_CACHE_TIME = 12 * 60 * 60 * 60 * 1000
+// Cache GitHub user repos for 1 hours
+const GITHUB_CACHE_TIME = 1 * 60 * 60 * 60 * 1000
 
 const api = domain('https://api.github.com')
 .use((req) => {
@@ -313,18 +314,22 @@ export function getRepo (owner: string, repo: string, token: string): Promise<Ob
  * @see https://developer.github.com/v3/repos/#list-user-repositories
  *
  * @param {User} user - User to find repositories for
- * @param {String} [sort] - what to sort the repos by
  *
  * @async
  * @throws {GitHubError} - on an error
  * @returns {Object}[] - a list of mapped GitHub projects
  */
-export async function getReposForUser (user: User, sort: string = 'pushed'): Promise<Array<Object>> {
+export async function getReposForUser (user: User): Promise<Array<Object>> {
   // Check user projects cache date
   if (user.github != null && user.github.cache != null) {
     if (moment().diff(user.github.cache) <= GITHUB_CACHE_TIME) {
       if (user.github.projects != null && user.github.projects.length > 0) {
-        return user.github.projects
+        // DEPRECATED let the old object storage format rest in peace.
+        if (typeof user.github.projects[0] === 'number') {
+          return Project.find({
+            'github.id': { $in: user.github.projects }
+          })
+        }
       }
     }
   }
@@ -336,7 +341,9 @@ export async function getReposForUser (user: User, sort: string = 'pushed'): Pro
   const req = api
   .get('/user/repos')
   .set('Authorization', `token ${user.github.access}`)
-  .query({ sort })
+  .query({
+    sort: 'pushed'
+  })
 
   const projects = await pagination(req)
   .then((res) => res.body.map((project) => castProject(project)))
@@ -346,7 +353,7 @@ export async function getReposForUser (user: User, sort: string = 'pushed'): Pro
 
   await user.update({
     'github.cache': new Date(),
-    'github.projects': projects
+    'github.projects': projects.map((project) => project.github.id)
   })
 
   return projects
