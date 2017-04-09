@@ -30,7 +30,6 @@ mock(path.resolve(alias.resolve.alias['root'], 'config.js'), _.merge(mockConfig,
 
 const config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
 const db = require(path.resolve(alias.resolve.alias['lib'], 'database', 'connection.js')).default
-const Project = require(path.resolve(alias.resolve.alias['lib'], 'database', 'project')).default
 const User = require(path.resolve(alias.resolve.alias['lib'], 'database', 'user')).default
 const github = require(path.resolve(alias.resolve.alias['service'], 'github'))
 
