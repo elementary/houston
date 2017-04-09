@@ -8,30 +8,12 @@
 import _ from 'lodash'
 import path from 'path'
 
+import * as aptly from 'service/aptly'
 import config from 'lib/config'
 import Log from 'lib/log'
 import Pipe from 'flightcheck/pipes/pipe'
-import request from 'lib/request'
 
 const log = new Log('flightcheck:ElementaryAptly')
-
-/**
- * aptlyerr
- * Helps log aptly errors
- *
- * @param {String} str - string to log in error
- * @param {Object} err - The request error object
- * @returns {Void}
- */
-const aptlyerr = (str, err) => {
-  log.error(str)
-
-  if (err.response != null && err.response.body[0] != null && err.response.body[0].error != null) {
-    log.error(err.response.body[0].error)
-  } else {
-    log.error(err)
-  }
-}
 
 /**
  * GitHubRelease
@@ -84,16 +66,11 @@ export default class ElementaryAptly extends Pipe {
     try {
       log.debug('ElementaryAptly is trying to check for existing packages')
 
-      existingKeys = await request
-      .get(`${config.aptly.url}/repos/${config.aptly.review}/packages`)
-      .query({
-        q: `${this.pipeline.build.name} (= ${this.pipeline.build.version})`
-      })
-      .then((data) => data.body)
+      existingKeys = await aptly.get(config.aptly.review, this.pipeline.build.name, this.pipeline.build.version)
 
       if (!_.isArray(existingKeys)) throw new Error('Unable to grab array of exisiting keys')
     } catch (error) {
-      aptlyerr('ElementaryAptly encountered error while grabbing exisiting keys', error)
+      log.error(error)
       return this.log('error', 'Elementary/Aptly/api.md')
     }
 
@@ -105,70 +82,26 @@ export default class ElementaryAptly extends Pipe {
     try {
       log.debug(`ElementaryAptly is uploading ${files} files to aptly`)
 
-      let req = request
-      .post(`${config.aptly.url}/files/${this.pipeline.build.name}`)
-
+      const promises = []
       files.forEach((file) => {
-        req = req.attach(file, path.join(this.pipeline.build.dir, file))
+        promises.push(aptly.review(this.pipeline.build.name, this.pipeline.build.version, file))
       })
-
-      await req
+      await Promise.all(promises)
 
       this.data.publishedFiles = files
     } catch (error) {
-      aptlyerr('ElementaryAptly encountered an error while posting files to repo', error)
+      log.error(error)
       return this.log('error', 'Elementary/Aptly/api.md')
     }
 
     try {
       log.debug('ElementaryAptly is grabbing package keys')
 
-      await request
-      .post(`${config.aptly.url}/repos/${config.aptly.review}/file/${this.pipeline.build.name}`)
+      this.data.publishedKeys = await aptly.get(config.aptly.review, this.pipeline.build.name, this.pipeline.build.version)
 
-      this.data.publishedKeys = await request
-      .get(`${config.aptly.url}/repos/${config.aptly.review}/packages`)
-      .query({
-        q: `${this.pipeline.build.name} (= ${this.pipeline.build.version})`
-      })
-      .then((data) => data.body)
+      if (!_.isArray(existingKeys)) throw new Error('Unable to grab array of exisiting keys')
     } catch (error) {
-      aptlyerr('ElementaryAptly encountered an error while adding files to repo', error)
-      return this.log('error', 'Elementary/Aptly/api.md')
-    }
-
-    try {
-      log.debug('ElementaryAptly is creating a new snapshot')
-
-      const timestamp = new Date()
-      .getTime()
-      .toString()
-
-      await request
-      .post(`${config.aptly.url}/repos/${config.aptly.review}/snapshots`)
-      .send({
-        Name: timestamp,
-        Description: `${this.pipeline.build.name} version bump to ${this.pipeline.build.version}`
-      })
-
-      await Promise.each(this.data.dists, (dist) => {
-        log.debug(`ElementaryAptly is updating snapshot for ${dist} repository`)
-
-        return request
-        .put(`${config.aptly.url}/publish/${config.aptly.review}/${dist}`)
-        .send({
-          Snapshots: [{
-            Component: 'main',
-            Name: timestamp
-          }],
-          Signing: {
-            Batch: true,
-            Passphrase: config.aptly.passphrase
-          }
-        })
-      })
-    } catch (error) {
-      aptlyerr('ElementaryAptly encountered an error while publishing new snapshot', error)
+      log.error(error)
       return this.log('error', 'Elementary/Aptly/api.md')
     }
   }

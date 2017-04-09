@@ -50,7 +50,7 @@ const errorCheck = (err: Object, res: ?Object): error.ServiceError => {
       return new error.ServiceRequestError('Stripe', res.status, res.body.error)
     }
 
-    log.error(error.toString())
+    log.error(err.toString())
     return new error.ServiceRequestError('Stripe', res.status, err.toString())
   }
 
