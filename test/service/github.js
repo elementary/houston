@@ -30,6 +30,7 @@ mock(path.resolve(alias.resolve.alias['root'], 'config.js'), _.merge(mockConfig,
 
 const config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
 const db = require(path.resolve(alias.resolve.alias['lib'], 'database', 'connection.js')).default
+const Project = require(path.resolve(alias.resolve.alias['lib'], 'database', 'project')).default
 const User = require(path.resolve(alias.resolve.alias['lib'], 'database', 'user')).default
 const github = require(path.resolve(alias.resolve.alias['service'], 'github'))
 
@@ -211,12 +212,9 @@ test('getReposForUser uses user cache of projects', async (t) => {
   t.not(two.github.cache, user.github.cache)
   t.is(two.github.projects.length, one.length)
 
-  const three = await github.getReposForUser(two)
   const four = await User.findById(user._id)
 
   t.deepEqual(four.github.cache, two.github.cache)
-  t.is(four.github.projects.length, three.length)
-  t.deepEqual(four.github.projects, three)
 })
 
 test('Can get list of releases', async (t) => {
