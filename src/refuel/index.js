@@ -46,6 +46,7 @@ export function start () {
  * @returns {Void}
  */
 export function stop () {
+  // FLOW disable next line due to null checks
   clearInterval(interval)
   interval = null
 }
