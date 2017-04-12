@@ -19,12 +19,6 @@ const worker = new atc.Worker('cycle')
  */
 worker.register('start', async (param) => {
   const cycle = await Cycle.findById(param.id)
-  const status = await cycle.getStatus()
-
-  if (status !== 'QUEUE') {
-    log.debug('Received flightcheck start data for a cycle already checked')
-    return
-  }
 
   log.debug('Received flightcheck data for start cycle')
   await cycle.setStatus('RUN')
@@ -41,12 +35,6 @@ worker.register('start', async (param) => {
  */
 worker.register('finish', async (param) => {
   const cycle = await Cycle.findById(param.id)
-  const status = await cycle.getStatus()
-
-  if (status !== 'RUN') {
-    log.debug('Received flightcheck finish data for a cycle not running')
-    return
-  }
 
   log.debug(`Received flightcheck data for finish cycle ${param.id}`)
   log.debug(`Found ${param.logs.length} logs in ${cycle.name}`)
@@ -93,14 +81,8 @@ worker.register('finish', async (param) => {
  */
 worker.register('error', async (param) => {
   const cycle = await Cycle.findById(param.id)
-  const status = await cycle.getStatus()
 
-  if (status !== 'RUN') {
-    log.debug('Received flightcheck error data for a cycle not running')
-    return
-  } else {
-    log.debug('Received flightcheck data for error cycle')
-  }
+  log.debug('Received flightcheck data for error cycle')
 
   await cycle.setStatus('ERROR')
   await cycle.update({ mistake: param.error })
