@@ -17,3 +17,5 @@ module.name_mapper='houston/\(.*\)'->'<PROJECT_ROOT>/src/houston/\1'
 module.name_mapper='lib/\(.*\)'->'<PROJECT_ROOT>/src/lib/\1'
 module.name_mapper='service/\(.*\)'->'<PROJECT_ROOT>/src/service/\1'
 module.name_mapper='test/\(.*\)'->'<PROJECT_ROOT>/test/\1'
+
+suppress_comment= \\(.\\|\n\\)*\\FLOW
