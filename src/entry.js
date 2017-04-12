@@ -40,6 +40,15 @@ program
   })
 
 program
+  .command('refuel')
+  .description('starts the process for updating the stable repository')
+  .action((opts) => {
+    const refuel = require('./refuel')
+
+    refuel.start()
+  })
+
+program
   .command('telemetry')
   .description('starts nginx syslog server for download statistics')
   .option('-p, --port <port>', 'Port to listen on', config.telemetry.port)

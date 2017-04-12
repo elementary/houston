@@ -80,6 +80,7 @@
     "start": "node build/entry.js",
     "flightcheck": "node build/entry.js flightcheck",
     "houston": "node build/entry.js houston",
+    "refuel": "node build/entry.js refuel",
     "telemetry": "node build/entry.js telemetry",
     "build": "gulp build",
     "build:watch": "gulp watch",
