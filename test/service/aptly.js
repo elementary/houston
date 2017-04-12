@@ -149,64 +149,34 @@ test('Can move files', async (t) => {
   await aptly.move('review', 'stable', ['test'])
 })
 
-test('Can snapshot repositories', async (t) => {
-  const aptly = t.context.aptly
-
-  nock('http://localhost:4321', { encodedQueryparams: true })
-  .replyContentLength()
-  .replyDate()
-  .post('/repos/stable/snapshots', (body) => {
-    if (body.Name == null) return false
-    if (body.Description !== 'Automated Houston publish') return false
-    return true
-  })
-  .reply(200, {
-    Name: 'test',
-    CreatedAt: '2015-02-28T19:56:59.137192613+03:00',
-    Description: 'Automated Houston publish'
-  })
-
-  const one = await aptly.snapshot('stable')
-
-  t.is(one, 'test')
-})
-
 test('Can publish repositories', async (t) => {
   const aptly = t.context.aptly
 
   nock('http://localhost:4321', { encodedQueryparams: true })
   .replyContentLength()
   .replyDate()
-  .post('/repos/stable/snapshots', (body) => {
-    if (body.Name == null) return false
-    if (body.Description !== 'Automated Houston publish') return false
-    return true
-  })
-  .reply(200, {
-    Name: 'test',
-    CreatedAt: '2015-02-28T19:56:59.137192613+03:00',
-    Description: 'Automated Houston publish'
-  })
-
-  nock('http://localhost:4321', { encodedQueryparams: true })
-  .replyContentLength()
-  .replyDate()
   .put('/publish/stable/xenial', (body) => {
-    if (body.Snapshots[0].Component !== 'main') return false
-    if (body.Snapshots[0].Name !== 'test') return false
-
     if (body.Signing.Batch !== true) return false
     if (body.Signing.Passphrase !== t.context.config.aptly.passphrase) return false
 
     return true
   })
   .reply(200, {
-    Name: 'test',
-    CreatedAt: '2015-02-28T19:56:59.137192613+03:00',
-    Description: 'Automated Houston publish'
+    Architectures: ['amd64'],
+    Distribution: 'xenial',
+    Label: '',
+    Origin: '',
+    Prefix: 'stable',
+    SkipContents: false,
+    SourceKind: 'local',
+    Sources: [{
+      Component: 'main',
+      Name: 'stable'
+    }],
+    Storage: ''
   })
 
   const one = await aptly.publish('stable')
 
-  t.is(one, 'test')
+  t.is(one, 'stable')
 })
