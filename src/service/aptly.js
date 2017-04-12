@@ -9,8 +9,7 @@
  * @exports {Function} add - Adds packages to repository
  * @exports {Function} remove - Removes packages from repository
  * @exports {Function} move - Moves packages from repository to repository.
- * @exports {Function} snapshot - Creates a snapshot of a local repository
- * @exports {Function} publish - Takes a snapshot of repo and publishes it
+ * @exports {Function} publish - Publishes a repository
  * @exports {Function} review - Sends package to review repo
  * @exports {Function} stable - Sends package to stable repo
  */
@@ -205,56 +204,24 @@ export async function move (from: string, to: string, pkg: string[]): Promise<> 
 }
 
 /**
- * snapshot
- * Creates a snapshot of a local repository
- *
- * @param {String} repo - Name of repository to take snapshot of
- *
- * @async
- * @returns {String} - name of the snapshot created
- */
-export async function snapshot (repo: string): Promise<string> {
-  const name = new Date()
-  .getTime()
-  .toString()
-
-  return api
-  .post(`/repos/${repo}/snapshots`)
-  .send({
-    Name: name,
-    Description: 'Automated Houston publish'
-  })
-  .then((data) => data.body.Name)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
-}
-
-/**
  * publish
- * Takes a snapshot of repo and publishes it
+ * Publishes a local repository
  *
- * @param {String} repo - Name of repository to take snapshot of
+ * @param {String} repo - Name of repository to publish
  *
  * @async
- * @returns {String} - Name of the snapshot published
+ * @returns {String} - Name of the repo published
  */
-export async function publish (repo: string): Promise<string> {
-  const name = await snapshot(repo)
-
+export function publish (repo: string): Promise<string> {
   return api
   .put(`/publish/${repo}/${dist}`)
   .send({
-    Snapshots: [{
-      Component: 'main',
-      Name: name
-    }],
     Signing: {
       Batch: true,
       Passphrase: config.aptly.passphrase
     }
   })
-  .then((data) => data.body.Name)
+  .then((data) => data.body.Sources[0].Name)
   .catch((err, res) => {
     throw errorCheck(err, res)
   })
@@ -286,7 +253,7 @@ export async function review (project: string, version: string, file: string): P
  * @param {String[]} pkg - Package keys
  *
  * @async
- * @returns {String} - Name of the snapshot published
+ * @returns {String} - Name of the repo published
  */
 export async function stable (pkg: string[]): Promise<string> {
   await move(config.aptly.review, config.aptly.stable, pkg)
