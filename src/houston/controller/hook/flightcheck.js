@@ -19,9 +19,12 @@ const worker = new atc.Worker('cycle')
  */
 worker.register('start', async (param) => {
   const cycle = await Cycle.findById(param.id)
+  const status = await cycle.getStatus()
 
-  log.debug('Received flightcheck data for start cycle')
-  await cycle.setStatus('RUN')
+  if (status === 'QUEUE') {
+    log.debug('Received flightcheck data for start cycle')
+    await cycle.setStatus('RUN')
+  }
 })
 
 /**
