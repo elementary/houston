@@ -211,12 +211,9 @@ test('getReposForUser uses user cache of projects', async (t) => {
   t.not(two.github.cache, user.github.cache)
   t.is(two.github.projects.length, one.length)
 
-  const three = await github.getReposForUser(two)
   const four = await User.findById(user._id)
 
   t.deepEqual(four.github.cache, two.github.cache)
-  t.is(four.github.projects.length, three.length)
-  t.deepEqual(four.github.projects, three)
 })
 
 test('Can get list of releases', async (t) => {
