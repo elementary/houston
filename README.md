@@ -1,6 +1,6 @@
 <img src="branding/apphub-purple-transparent-256.png" alt="AppCenter" width="128">
 
-#Houston
+# Houston
 
 [![Bountysource](https://www.bountysource.com/badge/tracker?tracker_id=27692469)](https://www.bountysource.com/trackers/27692469-elementary-houston)
 [![Gitter](https://badges.gitter.im/elementary/houston.svg)](https://gitter.im/elementary/houston?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
