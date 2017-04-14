@@ -34,8 +34,6 @@ export function start () {
     } catch (err) {
       log.error('Unable to publish repository', err)
     }
-
-    start()
   }, delay)
 }
 

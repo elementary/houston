@@ -35,7 +35,6 @@ export default class ElementaryAptly extends Pipe {
     this.data.archs = ['amd64'] // elementary architectures we publish for
     this.data.dists = ['xenial'] // elementary repository distributions we publish for
 
-    this.data.publishedFiles = [] // all file paths we published
     this.data.publishedKeys = [] // all aptly keys we published
   }
 
@@ -84,22 +83,12 @@ export default class ElementaryAptly extends Pipe {
 
       const promises = []
       files.forEach((file) => {
-        promises.push(aptly.review(this.pipeline.build.name, this.pipeline.build.version, file))
+        const p = path.resolve(this.pipeline.build.dir)
+        promises.push(aptly.review(this.pipeline.build.name, this.pipeline.build.version, p))
       })
-      await Promise.all(promises)
+      const keys = await Promise.all(promises)
 
-      this.data.publishedFiles = files
-    } catch (error) {
-      log.error(error)
-      return this.log('error', 'Elementary/Aptly/api.md')
-    }
-
-    try {
-      log.debug('ElementaryAptly is grabbing package keys')
-
-      this.data.publishedKeys = await aptly.get(config.aptly.review, this.pipeline.build.name, this.pipeline.build.version)
-
-      if (!_.isArray(existingKeys)) throw new Error('Unable to grab array of exisiting keys')
+      this.data.publishedFiles = _.flattenDeep(keys)
     } catch (error) {
       log.error(error)
       return this.log('error', 'Elementary/Aptly/api.md')

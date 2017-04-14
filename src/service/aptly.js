@@ -73,8 +73,8 @@ const errorCheck = (err: Object, res: ?Object): error.ServiceError => {
  */
 export function upload (project: string, version: string, file: string): Promise<string[]> {
   return api
-  .post('/files')
-  .attach('file', file, `${project}/${version}_${arch}.deb`)
+  .post(`/files/${project}`)
+  .attach('file', file, `${version}_${arch}.deb`)
   .then((data) => data.body)
   .catch((err, res) => {
     throw errorCheck(err, res)
@@ -229,7 +229,7 @@ export function publish (repo: string): Promise<string> {
 
 /**
  * review
- * Uploads a package to aptly review directory and publishes snapshot
+ * Uploads a package to aptly review directory and publishes review repo
  *
  * @param {String} project - Name of project package being uploaded
  * @param {String} version - Semver version of pacakge
@@ -239,7 +239,8 @@ export function publish (repo: string): Promise<string> {
  * @returns {String[]} - List of packages uploaded
  */
 export async function review (project: string, version: string, file: string): Promise<string[]> {
-  const keys = await ingest(project, version, file)
+  await upload(project, version, file)
+  const keys = await ingest(config.aptly.review, project, version)
 
   await publish(config.aptly.review)
 
