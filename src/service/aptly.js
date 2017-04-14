@@ -229,7 +229,7 @@ export function publish (repo: string): Promise<string> {
 
 /**
  * review
- * Uploads a package to aptly review directory and publishes snapshot
+ * Uploads a package to aptly review directory and publishes review repo
  *
  * @param {String} project - Name of project package being uploaded
  * @param {String} version - Semver version of pacakge
@@ -239,7 +239,8 @@ export function publish (repo: string): Promise<string> {
  * @returns {String[]} - List of packages uploaded
  */
 export async function review (project: string, version: string, file: string): Promise<string[]> {
-  const keys = await ingest(project, version, file)
+  await upload(project, version, file)
+  const keys = await ingest(config.aptly.review, version, file)
 
   await publish(config.aptly.review)
 
