@@ -88,7 +88,7 @@ export default class ElementaryAptly extends Pipe {
       })
       const keys = await Promise.all(promises)
 
-      this.data.publishedFiles = _.flattenDeep(keys)
+      this.data.publishedKeys = _.flattenDeep(keys)
     } catch (error) {
       log.error(error)
       return this.log('error', 'Elementary/Aptly/api.md')
