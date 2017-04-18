@@ -83,7 +83,7 @@ export default class ElementaryAptly extends Pipe {
 
       const promises = []
       files.forEach((file) => {
-        const p = path.resolve(this.pipeline.build.dir)
+        const p = path.resolve(this.pipeline.build.dir, file)
         promises.push(aptly.review(this.pipeline.build.name, this.pipeline.build.version, p))
       })
       const keys = await Promise.all(promises)
