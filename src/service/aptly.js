@@ -133,7 +133,7 @@ export function get (repo: string, project: string, version: string): Promise<st
  */
 export async function ingest (repo: string, project: string, version: string): Promise<string[]> {
   await api
-  .post(`/repos/${repo}/file/${project}/${version}_${arch}.deb`)
+  .post(`/repos/${repo}/file/${project}/${project}_${version}_${arch}.deb`)
   .then((data) => data.body.Report.Added)
   .catch((err, res) => {
     throw errorCheck(err, res)
