@@ -74,7 +74,7 @@ const errorCheck = (err: Object, res: ?Object): error.ServiceError => {
 export function upload (project: string, version: string, file: string): Promise<string[]> {
   return api
   .post(`/files/${project}`)
-  .attach('file', file, `${version}_${arch}.deb`)
+  .attach('file', file, `${project}_${version}_${arch}.deb`)
   .then((data) => data.body)
   .catch((err, res) => {
     throw errorCheck(err, res)
@@ -139,7 +139,7 @@ export async function ingest (repo: string, project: string, version: string): P
     throw errorCheck(err, res)
   })
 
-  await del(`${project}/${version}_${arch}.deb`)
+  await del(`${project}/${project}_${version}_${arch}.deb`)
 
   return api
   .get(`/repos/${repo}/packages`)
