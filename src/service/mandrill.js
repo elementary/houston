@@ -58,7 +58,8 @@ const errorCheck = (err: Object, res: ?Object): error.ServiceError => {
 /**
  * postReceipt
  * Sends a receipt email to a user after purchase
- * TODO: we need to save parsed appstream data for more human friendly items
+ * TODO: we need to save parsed appstream data for more human friendly names
+ * TODO: save icon path or data for email receipts
  *
  * @param {Project} project - The project that was purchased
  * @param {String} email - The email address to send the receipt to
