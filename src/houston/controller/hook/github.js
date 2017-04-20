@@ -385,7 +385,7 @@ route.post('/', async (ctx, next) => {
       releases: release
     },
     $set: {
-      status: 'DEFER'
+      _status: 'DEFER'
     }
   })
 
