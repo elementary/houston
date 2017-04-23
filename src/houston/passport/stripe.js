@@ -37,11 +37,12 @@ router.get('/callback', policy.isRole('beta'), async (ctx, next) => {
     return new ctx.Mistake(503, 'Stripe disabled')
   }
 
-  const cookieProject = ctx.cookies.get('stripe_project')
-  const project = await Project.findById(cookieProject)
+  const projectId = ctx.cookies.get('stripe_project')
+  const project = await Project.findById(projectId)
 
   if (project == null) {
     log.debug('Stripe oauth callback on a mysterious project')
+    throw new ctx.Mistake(404, 'Project not found')
   }
 
   if (!policy.ifMember(project, ctx.state.user)) {
@@ -74,12 +75,12 @@ router.get('/callback', policy.isRole('beta'), async (ctx, next) => {
   }
 
   await project.update({
-    'stripe.enabled': true,
-    'stripe.user': ctx.state.user._id,
+    'stripe.enable': true,
     'stripe.id': data.results['stripe_user_id'],
     'stripe.access': data.access,
     'stripe.refresh': data.refresh,
-    'stripe.public': data.results['stripe_publishable_key']
+    'stripe.public': data.results['stripe_publishable_key'],
+    'stripe.user': ctx.state.user._id
   })
 
   return ctx.redirect('/dashboard')
@@ -91,12 +92,11 @@ router.get('/enable/:project', policy.isRole('beta'), async (ctx, next) => {
     return new ctx.Mistake(503, 'Stripe disabled')
   }
 
-  const project = await Project.findOne({
-    name: ctx.params.project
-  })
+  const name = Project.sanatize(ctx.params.project)
+  const project = await Project.findByDomain(name)
 
   if (project == null) {
-    log.debug(`Could not found project ${ctx.params.project} in database`)
+    log.debug(`Could not found project ${name} in database`)
     throw new ctx.Mistake(404, 'Project not found')
   }
 
@@ -104,7 +104,7 @@ router.get('/enable/:project', policy.isRole('beta'), async (ctx, next) => {
     throw new ctx.Mistake(403, 'You do not have access to this project')
   }
 
-  log.debug(`Setting stripe project cookie to ${project.name}`)
+  log.debug(`Setting stripe project cookie to ${name}`)
   ctx.cookies.set('stripe_project', project._id, {
     expires: moment().add(5, 'minutes').toDate(),
     overwrite: true
@@ -132,12 +132,11 @@ router.get('/disable/:project', policy.isRole('beta'), async (ctx, next) => {
     return new ctx.Mistake(503, 'Stripe disabled')
   }
 
-  const project = await Project.findOne({
-    name: ctx.params.project
-  })
+  const name = Project.sanatize(ctx.params.project)
+  const project = await Project.findByDomain(name)
 
   if (project == null) {
-    log.debug(`Could not found project ${ctx.params.project} in database`)
+    log.debug(`Could not found project ${name} in database`)
     throw new ctx.Mistake(404, 'Project not found')
   }
 
@@ -146,7 +145,7 @@ router.get('/disable/:project', policy.isRole('beta'), async (ctx, next) => {
   }
 
   await project.update({
-    'stripe.enabled': false
+    'stripe.enable': false
   })
 
   return ctx.redirect('/dashboard')

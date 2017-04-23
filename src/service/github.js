@@ -139,7 +139,7 @@ const errorCheck = (err: Object, res: ?Object): error.ServiceError => {
  *
  * @param {Object} project - GitHub API project object
  * @param {Number} [installation] - GitHub installation number
- * @returns {Object} - a mapped project object
+ * @returns {Project} - A hydrated Project model
  */
 export function castProject (project: Object, installation: ?Number): Object {
   const owner = service.nameify(project.owner.login)
@@ -153,15 +153,19 @@ export function castProject (project: Object, installation: ?Number): Object {
   }
 
   return {
-    name: `com.github.${owner}.${repo}`,
-    repo: project.git_url,
-    tag: project.default_branch,
+    name: {
+      domain: `com.github.${owner}.${repo}`
+    },
+    repository: {
+      url: project.git_url,
+      tag: project.default_branch
+    },
     github: {
       id: project.id,
       owner: project.owner.login,
-      name: project.name,
-      private: project.private,
-      installation
+      repo: project.name,
+      installation,
+      private: project.private
     }
   }
 }
@@ -171,7 +175,7 @@ export function castProject (project: Object, installation: ?Number): Object {
  * Casts a GitHub release to a simpler object for internal use
  *
  * @param {Object} release - GitHub API release object
- * @returns {Object} - a mapped release object
+ * @returns {Object} - A mapped Release object
  */
 export function castRelease (release: Object): Object {
   const version = semver.valid(release.tag_name)

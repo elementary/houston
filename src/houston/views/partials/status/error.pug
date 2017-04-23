@@ -1,7 +1,7 @@
-a(href="/project/" + project.name + "/cycle")
+a(href="/project/" + view.project.name.domain + "/cycle")
   div.fab.error
     i.fa.fa-exclamation-circle
     div.popover-container
       div.popover-content
-        h3 Error Encountered Processing #{project.name}.
+        h3 Error Encountered Processing #{view.project.name.human}.
         p This is most likely a problem with this website.

@@ -66,29 +66,25 @@ export async function deleteInstallation (installation: number): Promise<> {
  */
 export async function createRepository (repo: Object, installation: number): Promise<Project> {
   const token = await github.generateToken(installation)
-  const project = await Project.findOne({ name: repo.name })
+  const project = await Project.findByDomain(repo.name.domain)
 
   if (project != null) {
-    log.debug(`Project "${repo.name}" already exists in database`)
+    log.debug(`Project "${repo.name.domain}" already exists in database`)
     return project
   }
 
-  log.debug(`Creating Project "${repo.name}" in database`)
+  log.debug(`Creating Project "${repo.name.domain}" in database`)
 
   repo.github.installation = installation
-  repo.releases = await github.getReleases(repo.github.owner, repo.github.name, token)
+  repo.releases = await github.getReleases(repo.github.owner, repo.github.repo, token)
 
   repo.releases = repo.releases
   .filter((release) => (release.version != null))
   .sort((a, b) => semver(a.version, b.version))
 
-  if (repo.releases.length > 0) {
-    repo._status = 'DEFER'
-  } else {
-    repo._status = 'NEW'
-  }
-
-  return Project.create(repo)
+  const newProject = new Project(repo)
+  await newProject.save()
+  return newProject
 }
 
 /**
@@ -354,9 +350,8 @@ route.post('/', async (ctx, next) => {
 
   log.debug('Processing new release')
 
-  const project = await Project.findOne({
-    'github.id': ctx.request.body.repository.id
-  })
+  const id = Project.sanatize(ctx.request.body.repository.id)
+  const project = await Project.findOne({ 'github.id': id })
 
   if (project == null) {
     log.debug('Unable to process new release for unknown project')
@@ -367,7 +362,7 @@ route.post('/', async (ctx, next) => {
   }
 
   const currentRelease = project.releases.find((release) => {
-    return (release.github.id === ctx.request.body.release.id)
+    return (release.github.id === id)
   })
 
   if (currentRelease != null) {

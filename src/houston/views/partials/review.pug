@@ -1,15 +1,15 @@
-a(href="project/" + project.name + "/review/no")
+a(href="project/" + view.project.name.domain + "/review/no")
   div.fab.error
     i.fa.fa-times
     div.popover-container
       div.popover-content
         h3 Request Changes
-        p #{project.name} needs fixing
+        p #{view.project.name.human} needs fixing
 
-a(href="project/" + project.name + "/review/yes")
+a(href="project/" + view.project.name.domain + "/review/yes")
   div.fab.success
     i.fa.fa-check
     div.popover-container
       div.popover-content
         h3 Approve
-        p Release #{project.name} into AppCenter
+        p Release #{view.project.name.human} into AppCenter

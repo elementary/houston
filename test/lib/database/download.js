@@ -13,9 +13,9 @@ import mockConfig from 'test/fixtures/config'
 
 mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
 
-const config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
-const db = require(path.resolve(alias.resolve.alias['lib'], 'database', 'connection.js')).default
-const Download = require(path.resolve(alias.resolve.alias['lib'], 'database', 'download')).default
+import config from 'lib/config'
+import db from 'lib/database/connection'
+import Download from 'lib/database/download'
 
 test.before((t) => {
   db.connect(config.database)

@@ -13,11 +13,11 @@ import mockConfig from 'test/fixtures/config'
 
 mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
 
-const config = require(path.resolve(alias.resolve.alias['lib'], 'config')).default
-const db = require(path.resolve(alias.resolve.alias['lib'], 'database', 'connection.js')).default
-const Download = require(path.resolve(alias.resolve.alias['lib'], 'database', 'download')).default
-const Project = require(path.resolve(alias.resolve.alias['lib'], 'database', 'project')).default
-const telemetry = require(path.resolve(alias.resolve.alias['telemetry'], 'server'))
+import * as telemetry from 'telemetry/server'
+import config from 'lib/config'
+import db from 'lib/database/connection'
+import Download from 'lib/database/download'
+import Project from 'lib/database/project'
 
 test.before((t) => {
   db.connect(config.database)
@@ -42,11 +42,15 @@ test('parseMessage can parse a nginx message string', (t) => {
 })
 
 test('increments download number for release', async (t) => {
-  await Project.remove({ name: 'com.github.elementary.houston' })
+  await Project.remove({ 'name.domain': 'com.github.elementary.houston' })
 
-  const project = await Project.create({
-    name: 'com.github.elementary.houston',
-    repo: 'https://github.com/elementary/houston.git',
+  const project = new Project({
+    name: {
+      domain: 'com.github.elementary.houston'
+    },
+    repository: {
+      url: 'https://github.com/elementary/houston.git'
+    },
     releases: [{
       version: '0.0.1',
       changelog: ['testing release'],
@@ -56,6 +60,8 @@ test('increments download number for release', async (t) => {
       'github.tag': 'v0.0.1'
     }]
   })
+
+  await project.save()
 
   const msg = '192.168.1.1|OK|/houston/pool/main/c/com.github.elementary.houston/com.github.elementary.houston_0.0.1_amd64.deb|163|chrome|128'
 

@@ -1,6 +1,7 @@
 /**
  * telemetry/server.js
  * Starts a syslog server for nginx to send download statistics
+ * @flow
  *
  * NOTE: the telemetry server requires a special format for syslog messages:
  * $remote_addr|$status|$request_filename|$body_bytes_sent|$http_user_agent|$request_time
@@ -35,7 +36,7 @@ const server = syslogd(handleMessage)
  * @returns {String} bytes - The amount of bytes sent during download
  * @returns {String} time - The amount of time it took to download
  */
-export function parseMessage (message) {
+export function parseMessage (message: string) {
   const arr = message.split('|')
 
   return {
@@ -56,11 +57,12 @@ export function parseMessage (message) {
  * TODO: we might want to consider adding an IP origin filter to avoid bad eggs
  * TODO: add some unique test, probably with client's ip address
  *
+ * @async
  * @param {Object} message - syslog message
  *
  * @return {Void}
  */
-export async function handleMessage (message) {
+export async function handleMessage (message: { msg: string }): Promise<> {
   const data = parseMessage(message.msg)
   const [name, version] = data.file.split('_')
 
@@ -79,7 +81,7 @@ export async function handleMessage (message) {
     return
   }
 
-  const project = await Project.findOne({ name })
+  const project = await Project.findByDomain(name)
   if (project == null) {
     log.debug('Project not found')
     return

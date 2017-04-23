@@ -23,9 +23,8 @@ const route = new Router({
  * @param {String} project - project name
  */
 route.get('/cycle', policy.isRole('BETA'), policy.isAgreement, async (ctx, next) => {
-  const project = await Project.findOne({
-    name: ctx.params.project
-  })
+  const name = Project.sanatize(ctx.params.project)
+  const project = await Project.findByDomain(name)
 
   if (project == null) {
     throw new error.ControllerError(404, 'Project not found')
@@ -35,11 +34,13 @@ route.get('/cycle', policy.isRole('BETA'), policy.isAgreement, async (ctx, next)
     throw new error.ControllerError(403, 'You do not have permission to cycle this project')
   }
 
-  if (project.releases.length < 1) {
+  const release = await project.findRelease()
+
+  if (release == null) {
     throw new error.ControllerError(400, 'The project has no releases to cycle')
   }
 
-  await project.createCycle('RELEASE')
+  await release.createCycle('RELEASE')
   .catch((err) => {
     throw new error.ControllerError(500, 'An error occured while creating a new release cycle', err, true)
   })
@@ -55,19 +56,19 @@ route.get('/cycle', policy.isRole('BETA'), policy.isAgreement, async (ctx, next)
  * @param {String} fate - yes or no approval for latest release review
  */
 route.get('/review/:fate', policy.isRole('REVIEW'), async (ctx, next) => {
-  ctx.project = await Project.findOne({
-    name: ctx.params.project
-  }).exec()
+  const name = Project.sanatize(ctx.params.project)
+  const project = await Project.findByDomain(name)
 
-  if (ctx.project == null) {
+  if (project == null) {
     throw new error.ControllerError(404, 'Project not found')
   }
 
-  if (ctx.project.releases.length < 1) {
+  const release = await project.findRelease()
+
+  if (release == null) {
     throw new error.ControllerError(400, 'The project has no releases', true)
   }
 
-  const release = await ctx.project.release.latest
   const status = await release.getStatus()
 
   if (status !== 'REVIEW') {

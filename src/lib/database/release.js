@@ -154,7 +154,7 @@ schema.set('toJSON', {
  * @return {Object} - mongoose query of update
  */
 schema.methods.update = function (obj, opt) {
-  return db.model('project').update({
+  return db.model('Project').update({
     _id: this.project._id,
     'releases._id': this._id
   }, dotNotation.toDot(obj, '.', 'releases.$'), opt)
@@ -207,9 +207,9 @@ schema.methods.createCycle = async function (type) {
   const cycle = await db.model('cycle').create({
     project: this.project._id,
     installation: this.project.github.installation,
-    repo: this.project.repo,
+    repo: this.project.repository.url,
     tag: this.github.tag,
-    name: this.project.name,
+    name: this.project.name.domain,
     version: this.version,
     type,
     changelog: await this.createChangelog(),
@@ -218,8 +218,7 @@ schema.methods.createCycle = async function (type) {
 
   const updates = {
     $addToSet: {
-      'releases.$.cycles': cycle._id,
-      'cycles': cycle._id
+      'releases.$.cycles': cycle._id
     }
   }
 
@@ -229,7 +228,7 @@ schema.methods.createCycle = async function (type) {
     }
   }
 
-  await db.model('project').update({
+  await db.model('Project').update({
     _id: this.project._id,
     'releases._id': this._id
   }, updates)
