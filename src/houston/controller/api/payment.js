@@ -163,7 +163,7 @@ const sendReceipt = async (project: Project, email: string, amount: number) => {
 
     log.debug('Payment email sent')
   } catch (err) {
-    log.error('Unable to send payment email')
+    log.error(`Unable to send payment email to ${email}`)
     log.error(err)
 
     log.report(err, {
