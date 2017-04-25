@@ -50,7 +50,7 @@ export async function deleteInstallation (installation: number): Promise<> {
     'github.installation': installation
   })
 
-  const promises = projects.map((project) => project.delete())
+  const promises = projects.map((project) => project.remove())
 
   return Promise.all(promises)
 }
@@ -385,7 +385,7 @@ route.post('/', async (ctx, next) => {
       releases: release
     },
     $set: {
-      status: 'DEFER'
+      _status: 'DEFER'
     }
   })
 

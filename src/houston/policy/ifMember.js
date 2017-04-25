@@ -23,6 +23,10 @@ const log = new Log('policy:ifMember')
  * @returns {Boolean} - true if the user have access to repository
  */
 export default function (project: Object, user: Object) {
+  if (project == null) {
+    log.warn('No project given. Denying access.')
+    throw new ApplicationError('Invalid project for authentication')
+  }
   if (project.github == null) {
     log.warn(`${project.name} has no GitHub data to authenticate against. Denying access.`)
     throw new ApplicationError('Project has no GitHub data')
