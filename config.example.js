@@ -37,6 +37,13 @@ module.exports.stripe = {
   public: 'pk_test_c32j0239j9tg8902j3f90238'
 }
 
+// https://mandrillapp.com/settings
+module.exports.mandrill = {
+  key: 'vw4861vwae4bv-4v8e1w2z',
+
+  purchaseTemplate: 'app-purchase'
+}
+
 // GitHub identifiers for admin, reviewer, and beta groups
 module.exports.rights = {
   beta: 'elementary',
