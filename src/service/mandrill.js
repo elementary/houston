@@ -92,6 +92,12 @@ export function postReceipt (project: Project, email: string, amount: number): P
   }, {
     name: 'developer-name',
     content: project.github.owner
+  }, {
+    name: 'developer-url',
+    content: `https://github.com/${project.github.owner}`
+  }, {
+    name: 'app-help',
+    content: `https://github.com/${project.github.owner}/${project.github.name}/issues`
   }]
 
   return api
