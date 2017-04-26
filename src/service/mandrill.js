@@ -80,12 +80,19 @@ export function postReceipt (project: Project, email: string, amount: number): P
 
   const price = `$${(amount * 100).toFixed(2)}`
 
-  const req = {
-    'app-name': project.name,
-    'app-icon': 'https://developer.elementary.io/images/system-software-install.svg',
-    'amount': price,
-    'developer-name': project.github.owner
-  }
+  const req = [{
+    name: 'app-name',
+    content: project.name
+  }, {
+    name: 'app-icon',
+    content: 'https://developer.elementary.io/images/system-software-install.svg'
+  }, {
+    name: 'amount',
+    content: price
+  }, {
+    name: 'developer-name',
+    content: project.github.owner
+  }]
 
   return api
   .post('/messages/send-template.json')
