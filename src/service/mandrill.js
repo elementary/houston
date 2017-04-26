@@ -121,6 +121,10 @@ export function postReceipt (project: Project, email: string, amount: number): P
       'merge': true,
       'merge_language': 'handlebars',
       'global_merge_vars': [req],
+      'merge_vars': [{
+        'rcpt': email,
+        'vars': req
+      }],
       'tags': ['appcenter', 'purchase']
     },
     'async': true
