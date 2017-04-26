@@ -78,7 +78,7 @@ export function postReceipt (project: Project, email: string, amount: number): P
     throw new error.ServiceConfigError('Mandrill', 'mandrill.purchaseTemplate', 'Not set')
   }
 
-  const price = `$${(amount * 100).toFixed(2)}`
+  const price = `$${(amount / 100).toFixed(2)}`
 
   const req = [{
     name: 'app-name',
