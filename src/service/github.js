@@ -174,7 +174,10 @@ export function castProject (project: Object, installation: ?Number): Object {
  * @returns {Object} - a mapped release object
  */
 export function castRelease (release: Object): Object {
-  const version = semver.valid(release.tag_name)
+  const version = semver.valid(semver.clean(release.tag_name))
+  if (version == null) {
+    throw new error.ServiceError('GitHub', 'Invalid release version')
+  }
 
   return {
     version,
@@ -380,7 +383,19 @@ export function getReleases (owner: string, repo: string, token: ?string): Promi
   if (token != null) req = req.set('Authorization', `token ${token}`)
 
   return pagination(req)
-  .then((res) => res.body.map((release) => castRelease(release)))
+  .then((res) => {
+    const releases = []
+
+    res.body.forEach((release) => {
+      try {
+        releases.push(castRelease(release))
+      } catch (e) {
+        log.error(e)
+      }
+    })
+
+    return releases
+  })
   .catch((err, res) => {
     throw errorCheck(err, res)
   })
