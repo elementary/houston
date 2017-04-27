@@ -154,7 +154,15 @@ schema.virtual('github.fullName').get(function () {
  * }
  */
 schema.virtual('release').get(function () {
-  const releases = this.releases.sort((a, b) => semver.compare(a.version, b.version))
+  const releases = this.releases.sort((a, b) => {
+    const cleanA = semver.clean(a.version)
+    const cleanB = semver.clean(b.version)
+
+    if (cleanA == null) return -1
+    if (cleanB == null) return 1
+
+    return semver.compare(cleanA, cleanB)
+  })
 
   return {
     latest: releases[releases.length - 1],

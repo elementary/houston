@@ -80,6 +80,11 @@ export async function createRepository (repo: Object, installation: number): Pro
 
   repo.releases = repo.releases
   .filter((release) => (release.version != null))
+  .map((release) => {
+    release.version = semver.clean(release.version)
+    return release
+  })
+  .filter((release) => semver.valid(release.version))
   .sort((a, b) => semver(a.version, b.version))
 
   if (repo.releases.length > 0) {
