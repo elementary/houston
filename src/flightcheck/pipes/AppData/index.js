@@ -69,7 +69,7 @@ export default class AppData extends Pipe {
       this.data = await file.parse()
 
       if (this.data['component']['custom'] == null) this.data['component']['custom'] = []
-      if (this.data['component']['custom'].length > 0) this.data['component']['custom'].push({})
+      if (this.data['component']['custom'].length < 1) this.data['component']['custom'][0] = {}
       if (this.data['component']['custom'][0]['value'] == null) this.data['component']['custom'][0]['value'] = []
 
       this.data['component']['custom'][0]['value'].push({
