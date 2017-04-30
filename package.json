@@ -1,0 +1,9 @@
+{
+  "name": "houston",
+  "version": "2.0.0",
+  "description": "Backend to AppCenter",
+  "main": "dist/cli/index.js",
+  "repository": "https://github.com/elementary/houston",
+  "author": "Blake Kostner <btkostner@gmail.com>",
+  "license": "MIT"
+}

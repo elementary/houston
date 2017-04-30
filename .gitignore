@@ -1,0 +1,13 @@
+# General files
+*.log
+*.tmp
+
+# Application files
+/config.json
+/dest/
+
+# Node files
+node_modules
+
+# OS files
+.DS_Store
