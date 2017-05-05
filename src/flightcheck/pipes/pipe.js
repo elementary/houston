@@ -149,7 +149,7 @@ export default class Pipe extends events.EventEmitter {
 
     const issue = render(path.join(__dirname, file), { data })
 
-    issue.body += `\n\nIf you need help understanding, or solving, this issue please stop by the [gitter](https://gitter.im/elementary/houston) channel.`
+    issue.body += `\n\nIf you need help with this issue please stop by the [gitter](https://gitter.im/elementary/houston) channel.`
 
     if (this.pipeline.build.source === 'github' && this.pipeline.build.id != null) {
       issue.body += `\n\n**Affects**: [${this.pipeline.build.tag} release](https://github.com/${this.pipeline.build.id}/releases/tag/${this.pipeline.build.tag})`
