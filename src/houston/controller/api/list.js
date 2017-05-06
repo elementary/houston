@@ -14,6 +14,30 @@ const route = new Router({
 })
 
 /**
+ * GET /api/newest
+ * Finds the newest _first_ published project
+ * DEPRECATED: 05/06/2017 use /api/newest/project endpoint instead
+ */
+route.get('/', async (ctx) => {
+  const projects = await Project.aggregate([
+    { $unwind: '$releases' },
+    { $match: {
+      'releases._status': 'DEFER',
+      'releases.date.published': { $exists: true }
+    }},
+    { $sort: { 'releases.date.published': 1 } },
+    { $group: { _id: '$_id', 'name': { $first: '$name' }, 'release': { $first: '$releases' } } },
+    { $sort: { 'release.date.published': -1 } },
+    { $limit: 10 }
+  ])
+
+  ctx.status = 200
+  ctx.body = { data: projects.map((p) => p.name) }
+
+  return
+})
+
+/**
  * GET /api/newest/release
  * Finds the newest released project
  */
