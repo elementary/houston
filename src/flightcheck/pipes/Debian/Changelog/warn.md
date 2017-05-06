@@ -1,12 +1,8 @@
-Changelog issues
+Missing changelog information
 
-Apphub had some issues with your changelog. We tried to fix them as best we can,
-but you should take a look just in case.
+AppCenter had some issues with your changelog. We tried to fix them as best we
+can, but you should make note about fixing them for your next release.
 
-{% for name, issues in data %}
-##### {{ name }}
-{% for issue in issues %}
-- {{ issue }}
-{% endfor %}
-
+{% for error in data %}
+- {{ error.message }}
 {% endfor %}
