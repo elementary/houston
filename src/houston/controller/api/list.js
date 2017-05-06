@@ -25,8 +25,8 @@ route.get('/release', async (ctx) => {
       'releases.date.published': { $exists: true }
     }},
     { $sort: { 'releases.date.published': -1 } },
-    { $group: { _id: '$_id', 'name': { $first: '$name' }, 'released': { $first: '$releases.date.published' } } },
-    { $sort: { 'released.date.published': -1 } },
+    { $group: { _id: '$_id', 'name': { $first: '$name' }, 'release': { $first: '$releases' } } },
+    { $sort: { 'release.date.published': -1 } },
     { $limit: 10 }
   ])
 
