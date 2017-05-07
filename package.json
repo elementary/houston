@@ -10,6 +10,9 @@
     "build": "gulp --gulpfile build/gulpfile.ts build",
     "build:dev": "gulp --gulpfile build/gulpfile.ts watch"
   },
+  "dependencies": {
+    "knex": "^0.13.0"
+  },
   "devDependencies": {
     "@types/node": "^7.0.18",
     "del": "^2.2.2",

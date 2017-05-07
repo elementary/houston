@@ -37,8 +37,8 @@ integrate other third party services easier, and without changing existing data.
 - `name_human` A human readable project name
 - `name_developer` A human readable name of the developer or group
 
-- `type` The type of project. Possible values include 'APPLICATION'. In place
-for future use, where we will want to support 'CLI' and 'LIBRARY' type projects.
+- `type` The type of project. Possible values include 'application'. In place
+for future use, where we will want to support 'cli' and 'library' type projects.
 
 - `projectable_id` A 1:1 UUID referencing a service table ID
 - `projectable_type` The type of service `projectable_id` is referencing. This
