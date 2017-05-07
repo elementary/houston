@@ -11,7 +11,8 @@
     "build:dev": "gulp --gulpfile build/gulpfile.ts watch"
   },
   "dependencies": {
-    "knex": "^0.13.0"
+    "knex": "^0.13.0",
+    "lodash": "^4.17.4"
   },
   "devDependencies": {
     "@types/node": "^7.0.18",
