@@ -35,7 +35,7 @@ module.exports = {
      * @see http://knexjs.org/#Installation-client
      */
     connection: {
-      filename: ':memory:'
+      filename: '/etc/houston/database.sqlite'
     }
   },
 
@@ -102,7 +102,7 @@ module.exports = {
       secret: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
 
       installation: 0,
-      key: '/tmp/github.pem',
+      key: '/etc/houston/github.pem',
       hook: false
     },
 
