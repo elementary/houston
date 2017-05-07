@@ -38,7 +38,8 @@ gulp.task('typescript', () => {
   const dest = path.resolve(common.paths.dest)
 
   return gulp.src([
-    path.resolve(src, '**', '*.ts')
+    path.resolve(src, '**', '*.ts'),
+    '!' + path.resolve(src, '**', '*.spec.ts')
   ], { base: src })
     .pipe(sourcemap.init())
     .pipe(tsProject())

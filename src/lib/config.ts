@@ -19,7 +19,7 @@ export class Config extends Map {
    *
    * @var {object}
    */
-  private tree: Object
+  private tree: object
 
   /**
    * immutable
@@ -76,7 +76,7 @@ export class Config extends Map {
    *
    * @param {object} configuration - A basic object to set as config
    */
-  constructor (configuration: Object = {}) {
+  constructor (configuration: object = {}) {
     super()
 
     this.tree = configuration
@@ -90,7 +90,7 @@ export class Config extends Map {
    * @param {*} key - Key value for the configuration
    * @return {*} - The stored configuration value
    */
-  public get (key: any): any {
+  public get (key) {
     return get(this.tree, key)
   }
 
@@ -113,8 +113,10 @@ export class Config extends Map {
    * @param {*} - The configuration value to store
    * @return {Config} - The configuration after value was set
    */
-  public set (key: any, value: any): this {
-    if (this.immutable === true) return this
+  public set (key, value): this {
+    if (this.immutable === true) {
+      return this
+    }
 
     set(this.tree, key, value)
 
@@ -129,7 +131,9 @@ export class Config extends Map {
    * @return {Config} - The configuration after value was set
    */
   public merge (obj: object): this {
-    if (this.immutable === true) return this
+    if (this.immutable === true) {
+      return this
+    }
 
     merge(this.tree, obj)
 

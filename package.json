@@ -7,21 +7,55 @@
   "author": "Blake Kostner <btkostner@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "gulp --gulpfile build/gulpfile.ts build",
-    "build:dev": "gulp --gulpfile build/gulpfile.ts watch"
+    "build": "gulp --gulpfile 'build/gulpfile.ts' build",
+    "build:dev": "gulp --gulpfile 'build/gulpfile.ts' watch",
+    "test": "jest",
+    "test:dev": "jest --watch",
+    "lint": "tslint --type-check --project 'tsconfig.json'",
+    "coverage": "jest --coverage"
   },
   "dependencies": {
     "knex": "^0.13.0",
     "lodash": "^4.17.4"
   },
   "devDependencies": {
+    "@types/jest": "^19.2.3",
     "@types/node": "^7.0.18",
     "del": "^2.2.2",
     "gulp": "gulpjs/gulp#4.0",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-typescript": "^3.1.6",
+    "jest": "^20.0.0",
     "sqlite3": "^3.1.8",
+    "ts-jest": "^20.0.0",
     "ts-node": "^3.0.4",
+    "tslint": "^5.2.0",
+    "tslint-consistent-codestyle": "^1.2.0",
+    "tslint-jsdoc-rules": "^0.1.2",
+    "tslint-microsoft-contrib": "^4.0.1",
     "typescript": "^2.3.2"
+  },
+  "jest": {
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 50,
+        "functions": 75,
+        "lines": 75,
+        "statements": 75
+      }
+    },
+    "mapCoverage": true,
+    "moduleFileExtensions": [
+      "js",
+      "ts",
+      "tsx"
+    ],
+    "testRegex": "\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    }
   }
 }

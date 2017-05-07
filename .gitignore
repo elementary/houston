@@ -4,6 +4,7 @@
 
 # Application files
 /config.js
+/coverage/
 /dest/
 
 # Node files
