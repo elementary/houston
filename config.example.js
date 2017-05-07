@@ -95,7 +95,7 @@ module.exports = {
      *
      * @property {string} installation - The installation ID
      * @property {string} key - The full path to the installation key file
-     * @property [string] hook - The installation web hook secret.
+     * @property {string} [hook] - The installation web hook secret.
      */
     github: {
       client: 'xxxxxxxxxxxxxxxxxxxx',

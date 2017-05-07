@@ -3,7 +3,7 @@
 *.tmp
 
 # Application files
-/config.json
+/config.js
 /dest/
 
 # Node files

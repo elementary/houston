@@ -1,0 +1,24 @@
+{
+  "filesGlob": [
+    "./**/*"
+  ],
+
+  "compilerOptions": {
+    "allowJs": true,
+    "alwaysStrict": true,
+    "baseUrl": "./src",
+    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "./dest",
+    "paths": {
+      "houston/*": ["./src"]
+    },
+    "pretty": true,
+    "sourceMap": true,
+    "strictNullChecks": true,
+    "target": "es2015"
+  }
+}

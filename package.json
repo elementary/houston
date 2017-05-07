@@ -5,5 +5,18 @@
   "main": "dist/cli/index.js",
   "repository": "https://github.com/elementary/houston",
   "author": "Blake Kostner <btkostner@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "build": "gulp --gulpfile build/gulpfile.ts build",
+    "build:dev": "gulp --gulpfile build/gulpfile.ts watch"
+  },
+  "devDependencies": {
+    "@types/node": "^7.0.18",
+    "del": "^2.2.2",
+    "gulp": "gulpjs/gulp#4.0",
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-typescript": "^3.1.6",
+    "ts-node": "^3.0.4",
+    "typescript": "^2.3.2"
+  }
 }

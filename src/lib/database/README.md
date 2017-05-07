@@ -1,4 +1,4 @@
-# src/lib/database/
+# houston/src/lib/database/
 
 This folder holds all of the database logic. Everything is making use of
 [knex](http://knexjs.org), so we recommend you read up a bit on that.
