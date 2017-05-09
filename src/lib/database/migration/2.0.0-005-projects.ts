@@ -1,5 +1,5 @@
 /**
- * houston/src/lib/database/migration/2.0.0_projects.ts
+ * houston/src/lib/database/migration/2.0.0-005-projects.ts
  * The inital houston 2.0.0 migration for projects table
  *
  * @exports {Function} up - Database information for upgrading to version 2.0.0
@@ -17,19 +17,20 @@ export function up (knex) {
   return knex.schema.createTable('projects', (table) => {
     table.uuid('id').primary()
 
-    table.string('name_domain').index()
-    table.string('name_human')
-    table.string('name_developer')
+    table.string('name_domain').unique().index()
+    table.string('name_human').notNullable()
+    table.string('name_developer').notNullable()
 
-    table.enu('type', ['application'])
+    table.enu('type', ['application']).defaultTo('application')
 
-    table.uuid('projectable_id')
-    table.string('projectable_type')
+    table.uuid('projectable_id').notNullable()
+    table.string('projectable_type').notNullable()
 
-    table.uuid('stripe_id')
+    table.uuid('stripe_id').notNullable().unsigned()
+    table.foreign('stripe_id').references('stripe_accounts.id')
 
-    table.timestamp('created_at').defaultTo(knex.fn.now())
-    table.timestamp('updated_at').onUpdate(knex.fn.now())
+    table.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
+    table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now())
     table.timestamp('deleted_at').nullable()
   })
 }
