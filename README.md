@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://developer.elementary.io">
-    <img src="brand/AppCenter.png" alt="AppCenter" width="256">
+    <img src="brand/AppCenter.png" alt="AppCenter">
   </a>
   <br>
   <h1>Houston</h1>
