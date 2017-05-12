@@ -31,7 +31,7 @@ export const router = new Router({
 })
 
 // NOTE: here be dragons. Really big mockup like dragons that breath fire.
-router.get('/callback', policy.isRole('beta'), async (ctx, next) => {
+router.get('/callback', policy.isRole('USER'), async (ctx, next) => {
   if (config.stripe == null) {
     log.debug('Stripe callback called while configuration disabled')
     return new ctx.Mistake(503, 'Stripe disabled')
@@ -85,7 +85,7 @@ router.get('/callback', policy.isRole('beta'), async (ctx, next) => {
   return ctx.redirect('/dashboard')
 })
 
-router.get('/enable/:project', policy.isRole('beta'), async (ctx, next) => {
+router.get('/enable/:project', policy.isRole('USER'), async (ctx, next) => {
   if (config.stripe == null) {
     log.debug('Stripe enable called while configuration disabled')
     return new ctx.Mistake(503, 'Stripe disabled')
@@ -126,7 +126,7 @@ router.get('/enable/:project', policy.isRole('beta'), async (ctx, next) => {
   return ctx.redirect(authUrl)
 })
 
-router.get('/disable/:project', policy.isRole('beta'), async (ctx, next) => {
+router.get('/disable/:project', policy.isRole('USER'), async (ctx, next) => {
   if (config.stripe == null) {
     log.debug('Stripe disable called while configuration disabled')
     return new ctx.Mistake(503, 'Stripe disabled')

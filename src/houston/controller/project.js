@@ -22,7 +22,7 @@ const route = new Router({
  *
  * @param {String} project - project name
  */
-route.get('/cycle', policy.isRole('BETA'), policy.isAgreement, async (ctx, next) => {
+route.get('/cycle', policy.isRole('USER'), policy.isAgreement, async (ctx, next) => {
   const project = await Project.findOne({
     name: ctx.params.project
   })
