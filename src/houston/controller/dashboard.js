@@ -54,10 +54,15 @@ route.get('/dashboard', policy.isRole('BETA'), policy.isAgreement, async (ctx, n
  * Shows all the outstanding reviews
  */
 route.get('/reviews', policy.isRole('REVIEW'), policy.isAgreement, async (ctx, next) => {
-  const cycles = await Cycle.find({
-    type: 'RELEASE',
-    _status: 'REVIEW'
-  })
+  const reviewCycles = await Cycle.aggregate([
+    { $sort: { 'version': -1, '_id': -1 } },
+    { $group: { _id: '$project', cycle: { $first: '$_id' }, status: { $first: '$_status' } } },
+    { $match: { status: 'REVIEW' } }
+  ])
+
+  const reviewCycleIds = reviewCycles.map((res) => res.cycle)
+
+  const cycles = await Cycle.find({ _id: { $in: reviewCycleIds } })
   .populate('project')
 
   // We can manually set the project status instead of calling the DB again

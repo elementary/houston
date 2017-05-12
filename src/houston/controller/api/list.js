@@ -9,13 +9,39 @@ import Router from 'koa-router'
 
 import Project from 'lib/database/project'
 
-const route = new Router()
+const route = new Router({
+  prefix: '/newest'
+})
 
 /**
  * GET /api/newest
  * Finds the newest _first_ published project
+ * DEPRECATED: 05/06/2017 use /api/newest/project endpoint instead
  */
-route.get('/newest', async (ctx) => {
+route.get('/', async (ctx) => {
+  const projects = await Project.aggregate([
+    { $unwind: '$releases' },
+    { $match: {
+      'releases._status': 'DEFER',
+      'releases.date.published': { $exists: true }
+    }},
+    { $sort: { 'releases.date.published': 1 } },
+    { $group: { _id: '$_id', 'name': { $first: '$name' }, 'release': { $first: '$releases' } } },
+    { $sort: { 'release.date.published': -1 } },
+    { $limit: 10 }
+  ])
+
+  ctx.status = 200
+  ctx.body = { data: projects.map((p) => p.name) }
+
+  return
+})
+
+/**
+ * GET /api/newest/release
+ * Finds the newest released project
+ */
+route.get('/release', async (ctx) => {
   const projects = await Project.aggregate([
     { $unwind: '$releases' },
     { $match: {
@@ -23,6 +49,29 @@ route.get('/newest', async (ctx) => {
       'releases.date.published': { $exists: true }
     }},
     { $sort: { 'releases.date.published': -1 } },
+    { $group: { _id: '$_id', 'name': { $first: '$name' }, 'release': { $first: '$releases' } } },
+    { $sort: { 'release.date.published': -1 } },
+    { $limit: 10 }
+  ])
+
+  ctx.status = 200
+  ctx.body = { data: projects.map((p) => p.name) }
+
+  return
+})
+
+/**
+ * GET /api/newest/project
+ * Finds the newest _first_ published project
+ */
+route.get('/project', async (ctx) => {
+  const projects = await Project.aggregate([
+    { $unwind: '$releases' },
+    { $match: {
+      'releases._status': 'DEFER',
+      'releases.date.published': { $exists: true }
+    }},
+    { $sort: { 'releases.date.published': 1 } },
     { $group: { _id: '$_id', 'name': { $first: '$name' }, 'release': { $first: '$releases' } } },
     { $sort: { 'release.date.published': -1 } },
     { $limit: 10 }
