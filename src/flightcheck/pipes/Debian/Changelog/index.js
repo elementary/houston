@@ -108,6 +108,13 @@ export default class DebianChangelog extends Pipe {
       this.data.changelog = this.pipeline.build.changelog
     }
 
+    // This is the only thing that is not included in the changelog from the
+    // database. So we have to insert it to avoid errors.
+    this.data.changelog.map((changelog) => {
+      changelog.project = this.pipeline.build.name
+      return changelog
+    })
+
     this.data.changelog = this.data.changelog.sort((a, b) => semver.compare(b.version, a.version))
 
     const errors = lintChangelogVersion(this.data.changelog[0])
