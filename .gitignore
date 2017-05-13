@@ -3,9 +3,11 @@
 *.tmp
 
 # Application files
-/config.js
+/config*
 /coverage/
 /dest/
+
+!/config.example.js
 
 # Node files
 node_modules
