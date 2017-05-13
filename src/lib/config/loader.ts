@@ -1,6 +1,11 @@
 /**
  * houston/src/lib/config/loader.ts
  * This file is responsible for loading the configuration file.
+ *
+ * @exports {Function} environmentToDot
+ * @exports {Function} findEnvironmentConfig
+ * @exports {Function} findProgramConfig
+ * @exports {Function} findFileConfig
  */
 
 import * as fs from 'fs'
