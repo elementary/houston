@@ -1,5 +1,5 @@
 /**
- * houston/src/lib/config.ts
+ * houston/src/lib/config/class.ts
  * The application wide configuration class
  *
  * @exports {class} config - Global configuration class
@@ -88,9 +88,14 @@ export class Config extends Map {
    * Returns a configuration value
    *
    * @param {*} key - Key value for the configuration
+   * @param {*} def - The default value if configuration does not exist
    * @return {*} - The stored configuration value
    */
-  public get (key) {
+  public get (key, def) {
+    if (this.has(key) === false) {
+      return def
+    }
+
     return get(this.tree, key)
   }
 
