@@ -11,7 +11,7 @@ import { get, has, merge, set } from 'lodash'
  * Config
  * An easy to use application wide configuration class
  */
-export class Config extends Map {
+export class Config {
 
   /**
    * tree
@@ -77,8 +77,6 @@ export class Config extends Map {
    * @param {object} configuration - A basic object to set as config
    */
   constructor (configuration: object = {}) {
-    super()
-
     this.tree = configuration
     this.immutable = false
   }
