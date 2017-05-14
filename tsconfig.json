@@ -17,9 +17,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "outDir": "./dest",
-    "paths": {
-      "houston/*": ["./src"]
-    },
     "pretty": true,
     "sourceMap": true,
     "strictNullChecks": true,

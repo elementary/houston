@@ -6,6 +6,8 @@
  * @exports {Function} down - Database information for downgrading version 2.0.0
  */
 
+import * as Knex from 'knex'
+
 /**
  * up
  * Database information for upgrading to version 2.0.0
@@ -13,7 +15,7 @@
  * @param {Object} knex - An initalized Knex package
  * @return {Promise} - A promise of database migration
  */
-export function up (knex) {
+export function up (knex: Knex) {
   return knex.schema.createTable('releases', (table) => {
     table.uuid('id').primary()
 
@@ -43,6 +45,6 @@ export function up (knex) {
  * @param {Object} knex - An initalized Knex package
  * @return {Promise} - A promise of successful database migration
  */
-export function down (knex) {
+export function down (knex: Knex) {
   return knex.schema.dropTable('releases')
 }

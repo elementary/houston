@@ -21,7 +21,7 @@ import { Config } from './class'
 const environmentPrefix = 'HOUSTON'
 
 /**
- * environmentToDot
+ * stringToDot
  * Transforms an environmental variable name to dot notation.
  *
  * @example `HOUSTON_LOG_LEVEL` to `log.level`
@@ -29,26 +29,27 @@ const environmentPrefix = 'HOUSTON'
  * @param {string} str - The string to transform
  * @return {string}
  */
-export function environmentToDot (str: string): string {
+export function stringToDot (str: string): string {
   return str
     .toLowerCase()
     .split('_')
     .splice(1)
     .join('.')
+    .replace('env', 'environment')
 }
 
 /**
- * findEnvironmentConfig
+ * getEnvironmentConfig
  * Finds all the environment variables set and returns a built config.
  *
  * @return {Config}
  */
-export function findEnvironmentConfig (): Config {
+export function getEnvironmentConfig (): Config {
   const config = new Config()
 
   Object.keys(process.env).forEach((key) => {
     if (key.startsWith(environmentPrefix)) {
-      const name = environmentToDot(key)
+      const name = stringToDot(key)
 
       const numberValue = Number(process.env[key])
 
@@ -62,20 +63,24 @@ export function findEnvironmentConfig (): Config {
 
   // Some special case variables
   if (process.env.NODE_ENV != null) {
-    config.set('env', process.env.NODE_ENV)
+    config.set('environment', process.env.NODE_ENV)
   }
 
-  return config
+  if (process.env.NODE_DEBUG != null) {
+    config.set('log.console', 'debug')
+  }
+
+  return config.freeze()
 }
 
 /**
- * findProgramConfig
+ * getProgramConfig
  * Returns a built config with program variables like git commit and package
  * version.
  *
  * @return {Config}
  */
-export function findProgramConfig (): Config {
+export function getProgramConfig (): Config {
   const config = new Config()
 
   try {
@@ -115,11 +120,11 @@ export function findProgramConfig (): Config {
     }
   } catch (e) {} // tslint:disable-line no-empty
 
-  return config
+  return config.freeze()
 }
 
 /**
- * findFileConfig
+ * getFileConfig
  * Tries to read configuration from a file.
  *
  * @param {string} p - The path to the file
@@ -127,15 +132,38 @@ export function findProgramConfig (): Config {
  * @throws {Error} - On 404 file not found
  * @return {Config}
  */
-export function findFileConfig (p: string): Config {
-  let data = {}
+export function getFileConfig (p: string): Config {
+  const config = new Config()
 
   if (p.startsWith('/')) {
-    data = require(p) // tslint:disable-line non-literal-require
+    config.merge(require(p)) // tslint:disable-line non-literal-require
   } else {
     const relativeP = path.resolve(process.cwd(), p)
-    data = require(relativeP) // tslint:disable-line non-literal-require
+    config.merge(require(relativeP)) // tslint:disable-line non-literal-require
   }
 
-  return new Config(data)
+  return config.freeze()
+}
+
+/**
+ * getConfig
+ * This creates a Config from all possible places.
+ *
+ * @param {string} p - The path to the configuration file
+ *
+ * @throws {Error} - On 404 file not found
+ * @return {Config}
+ */
+export function getConfig (p: string): Config {
+  const environment = getEnvironmentConfig()
+  const program = getProgramConfig()
+  const file = getFileConfig(p)
+
+  const config = new Config()
+
+  return config
+    .merge(program.get('.'))
+    .merge(file.get('.'))
+    .merge(environment.get('.'))
+    .freeze()
 }

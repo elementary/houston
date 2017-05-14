@@ -89,7 +89,11 @@ export class Config {
    * @param {*} def - The default value if configuration does not exist
    * @return {*} - The stored configuration value
    */
-  public get (key, def) {
+  public get (key, def?) {
+    if (key === '.') {
+      return this.tree
+    }
+
     if (this.has(key) === false) {
       return def
     }
@@ -147,21 +151,25 @@ export class Config {
    * freeze
    * Makes the configuration immutable
    *
-   * @return {void}
+   * @return {Config} - The configuration after being frozen
    */
-  public freeze (): void {
+  public freeze (): this {
     this.immutable = true
     this.tree = Config.freeze(this.tree)
+
+    return this
   }
 
   /**
    * unfreeze
    * Makes the configuration editable
    *
-   * @return {void}
+   * @return {Config} - The configuration after unfrozzen
    */
-  public unfreeze (): void {
+  public unfreeze (): this {
     this.immutable = false
     this.tree = Config.unfreeze(this.tree)
+
+    return this
   }
 }

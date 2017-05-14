@@ -8,30 +8,39 @@ import * as path from 'path'
 import * as loader from './loader'
 
 test('can convert houston environment variables to dot notation', () => {
-  expect(loader.environmentToDot('HOUSTON_ENV')).toEqual('env')
-  expect(loader.environmentToDot('HOUSTON_SERVER_PORT')).toEqual('server.port')
+  expect(loader.stringToDot('HOUSTON_SERVER_PORT')).toEqual('server.port')
+})
+
+test('converts env to environment', () => {
+  expect(loader.stringToDot('HOUSTON_ENV')).toEqual('environment')
 })
 
 test('can find houston environment variables', () => {
-  process.env['HOUSTON_ENV'] = 'development'
   process.env['HOUSTON_SERVER_PORT'] = 3000
 
-  const config = loader.findEnvironmentConfig()
+  const config = loader.getEnvironmentConfig()
 
-  expect(config.get('env')).toEqual('development')
   expect(config.get('server.port')).toEqual(3000)
 })
 
-test('finds node specific variables', () => {
+test('assigns environment based on NODE_ENV', () => {
   process.env['NODE_ENV'] = 'development'
 
-  const config = loader.findEnvironmentConfig()
+  const config = loader.getEnvironmentConfig()
 
-  expect(config.get('env')).toEqual('development')
+  expect(config.get('environment')).toEqual('development')
+})
+
+test('assigns console log based on NODE_DEBUG', () => {
+  process.env['NODE_DEBUG'] = 'true'
+
+  const config = loader.getEnvironmentConfig()
+
+  expect(config.get('log.console')).toEqual('debug')
 })
 
 test('can find the package version', () => {
-  const config = loader.findProgramConfig()
+  const config = loader.getProgramConfig()
 
   expect(config.get('houston.version')).toEqual(expect.anything())
   expect(config.get('houston.major')).toEqual(expect.anything())
@@ -40,20 +49,20 @@ test('can find the package version', () => {
 })
 
 test('can find the git commit', () => {
-  const config = loader.findProgramConfig()
+  const config = loader.getProgramConfig()
 
   expect(config.get('houston.commit')).toEqual(expect.anything())
 })
 
 test('can find the git change', () => {
-  const config = loader.findProgramConfig()
+  const config = loader.getProgramConfig()
 
   expect(config.get('houston.change')).toEqual(expect.anything())
 })
 
 test('can read configuration from file', () => {
   const testingConfigPath = path.resolve(__dirname, '..', '..', '..', 'test', 'fixture', 'config.js')
-  const config = loader.findFileConfig(testingConfigPath)
+  const config = loader.getFileConfig(testingConfigPath)
 
   expect(config.get('environment')).toEqual('testing')
 })
