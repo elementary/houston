@@ -7,6 +7,8 @@ import * as path from 'path'
 
 import * as loader from './loader'
 
+import { isCi } from '../../../test/utility/ci'
+
 test('can convert houston environment variables to dot notation', () => {
   expect(loader.stringToDot('HOUSTON_SERVER_PORT')).toEqual('server.port')
 })
@@ -48,17 +50,19 @@ test('can find the package version', () => {
   expect(config.get('houston.patch')).toEqual(expect.anything())
 })
 
-test('can find the git commit', () => {
-  const config = loader.getProgramConfig()
+if (isCi() === false) { // CI environments usually don't have the git folder.
+  test('can find the git commit', () => {
+    const config = loader.getProgramConfig()
 
-  expect(config.get('houston.commit')).toEqual(expect.anything())
-})
+    expect(config.get('houston.commit')).toEqual(expect.anything())
+  })
 
-test('can find the git change', () => {
-  const config = loader.getProgramConfig()
+  test('can find the git change', () => {
+    const config = loader.getProgramConfig()
 
-  expect(config.get('houston.change')).toEqual(expect.anything())
-})
+    expect(config.get('houston.change')).toEqual(expect.anything())
+  })
+}
 
 test('can read configuration from file', () => {
   const testingConfigPath = path.resolve(__dirname, '..', '..', '..', 'test', 'fixture', 'config.js')
