@@ -5,7 +5,7 @@
  * @exports {class} config - Global configuration class
  */
 
-import { get, has, merge, set } from 'lodash'
+import { get, has, isPlainObject, merge, set } from 'lodash'
 
 /**
  * Config
@@ -40,7 +40,7 @@ export class Config {
     const newObject = {}
 
     Object.getOwnPropertyNames(obj).forEach((key) => {
-      if (typeof obj[key] === 'object') {
+      if (isPlainObject(obj[key])) {
         newObject[key] = this.freeze(obj[key])
       } else {
         newObject[key] = obj[key]
@@ -155,6 +155,7 @@ export class Config {
    */
   public freeze (): this {
     this.immutable = true
+
     this.tree = Config.freeze(this.tree)
 
     return this

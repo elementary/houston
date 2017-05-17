@@ -135,14 +135,19 @@ export function getProgramConfig (): Config {
 export function getFileConfig (p: string): Config {
   const config = new Config()
 
+  let file = {}
+
   if (p.startsWith('/')) {
-    config.merge(require(p)) // tslint:disable-line non-literal-require
+    file = require(p) // tslint:disable-line non-literal-require
   } else {
     const relativeP = path.resolve(process.cwd(), p)
-    config.merge(require(relativeP)) // tslint:disable-line non-literal-require
+
+    file = require(relativeP) // tslint:disable-line non-literal-require
   }
 
-  return config.freeze()
+  return config
+    .merge(file)
+    .freeze()
 }
 
 /**

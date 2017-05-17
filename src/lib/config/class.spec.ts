@@ -94,3 +94,17 @@ test('unfreeze makes the config editable', () => {
   config.tree.key = 'good'
   expect(config.tree.key).toEqual('good')
 })
+
+test('freeze does not mess up with a null value', () => {
+  const config = new Config({
+    key: null
+  })
+
+  config.freeze()
+
+  expect(config.immutable).toBeTruthy()
+
+  expect(() => {
+    config.tree.key = 'bad'
+  }).toThrowError(/read\sonly/)
+})
