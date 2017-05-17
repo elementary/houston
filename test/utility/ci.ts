@@ -13,11 +13,11 @@
  * @return {boolean}
  */
 export function isCi (): boolean {
-  if (process.env.CI === true) {
+  if (process.env.CI === 'true' || process.env.CI === '1') {
     return true
   }
 
-  if (process.env.TRAVIS === true) {
+  if (process.env.TRAVIS === 'true' || process.env.TRAVIS === '1') {
     return true
   }
 
