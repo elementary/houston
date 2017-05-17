@@ -1,6 +1,6 @@
 /**
- * houston/src/lib/database/migration/2.0.0-005-projects.ts
- * The inital houston 2.0.0 migration for projects table
+ * houston/src/lib/database/migration/2.0.0-010-build_logs.ts
+ * The inital houston 2.0.0 migration for build logs table
  *
  * @exports {Function} up - Database information for upgrading to version 2.0.0
  * @exports {Function} down - Database information for downgrading version 2.0.0
@@ -16,20 +16,18 @@ import * as Knex from 'knex'
  * @return {Promise} - A promise of database migration
  */
 export function up (knex: Knex) {
-  return knex.schema.createTable('projects', (table) => {
+  return knex.schema.createTable('build_logs', (table) => {
     table.uuid('id').primary()
 
-    table.string('name_domain').unique().index()
-    table.string('name_human').notNullable()
-    table.string('name_developer').notNullable()
+    table.string('title').notNUllable()
+    table.string('body').notNUllable()
 
-    table.enu('type', ['application']).defaultTo('application')
+    table.string('test').nullable()
 
-    table.uuid('projectable_id').notNullable()
-    table.string('projectable_type').notNullable()
+    table.jsonb('metadata').nullable()
 
-    table.uuid('stripe_id').notNullable().unsigned()
-    table.foreign('stripe_id').references('stripe_accounts.id')
+    table.uuid('build_id').nullable().unsigned()
+    table.foreign('build_id').references('builds.id')
 
     table.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
     table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now())
@@ -45,5 +43,5 @@ export function up (knex: Knex) {
  * @return {Promise} - A promise of successful database migration
  */
 export function down (knex: Knex) {
-  return knex.schema.dropTable('projects')
+  return knex.schema.dropTable('build_logs')
 }
