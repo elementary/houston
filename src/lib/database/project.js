@@ -307,7 +307,7 @@ schema.methods.createCycle = async function (type) {
 
   if (type === 'RELEASE') return this.release.latest.createCycle(type)
 
-  const cycle = await db.model('cycle').create({
+  const cycleData = {
     project: this._id,
     installation: this.github.installation,
     repo: this.repo,
@@ -316,8 +316,14 @@ schema.methods.createCycle = async function (type) {
     version: this.release.latest.version,
     type,
     changelog: await this.release.latest.createChangelog(),
-    stripe: this.stripe.public
-  })
+    stripe: undefined
+  }
+
+  if (this.stripe.enabled) {
+    cycleData.stripe = this.stripe.public
+  }
+
+  const cycle = await db.model('cycle').create(cycleData)
 
   await this.update({ $addToSet: { 'cycles': cycle._id } })
 
