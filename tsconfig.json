@@ -11,7 +11,9 @@
     "allowJs": true,
     "alwaysStrict": true,
     "baseUrl": "./src",
+    "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
+    "lib": ["es2015"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noUnusedLocals": true,
@@ -20,6 +22,6 @@
     "pretty": true,
     "sourceMap": true,
     "strictNullChecks": true,
-    "target": "es2015"
+    "target": "es6"
   }
 }
