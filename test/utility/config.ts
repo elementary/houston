@@ -7,6 +7,7 @@
 
 import * as path from 'path'
 
+import { Config } from '../../src/lib/config/class'
 import { getFileConfig } from '../../src/lib/config/loader'
 
 /**
@@ -16,7 +17,7 @@ import { getFileConfig } from '../../src/lib/config/loader'
  * @async
  * @return {Config}
  */
-export async function setup () {
+export async function setup (): Promise<Config> {
   const configPath = path.resolve(__dirname, '..', 'fixture', 'config.js')
   return getFileConfig(configPath)
 }

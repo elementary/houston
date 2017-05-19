@@ -17,7 +17,9 @@ import * as Knex from 'knex'
  */
 export function up (knex: Knex) {
   return knex.schema.createTable('github_repositories', (table) => {
-    table.integer('id').primary()
+    table.uuid('id').primary()
+
+    table.integer('key').notNullable().unique()
 
     table.string('owner').notNullable()
     table.string('name').notNullable()

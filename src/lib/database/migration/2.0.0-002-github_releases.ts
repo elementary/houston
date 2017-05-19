@@ -17,7 +17,9 @@ import * as Knex from 'knex'
  */
 export function up (knex: Knex) {
   return knex.schema.createTable('github_releases', (table) => {
-    table.integer('id').primary()
+    table.uuid('id').primary()
+
+    table.integer('key').notNullable().unique()
 
     table.string('tag').notNullable()
 
