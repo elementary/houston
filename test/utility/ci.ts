@@ -17,9 +17,5 @@ export function isCi (): boolean {
     return true
   }
 
-  if (process.env.TRAVIS === 'true' || process.env.TRAVIS === '1') {
-    return true
-  }
-
   return false
 }

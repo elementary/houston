@@ -19,8 +19,8 @@ export function up (knex: Knex) {
   return knex.schema.createTable('build_logs', (table) => {
     table.uuid('id').primary()
 
-    table.string('title').notNUllable()
-    table.string('body').notNUllable()
+    table.string('title').notNullable()
+    table.string('body').notNullable()
 
     table.string('test').nullable()
 
