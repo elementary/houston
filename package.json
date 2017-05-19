@@ -27,7 +27,7 @@
     "gulp": "gulpjs/gulp#4.0",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-typescript": "^3.1.6",
-    "jest": "^20.0.0",
+    "jest": "^20.0.3",
     "sqlite3": "^3.1.8",
     "ts-jest": "^20.0.0",
     "ts-node": "^3.0.4",
@@ -53,6 +53,7 @@
     "mapCoverage": true,
     "moduleFileExtensions": [
       "js",
+      "json",
       "ts",
       "tsx"
     ],
