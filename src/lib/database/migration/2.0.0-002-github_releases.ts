@@ -23,6 +23,9 @@ export function up (knex: Knex) {
 
     table.string('tag').notNullable()
 
+    table.uuid('github_repository').nullable().unsigned()
+    table.foreign('github_repository').references('github_repository.id')
+
     table.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
     table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now())
     table.timestamp('deleted_at').nullable()

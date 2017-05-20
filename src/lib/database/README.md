@@ -29,36 +29,39 @@ The `projects`, `releases`, and `build_issues` tables have a polymorphic
 relationship to a service table like `github_projects`. This allows us to
 integrate other third party services easier, and without changing existing data.
 
-## Projects
+## Seeds
 
-- `id` A UUID primary key
+The seed folder contains a bunch of helpful seeds designed to be used in tests
+and for development. Here is the lodown for how they are setup.
 
-- `name_domain` A reverse domain name notation to identify the project
-- `name_human` A human readable project name
-- `name_developer` A human readable name of the developer or group
+### Projects
 
-- `type` The type of project. Possible values include 'application'. In place
-for future use, where we will want to support 'cli' and 'library' type projects.
+Keymaker
+- 3 Releases
+- 1 Build
+- 4 Build logs
+- 1 Package
 
-- `projectable_id` A 1:1 UUID referencing a service table ID
-- `projectable_type` The type of service `projectable_id` is referencing. This
-should always be the lowercase service name like `github` or `gitlab`.
+AppCenter
+- 8 Releases (2 invalid)
+- 3 Builds
+- 2 Build logs
+- 3 Packages
 
-- `stripe_id` A has one relationship referencing the `stripe_account` table
+Code
+- 1 Release (1 invalid)
+- 0 Builds
+- 0 build logs
+- 0 Packages
 
-## Releases
+Terminal
+- 2 Releases
+- 2 Builds
+- 3 Build logs
+- 1 Package
 
-- `id` A UUID primary key
+### Users
 
-- `version_major` An int Semver major release version (x.0.0)
-- `version_minor` An int Semver minor release version (0.x.0)
-- `version_patch` An int Semver patch release version (0.0.x)
-- `version_test` An int test version to be used for prereleases
-
-- `is_prerelease` A boolean to declare if this version is considered stable
-
-- `releaseable_id` A belongs to relationship referencing a service table ID
-- `releaseable_type` The type of service `releaseable_id` is referencing. This
-should always be the lowercase service name like `github` or `gitlab`.
-
-- `project_id` A belongs to relationship referencing the `projects` table
+The seed files include multiple users, each one representing a different
+permission level. As of right now you will not be able to log into these
+accounts. They are only used in tests.
