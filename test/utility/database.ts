@@ -18,7 +18,7 @@ import { Database } from '../../src/lib/database/database'
  * @param {Database} database - The database connection to run migrations on
  * @return {void}
  */
-export async function migrate (database: Database): Promise<> {
+export async function migrate (database: Database): Promise<void> {
   await database.knex.migrate.latest()
 }
 
@@ -30,7 +30,7 @@ export async function migrate (database: Database): Promise<> {
  * @param {Database} database - The database connection to run migrations on
  * @return {void}
  */
-export async function seed (database: Database): Promise<> {
+export async function seed (database: Database): Promise<void> {
   await database.knex.seed.run()
 }
 

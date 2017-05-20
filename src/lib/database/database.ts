@@ -10,6 +10,12 @@ import * as path from 'path'
 
 import { Config } from '../config/class'
 
+/**
+ * Database
+ * The master database connection class
+ *
+ * @property {Knex} knex - A knex instance for queries
+ */
 export class Database {
 
   protected config: Config
