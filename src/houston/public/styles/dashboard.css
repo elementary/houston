@@ -19,6 +19,7 @@
     display: inline-block;
     height: 30px;
     position: relative;
+    transition: all 150ms ease-in-out;
     vertical-align: middle;
     width: 30px;
 }
@@ -51,6 +52,33 @@
     -webkit-text-fill-color: #f3f3f3;
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: #888;
+}
+
+#gitter {
+    align-self: flex-end;
+    margin: 0 16px;
+}
+
+#gitter .fab {
+    background-color: #4d4267;
+    box-shadow:
+        0 3px 6px rgba(0,0,0,0.16),
+        0 3px 6px rgba(0,0,0,0.23);
+    height: 40px;
+    width: 40px;
+}
+
+#gitter .fab > i {
+    line-height: 40px;
+    width: 40px;
+    font-size: 18px;
+}
+
+#gitter .fab:hover {
+    box-shadow:
+        0 10px 20px rgba(0,0,0,0.19),
+        0 6px 6px rgba(0,0,0,0.23);
+    transform: translateY(-1px);
 }
 
 /************
