@@ -18,6 +18,7 @@
   "dependencies": {
     "knex": "^0.13.0",
     "lodash": "^4.17.4",
+    "raven": "^2.0.1",
     "uuid": "^3.0.1",
     "yargs": "^8.0.1"
   },

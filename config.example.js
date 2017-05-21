@@ -43,6 +43,7 @@ module.exports = {
    * Log configuration
    * Configures Houston log output
    * NOTE: This is an optional configuration value.
+   * NOTE: Log levels are 'debug' 'info' 'warn' 'error'
    *
    * @property {string} [console] - Minimum level to output logs to console
    * @property {string} [service] - Minimum level needed to report to sentry
