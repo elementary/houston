@@ -18,9 +18,9 @@ import { Config } from '../config/class'
  */
 export class Database {
 
-  protected config: Config
-
   public knex: Knex
+
+  protected config: Config
 
   /**
    * Creates a Database class

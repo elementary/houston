@@ -18,13 +18,13 @@ export class Model {
 
   protected static table: string
 
-  protected exists = false
-
   public id?: string
 
   public createdAt?: Date
   public updatedAt?: Date
   public deletedAt?: Date|null
+
+  protected exists = false
 
   /**
    * createId
