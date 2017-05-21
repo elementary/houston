@@ -3,7 +3,6 @@
  * A basic master model inherited by everything
  */
 
-import * as Knex from 'knex'
 import { camelCase } from 'lodash'
 import * as uuid from 'uuid/v4'
 
@@ -23,6 +22,10 @@ export class Model {
 
   public id?: string
 
+  public createdAt?: Date
+  public updatedAt?: Date
+  public deletedAt?: Date|null
+
   /**
    * createId
    * Creates a new UUID for use in the model.
@@ -40,7 +43,7 @@ export class Model {
    * @param {object} values - Values from the database
    * @return {Model}
    */
-  public static castFromDatabase (values: object): Model {
+  public static castFromDatabase (values: object) {
     const cammelCasedValues = {}
 
     Object.keys(values).forEach((key) => {
@@ -49,7 +52,11 @@ export class Model {
       cammelCasedValues[cammelCasedKey] = values[key]
     })
 
-    return new this(cammelCasedValues)
+    const record = new this(cammelCasedValues)
+
+    record.exists = true
+
+    return record
   }
 
   /**
@@ -59,10 +66,11 @@ export class Model {
    * @async
    * @return {Model}
    */
-  public static async findById (database: Database, id: string): Promise<Model|null> {
+  public static async findById (database: Database, id: string) {
     const record = await database.knex
       .table(this.table)
       .where('id', id)
+      .where('deleted_at', null)
       .first()
 
     if (record == null) {
@@ -70,21 +78,6 @@ export class Model {
     }
 
     return this.castFromDatabase(record)
-  }
-
-  /**
-   * findById
-   * Finds records in the database
-   *
-   * @async
-   * @return {Model}
-   */
-  public static async find (database: Database, fn: (knex: Knex) => Knex): Promise<[Model]> {
-    const knex = database.knex.table(this.table)
-    const query = fn(knex)
-    const records = await query.get()
-
-    return records.map((record) => this.castFromDatabase(record))
   }
 
   /**
@@ -97,6 +90,43 @@ export class Model {
       Object.keys(values).forEach((key) => {
         this[key] = values[key]
       })
+    }
+
+    if (this.createdAt == null) {
+      this.createdAt = new Date()
+    }
+
+    if (this.updatedAt == null) {
+      this.updatedAt = new Date()
+    }
+  }
+
+  /**
+   * isDeleted
+   * Tells if the record has been soft deleted or not
+   *
+   * @return {boolean}
+   */
+  public get isDeleted (): boolean {
+    if (this.deletedAt == null) {
+      return false
+    }
+
+    return true
+  }
+
+  /**
+   * isDeleted
+   * Sets the deleted at date
+   *
+   * @param {boolean} value - True if the record should be deleted
+   * @return {void}
+   */
+  public set isDeleted(value: boolean) {
+    if (value === true) {
+      this.deletedAt = new Date()
+    } else {
+      this.deletedAt = null
     }
   }
 }
