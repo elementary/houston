@@ -9,7 +9,7 @@
 // This file outputs to console.
 // tslint:disable no-console
 
-import Raven from 'raven'
+import { Client as Raven } from 'raven'
 
 import { Config } from './config/class'
 
@@ -206,7 +206,9 @@ export class Log {
       }
 
       if (key != null) {
-        this.sentry = Raven.configure(key).install()
+        this.sentry = new Raven(key)
+        this.sentry.release = this.config.get('houston.version')
+        this.sentry.environment = this.config.get('environment')
       } else {
         this.error('No sentry service key configured')
       }
@@ -224,11 +226,11 @@ export class Log {
     const levelIndex = levels.indexOf(level)
     const consoleIndex = levels.indexOf(this.consoleLevel)
 
-    if (consoleIndex >= levelIndex) {
-      return true
+    if (consoleIndex > levelIndex) {
+      return false
     }
 
-    return false
+    return true
   }
 
   /**
@@ -240,12 +242,17 @@ export class Log {
    */
   protected shouldReportToService (level: string): boolean {
     const levelIndex = levels.indexOf(level)
-    const consoleIndex = levels.indexOf(this.serviceLevel)
+    const serviceIndex = levels.indexOf(this.serviceLevel)
 
-    if (consoleIndex >= levelIndex) {
-      return true
+    if (serviceIndex > levelIndex) {
+      return false
     }
 
-    return false
+    // We never report errors unless we are actually in a production environment
+    if (this.config.get('environment', 'production') !== 'production') {
+      return false
+    }
+
+    return true
   }
 }
