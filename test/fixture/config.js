@@ -104,64 +104,6 @@ module.exports = {
       installation: 0,
       key: '/etc/houston/github.pem',
       hook: false
-    },
-
-    /**
-     * Mandrill configuration
-     * You will need a Mandrill account and email templates.
-     * NOTE: This is an optional configuration value.
-     *
-     * @see https://mandrillapp.com/settings
-     *
-     * @property {string} key - Mandrill API key
-     * @property {object} template - A list of template names for events
-     */
-    mandrill: {
-      key: 'xxxxxxxxxxxxxxxxxxxxxx',
-
-      /**
-       * Mandrill template names
-       *
-       * @see https://mandrillapp.com/templates
-       *
-       * @property {string} [purchase] - Template name for an app purchase
-       */
-      template: {
-        purchase: 'appcenter-purchase'
-      }
-    },
-
-    /**
-     * Sentry configuration
-     * A third party error tracking service
-     * NOTE: This is an optional configuration value
-     *
-     * @see https://docs.sentry.io/quickstart
-     *
-     * @property {string} [secret] - Non public sentry dsn to use for server logs
-     * @property {string} [public] - A public sentry dsn to use for client logs
-     */
-    sentry: {
-      secret: 'https://xxx:xxx@sentry.io/houston',
-      public: 'https://xxx:xxx@sentry.io/houston'
-    },
-
-    /**
-     * Stripe configuration
-     * You will need a Stripe connect application.
-     * NOTE: This is an optional configuration value.
-     *
-     * @see https://dashboard.stripe.com/account/applications/settings
-     * @see https://dashboard.stripe.com/account/apikeys
-     *
-     * @property {string} client - Stripe connect client ID
-     * @property {string} secret - Stripe account secret key
-     * @property {string} public - Stripe account publishable key
-     */
-    stripe: {
-      client: 'ca_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-      secret: 'sk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-      public: 'pk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
     }
   }
 }
