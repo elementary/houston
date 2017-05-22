@@ -37,3 +37,10 @@ test('findByNameDomain can find a project by the name domain', async () => {
   expect(found).toHaveProperty('nameHuman')
   expect(found.nameHuman).toEqual('Terminal')
 })
+
+
+test('findByNameDomain returns null if not found', async () => {
+  const found = await Project.findByNameDomain(database, 'com.exists.should.never')
+
+  expect(found).toEqual(null)
+})
