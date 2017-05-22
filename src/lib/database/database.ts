@@ -9,6 +9,7 @@ import * as Knex from 'knex'
 import * as path from 'path'
 
 import { Config } from '../config/class'
+import { Log } from '../log'
 
 /**
  * Database
@@ -19,6 +20,7 @@ import { Config } from '../config/class'
 export class Database {
 
   public knex: Knex
+  public log: Log
 
   protected config: Config
 
@@ -26,8 +28,9 @@ export class Database {
    * Creates a Database class
    *
    * @param {Config} config - Configuration for database connection
+   * @param {Log} [log] - The log instance to use for reporting
    */
-  constructor (config: Config) {
+  constructor (config: Config, log?: Log) {
     const migrationPath = path.resolve(__dirname, 'migration')
     const seedPath = path.resolve(__dirname, 'seed')
 
@@ -46,6 +49,7 @@ export class Database {
     this.config = config
 
     this.knex = new Knex(databaseConfig)
+    this.log = log || new Log(config)
   }
 
 }
