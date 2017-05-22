@@ -70,3 +70,20 @@ test('can read configuration from file', () => {
 
   expect(config.get('environment')).toEqual('testing')
 })
+
+test('can read configuration from relative path', () => {
+  const testingConfigPath = path.resolve(__dirname, '..', '..', '..', 'test', 'fixture', 'config.js')
+  const relativeConfigPath = path.relative(process.cwd(), testingConfigPath)
+  const config = loader.getFileConfig(relativeConfigPath)
+
+  expect(config.get('environment')).toEqual('testing')
+})
+
+test('getConfig loads environment variables', () => {
+  process.env['HOUSTON_KEY'] = 'value'
+
+  const testingConfigPath = path.resolve(__dirname, '..', '..', '..', 'test', 'fixture', 'config.js')
+  const config = loader.getConfig(testingConfigPath)
+
+  expect(config.get('key')).toEqual('value')
+})
