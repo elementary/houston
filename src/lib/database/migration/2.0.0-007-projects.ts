@@ -28,8 +28,8 @@ export function up (knex: Knex) {
     table.uuid('projectable_id').notNullable()
     table.string('projectable_type').notNullable()
 
-    table.uuid('stripe_id').nullable().unsigned()
-    table.foreign('stripe_id').references('stripe_accounts.id')
+    table.uuid('stripe_id').nullable()
+    table.foreign('stripe_id').references('id').inTable('stripe_accounts')
 
     table.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
     table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now())

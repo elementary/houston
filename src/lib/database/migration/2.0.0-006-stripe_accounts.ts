@@ -26,8 +26,8 @@ export function up (knex: Knex) {
     table.string('access').notNullable()
     table.string('refresh').nullable()
 
-    table.uuid('user_id').notNullable().unsigned()
-    table.foreign('user_id').references('users.id')
+    table.uuid('user_id').notNullable()
+    table.foreign('user_id').references('id').inTable('users')
 
     table.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
     table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now())

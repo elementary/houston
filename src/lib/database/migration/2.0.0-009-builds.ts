@@ -19,11 +19,11 @@ export function up (knex: Knex) {
   return knex.schema.createTable('builds', (table) => {
     table.uuid('id').primary()
 
-    table.jsonb('appcenter').nullable()
-    table.jsonb('appstream').nullable()
+    table.json('appcenter').nullable()
+    table.json('appstream').nullable()
 
-    table.uuid('release_id').notNullable().unsigned()
-    table.foreign('release_id').references('releases.id')
+    table.uuid('release_id').notNullable()
+    table.foreign('release_id').references('id').inTable('releases')
 
     table.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
     table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now())

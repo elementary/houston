@@ -24,10 +24,10 @@ export function up (knex: Knex) {
 
     table.string('test').nullable()
 
-    table.jsonb('metadata').nullable()
+    table.json('metadata').nullable()
 
-    table.uuid('build_id').nullable().unsigned()
-    table.foreign('build_id').references('builds.id')
+    table.uuid('build_id').nullable()
+    table.foreign('build_id').references('id').inTable('builds')
 
     table.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
     table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now())

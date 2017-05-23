@@ -17,8 +17,9 @@ import * as Knex from 'knex'
  */
 export function up (knex: Knex) {
   return knex.schema.createTable('github_users', (table) => {
-    table.integer('id').primary()
+    table.uuid('id').primary()
 
+    table.integer('key').notNullable().unique()
     table.string('login').notNullable()
 
     table.string('name').nullable()
@@ -26,8 +27,8 @@ export function up (knex: Knex) {
     table.string('company').nullable()
     table.string('avatar').nullable()
 
-    table.uuid('user_id').nullable().unsigned()
-    table.foreign('user_id').references('users.id')
+    table.uuid('user_id').nullable()
+    table.foreign('user_id').references('id').inTable('users')
 
     table.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
     table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now())

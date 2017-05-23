@@ -20,11 +20,11 @@ export function up (knex: Knex) {
   return knex.schema.createTable('github_repositories_github_users', (table) => {
     table.increments()
 
-    table.uuid('github_repository_id').nullable().unsigned()
-    table.foreign('github_repository_id').references('github_repositories.id')
+    table.uuid('github_repository_id').nullable()
+    table.foreign('github_repository_id').references('id').inTable('github_repositories')
 
-    table.uuid('github_user_id').nullable().unsigned()
-    table.foreign('github_user_id').references('github_users.id')
+    table.uuid('github_user_id').nullable()
+    table.foreign('github_user_id').references('id').inTable('github_users')
   })
 }
 

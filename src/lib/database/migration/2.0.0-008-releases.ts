@@ -19,18 +19,19 @@ export function up (knex: Knex) {
   return knex.schema.createTable('releases', (table) => {
     table.uuid('id').primary()
 
-    table.int('version_major').notNullable()
-    table.int('version_minor').notNullable()
-    table.int('version_patch').notNullable()
-    table.int('version_test').nullable()
+    table.string('version').notNullable()
+    table.integer('version_major', 12).notNullable()
+    table.integer('version_minor', 12).notNullable()
+    table.integer('version_patch', 12).notNullable()
+    table.integer('version_build', 12).nullable()
 
     table.boolean('is_prerelease').defaultTo(false)
 
     table.uuid('releaseable_id').notNullable()
     table.string('releaseable_type').notNullable()
 
-    table.uuid('project_id').notNullable().unsigned()
-    table.foreign('project_id').references('projects.id')
+    table.uuid('project_id').notNullable()
+    table.foreign('project_id').references('id').inTable('projects')
 
     table.timestamp('created_at').notNullable().defaultTo(knex.fn.now())
     table.timestamp('updated_at').notNullable().defaultTo(knex.fn.now())
