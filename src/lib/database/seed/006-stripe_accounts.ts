@@ -20,6 +20,7 @@ export async function seed (knex: Knex) {
     color: 'FFA500',
     created_at: new Date(),
     id: '326599e7-97ed-455a-9c38-122651a12be6',
+    key: 4235823,
     name: 'btkostner',
     public_key: 'pk_test_uj0fjv0a9u9302fawfa2rasd',
     secret_key: 'sk_test_j89j2098vah803cnb83v298r',
