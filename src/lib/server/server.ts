@@ -25,6 +25,7 @@ export class Server {
   protected database: Database
 
   protected koa: Koa
+  protected server: http.Server
 
   /**
    * Creates a new web server
@@ -53,13 +54,13 @@ export class Server {
    * @throws {Error} - When unable to listen to requested port
    * @return {Server} - An active Server class
    */
-  public async listen (port = 0): Promise<Server> {
+  public async listen (port = 0): Promise<this> {
     const env = this.config.get('environment')
-    const server = this.http()
+    this.server = this.http()
 
     try {
       await new Promise((resolve, reject) => {
-        server.listen(port, undefined, undefined, (err: Error) => {
+        this.server.listen(port, undefined, undefined, (err: Error) => {
           if (err) {
             return reject(err)
           }
@@ -74,8 +75,35 @@ export class Server {
       throw err
     }
 
-    this.port = server.address().port
+    this.port = this.server.address().port
     this.log.info(`Server listening on port ${this.port} with ${env} configuration`)
+
+    return this
+  }
+
+  /**
+   * close
+   * Stops the HTTP server
+   *
+   * @async
+   *
+   * @throws {Error} - When the Server class is messed up
+   * @return {Server} - An inactive Server class
+   */
+  public async close (): Promise<this> {
+    if (this.server != null) {
+      await new Promise((resolve, reject) => {
+        this.server.close((err) => {
+          if (err != null) {
+            return reject(err)
+          }
+
+          return resolve()
+        })
+      })
+
+      this.port = null
+    }
 
     return this
   }

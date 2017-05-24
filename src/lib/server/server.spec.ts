@@ -17,10 +17,14 @@ beforeEach(async () => {
   server = new Server(config)
 })
 
+afterEach(async () => {
+  await server.close()
+})
+
 test('can listen on random port', async () => {
   await server.listen(0)
 
-  return supertest(`localhost:${server.port}`)
+  await supertest(`localhost:${server.port}`)
     .get('/')
     .expect(404)
 })
