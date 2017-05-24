@@ -27,6 +27,9 @@ export function up (knex: Knex) {
     table.string('company').nullable()
     table.string('avatar').nullable()
 
+    table.string('access_key').nullable()
+    table.string('scopes').nullable()
+
     table.uuid('user_id').nullable()
     table.foreign('user_id').references('id').inTable('users')
 

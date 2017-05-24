@@ -1,5 +1,5 @@
 /**
- * houston/src/lib/database/seed/github_repositories.ts
+ * houston/src/lib/database/seed/001-github_repositories.ts
  * Seeds the database
  *
  * @exports {Function} seed - Seeds the Github repositories table

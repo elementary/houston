@@ -1,5 +1,5 @@
 /**
- * houston/src/lib/database/seed/projects.ts
+ * houston/src/lib/database/seed/007-projects.ts
  * Seeds the database
  *
  * @exports {Function} seed - Seeds the projects table
@@ -25,7 +25,7 @@ export async function seed (knex: Knex) {
     name_human: 'Keymaker',
     projectable_id: 'b272a75e-5263-4133-b2e1-c8894b29493c',
     projectable_type: 'github',
-    stripe_id: null,
+    stripe_id: '326599e7-97ed-455a-9c38-122651a12be6',
     type: 'application',
     updated_at: new Date()
   })

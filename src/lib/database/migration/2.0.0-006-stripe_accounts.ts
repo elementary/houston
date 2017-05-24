@@ -17,14 +17,16 @@ import * as Knex from 'knex'
  */
 export function up (knex: Knex) {
   return knex.schema.createTable('stripe_accounts', (table) => {
-    table.string('id').primary()
+    table.uuid('id').primary()
 
-    table.string('name').unique().index()
+    table.integer('key').notNullable().unique()
+
+    table.string('name').unique()
     table.string('color').nullable()
     table.string('url').nullable()
 
-    table.string('access').notNullable()
-    table.string('refresh').nullable()
+    table.string('public_key').nullable()
+    table.string('secret_key').nullable()
 
     table.uuid('user_id').notNullable()
     table.foreign('user_id').references('id').inTable('users')

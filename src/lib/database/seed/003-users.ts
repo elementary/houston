@@ -1,5 +1,5 @@
 /**
- * houston/src/lib/database/seed/users.ts
+ * houston/src/lib/database/seed/003-users.ts
  * Seeds the database
  *
  * @exports {Function} seed - Seeds the users table
