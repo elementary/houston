@@ -48,8 +48,8 @@ module.exports = {
    * @property {string} [service] - Minimum level needed to report to sentry
    */
   log: {
-    console: null,
-    service: null
+    console: 'never',
+    service: 'never'
   },
 
   /**

@@ -10,10 +10,11 @@
 // tslint:disable no-console
 
 import { Client as Raven } from 'raven'
+import { inspect } from 'util'
 
 import { Config } from './config/class'
 
-const levels = ['debug', 'info', 'warn', 'error']
+const levels = ['debug', 'info', 'warn', 'error', 'never']
 
 /**
  * Log
@@ -166,6 +167,20 @@ export class Log {
    * @return {void}
    */
   public reportData (data: object) {
+    if (typeof data === 'object') {
+      if (Object.keys(data).length > 0) {
+        const inspected = inspect(data, {
+          colors: true,
+          depth: 6,
+          showHidden: false
+        })
+
+        console.log(inspected)
+      }
+
+      return
+    }
+
     console.log(JSON.stringify(data, null, '\t'))
   }
 
