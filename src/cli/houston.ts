@@ -10,19 +10,18 @@ import * as yargs from 'yargs'
 
 import { getProgramConfig } from '../lib/config/loader'
 
+import * as api from './api'
 import * as migrate from './migrate'
 import * as seed from './seed'
 
-yargs.command(migrate)
-yargs.command(seed)
+yargs.command(api, api.describe, api.builder)
+yargs.command(migrate, migrate.describe, migrate.builder)
+yargs.command(seed, seed.describe)
 
 yargs.help('h').alias('h', 'help')
 yargs.option('version', { alias: 'v', describe: 'Outputs the current houston version', type: 'boolean' })
 yargs.option('config', { alias: 'c', describe: 'Path to configuration file', type: 'string' })
 
-yargs.example('houston migrate up', 'Updates the database tables to current huoston schemas')
-
-yargs.demandCommand()
 yargs.recommendCommands()
 yargs.showHelpOnFail(true)
 
