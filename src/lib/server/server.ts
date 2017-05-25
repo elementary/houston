@@ -11,6 +11,9 @@ import * as Koa from 'koa'
 import { Config } from '../config/class'
 import { Database } from '../database/database'
 import { Log } from '../log'
+import * as middleware from './middleware'
+
+import { ServerError } from './error'
 
 /**
  * Server
@@ -18,11 +21,10 @@ import { Log } from '../log'
  */
 export class Server {
 
+  public config: Config
+  public database: Database
   public log: Log
   public port: number|null
-
-  protected config: Config
-  protected database: Database
 
   protected koa: Koa
   protected server: http.Server
@@ -42,6 +44,33 @@ export class Server {
     this.database = database || new Database(config)
 
     this.koa = new Koa()
+
+    this.registerMiddleware()
+    this.registerRoutes()
+  }
+
+  /**
+   * registerMiddleware
+   * Registers all the koa middleware the server is going to use.
+   *
+   * @return {void}
+   */
+  public registerMiddleware (): void {
+    this.koa.on('error', middleware.onError(this))
+  }
+
+  /**
+   * registerRoutes
+   * Registers all the koa routes the server is going to use.
+   *
+   * @return {void}
+   */
+  public registerRoutes (): void {
+    // Logic.
+
+    this.koa.use(() => {
+      throw new ServerError('Page Not Found', 404)
+    })
   }
 
   /**

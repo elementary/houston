@@ -5,6 +5,8 @@
 
 import * as supertest from 'supertest'
 
+import { Log } from '../log'
+import { ServerError } from './error'
 import { Server } from './server'
 
 import { setup as setupConfig } from '../../../test/utility/config'
