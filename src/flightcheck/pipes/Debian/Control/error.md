@@ -5,4 +5,5 @@ file.
 
 {% for p in data %}
 - {{ p.error | safe }} {% if p.critical %}(critical){% endif %}
+
 {% endfor %}
