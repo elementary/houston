@@ -6,6 +6,7 @@
  */
 
 import { Server } from '../lib/server/server'
+import * as middleware from './middleware'
 
 export class Api extends Server {
 
@@ -16,7 +17,9 @@ export class Api extends Server {
    * @return {void}
    */
   public registerMiddleware (): void {
-    this.koa.use((ctx) => this.log.debug(`api endpoint ${ctx.url}`))
+    this.koa.use(middleware.catchError(this))
+    this.koa.use(middleware.checkHeaders(this))
+    this.koa.use(middleware.wrapBody(this))
 
     super.registerMiddleware()
   }

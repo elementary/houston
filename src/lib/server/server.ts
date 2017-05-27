@@ -7,6 +7,7 @@
 
 import * as http from 'http'
 import * as Koa from 'koa'
+import * as Router from 'koa-router'
 
 import { Config } from '../config/class'
 import { Database } from '../database/database'
@@ -15,19 +16,33 @@ import * as middleware from './middleware'
 
 import { ServerError } from './error'
 
+import { Health } from './controller/health'
+
 /**
  * Server
  * A basic HTTP web server
+ *
+ * @property {Config} config
+ * @property {Database} database
+ * @property {Log} log
+ *
+ * @property {Koa} koa
+ * @property {Router} router
+ *
+ * @property {Server} server
+ * @property {number} port
  */
 export class Server {
 
   public config: Config
   public database: Database
   public log: Log
-  public port: number|null
 
-  protected koa: Koa
-  protected server: http.Server
+  public koa: Koa
+  public router: Router
+
+  public server: http.Server
+  public port: number
 
   /**
    * Creates a new web server
@@ -37,16 +52,18 @@ export class Server {
    * @param {Log} [log] - The log instance to use
    */
   constructor (config: Config, database?: Database, log?: Log) {
-    this.log = log || new Log(config)
-    this.port = null
-
     this.config = config
     this.database = database || new Database(config)
+    this.log = log || new Log(config)
 
     this.koa = new Koa()
+    this.router = new Router()
 
     this.registerMiddleware()
     this.registerRoutes()
+
+    this.koa.use(this.router.routes())
+    this.koa.use(this.router.allowedMethods())
   }
 
   /**
@@ -56,7 +73,12 @@ export class Server {
    * @return {void}
    */
   public registerMiddleware (): void {
+    // Logic.
+
     this.koa.on('error', middleware.onError(this))
+
+    this.koa.use(middleware.Compress(this))
+    this.koa.use(middleware.Logger(this))
   }
 
   /**
@@ -68,8 +90,12 @@ export class Server {
   public registerRoutes (): void {
     // Logic.
 
-    this.koa.use(() => {
-      throw new ServerError('Page Not Found', 404)
+    const health = new Health(this)
+
+    this.router.get('/health', health.view)
+
+    this.router.all('*', () => {
+      throw new ServerError('Endpoint Not Found', 404)
     })
   }
 
@@ -131,7 +157,7 @@ export class Server {
         })
       })
 
-      this.port = null
+      this.port = 0
     }
 
     return this

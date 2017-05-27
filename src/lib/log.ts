@@ -194,9 +194,9 @@ export class Log {
    */
   public reportToService (msg: string, data?: object): void {
     if (this.sentry != null) {
-      Raven.context(() => {
+      this.sentry.context(() => {
         if (data != null) {
-          Raven.setContext(data)
+          this.sentry.setContext(data)
         }
 
         throw new Error(msg)

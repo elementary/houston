@@ -122,7 +122,7 @@ export class Model {
    * @param {boolean} value - True if the record should be deleted
    * @return {void}
    */
-  public set isDeleted(value: boolean) {
+  public set isDeleted (value: boolean) {
     if (value === true) {
       this.deletedAt = new Date()
     } else {

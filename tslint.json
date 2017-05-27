@@ -15,7 +15,7 @@
     "non-literal-require": true,
     "possible-timing-attack": true,
 
-    "curly": true,
+    "curly": [true, "ignore-same-line"],
     "forin": true,
     "no-any": true,
     "no-arg": true,

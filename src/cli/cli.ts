@@ -8,6 +8,7 @@
 
 import { Config } from '../lib/config/class'
 import { getConfig as getConfigClass } from '../lib/config/loader'
+import { Log } from '../lib/log'
 
 /**
  * getConfig
@@ -39,4 +40,19 @@ export function getConfig (argv): Config {
   process.exit(1)
 
   return new Config()
+}
+
+/**
+ * setupLog
+ * Sets up a global log instance to catch bad process events
+ *
+ * @param {Config} config - The configuration to use for the logger
+ * @return {void}
+ */
+export function setupLog (config: Config): void {
+  const log = new Log(config)
+
+  process.on('unhandledRejection', (reason, promise) => {
+    log.warn(reason, promise)
+  })
 }

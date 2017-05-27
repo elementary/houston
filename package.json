@@ -18,6 +18,8 @@
   "dependencies": {
     "knex": "^0.13.0",
     "koa": "^2.2.0",
+    "koa-compress": "^2.0.0",
+    "koa-router": "^7.2.0",
     "lodash": "^4.17.4",
     "raven": "^2.0.1",
     "uuid": "^3.0.1",
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "@types/jest": "^19.2.3",
+    "@types/koa-router": "^7.0.22",
     "@types/node": "^7.0.18",
     "del": "^2.2.2",
     "gulp": "gulpjs/gulp#4.0",
