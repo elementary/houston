@@ -1,14 +1,14 @@
 /**
- * houston/src/lib/database/model/project.ts
- * The super amazing master project model of all that is everything
+ * houston/src/lib/database/model/release.ts
+ * The master model for releases
  */
 
 import { Database } from '../database'
 import { Model } from './model'
 
 /**
- * Project
- * The main project model.
+ * Release
+ * The main release model.
  *
  * @property {string} id - The record's ID
  *
@@ -27,7 +27,7 @@ import { Model } from './model'
  * @property {Date} updatedAt - The date the record was last updated
  * @property {Date} [deletedAt] - The date the record may have been deleted
  */
-export class Project extends Model {
+export class Release extends Model {
 
   /**
    * table
@@ -35,40 +35,43 @@ export class Project extends Model {
    *
    * @var {string}
    */
-  protected static table = 'projects'
+  protected static table = 'releases'
 
-  public nameDomain: string
-  public nameHuman?: string
-  public nameDeveloper?: string
+  public version: string
+  public versionMajor: number
+  public versionMinor: number
+  public versionPatch: number
+  public versionBuild: number
 
-  public type: string
+  public isPrerelease: boolean
 
-  public projectableId: string
-  public projectableType: string
+  public releaseableId: string
+  public releaseableType: string
 
-  public stripeId?: string
-
-  /**
-   * guarded
-   * All properties that should not be included when put to object or json
-   *
-   * @var {string[]}
-   */
-  protected guarded = ['stripeId']
+  public projectId: string
 
   /**
-   * findByNameDomain
-   * Finds a project by the name_domain field
+   * findByNameDomainAndVersion
+   * Finds a release by the project name domain and release version
    *
    * @param {Database} database - The database connection to use
    * @param {string} name - The domain name for the project
-   * @return {Project|null}
+   * @param {string} version - The version string that identifies the release
+   * @return {Release|null}
    */
-  public static async findByNameDomain (database: Database, name: string) {
+  public static async findByNameDomainAndVersion (
+    database: Database,
+    name: string,
+    version: string
+  ): Promise<Release|null> {
     return this.query(database, (q) => {
       return q
-        .where('name_domain', name)
-        .where('deleted_at', null)
+        .select('releases.*')
+        .leftJoin('projects', 'projects.id', 'releases.project_id')
+        .where('releases.deleted_at', null)
+        .where('projects.deleted_at', null)
+        .where('releases.version', version)
+        .where('projects.name_domain', name)
         .first()
     })
   }
@@ -83,30 +86,20 @@ export class Project extends Model {
    * @param {number} offset - The page we should lookup
    * @return {Project[]}
    */
-  public static async findNewestReleased (database: Database, limit = 10, offset = 0) {
+  public static async findNewestReleased (database: Database, limit = 10, offset = 0): Promise<Release[]> {
     return this.query(database, (q) => {
       return q
-        .select('projects.*')
-        .leftJoin('releases', 'projects.id', 'releases.project_id')
+        .select('releases.*')
+        .leftJoin('projects', 'releases.project_id', 'projects.id')
         .leftJoin('builds', 'releases.id', 'builds.release_id')
         .where('projects.deleted_at', null)
         .where('releases.deleted_at', null)
         .where('builds.deleted_at', null)
         .where('builds.status', 'publish')
-        .orderBy('projects.created_at', 'desc')
+        .orderBy('releases.created_at', 'desc')
         .groupBy('projects.id')
         .limit(limit)
         .offset(offset)
     })
-  }
-
-  /**
-   * name_appstream
-   * Returns the name used when in desktop appstream.
-   *
-   * @return {string}
-   */
-  public get nameAppstream (): string {
-    return `${this.nameDomain}.desktop`
   }
 }

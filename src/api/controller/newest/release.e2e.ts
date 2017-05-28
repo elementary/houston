@@ -1,6 +1,6 @@
 /**
- * houston/src/api/controller/newest/project.e2e.ts
- * Tests the endpoint for AppCenter's homepage banner. Kinda a big deal.
+ * houston/src/api/controller/newest/release.e2e.ts
+ * Tests the endpoint for AppCenter's newest release scroller
  */
 
 import * as supertest from 'supertest'
@@ -26,14 +26,14 @@ afterEach(async () => {
 
 test('view', async () => {
   const res = await supertest(server.http())
-    .get('/newest/project')
+    .get('/newest/release')
     .expect(200)
 
   expect(res.body).toHaveProperty('data')
   expect(res.body.data).toHaveLength(3)
   expect(res.body.data).toEqual([
-    'com.github.elementary.terminal.desktop',
     'com.github.elementary.appcenter.desktop',
-    'com.github.btkostner.keymaker.desktop'
+    'com.github.btkostner.keymaker.desktop',
+    'com.github.elementary.terminal.desktop'
   ])
 })

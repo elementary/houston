@@ -10,6 +10,7 @@ import { Server } from '../lib/server/server'
 import * as middleware from './middleware'
 
 import { NewestProject } from './controller/newest/project'
+import { NewestRelease } from './controller/newest/release'
 
 export class Api extends Server {
 
@@ -36,8 +37,10 @@ export class Api extends Server {
    */
   public registerRoutes (): void {
     const newestProject = new NewestProject(this)
+    const newestRelease = new NewestRelease(this)
 
     this.router.get('/newest/project', (ctx: Context) => newestProject.view(ctx))
+    this.router.get('/newest/release', (ctx: Context) => newestRelease.view(ctx))
 
     super.registerRoutes()
   }

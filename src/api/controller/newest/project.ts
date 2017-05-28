@@ -17,7 +17,7 @@ export class NewestProject extends Controller {
 
   /**
    * view
-   * Returns a 200 for health checking purposes
+   * Returns a list of the newest projects that have been released
    *
    * @param {Context} ctx
    * @return {void}

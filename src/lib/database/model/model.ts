@@ -29,7 +29,7 @@ export class Model {
    */
   protected static table: string
 
-  public id?: string
+  public id: string
 
   public createdAt: Date
   public updatedAt: Date
@@ -130,6 +130,10 @@ export class Model {
       Object.keys(values).forEach((key) => {
         this[camelCase(key)] = values[key]
       })
+    }
+
+    if (this.id == null) {
+      this.id = Model.createId()
     }
 
     if (this.createdAt == null) {
