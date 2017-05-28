@@ -41,7 +41,7 @@
     "tslint": "^5.2.0",
     "tslint-consistent-codestyle": "^1.2.0",
     "tslint-jsdoc-rules": "^0.1.2",
-    "tslint-microsoft-contrib": "^4.0.1",
+    "tslint-microsoft-contrib": "^5.0.0",
     "typescript": "^2.3.2"
   },
   "jest": {
