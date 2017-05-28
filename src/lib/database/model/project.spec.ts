@@ -16,6 +16,24 @@ beforeEach(async () => {
   database = await setupDatabase(config)
 })
 
+test('stripe ID is not showen in json output', async () => {
+  const found = await Project.query(database, (q) => {
+    return q
+      .where('id', '24ef2115-67e7-4ea9-8e18-ae6c44b63a71')
+      .first()
+  })
+
+  expect(found).toBeInstanceOf(Project)
+  expect(found).toHaveProperty('stripeId')
+  expect(found.stripeId).toEqual('326599e7-97ed-455a-9c38-122651a12be6')
+
+  const jsonOutput = found.toJson()
+  const jsonInput = JSON.parse(jsonOutput)
+
+  expect(jsonInput).toHaveProperty('id')
+  expect(jsonInput).not.toHaveProperty('stripeId')
+})
+
 test('findById returns a single Project model', async () => {
   const found = await Project.findById(database, '24ef2115-67e7-4ea9-8e18-ae6c44b63a71')
 
@@ -43,4 +61,22 @@ test('findByNameDomain returns null if not found', async () => {
   const found = await Project.findByNameDomain(database, 'com.exists.should.never')
 
   expect(found).toEqual(null)
+})
+
+test('findNewestReleased returns accurate records', async () => {
+  const found = await Project.findNewestReleased(database)
+
+  expect(found).toHaveLength(3)
+
+  // Terminal should be first
+  expect(found[0]).toHaveProperty('id')
+  expect(found[0].id).toEqual('4a9e027d-c27e-483a-a0fc-b2724a19491b')
+
+  // AppCenter second
+  expect(found[1]).toHaveProperty('id')
+  expect(found[1].id).toEqual('75fa37dc-888d-4905-97bd-73cc9e39be2a')
+
+  // And last should be keymaker
+  expect(found[2]).toHaveProperty('id')
+  expect(found[2].id).toEqual('24ef2115-67e7-4ea9-8e18-ae6c44b63a71')
 })

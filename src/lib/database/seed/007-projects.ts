@@ -17,7 +17,7 @@ export async function seed (knex: Knex) {
   await knex('projects').del()
 
   await knex('projects').insert({
-    created_at: new Date(),
+    created_at: new Date(1),
     deleted_at: null,
     id: '24ef2115-67e7-4ea9-8e18-ae6c44b63a71',
     name_developer: 'Blake Kostner',
@@ -31,7 +31,7 @@ export async function seed (knex: Knex) {
   })
 
   await knex('projects').insert({
-    created_at: new Date(),
+    created_at: new Date(2),
     deleted_at: null,
     id: '75fa37dc-888d-4905-97bd-73cc9e39be2a',
     name_developer: 'elementary LLC',
@@ -45,7 +45,7 @@ export async function seed (knex: Knex) {
   })
 
   await knex('projects').insert({
-    created_at: new Date(),
+    created_at: new Date(3),
     deleted_at: null,
     id: '0086b0d2-be43-45fc-8619-989104705c8a',
     name_developer: 'elementary LLC',
@@ -59,7 +59,7 @@ export async function seed (knex: Knex) {
   })
 
   await knex('projects').insert({
-    created_at: new Date(),
+    created_at: new Date(4),
     deleted_at: null,
     id: '4a9e027d-c27e-483a-a0fc-b2724a19491b',
     name_developer: 'elementary LLC',

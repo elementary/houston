@@ -3,7 +3,8 @@
  * A basic master model inherited by everything
  */
 
-import { camelCase } from 'lodash'
+import * as Knex from 'knex'
+import { camelCase, isArray } from 'lodash'
 import * as uuid from 'uuid/v4'
 
 import { Database } from '../database'
@@ -13,18 +14,42 @@ import { Database } from '../database'
  * A basic master model to be inherited by other models
  *
  * @property {string} id - The record's ID
+ *
+ * @property {Date} createdAt - The date the record was created at
+ * @property {Date} updatedAt - The date the record was last updated
+ * @property {Date} [deletedAt] - The date the record may have been deleted
  */
 export class Model {
 
+  /**
+   * table
+   * The table name for the current model
+   *
+   * @var {string}
+   */
   protected static table: string
 
   public id?: string
 
-  public createdAt?: Date
-  public updatedAt?: Date
+  public createdAt: Date
+  public updatedAt: Date
   public deletedAt?: Date|null
 
+  /**
+   * exists
+   * If this record already exists in the database
+   *
+   * @var {boolean}
+   */
   protected exists = false
+
+  /**
+   * guarded
+   * All properties that should not be included when put to object or json
+   *
+   * @var {string[]}
+   */
+  protected guarded: string[] = []
 
   /**
    * createId
@@ -47,9 +72,7 @@ export class Model {
     const cammelCasedValues = {}
 
     Object.keys(values).forEach((key) => {
-      const cammelCasedKey = camelCase(key)
-
-      cammelCasedValues[cammelCasedKey] = values[key]
+      cammelCasedValues[camelCase(key)] = values[key]
     })
 
     const record = new this(cammelCasedValues)
@@ -60,6 +83,28 @@ export class Model {
   }
 
   /**
+   * query
+   * This is a super master query function so we can put data in a model
+   * TODO: can't we just do some fancy magic and overwrite a knex thing?
+   *
+   * @param {Database} database - The database to query
+   * @param {Function} fn - A function given a query and returning a query
+   * @return {mixed}
+   */
+  public static async query (database: Database, fn: (q: Knex) => Knex) {
+    const query = fn(database.knex.table(this.table))
+    const result = await query
+
+    if (result == null) return null
+
+    if (isArray(result)) {
+      return result.map((res) => this.castFromDatabase(res))
+    }
+
+    return this.castFromDatabase(result)
+  }
+
+  /**
    * findById
    * Finds a record in the database
    *
@@ -67,17 +112,12 @@ export class Model {
    * @return {Model}
    */
   public static async findById (database: Database, id: string) {
-    const record = await database.knex
-      .table(this.table)
-      .where('id', id)
-      .where('deleted_at', null)
-      .first()
-
-    if (record == null) {
-      return null
-    }
-
-    return this.castFromDatabase(record)
+    return this.query(database, (q) => {
+      return q
+        .where('id', id)
+        .where('deleted_at', null)
+        .first()
+    })
   }
 
   /**
@@ -88,7 +128,7 @@ export class Model {
   constructor (values?: object) {
     if (values != null) {
       Object.keys(values).forEach((key) => {
-        this[key] = values[key]
+        this[camelCase(key)] = values[key]
       })
     }
 
@@ -128,5 +168,33 @@ export class Model {
     } else {
       this.deletedAt = null
     }
+  }
+
+  /**
+   * toObject
+   * Transforms the current model to a plain object
+   *
+   * @return {object}
+   */
+  public toObject () {
+    const res = {}
+
+    Object.keys(this).forEach((key) => {
+      if (this.guarded.indexOf(key) === -1) {
+        res[key] = this[key]
+      }
+    })
+
+    return res
+  }
+
+  /**
+   * toJson
+   * Transforms the current model to a json value
+   *
+   * @return {string}
+   */
+  public toJson () {
+    return JSON.stringify(this.toObject())
   }
 }

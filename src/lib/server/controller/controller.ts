@@ -6,6 +6,7 @@
  */
 
 import { Config } from '../../config/class'
+import { Database } from '../../database/database'
 import { Log } from '../../log'
 import { Server } from '../server'
 
@@ -20,6 +21,7 @@ export class Controller {
 
   protected server: Server
   protected config: Config
+  protected database: Database
   protected log: Log
 
   /**
@@ -30,9 +32,10 @@ export class Controller {
    * @param {Config} [config] - The configuration to be used for the route
    * @param {Log} [log] - A log instance to be used for things
    */
-  constructor (server: Server, config?: Config, log?: Log) {
+  constructor (server: Server, config?: Config, database?: Database, log?: Log) {
     this.server = server
     this.config = config || server.config
+    this.database = database || server.database
     this.log = log || server.log
   }
 }

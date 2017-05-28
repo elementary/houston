@@ -77,8 +77,8 @@ export class Server {
 
     this.koa.on('error', middleware.onError(this))
 
-    this.koa.use(middleware.Compress(this))
-    this.koa.use(middleware.Logger(this))
+    this.router.use(middleware.Compress(this))
+    this.router.use(middleware.Logger(this))
   }
 
   /**

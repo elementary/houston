@@ -19,6 +19,16 @@ export function up (knex: Knex) {
   return knex.schema.createTable('builds', (table) => {
     table.uuid('id').primary()
 
+    table.enum('status', [
+      'queue',
+      'build',
+      'test',
+      'review',
+      'publish',
+      'fail',
+      'error'
+    ]).nullable()
+
     table.json('appcenter').nullable()
     table.json('appstream').nullable()
 

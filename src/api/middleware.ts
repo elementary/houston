@@ -21,7 +21,7 @@ import * as payload from './payload'
  * Sets the body to a nice API error
  *
  * @param {Server} _ - The server that throws errors
- * @return {Function} - A listener function
+ * @return {Function} - A middleware function
  */
 export function catchError (server: Server) {
 
@@ -29,7 +29,7 @@ export function catchError (server: Server) {
    * Trys to catch any unset errors
    *
    * @param {Context} ctx - A Server context
-   * @param {Function|null} next - THe next item in line
+   * @param {Function|null} next - The next item in line
    *
    * @return {void}
    */
@@ -76,8 +76,8 @@ export function catchError (server: Server) {
  * checkHeaders
  * Checks headers for JSON api requirements
  *
- * @param {Server} _ - The server that throws errors
- * @return {Function} - A listener function
+ * @param {Server} _ - The server
+ * @return {Function} - A middleware function
  */
 export function checkHeaders (_: Server) {
 
@@ -85,7 +85,7 @@ export function checkHeaders (_: Server) {
    * Checks headers for incomming requests
    *
    * @param {Context} ctx - A Server context
-   * @param {Function|null} next - THe next item in line
+   * @param {Function|null} next - The next item in line
    *
    * @return {void}
    */
@@ -103,11 +103,36 @@ export function checkHeaders (_: Server) {
 }
 
 /**
+ * setResponse
+ * Sets common JSON api response things
+ *
+ * @param {Server} _ - The server
+ * @return {Function} - A middleware function
+ */
+export function setResponse (_: Server) {
+
+  /**
+   * Sets common API things in the response
+   *
+   * @param {Context} ctx - A Server context
+   * @param {Function|null} next - The next item in line
+   *
+   * @return {void}
+   */
+  return async (ctx: middleware.Context, next: () => Promise<any>) => {
+    ctx.response.type = 'application/vnd.api+json'
+    ctx.response.body = {}
+
+    return next()
+  }
+}
+
+/**
  * wrapBody
  * Sets common API endpoint properties
  *
- * @param {Server} _ - The server that throws errors
- * @return {Function} - A listener function
+ * @param {Server} _ - The server
+ * @return {Function} - A middleware function
  */
 export function wrapBody (server: Server) {
 
@@ -115,7 +140,7 @@ export function wrapBody (server: Server) {
    * Wraps body content for common properties
    *
    * @param {Context} ctx - A Server context
-   * @param {Function|null} next - THe next item in line
+   * @param {Function|null} next - The next item in line
    *
    * @return {void}
    */
@@ -123,6 +148,10 @@ export function wrapBody (server: Server) {
     await next()
 
     if (ctx.body == null) ctx.body = {}
+
+    // Sometimes the response is set to a string before the stack is done.
+    // Everything here should be a json object anyway.
+    if (typeof ctx.body === 'string') ctx.body = JSON.parse(ctx.body)
 
     const response: payload.Response = ctx.body
 
