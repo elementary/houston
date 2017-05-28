@@ -68,7 +68,7 @@
       "ts",
       "tsx"
     ],
-    "testRegex": "\\.spec\\.ts$",
+    "testRegex": "\\.(spec|e2e)\\.ts$",
     "transform": {
       "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     }

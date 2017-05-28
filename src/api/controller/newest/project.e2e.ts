@@ -1,5 +1,5 @@
 /**
- * houston/src/api/controller/newest/project.spec.ts
+ * houston/src/api/controller/newest/project.e2e.ts
  * Tests the endpoint for AppCenter's homepage banner. Kinda a big deal.
  */
 
@@ -24,13 +24,7 @@ afterEach(async () => {
   await server.close()
 })
 
-test('returns a 200 when viewing', () => {
-  return supertest(server.http())
-    .get('/newest/project')
-    .expect(200)
-})
-
-test('returns an array of appstream values when viewing', async () => {
+test('view', async () => {
   const res = await supertest(server.http())
     .get('/newest/project')
     .expect(200)

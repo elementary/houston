@@ -59,6 +59,8 @@ export class Server {
     this.koa = new Koa()
     this.router = new Router()
 
+    this.koa.env = config.get('environment', 'production')
+
     this.registerMiddleware()
     this.registerRoutes()
 
