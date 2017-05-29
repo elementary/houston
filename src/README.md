@@ -19,3 +19,8 @@ and seeding.
 
 This folder holds universal code used in multiple processes. Look here if you
 need to change something about the database.
+
+## repo/
+
+This holds the code for the repository syslog server. This is used by nginx
+to record download counts of files in the repository.
