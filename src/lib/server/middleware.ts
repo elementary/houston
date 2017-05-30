@@ -22,7 +22,6 @@ import { Server } from './server'
  */
 export interface Context extends Router.IRouterContext {
   log: Log
-  render (rel: string, locals?: object): void
 }
 
 /**
