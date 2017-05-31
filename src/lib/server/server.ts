@@ -75,8 +75,6 @@ export class Server {
    * @return {void}
    */
   public registerMiddleware (): void {
-    // Logic.
-
     this.koa.on('error', middleware.onError(this))
 
     this.router.use(middleware.Compress(this))
@@ -90,14 +88,14 @@ export class Server {
    * @return {void}
    */
   public registerRoutes (): void {
-    // Logic.
-
     const health = new Health(this)
 
     this.router.get('/health', health.view)
 
-    this.router.all('*', () => {
-      throw new ServerError('Endpoint Not Found', 404)
+    this.router.all('*', (ctx) => {
+      if (ctx.status === 404 && ctx.body == null) {
+        throw new ServerError('Endpoint Not Found', 404)
+      }
     })
   }
 
