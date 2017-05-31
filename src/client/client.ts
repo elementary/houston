@@ -5,6 +5,8 @@
  * @export {Server} Api - An API server
  */
 
+import * as path from 'path'
+
 import { Server } from '../lib/server/server'
 import * as middleware from './middleware'
 
@@ -21,6 +23,7 @@ export class Client extends Server {
   public registerMiddleware (): void {
     this.router.use(middleware.render(this))
     this.router.use(middleware.catchError(this))
+    this.router.use(middleware.assets(this, path.resolve(__dirname, 'public')))
 
     super.registerMiddleware()
   }
@@ -34,7 +37,8 @@ export class Client extends Server {
   public registerRoutes (): void {
     const homepage = new Homepage(this)
 
-    this.router.get('/', (ctx: middleware.Context) => homepage.view(ctx))
+    this.router.get('/', homepage.view)
+    this.router.get('/homepage', homepage.view)
 
     super.registerRoutes()
   }

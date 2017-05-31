@@ -10,6 +10,7 @@
 // Marko requires a runtime library to be able to require raw marko files
 import 'marko/node-require'
 
+import * as koaStatic from 'koa-static'
 import * as lasso from 'lasso'
 import * as path from 'path'
 import { createGzip } from 'zlib'
@@ -68,6 +69,28 @@ export function catchError (server: Server) {
 }
 
 /**
+ * assets
+ * Serves a public folder
+ *
+ * @param {Server} server - The server that throws errors
+ * @param {string} folder - The folder to serve from
+ * @return {Function} - A middleware function
+ */
+export function assets (server: Server, folder: string) {
+  const maxage = (server.config.get('environment', 'production') === 'production') ? 31536000 : 0
+
+  return koaStatic(folder, {
+    defer: false,
+    extensions: false,
+    gzip: true,
+    hidden: false,
+    index: false,
+    maxage
+  })
+}
+
+
+/**
  * render
  * Adds a render function to server context
  *
@@ -83,7 +106,7 @@ export function render (server: Server) {
     minify: isProduction,
     outputDir: path.resolve(__dirname, 'public', 'bundle'),
     plugins: ['lasso-marko'],
-    urlPrefix: path.resolve(__dirname, 'public', 'bundle')
+    urlPrefix: '/bundle'
   })
 
   /**

@@ -1,0 +1,14 @@
+/**
+ * houston/src/client/page/error/index.marko
+ * The html markup for the houston error page
+ */
+
+<include('../../layout/main/index.marko')>
+  <@body>
+    <h1>${ data.status }</h1>
+    <h4>${ data.message }</h4>
+    <if(data.detail)>
+      <pre>${ data.detail }</pre>
+    </if>
+  </@body>
+</include>

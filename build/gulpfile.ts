@@ -28,6 +28,24 @@ gulp.task('clean', () => {
 })
 
 /**
+ * copy
+ * Copies over files that do not need to be built, but must be in project folder
+ *
+ * @return {stream} - A gulp task
+ */
+gulp.task('copy', () => {
+  const src = path.resolve(common.paths.src)
+  const dest = path.resolve(common.paths.dest)
+
+  return gulp.src([
+    path.resolve(src, 'client', '**', '*.json'),
+    path.resolve(src, 'client', '**', '*.marko'),
+    path.resolve(src, 'public', '**', '*')
+  ], { base: src })
+    .pipe(gulp.dest(dest))
+})
+
+/**
  * typescript
  * Builds all typescript files into regular javascript files
  *
@@ -54,7 +72,7 @@ gulp.task('typescript', () => {
  *
  * @return {stream} - A gulp task
  */
-gulp.task('build', gulp.series('clean', gulp.parallel('typescript')))
+gulp.task('build', gulp.series('clean', gulp.parallel('copy', 'typescript')))
 
 /**
  * watch

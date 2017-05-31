@@ -94,7 +94,7 @@ export class Server {
 
     this.router.all('*', (ctx) => {
       if (ctx.status === 404 && ctx.body == null) {
-        throw new ServerError('Endpoint Not Found', 404)
+        throw new ServerError('Endpoint Not Found', 404, ctx.url)
       }
     })
   }

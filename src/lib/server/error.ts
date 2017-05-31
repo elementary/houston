@@ -14,11 +14,13 @@
  *
  * @property {boolean} expose - If this error should be sent to the client
  * @property {number} status - The HTTP status code
+ * @property {string} [url] - The url the error occured on
  */
 export class ServerError extends Error {
 
   public expose = true
   public status: number
+  public url?: string
 
   /**
    * Creates a new ServerError
@@ -26,10 +28,11 @@ export class ServerError extends Error {
    * @param {string} message - The message to be sent to the client.
    * @param {number} status - The Http status code
    */
-  constructor (message: string, status = 500) {
+  constructor (message: string, status = 500, url?: string) {
     super(message)
 
     this.status = status
+    this.url = url
   }
 }
 

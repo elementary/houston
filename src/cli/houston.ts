@@ -11,11 +11,13 @@ import * as yargs from 'yargs'
 import { getProgramConfig } from '../lib/config/loader'
 
 import * as api from './api'
+import * as client from './client'
 import * as migrate from './migrate'
 import * as repo from './repo'
 import * as seed from './seed'
 
 yargs.command(api, api.describe, api.builder)
+yargs.command(client, client.describe, client.builder)
 yargs.command(migrate, migrate.describe, migrate.builder)
 yargs.command(repo, repo.describe, repo.builder)
 yargs.command(seed, seed.describe)

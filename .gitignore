@@ -3,6 +3,7 @@
 *.tmp
 
 # Application files
+/.cache
 /config*
 /coverage/
 /dest/
