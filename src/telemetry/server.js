@@ -10,15 +10,15 @@
  * @exports {Function} handleMessage - Adds package download information to database
  */
 
+import dgram from 'dgram'
 import path from 'path'
 import semver from 'semver'
-import syslogd from 'syslogd'
 
 import Log from 'lib/log'
 import Project from 'lib/database/project'
 
 const log = new Log('telemetry')
-const server = syslogd(handleMessage)
+const server = dgram.createSocket('udp4')
 
 /**
  * parseMessage
@@ -36,15 +36,16 @@ const server = syslogd(handleMessage)
  * @returns {String} time - The amount of time it took to download
  */
 export function parseMessage (message) {
-  const arr = message.split('|')
+  const arr = message.split(': ')[1].split('|')
 
   return {
     client: arr[0],
-    status: arr[1],
+    status: Number(arr[1]),
     path: arr[2],
     file: path.basename(arr[2]),
     ext: path.extname(arr[2]),
     bytes: Number(arr[3]),
+    agent: arr[4],
     time: Number(arr[5])
   }
 }
@@ -56,12 +57,12 @@ export function parseMessage (message) {
  * TODO: we might want to consider adding an IP origin filter to avoid bad eggs
  * TODO: add some unique test, probably with client's ip address
  *
- * @param {Object} message - syslog message
+ * @param {Buffer} buf - syslog message
  *
  * @return {Void}
  */
-export async function handleMessage (message) {
-  const data = parseMessage(message.msg)
+export async function handleMessage (buf) {
+  const data = parseMessage(buf.toString('utf8'))
   const [name, version] = data.file.split('_')
 
   if (data.ext !== '.deb') {
@@ -69,7 +70,7 @@ export async function handleMessage (message) {
     return
   }
 
-  if (data.status !== 'OK') {
+  if (data.status >= 400) {
     log.debug('Download did not complete')
     return
   }
@@ -95,16 +96,18 @@ export async function handleMessage (message) {
   log.debug(`Added download of ${name}#${version}`)
 }
 
-server.server.on('listening', () => {
-  log.info(`Listening on ${server.port}`)
+server.on('message', (msg) => handleMessage(msg))
+
+server.on('listening', () => {
+  log.info(`Listening`)
 })
 
-server.server.on('error', (err) => {
+server.on('error', (err) => {
   log.error(err)
   log.report(err)
 })
 
-server.server.on('close', () => {
+server.on('close', () => {
   log.debug('Closing')
 })
 
