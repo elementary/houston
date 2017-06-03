@@ -80,6 +80,8 @@ export async function handleMessage (buf) {
     return
   }
 
+  log.debug(`Download ping for "${name}" and "${version}"`)
+
   const project = await Project.findOne({ name })
   if (project == null) {
     log.debug('Project not found')
