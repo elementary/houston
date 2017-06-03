@@ -30,10 +30,10 @@ test.after((t) => {
 test('parseMessage can parse a nginx message string', (t) => {
   const parseMessage = telemetry.parseMessage
 
-  const one = parseMessage('192.168.1.1|OK|/apphub/dists/xenial/main/appstream/Components-amd64.yml.gz|163|chrome|128')
+  const one = parseMessage('test nginx: 192.168.1.1|200|/apphub/dists/xenial/main/appstream/Components-amd64.yml.gz|163|chrome|128')
 
   t.is(one.client, '192.168.1.1')
-  t.is(one.status, 'OK')
+  t.is(one.status, 200)
   t.is(one.path, '/apphub/dists/xenial/main/appstream/Components-amd64.yml.gz')
   t.is(one.file, 'Components-amd64.yml.gz')
   t.is(one.ext, '.gz')
@@ -57,9 +57,10 @@ test('increments download number for release', async (t) => {
     }]
   })
 
-  const msg = '192.168.1.1|OK|/houston/pool/main/c/com.github.elementary.houston/com.github.elementary.houston_0.0.1_amd64.deb|163|chrome|128'
+  const msg = 'test nginx: 192.168.1.1|200|/houston/pool/main/c/com.github.elementary.houston/com.github.elementary.houston_0.0.1_amd64.deb|163|chrome|128'
 
-  await telemetry.handleMessage({ msg })
+  const buf = Buffer.from(msg, 'utf8')
+  await telemetry.handleMessage(buf)
 
   const downloads = await Download.find({ release: project.releases[0]._id })
 
