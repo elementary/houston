@@ -5,8 +5,10 @@
  * @exports {Object} - Koa router
  */
 
+import moment from 'moment'
 import Router from 'koa-router'
 
+import Download from 'lib/database/download'
 import Project from 'lib/database/project'
 
 const route = new Router({
@@ -79,6 +81,38 @@ route.get('/project', async (ctx) => {
 
   ctx.status = 200
   ctx.body = { data: projects.map((p) => p.name) }
+
+  return
+})
+
+/**
+ * GET /api/newest/downloads
+ * Finds the projects with the most downloads in the current day.
+ */
+route.get('/downloads', async (ctx) => {
+  const currentDay = moment.utc().get('date')
+
+  const results = await Download.aggregate([
+    { $match: { type: 'month' } },
+    { $lookup: {
+      from: 'projects',
+      localField: 'release',
+      foreignField: 'releases._id',
+      as: 'project'
+    }},
+    { $group: {
+      _id: '$project._id',
+      'name': { $first: '$project.name' },
+      'count': { $sum: `$month.${currentDay}` },
+      'total': { $sum: '$current.total' }
+    }},
+    { $sort: { 'count': -1, 'total': -1 } },
+    { $match: { 'name': { $size: 1 } } }, // Avoid deleted projects
+    { $limit: 10 }
+  ])
+
+  ctx.status = 200
+  ctx.body = { data: results.map((p) => p.name[0]) }
 
   return
 })
