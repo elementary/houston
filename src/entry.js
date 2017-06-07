@@ -55,13 +55,20 @@ program
   .action((opts) => {
     const telemetry = require('./telemetry/server').default
 
-    telemetry.server.on('error', (err) => {
+    telemetry.on('error', (err) => {
       console.error(err)
       process.exit(1)
     })
 
     database.connect(config.database, { server: { auto_reconnect: true } })
-    telemetry.listen(opts.port)
+    telemetry.bind({
+      port: opts.port
+    }, (err) => {
+      if (err != null) {
+        console.error(err)
+        process.exit(1)
+      }
+    })
   })
 
 program
