@@ -3,6 +3,8 @@
  * Entry point for repository syslog server. I whould highly recommend reading
  * some of the code from the node syslogd package and the dgram docs.
  *
+ * TODO: We should cache download count for a while so we can mass increment
+ *
  * @exports {Class} repo - A repository syslog server
  */
 
@@ -46,6 +48,46 @@ export class Repo {
   }
 
   /**
+   * onError
+   * Handles a download message from web server
+   *
+   * @param {Error} err - An error that occured
+   *
+   * @return {void}
+   */
+  public onError (err: Error): void {
+    this.log.error('Internal server error', err)
+  }
+
+  /**
+   * onMessage
+   * Handles a download message from web server
+   *
+   * @async
+   * @param {Buffer} buf - The message sent from the web server
+   *
+   * @return {void}
+   */
+  public async onMessage (buf: Buffer): Promise<void> {
+    const message = buf.toString('utf8').split(': ')[1]
+
+    // Possibly a broken message?
+    if (message == null || message === '') {
+      return
+    }
+
+    // Format: ip address | status code | path | bytes | user agent | time
+    const [, status] = message.split('|')
+
+    // Trying to get a file that errored, or does not exist.
+    if (Number(status) >= 400) {
+      return
+    }
+
+    // TODO: Increment package download count
+  }
+
+  /**
    * listen
    * Starts the repository syslogd server
    *
@@ -58,6 +100,9 @@ export class Repo {
   public async listen (port = 0): Promise<this> {
     const env = this.config.get('environment')
     this.server = dgram.createSocket('udp4')
+
+    this.server.on('error', (err) => this.onError(err))
+    this.server.on('message', (msg) => this.onMessage(msg))
 
     try {
       await new Promise((resolve, reject) => {
