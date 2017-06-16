@@ -78,22 +78,6 @@ export async function mkdirp (p: string) {
 export async function rmp (p: string) {
   const folder = path.normalize(p)
 
-  const contents = await new Promise<string[]>((resolve, reject) => {
-    fs.readdir(folder, (err, files) => {
-      if (err != null) {
-        return reject(err)
-      }
-
-      return resolve(files)
-    })
-  })
-
-  const promises = contents.map((contentPath) => {
-    return rmp(path.resolve(folder, contentPath))
-  })
-
-  await Promise.all(promises)
-
   const stat = await new Promise<fs.Stats>((resolve, reject) => {
     fs.stat(folder, (err, status) => {
       if (err != null) {
@@ -104,9 +88,9 @@ export async function rmp (p: string) {
     })
   })
 
-  if (stat.isDirectory()) {
-    await new Promise((resolve, reject) => {
-      fs.rmdir(folder, (err) => {
+  if (stat.isFile()) {
+    return new Promise((resolve, reject) => {
+      fs.unlink(folder, (err) => {
         if (err != null) {
           return reject(err)
         }
@@ -116,9 +100,25 @@ export async function rmp (p: string) {
     })
   }
 
-  if (stat.isFile()) {
+  if (stat.isDirectory()) {
+    const contents = await new Promise<string[]>((resolve, reject) => {
+      fs.readdir(folder, (err, files) => {
+        if (err != null) {
+          return reject(err)
+        }
+
+        return resolve(files)
+      })
+    })
+
+    const promises = contents.map((contentPath) => {
+      return rmp(path.resolve(folder, contentPath))
+    })
+
+    await Promise.all(promises)
+
     await new Promise((resolve, reject) => {
-      fs.unlink(folder, (err) => {
+      fs.rmdir(folder, (err) => {
         if (err != null) {
           return reject(err)
         }

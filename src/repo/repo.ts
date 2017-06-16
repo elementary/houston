@@ -5,7 +5,7 @@
  *
  * TODO: We should cache download count for a while so we can mass increment
  *
- * @exports {Class} repo - A repository syslog server
+ * @exports {Class} Repo - A repository syslog server
  */
 
 import * as dgram from 'dgram'
