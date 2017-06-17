@@ -36,7 +36,9 @@ mongoose.connection.on('open', () => {
 mongoose.connection.on('close', () => {
   log.warn('Disconnected to database')
 
-  process.exit(1)
+  if (process.env.NODE_ENV !== 'test') {
+    process.exit(1)
+  }
 })
 
 export default mongoose
