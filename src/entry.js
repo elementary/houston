@@ -21,6 +21,16 @@ import config from 'lib/config'
 import database from 'lib/database/connection'
 import Pipeline from 'flightcheck/pipeline'
 
+const databaseOptions = {
+  server: {
+    socketOptions: {
+      autoReconnect: true,
+      connectTimeoutMS: 30000,
+      keepAlive: 1
+    }
+  }
+}
+
 program
   .command('flightcheck')
   .description('starts flightcheck to listen for requests from houston')
@@ -35,7 +45,7 @@ program
   .action((opts) => {
     const app = require('./houston').default
 
-    database.connect(config.database, { server: { auto_reconnect: true } })
+    database.connect(config.database, databaseOptions)
     app.listen(opts.port)
   })
 
@@ -60,7 +70,7 @@ program
       process.exit(1)
     })
 
-    database.connect(config.database, { server: { auto_reconnect: true } })
+    database.connect(config.database, databaseOptions)
     telemetry.bind({
       port: opts.port
     }, (err) => {
