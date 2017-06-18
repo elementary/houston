@@ -158,15 +158,16 @@ schema.virtual('release').get(function () {
     const cleanA = semver.clean(a.version)
     const cleanB = semver.clean(b.version)
 
-    if (cleanA == null) return -1
-    if (cleanB == null) return 1
+    if (cleanA == null) return 1
+    if (cleanB == null) return -1
 
-    return semver.compare(cleanA, cleanB)
+    return semver.compare(cleanB, cleanA)
   })
 
   return {
-    latest: releases[releases.length - 1],
-    oldest: releases[0]
+    latest: releases[0],
+    current: releases.find((release) => (release.date.published != null)),
+    oldest: releases[releases.length - 1]
   }
 })
 

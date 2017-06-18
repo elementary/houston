@@ -1,4 +1,4 @@
-mixin project(project, status, stripe)
+mixin project(project, status, review)
   .repo
     .repo__container
       div.repo__icon
@@ -11,7 +11,10 @@ mixin project(project, status, stripe)
           p #{project.github.fullName} #{project.release.latest.version}
         else
           p #{project.github.fullName}
-        p.subtext: a(href="https://github.com/" + project.github.fullName, target="_blank")= project.name
+        if review && project.release.current
+          p.subtext: a(href="https://github.com/" + project.github.fullName + "/compare/"+ project.release.current.version + "..." + project.release.latest.version) #{project.name} #{project.release.current.version} to #{project.release.latest.version}
+        else
+          p.subtext: a(href="https://github.com/" + project.github.fullName, target="_blank")= project.name
       div.repo__action
         if status === true
           if project.status === 'NEW'
@@ -34,5 +37,5 @@ mixin project(project, status, stripe)
           if project.status === 'ERROR'
             include /partials/status/error
 
-        if stripe === true
+        if review === false
           include /partials/stripe
