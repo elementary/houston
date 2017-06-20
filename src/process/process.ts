@@ -22,7 +22,7 @@ export class Process extends EventEmitter {
    *
    * @var {string}
    */
-  protected static tempDir = `${os.tmpdir()}/houston/`
+  protected static tempDir = path.resolve(os.tmpdir(), 'houston')
 
   /**
    * config
@@ -48,6 +48,12 @@ export class Process extends EventEmitter {
    */
   protected workspace?: string
 
+  /**
+   * Creates a new worker process
+   *
+   * @param {Config} config - The configuration to use
+   * @param {Repository} repository - The repository to process on
+   */
   constructor (config: Config, repository: Repository) {
     super()
 
@@ -64,9 +70,12 @@ export class Process extends EventEmitter {
    */
   public async setup (): Promise<void> {
     if (this.workspace == null) {
-      this.workspace = path.resolve(`${Process.tempDir}/${uuid()}`)
+      this.workspace = path.resolve(Process.tempDir, uuid())
 
-      await mkdirp(this.workspace)
+      const repositoryFolder = path.resolve(this.workspace, 'repository')
+
+      await mkdirp(repositoryFolder)
+      await this.repository.clone(repositoryFolder)
     }
   }
 

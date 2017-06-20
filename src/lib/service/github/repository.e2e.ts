@@ -10,13 +10,19 @@ import * as uuid from 'uuid/v4'
 import * as fsHelper from '../../helper/fs'
 import { Repository } from './repository'
 
+const testingDir = path.resolve(os.tmpdir(), 'houston-test', 'process', uuid())
+
 // Extend the default timeout time due to long running tests
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
+
+afterAll(async() => {
+  await fsHelper.rmr(testingDir)
+})
 
 test('can clone a repository', async () => {
   const repo = new Repository('elementary', 'houston')
 
-  const folder = path.resolve(os.tmpdir(), 'houston-test', 'service', 'github', uuid())
+  const folder = path.resolve(testingDir, uuid())
   await fsHelper.mkdirp(folder)
 
   await repo.clone(folder)
@@ -30,7 +36,7 @@ test('can clone a repository', async () => {
 test('can clone a repository with tag', async () => {
   const repo = new Repository('elementary', 'houston')
 
-  const folder = path.resolve(os.tmpdir(), 'houston-test', 'service', 'github', uuid())
+  const folder = path.resolve(testingDir, uuid())
   await fsHelper.mkdirp(folder)
 
   await repo.clone(folder, 'refs/tags/0.2.0')

@@ -1,12 +1,10 @@
 /**
  * houston/src/lib/service/base/repository.ts
- * A repository interface.
- *
- * @return {interface} Repository
+ * A generaic repository interface
  */
 
 export interface Repository {
   url: string
 
-  clone: (p: string, branch?: string) => Promise<void>
+  clone: (p: string, reference?: string) => Promise<void>
 }
