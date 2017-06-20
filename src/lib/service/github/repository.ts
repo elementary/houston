@@ -36,12 +36,12 @@ export class Repository implements RepositoryInterface {
   public auth?: string
 
   /**
-   * branch
-   * The default branch in the repository. 99% of the time it's master.
+   * reference
+   * The reference to branch or tag.
    *
    * @var {string}
    */
-  public branch = 'master'
+  public reference = 'refs/heads/master'
 
   /**
    * Creates a new GitHub Repository
@@ -106,14 +106,13 @@ export class Repository implements RepositoryInterface {
    *
    * @async
    * @param {string} p - The path to clone to
-   * @param {string} [branch] - The branch to clone
+   * @param {string} [reference] - The branch to clone
    * @return {void}
    */
-  public async clone (p: string, branch = this.branch): Promise<void> {
+  public async clone (p: string, reference = this.reference): Promise<void> {
     const repo = await Git.Clone(this.url, p)
+    const ref = await Git.Reference.lookup(repo, reference)
 
-    // TODO: checkout branch and verify
-
-    return
+    await repo.checkoutRef(ref)
   }
 }

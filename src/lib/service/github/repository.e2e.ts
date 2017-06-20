@@ -26,3 +26,22 @@ test('can clone a repository', async () => {
 
   await fsHelper.rmp(folder)
 })
+
+test('can clone a repository with tag', async () => {
+  const repo = new Repository('elementary', 'houston')
+
+  const folder = path.resolve(os.tmpdir(), 'houston-test', 'service', 'github', uuid())
+  await fsHelper.mkdirp(folder)
+
+  await repo.clone(folder, 'refs/tags/0.2.0')
+
+  const exists = await fsHelper.folderExists(folder)
+  expect(exists).toBeTruthy()
+
+  // tslint:disable-next-line non-literal-require
+  const pkg = require(path.resolve(folder, 'package.json'))
+  expect(pkg).toHaveProperty('version')
+  expect(pkg.version).toEqual('0.1.8')
+
+  await fsHelper.rmp(folder)
+})
