@@ -10,7 +10,7 @@ import db from './connection'
 
 // AGREEMENTDATE is the date the current TOS was created
 // NOTE: JavaScript's month starts at zero
-const AGREEMENTDATE = new Date(2017, 0, 13)
+const AGREEMENTDATE = new Date(2017, 5, 26)
 
 /**
  * @type {object} - User database schema
