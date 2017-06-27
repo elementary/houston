@@ -6,12 +6,12 @@
  */
 
 import { EventEmitter } from 'events'
+import * as fs from 'fs-extra'
 import * as os from 'os'
 import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
 import { Config } from '../lib/config/class'
-import { mkdirp, rmp } from '../lib/helper/fs'
 import { Repository } from '../lib/service/base/repository'
 
 export class Process extends EventEmitter {
@@ -23,6 +23,14 @@ export class Process extends EventEmitter {
    * @var {string}
    */
   protected static tempDir = path.resolve(os.tmpdir(), 'houston')
+
+  /**
+   * workspace
+   * The directory that contains the working files
+   *
+   * @var {string}
+   */
+  public workspace?: string
 
   /**
    * config
@@ -39,14 +47,6 @@ export class Process extends EventEmitter {
    * @var {Repository}
    */
   protected repository: Repository
-
-  /**
-   * workspace
-   * The directory that contains the working files
-   *
-   * @var {string}
-   */
-  protected workspace?: string
 
   /**
    * Creates a new worker process
@@ -74,7 +74,7 @@ export class Process extends EventEmitter {
 
       const repositoryFolder = path.resolve(this.workspace, 'repository')
 
-      await mkdirp(repositoryFolder)
+      await fs.mkdirs(repositoryFolder)
       await this.repository.clone(repositoryFolder)
     }
   }
@@ -88,9 +88,21 @@ export class Process extends EventEmitter {
    */
   public async teardown (): Promise<void> {
     if (this.workspace != null) {
-      await rmp(this.workspace)
+      await fs.remove(this.workspace)
 
       this.workspace = undefined
     }
+  }
+
+  /**
+   * run
+   * Runs a task in the current process
+   *
+   * @param {Task} task - The dot notation of the task to run
+   * @param {string} [workspace] - The workspace to run the task in
+   * @return {*}
+   */
+  public async newTask (task, workspace = this.workspace) {
+    return new task(this, workspace)
   }
 }

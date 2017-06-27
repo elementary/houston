@@ -3,11 +3,11 @@
  * Runs some repositories through tests for end to end testing
  */
 
+import * as fs from 'fs-extra'
 import * as os from 'os'
 import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
-import * as fsHelper from '../lib/helper/fs'
 import { Repository as GithubRepository } from '../lib/service/github/repository'
 import { Process } from './process'
 
@@ -27,7 +27,7 @@ beforeEach(async () => {
 })
 
 afterAll(async () => {
-  await fsHelper.rmr(testingDir)
+  await fs.remove(testingDir)
 })
 
 test('needle-and-thread/vocal passes release process', async () => {

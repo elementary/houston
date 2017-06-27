@@ -18,6 +18,7 @@
     "coverage": "jest --coverage"
   },
   "dependencies": {
+    "fs-extra": "^3.0.1",
     "knex": "^0.13.0",
     "koa": "^2.2.0",
     "koa-compress": "^2.0.0",
