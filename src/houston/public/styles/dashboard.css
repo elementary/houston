@@ -3,6 +3,11 @@
 * This file is part of houston.elementary.io *
 *********************************************/
 
+#content-container {
+    display: flex;
+    flex-direction: column;
+}
+
 .alert h3,
 .alert p {
     margin: 12px 0;
@@ -56,7 +61,7 @@
 
 #gitter {
     align-self: flex-end;
-    margin: 0 16px;
+    margin: auto 16px 8px;
 }
 
 #gitter .fab {
