@@ -6,7 +6,6 @@
  */
 
 import Cache from 'node-cache'
-import moment from 'moment'
 import Router from 'koa-router'
 
 import Download from 'lib/database/download'
