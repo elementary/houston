@@ -13,6 +13,7 @@
  * @exports {Function} generateToken - Generates GitHub authentication token
  * @exports {Function} getRepo - Fetches a repository by GitHub ID
  * @exports {Function} getRepos - Fetches all repos the token has access to
+ * @exports {Function} getReposForUser - Fetches all repos for a given User
  * @exports {Function} getReleases - Fetches all releases a repo has
  * @exports {Function} getPermission - Checks callaborator status on repository
  * @exports {Function} getLabel - Returns GitHub label for repository
@@ -34,8 +35,13 @@ import * as error from 'lib/error/service'
 import * as service from './index'
 import config from 'lib/config'
 import Log from 'lib/log'
+import Project from 'lib/database/project'
+import User from 'lib/database/user'
 
 const log = new Log('service:github')
+
+// Cache GitHub user repos for 1 hours
+const GITHUB_CACHE_TIME = 1 * 60 * 60 * 60 * 1000
 
 const api = domain('https://api.github.com')
 .use((req) => {
@@ -119,7 +125,7 @@ const errorCheck = (err: Object, res: ?Object): error.ServiceError => {
       return new error.ServiceRequestError('GitHub', res.status, res.body.message)
     }
 
-    log.error(error.toString())
+    log.error(err.toString())
     return new error.ServiceRequestError('GitHub', res.status, err.toString())
   }
 
@@ -168,7 +174,10 @@ export function castProject (project: Object, installation: ?Number): Object {
  * @returns {Object} - a mapped release object
  */
 export function castRelease (release: Object): Object {
-  const version = semver.valid(release.tag_name)
+  const version = semver.valid(semver.clean(release.tag_name))
+  if (version == null) {
+    throw new error.ServiceError('GitHub', 'Invalid release version')
+  }
 
   return {
     version,
@@ -302,29 +311,55 @@ export function getRepo (owner: string, repo: string, token: string): Promise<Ob
 }
 
 /**
- * getRepos
- * Fetches all repos the token has access to
+ * getReposForUser
+ * Fetches all repos for a given User
  *
  * @see https://developer.github.com/v3/repos/#list-user-repositories
  *
- * @param {String} token - GitHub authentication token
- * @param {String} [sort] - what to sort the repos by
+ * @param {User} user - User to find repositories for
  *
  * @async
  * @throws {GitHubError} - on an error
  * @returns {Object}[] - a list of mapped GitHub projects
  */
-export function getRepos (token: string, sort: string = 'pushed'): Promise<Array<Object>> {
+export async function getReposForUser (user: User): Promise<Array<Object>> {
+  // Check user projects cache date
+  if (user.github != null && user.github.cache != null) {
+    if (moment().diff(user.github.cache) <= GITHUB_CACHE_TIME) {
+      if (user.github.projects != null && user.github.projects.length > 0) {
+        // DEPRECATED let the old object storage format rest in peace.
+        if (typeof user.github.projects[0] === 'number') {
+          return Project.find({
+            'github.id': { $in: user.github.projects }
+          })
+        }
+      }
+    }
+  }
+
+  if (user.github.access == null) {
+    throw new error.ServiceError('GitHub', 'Unable to grab repositories for non GitHub user')
+  }
+
   const req = api
   .get('/user/repos')
-  .set('Authorization', `token ${token}`)
-  .query({ sort })
+  .set('Authorization', `token ${user.github.access}`)
+  .query({
+    sort: 'pushed'
+  })
 
-  return pagination(req)
+  const projects = await pagination(req)
   .then((res) => res.body.map((project) => castProject(project)))
   .catch((err, res) => {
     throw errorCheck(err, res)
   })
+
+  await user.update({
+    'github.cache': new Date(),
+    'github.projects': projects.map((project) => project.github.id)
+  })
+
+  return projects
 }
 
 /**
@@ -348,7 +383,19 @@ export function getReleases (owner: string, repo: string, token: ?string): Promi
   if (token != null) req = req.set('Authorization', `token ${token}`)
 
   return pagination(req)
-  .then((res) => res.body.map((release) => castRelease(release)))
+  .then((res) => {
+    const releases = []
+
+    res.body.forEach((release) => {
+      try {
+        releases.push(castRelease(release))
+      } catch (e) {
+        log.error(e)
+      }
+    })
+
+    return releases
+  })
   .catch((err, res) => {
     throw errorCheck(err, res)
   })

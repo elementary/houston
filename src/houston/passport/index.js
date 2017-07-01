@@ -10,6 +10,7 @@ import passport from 'koa-passport'
 import Router from 'koa-router'
 
 import * as github from './github'
+import * as policy from 'houston/policy'
 import * as stripe from './stripe'
 import Log from 'lib/log'
 import User from 'lib/database/user'
@@ -47,7 +48,18 @@ export const router = new Router({
   prefix: '/auth'
 })
 
-router.get('/logout', (ctx) => {
+router.get('/logout', policy.isRole('USER'), async (ctx) => {
+  try {
+    await User.findByIdAndUpdate(ctx.state.user._id, {
+      $set: {
+        'github.cache': null,
+        'github.projects': []
+      }
+    })
+  } catch (err) {
+    log.warn('Unable to clear cache for user', err)
+  }
+
   ctx.logout()
   ctx.redirect('/')
 })

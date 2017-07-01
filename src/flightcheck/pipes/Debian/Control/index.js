@@ -83,11 +83,7 @@ export default class DebianControl extends Pipe {
 
     try {
       if (lintedControl['Source'] !== this.pipeline.build.name) {
-        if (lintedControl['Source'].split('.').length - 1 < 3) {
-          thr('Package is not valid reverse domain name scheme')
-        } else {
-          thr(`Package value should be "${this.pipeline.build.name}"`)
-        }
+        thr(`Source is not correct. It should be "${this.pipeline.build.name}"`)
 
         lintedControl['Source'] = this.pipeline.build.name
       }
@@ -96,6 +92,12 @@ export default class DebianControl extends Pipe {
         thr('Maintainer has no value', true)
       } else if (!/^.*\s<.*>$/.test(lintedControl['Maintainer'])) {
         thr('Maintainer is not a valid value. Must be in the form of "Maintainer Name <maintainer@email.com>"')
+      }
+
+      if (lintedControl['Package'] !== this.pipeline.build.name) {
+        thr(`Package is not correct. It should be "${this.pipeline.build.name}"`)
+
+        lintedControl['Package'] = this.pipeline.build.name
       }
     } catch (e) {
       return this.log('error', 'Debian/Control/error.md', errors)

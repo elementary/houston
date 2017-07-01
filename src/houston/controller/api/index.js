@@ -13,6 +13,7 @@ import { ControllerError } from 'lib/error/controller'
 import { toAPI } from './error'
 import config from 'lib/config'
 
+import list from './list'
 import payment from './payment'
 
 const route = new Router({
@@ -79,6 +80,7 @@ route.use((ctx, next) => {
 })
 
 // Load all api paths here
+route.use(list.routes(), list.allowedMethods())
 route.use(payment.routes(), payment.allowedMethods())
 
 /**

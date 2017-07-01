@@ -89,26 +89,25 @@ const getRights = async function (user: Object): Promise<Object> {
  * @returns {Object} - database saved user object
  */
 const upsertUser = async function (access: string, refresh: string, profile: Object): Promise<Object> {
-  let user = await User.findOne({
-    'github.id': profile.id
-  })
-
-  if (user == null) {
-    const mappedUser = {
-      username: profile.username,
-      email: null,
-      avatar: null,
-      'github.id': profile.id,
-      'github.access': access,
-      'github.refresh': refresh,
-      'date.visited': new Date()
-    }
-
-    if (profile.emails != null) mappedUser.email = profile.emails[0].value
-    if (profile.photos != null) mappedUser.avatar = profile.photos[0].value
-
-    user = await User.create(mappedUser)
+  const updatePayload = {
+    username: profile.username,
+    email: null,
+    avatar: null,
+    'github.id': profile.id,
+    'github.access': access,
+    'github.refresh': refresh,
+    'date.visited': new Date()
   }
+
+  if (profile.emails != null) updatePayload.email = profile.emails[0].value
+  if (profile.photos != null) updatePayload.avatar = profile.photos[0].value
+
+  const user = await User.findOneAndUpdate({
+    'github.id': profile.id
+  }, updatePayload, {
+    new: true,
+    upsert: true
+  })
 
   await getRights(user)
   return user

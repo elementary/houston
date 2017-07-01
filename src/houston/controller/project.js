@@ -7,7 +7,7 @@
 
 import Router from 'koa-router'
 
-import * as aptly from 'houston/service/aptly'
+import * as aptly from 'service/aptly'
 import * as error from 'lib/error/controller'
 import * as policy from 'houston/policy'
 import Project from 'lib/database/project'
@@ -22,7 +22,7 @@ const route = new Router({
  *
  * @param {String} project - project name
  */
-route.get('/cycle', policy.isRole('BETA'), policy.isAgreement, async (ctx, next) => {
+route.get('/cycle', policy.isRole('USER'), policy.isAgreement, async (ctx, next) => {
   const project = await Project.findOne({
     name: ctx.params.project
   })
@@ -81,8 +81,11 @@ route.get('/review/:fate', policy.isRole('REVIEW'), async (ctx, next) => {
   const cycle = await release.cycle.latest
 
   if (ctx.params.fate === 'yes') {
-    await aptly.stable(cycle.packages)
-    await cycle.setStatus('FINISH')
+    await Promise.all([
+      aptly.stable(cycle.packages),
+      cycle.setStatus('FINISH'),
+      release.update({ 'date.published': new Date() })
+    ])
   } else {
     await cycle.setStatus('FAIL')
   }

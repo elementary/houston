@@ -1,6 +1,6 @@
 {
   "name": "Houston",
-  "version": "0.3.0",
+  "version": "0.4.1",
   "description": "Backend for AppHub",
   "license": "MIT",
   "main": "build/entry.js",
@@ -40,6 +40,7 @@
     "moment": "^2.17.0",
     "mongoose": "^4.7.0",
     "monq": "^0.3.6",
+    "node-cache": "^4.1.1",
     "nodegit": "^0.16.0",
     "nunjucks": "^3.0.0",
     "oauth": "^0.9.14",
@@ -54,7 +55,6 @@
     "semver": "^5.3.0",
     "style-loader": "^0.13.1",
     "superagent": "^3.0.0",
-    "syslogd": "^1.1.2",
     "webpack": "^2.2.0-rc.0",
     "webpack-stream": "^3.2.0",
     "xml2js": "^0.4.17"
@@ -80,6 +80,7 @@
     "start": "node build/entry.js",
     "flightcheck": "node build/entry.js flightcheck",
     "houston": "node build/entry.js houston",
+    "refuel": "node build/entry.js refuel",
     "telemetry": "node build/entry.js telemetry",
     "build": "gulp build",
     "build:watch": "gulp watch",

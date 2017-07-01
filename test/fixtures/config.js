@@ -27,6 +27,11 @@ module.exports.stripe = {
   public: 'pk_test_c32j0239j9tg8902j3f90238'
 }
 
+module.exports.mandrill = {
+  key: '489we1f5v156a-f78zxg9e',
+  purchaseTemplate: 'app-purchase'
+}
+
 module.exports.rights = {
   beta: 'awesomepeople',
   admin: 213128,

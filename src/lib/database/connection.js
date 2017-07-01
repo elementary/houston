@@ -1,6 +1,7 @@
 /**
  * lib/database.js
  * Sets up database connection
+ * TODO: turn this into a class for easier handling of errors and things
  *
  * @exports {Object} - initialized mongoose object
  */
@@ -20,7 +21,7 @@ mongoose.connection.on('error', (msg) => {
   log.report(msg)
 })
 
-mongoose.connection.once('open', () => {
+mongoose.connection.on('open', () => {
   log.info('Connected to database')
 
   const downloads = mongoose.connection.db.collection('downloads')
@@ -32,6 +33,12 @@ mongoose.connection.once('open', () => {
   })
 })
 
-mongoose.connection.once('close', () => log.warn('Disconnected to database'))
+mongoose.connection.on('close', () => {
+  log.warn('Disconnected to database')
+
+  if (process.env.NODE_ENV !== 'test') {
+    process.exit(1)
+  }
+})
 
 export default mongoose

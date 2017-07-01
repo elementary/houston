@@ -21,6 +21,16 @@ import config from 'lib/config'
 import database from 'lib/database/connection'
 import Pipeline from 'flightcheck/pipeline'
 
+const databaseOptions = {
+  server: {
+    socketOptions: {
+      autoReconnect: true,
+      connectTimeoutMS: 30000,
+      keepAlive: 1
+    }
+  }
+}
+
 program
   .command('flightcheck')
   .description('starts flightcheck to listen for requests from houston')
@@ -35,8 +45,17 @@ program
   .action((opts) => {
     const app = require('./houston').default
 
-    database.connect(config.database)
+    database.connect(config.database, databaseOptions)
     app.listen(opts.port)
+  })
+
+program
+  .command('refuel')
+  .description('starts the process for updating the stable repository')
+  .action((opts) => {
+    const refuel = require('./refuel')
+
+    refuel.start()
   })
 
 program
@@ -46,12 +65,20 @@ program
   .action((opts) => {
     const telemetry = require('./telemetry/server').default
 
-    telemetry.server.on('error', (err) => {
+    telemetry.on('error', (err) => {
       console.error(err)
       process.exit(1)
     })
 
-    telemetry.listen(opts.port)
+    database.connect(config.database, databaseOptions)
+    telemetry.bind({
+      port: opts.port
+    }, (err) => {
+      if (err != null) {
+        console.error(err)
+        process.exit(1)
+      }
+    })
   })
 
 program

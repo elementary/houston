@@ -1,6 +1,6 @@
 Create a readable Debian control file
 
-AppHub was unable to parse your `debian/control` file. Please check it for
+AppCenter Dashboard was unable to parse your `debian/control` file. Please check it for
 formatting errors.
 
 Here is the error we received when trying to parse it:

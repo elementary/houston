@@ -154,11 +154,20 @@ schema.virtual('github.fullName').get(function () {
  * }
  */
 schema.virtual('release').get(function () {
-  const releases = this.releases.sort((a, b) => semver.compare(a.version, b.version))
+  const releases = this.releases.sort((a, b) => {
+    const cleanA = semver.clean(a.version)
+    const cleanB = semver.clean(b.version)
+
+    if (cleanA == null) return 1
+    if (cleanB == null) return -1
+
+    return semver.compare(cleanB, cleanA)
+  })
 
   return {
-    latest: releases[releases.length - 1],
-    oldest: releases[0]
+    latest: releases[0],
+    current: releases.find((release) => (release.date.published != null)),
+    oldest: releases[releases.length - 1]
   }
 })
 
@@ -299,7 +308,7 @@ schema.methods.createCycle = async function (type) {
 
   if (type === 'RELEASE') return this.release.latest.createCycle(type)
 
-  const cycle = await db.model('cycle').create({
+  const cycleData = {
     project: this._id,
     installation: this.github.installation,
     repo: this.repo,
@@ -308,8 +317,14 @@ schema.methods.createCycle = async function (type) {
     version: this.release.latest.version,
     type,
     changelog: await this.release.latest.createChangelog(),
-    stripe: this.stripe.public
-  })
+    stripe: undefined
+  }
+
+  if (this.stripe.enabled) {
+    cycleData.stripe = this.stripe.public
+  }
+
+  const cycle = await db.model('cycle').create(cycleData)
 
   await this.update({ $addToSet: { 'cycles': cycle._id } })
 

@@ -1,6 +1,7 @@
 /**
  * flightcheck/pipes/Debian/Changelog/index.js
  * Creates a debian/changelog file for a project
+ * @flow
  *
  * @exports {Class} - Creates the debian changelog
  */
@@ -10,7 +11,69 @@ import semver from 'semver'
 
 import File from 'flightcheck/file'
 import Pipe from 'flightcheck/pipes/pipe'
+import Pipeline from 'flightcheck/pipeline'
 import render from 'lib/render'
+
+/**
+ * lintChangelogVersion
+ * Lints a changelog version for inaccurate data
+ *
+ * @param {Object} changelog - A changelog version
+ * @return {Boolean} True if the changelog version has an error
+ */
+const lintChangelogVersion = (changelog: Object): Array<Error> => {
+  const errors = []
+
+  if (changelog.project == null) {
+    errors.push(new Error('Changelog project not found'))
+  }
+
+  if (changelog.version == null) {
+    errors.push(new Error('Changelog version not found'))
+  } else if (semver.clean(changelog.version) == null) {
+    errors.push(new Error('Changelog version it valid SemVer'))
+  }
+
+  if (changelog.author == null) {
+    errors.push(new Error('Changelog author not found'))
+  }
+
+  if (changelog.changes == null || typeof changelog.changes !== 'object') {
+    errors.push(new Error('Invalid changelog changes'))
+  } else if (changelog.changes.length < 1) {
+    errors.push(new Error('No changelog changes found'))
+  }
+
+  if (changelog.date == null) {
+    errors.push(new Error('Changelog date is invalid'))
+  }
+
+  return errors
+}
+
+/**
+ * fixChangelogVersion
+ * Adds missing data to changelog version
+ *
+ * @param {Object} changelog - A changelog version
+ * @param {Object} build - A pipeline build
+ * @param {String} distribution - The distribution for the package
+ * @return {Object}
+ */
+const fixChangelogVersion = (changelog: Object, build: Object, distribution: string): Object => {
+  const change = Object.assign({}, {
+    project: build.name,
+    version: build.version,
+    distribution,
+    author: 'elementaryBot',
+    changes: ['version bump'],
+    date: new Date()
+  }, changelog)
+
+  change.version = semver.clean(change.version)
+
+  return change
+}
 
 /**
  * DebianChangelog
@@ -23,17 +86,10 @@ export default class DebianChangelog extends Pipe {
    *
    * @param {Object} pipeline - Current running Pipeline
    */
-  constructor (pipeline) {
+  constructor (pipeline: Pipeline) {
     super(pipeline)
 
-    this.data.changelog = [{
-      author: 'rabbitbot',
-      changes: ['version bump'],
-      date: new Date(),
-      distribution: 'xenial',
-      project: pipeline.build.name,
-      version: pipeline.build.version
-    }]
+    this.data.changelog = [fixChangelogVersion({}, pipeline.build, 'xenial')]
   }
 
   /**
@@ -44,7 +100,7 @@ export default class DebianChangelog extends Pipe {
    * @param {String} d - distribution to build
    * @returns {Void}
    */
-  async code (p = 'repository/debian', d = 'xenial') {
+  async code (p: string = 'repository/debian', d: string = 'xenial') {
     const changelogPath = path.join(p, 'changelog')
     const file = new File(path.resolve(this.pipeline.build.dir, changelogPath))
 
@@ -52,63 +108,23 @@ export default class DebianChangelog extends Pipe {
       this.data.changelog = this.pipeline.build.changelog
     }
 
-    const errors = {}
-
-    const changelog = await Promise.map(this.data.changelog, (change, i) => {
-      const lintedChange = Object.assign({}, change, {
-        distribution: d,
-        project: this.pipeline.build.name,
-        version: semver.valid(change.version)
-      })
-
-      /**
-       * thr
-       * Adds an error to the collection
-       *
-       * @param {String} err - the message to show on log
-       * @param {Boolean} exit - true to stop the build
-       * @throws {Error} - if the error is unrecoverable
-       * @returns {Void}
-       */
-      const thr = (err, exit = false) => {
-        const i = (lintedChange.version != null) ? lintedChange.version : 'Unknown version'
-
-        if (errors[i] == null) {
-          errors[i] = [err]
-        } else {
-          errors[i].push(err)
-        }
-
-        if (exit) throw new Error(err)
-      }
-
-      if (lintedChange.version == null) {
-        thr('Invalid semver version', true)
-      }
-
-      if (lintedChange.author == null) {
-        thr('No author')
-      }
-
-      if (lintedChange.changes == null || lintedChange.changes.length === 0) {
-        thr('No documented changes')
-        lintedChange.changes = ['version bump']
-      }
-
-      if (lintedChange.date == null) {
-        thr('No release date')
-        lintedChange.date = new Date()
-      }
-
-      return lintedChange
+    // This is the only thing that is not included in the changelog from the
+    // database. So we have to insert it to avoid errors.
+    this.data.changelog.map((changelog) => {
+      changelog.project = this.pipeline.build.name
+      return changelog
     })
-    .catch(() => this.log('error', 'Debian/Changelog/error.md', errors))
 
-    if (Object.keys(errors).length !== 0) {
+    this.data.changelog = this.data.changelog.sort((a, b) => semver.compare(b.version, a.version))
+
+    const errors = lintChangelogVersion(this.data.changelog[0])
+    if (errors.length > 0) {
       await this.log('warn', 'Debian/Changelog/warn.md', errors)
     }
 
-    this.data.changelog = changelog
+    this.data.changelog = this.data.changelog.map((a) => fixChangelogVersion(a, this.pipeline.build, d))
+
+    this.data.changelog = this.data.changelog
     .sort((a, b) => semver.compare(b.version, a.version))
     .map((change) => render('flightcheck/pipes/Debian/Changelog/changelog.nun', change, false).body)
     .join('\n\n')

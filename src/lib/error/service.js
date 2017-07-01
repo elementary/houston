@@ -31,6 +31,31 @@ export class ServiceError extends ApplicationError {
 }
 
 /**
+ * ServiceConfigError
+ * An error relating to the configuration of a third party service
+ *
+ * @extends {ServiceError}
+ * @property {String} key - Configuration key that has an error
+ */
+export class ServiceConfigError extends ServiceError {
+
+  key: string
+
+  /**
+   * Creates a new ServiceConfigError
+   *
+   * @param {String} service - Name of third party service error is from
+   * @param {String} key - Key that has the error (in dot notation)
+   * @param {String} error - Some general error information
+   */
+  constructor (service: string, key: string, error: string) {
+    super(service, `${key}: ${error}`)
+
+    this.key = key
+  }
+}
+
+/**
  * ServiceRequestError
  * A general HTTP error from third party service
  *

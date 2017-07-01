@@ -1,4 +1,4 @@
-Clean extra AppHub data
+Clean extra AppCenter Dashboard data
 
 It seems you have some extra `.apphub` data. While this isn't an error, we would
 recommend keeping it nice and clean so it's easy to read and change if need be.

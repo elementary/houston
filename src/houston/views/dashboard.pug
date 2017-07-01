@@ -12,4 +12,8 @@ block body
       p Install the AppCenter integration and select repositories to build by clicking "Manage Apps…" in the top left corner.
   else
     each p in projects
-      +project(p, true, true)
+      +project(p, true, false)
+
+  a(href="https://gitter.im/elementary/houston", target="_blank", title="Get Help")#gitter
+      div.fab
+          i.fa.fa-comment-o

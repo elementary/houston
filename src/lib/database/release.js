@@ -204,7 +204,7 @@ schema.methods.setStatus = async function (status) {
  * @returns {Object} - database object for new cycle
  */
 schema.methods.createCycle = async function (type) {
-  const cycle = await db.model('cycle').create({
+  const cycleData = {
     project: this.project._id,
     installation: this.project.github.installation,
     repo: this.project.repo,
@@ -213,8 +213,14 @@ schema.methods.createCycle = async function (type) {
     version: this.version,
     type,
     changelog: await this.createChangelog(),
-    stripe: this.project.stripe.public
-  })
+    stripe: undefined
+  }
+
+  if (this.project.stripe.enabled) {
+    cycleData.stripe = this.project.stripe.public
+  }
+
+  const cycle = await db.model('cycle').create(cycleData)
 
   const updates = {
     $addToSet: {

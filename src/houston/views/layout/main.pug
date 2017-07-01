@@ -54,19 +54,21 @@ html
     if user && !hideUser
       nav#secondary
         div.nav-content
-          if policy.ifRole(user, 'beta')
-            ul
-              block actions
-              li: a(href="https://github.com/integration/appcenter", target="_blank") Manage Apps…
+          ul
+            if policy.ifRole(user, 'USER')
+              div
+                block actions
+                li: a(href="https://github.com/integration/appcenter", target="_blank") Manage Apps…
 
-          if policy.ifRole(user, 'review')
-            ul
-              li: a(href="/dashboard")
-                i.fa.fa-bar-chart
-                span  Dashboard
-              li: a(href="/reviews")
-                i.fa.fa-check-square-o
-                span  Reviews
+          ul
+            if policy.ifRole(user, 'review')
+              div
+                li: a(href="/dashboard")
+                  i.fa.fa-bar-chart
+                  span  Dashboard
+                li: a(href="/reviews")
+                  i.fa.fa-check-square-o
+                  span  Reviews
 
           ul
             // We can re/move this after beta is over
