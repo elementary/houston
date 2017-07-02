@@ -93,16 +93,4 @@ export class Process extends EventEmitter {
       this.workspace = undefined
     }
   }
-
-  /**
-   * run
-   * Runs a task in the current process
-   *
-   * @param {Task} task - The dot notation of the task to run
-   * @param {string} [workspace] - The workspace to run the task in
-   * @return {*}
-   */
-  public async newTask (task, workspace = this.workspace) {
-    return new task(this, workspace)
-  }
 }

@@ -40,6 +40,15 @@ module.exports = {
   },
 
   /**
+   * Docker configuration
+   * This is passed to dockerode directly.
+   * @see https://github.com/apocas/dockerode#getting-started
+   */
+  docker: {
+    socketPath: '/var/run/docker.sock'
+  },
+
+  /**
    * Log configuration
    * Configures Houston log output
    * NOTE: This is an optional configuration value.
