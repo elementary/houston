@@ -69,26 +69,25 @@ export default class AppData extends Pipe {
     }
 
     if (this.pipeline.build.stripe != null) {
-      log.debug('Saving AppCenter Stripe key')
-      this.data = await file.parse()
-
-      if (this.data['component']['custom'] == null) this.data['component']['custom'] = []
-      if (this.data['component']['custom'].length < 1) this.data['component']['custom'][0] = {}
-      if (this.data['component']['custom'][0]['value'] == null) this.data['component']['custom'][0]['value'] = []
-
-      this.data['component']['custom'][0]['value'].push({
-        '_': this.pipeline.build.stripe,
-        '$': {
-          key: 'x-appcenter-stripe'
-        }
-      })
-
       try {
+        log.debug('Saving AppCenter Stripe key')
+        this.data = await file.parse()
+
+        if (this.data['component']['custom'] == null) this.data['component']['custom'] = []
+        if (this.data['component']['custom'].length < 1) this.data['component']['custom'][0] = {}
+        if (this.data['component']['custom'][0]['value'] == null) this.data['component']['custom'][0]['value'] = []
+
+        this.data['component']['custom'][0]['value'].push({
+          '_': this.pipeline.build.stripe,
+          '$': {
+            key: 'x-appcenter-stripe'
+          }
+        })
+
         await file.stringify(this.data)
       } catch (err) {
-        log.warn('Unable to save AppCenter Stripe key to AppData')
-        log.warn(err)
         log.report(err, this.pipeline.build)
+        await this.log('error', 'AppData/stripe.md')
       }
     }
   }
