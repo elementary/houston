@@ -44,7 +44,7 @@ export default class AppData extends Pipe {
     const fileFound = await file.exists()
 
     if (fileFound == null) {
-      return this.log('warn', 'AppData/existance.md', appdataName)
+      return this.log('error', 'AppData/existance.md', appdataName)
     }
 
     const filePath = path.relative(this.pipeline.build.dir, fileFound)
@@ -55,12 +55,12 @@ export default class AppData extends Pipe {
         const file = new File(path.resolve(this.pipeline.build.dir, returned.log))
         const log = await file.read()
 
-        return this.log('warn', 'AppData/invalid.md', log)
+        return this.log('error', 'AppData/invalid.md', log)
       } catch (e) {
         log.debug('Unable to fetch log of failed AppData validation')
         log.debug(e)
 
-        return this.log('warn', 'AppData/invalid.md')
+        return this.log('error', 'AppData/invalid.md')
       }
     }
 
