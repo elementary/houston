@@ -55,7 +55,11 @@ export default class AppData extends Pipe {
         const file = new File(path.resolve(this.pipeline.build.dir, returned.log))
         const log = await file.read()
 
-        return this.log('error', 'AppData/invalid.md', log)
+        const type = (log.indexOf('errors: ') !== -1) ? 'error' : 'warn'
+
+        await this.log(type, 'AppData/invalid.md', log, false)
+
+        if (type === 'error') return
       } catch (e) {
         log.debug('Unable to fetch log of failed AppData validation')
         log.debug(e)
