@@ -20,3 +20,16 @@ project.
 These are the most basic of tasks we can do. They only do one thing, and are
 very easy to test. Examples include parsing the apphub file, publishing a
 package to github, and building a deb package.
+
+## The build directory
+
+Every build gets its own unique folder in the OS temporary folder. In most Linux
+system this ends up being `/tmp/houston`. It then has a UUID generated folder to
+hold the process workspace. If all tasks where ran, the workspace would end up
+looking similar to this
+```
+/tmp/houston/ad1553ea-7a27-44cd-8eb7-66540c4ad77c/
+├── repository/ # Untouched cloned repository
+└── build/
+    └── deb/ # Copy of the repository used when building deb file with liftoff
+```

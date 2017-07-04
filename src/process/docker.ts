@@ -45,13 +45,13 @@ export class Docker {
   protected name: string
 
   /**
-   * mountes
+   * mounts
    * All of the directories that will be mounted on the container.
    * NOTE: Key is local folder, value is container folder.
    *
    * @var {object}
    */
-  protected mountes = {}
+  protected mounts = {}
 
   /**
    * Creates a new docker container class
@@ -63,7 +63,7 @@ export class Docker {
     this.config = config
     this.docker = new Dockerode(config.get('docker'))
 
-    this.name = name
+    this.name = `houston-${name}`
   }
 
   /**
@@ -75,7 +75,7 @@ export class Docker {
    * @return {void}
    */
   public mount (from: string, to: string): void {
-    this.mountes[from] = to
+    this.mounts[from] = to
   }
 
   /**
@@ -120,10 +120,39 @@ export class Docker {
    * Runs a container with the given command and mounts
    *
    * @param {string} cmd - Command to run
+   * @param {object} [opt] - Different docker options to run with
    * @return {number} - Container exit code
    */
-  public async run (cmd: string): Promise<number> {
-    return 0
+  public async run (cmd: string, opt = {}): Promise<number> {
+    const commands = cmd.split(' ')
+    const mounts = this.setupMounts()
+    const stream = await this.setupLog()
+
+    const options = Object.assign({ Binds: mounts }, opt)
+
+    return new Promise<number>((resolve, reject) => {
+      this.docker.run(`${this.name}:latest`, commands, stream, options, (err, data) => {
+        if (err) return reject(err)
+
+        return resolve(data.StatusCode)
+      })
+    })
+  }
+
+  /**
+   * setupMounts
+   * Creates a string to pass to docker from all of the specified mount points.
+   *
+   * @return {string[]}
+   */
+  protected setupMounts (): string[] {
+    const output: string[] = []
+
+    Object.keys(this.mounts).forEach((local) => {
+      output.push(`${local}:${this.mounts[local]}:rw`)
+    })
+
+    return output
   }
 
   /**
@@ -131,7 +160,7 @@ export class Docker {
    * Creates / Clears the log file
    *
    * @async
-   * @return {void}
+   * @return {stream|null} - Stream to log docker container to
    */
   protected async setupLog (): Promise<void> {
     if (this.log == null) {
