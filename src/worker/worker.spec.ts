@@ -1,12 +1,12 @@
 /**
- * houston/src/process/process.ts
+ * houston/src/worker/worker.ts
  * The master class for repository processing.
  *
  * @exports {Class} Process - A processing class
  */
 
 import { Repository } from '../lib/service/github/repository'
-import { Process } from './process'
+import { Worker } from './worker'
 
 import { setup as setupConfig } from '../../test/utility/config'
 
@@ -18,5 +18,5 @@ beforeEach(async () => {
 
 test('can be created with a GitHub repository', async () => {
   const repo = new Repository('elementary', 'houston')
-  const process = new Process(config, repo)
+  const process = new Worker(config, repo)
 })

@@ -1,10 +1,10 @@
-# houston/src/process/
+# houston/src/worker/
 
 This folder holds all the logic for testing, building, and fixing projects. If
 something goes wrong when building your project, it's probably because of code
 in this folder.
 
-## process.ts
+## worker.ts
 
 This class holds the basic information about any task we do. It holds the
 repository, working directory, and logs.

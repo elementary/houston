@@ -1,5 +1,5 @@
 /**
- * houston/src/process/docker.ts
+ * houston/src/worker/docker.ts
  * A helpful class for using docker.
  *
  * @exports {Class} Docker - A helpful class for using docker.

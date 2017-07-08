@@ -1,11 +1,11 @@
 /**
- * houston/src/process/task/build/deb.ts
+ * houston/src/worker/task/build/deb.ts
  * Builds deb files.
  *
  * @exports {Function} run - Builds deb files
  */
 
-import { Process } from '../../process'
+import { Process } from '../../worker'
 
 /**
  * liftoff

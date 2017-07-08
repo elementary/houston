@@ -1,5 +1,5 @@
 /**
- * houston/src/cli/process.ts
+ * houston/src/cli/work.ts
  * Processes a repository quickly
  */
 
@@ -7,8 +7,8 @@
 // tslint:disable no-console
 
 import { Repository as GithubRepository } from '../lib/service/github/repository'
-import { Process } from '../process/process'
-import { run as runBuild } from '../process/role/build'
+import { run as runBuild } from '../worker/role/build'
+import { Worker } from '../worker/worker'
 import { getConfig } from './cli'
 
 export const command = 'build <user> <repo> <branch>'
@@ -21,7 +21,7 @@ export const builder = (yargs) => {
 export async function handler (argv) {
   const config = getConfig(argv)
   const repository = new GithubRepository(argv.user, argv.repo, argv.branch)
-  const proc = new Process(config, repository)
+  const proc = new Worker(config, repository)
 
   await runBuild(proc)
 

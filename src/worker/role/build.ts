@@ -1,12 +1,12 @@
 /**
- * houston/src/process/role/build.ts
+ * houston/src/worker/role/build.ts
  * Builds a package and edits contents for appcenter.
  */
 
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
-import { Process } from '../process'
+import { Process } from '../worker'
 
 import { run as runBuildDeb } from '../task/build/deb'
 

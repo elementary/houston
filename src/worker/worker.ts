@@ -1,8 +1,8 @@
 /**
- * houston/src/process/process.ts
+ * houston/src/worker/worker.ts
  * The master class for repository processing.
  *
- * @exports {Class} Process - A processing class
+ * @exports {Class} Worker - A processing class
  */
 
 import { EventEmitter } from 'events'
@@ -14,7 +14,7 @@ import * as uuid from 'uuid/v4'
 import { Config } from '../lib/config/class'
 import { Repository } from '../lib/service/base/repository'
 
-export class Process extends EventEmitter {
+export class Worker extends EventEmitter {
 
   /**
    * tempDir
@@ -70,7 +70,7 @@ export class Process extends EventEmitter {
    */
   public async setup (): Promise<void> {
     if (this.workspace == null) {
-      this.workspace = path.resolve(Process.tempDir, uuid())
+      this.workspace = path.resolve(Worker.tempDir, uuid())
 
       const repositoryFolder = path.resolve(this.workspace, 'repository')
 
