@@ -25,20 +25,20 @@ export class Worker extends EventEmitter {
   protected static tempDir = path.resolve(os.tmpdir(), 'houston')
 
   /**
+   * config
+   * The configuration to use during processing
+   *
+   * @var {Config}
+   */
+  public config: Config
+
+  /**
    * workspace
    * The directory that contains the working files
    *
    * @var {string}
    */
   public workspace?: string
-
-  /**
-   * config
-   * The configuration to use during processing
-   *
-   * @var {Config}
-   */
-  protected config: Config
 
   /**
    * repository

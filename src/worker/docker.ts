@@ -70,7 +70,7 @@ export class Docker {
     this.config = config
     this.docker = new Dockerode(config.get('docker'))
 
-    this.name = name
+    this.name = `houston-${name}`
   }
 
   /**
