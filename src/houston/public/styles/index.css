@@ -155,6 +155,21 @@ pre.highlighted .pre-numbering {
     .grid .grid .half {
         text-align: center;
     }
+
+    .pitch-appcenter .grid {
+        display: flex;
+        align-items: center;
+    }
+
+    .pitch-appcenter .discovery img {
+        transform: scale(1.25);
+        position: relative;
+        left: -15%;
+    }
+}
+
+.pitch-appcenter .call-to-action {
+    text-align: center;
 }
 
 .third .fa {
