@@ -5,8 +5,10 @@
  * @exports {Object} - Koa router
  */
 
-import Router from 'koa-router'
+import _ from 'lodash'
 import Promise from 'bluebird'
+import Router from 'koa-router'
+import semver from 'semver'
 
 import * as github from 'service/github'
 import * as policy from 'houston/policy'
@@ -51,22 +53,33 @@ route.get('/dashboard', policy.isRole('USER'), policy.isAgreement, async (ctx, n
  * Shows all the outstanding reviews
  */
 route.get('/reviews', policy.isRole('REVIEW'), policy.isAgreement, async (ctx, next) => {
-  const reviewCycles = await Cycle.aggregate([
-    { $sort: { 'version': -1, '_id': -1 } },
-    { $group: { _id: '$project', cycle: { $first: '$_id' }, status: { $first: '$_status' } } },
-    { $match: { status: 'REVIEW' } }
-  ])
+  const cycles = await Cycle.find({ _status: 'REVIEW' })
+    .populate('project')
+    .then((cycles) => _.groupBy(cycles, 'project._id'))
+    // Sort all the cycles in review so we get the latest version.
+    .then((projects) => {
+      const output = []
 
-  const reviewCycleIds = reviewCycles.map((res) => res.cycle)
+      Object.keys(projects).forEach((key) => {
+        const cycles = projects[key].sort((a, b) => semver.compare(a.version, b.version))
+        output.push(cycles[0])
+      })
 
-  const cycles = await Cycle.find({ _id: { $in: reviewCycleIds } })
-  .populate('project')
+      return output
+    })
+    // Filter out any cycles that have newer cycles.
+    .then((cycles) => {
+      return cycles.filter((cycle) => {
+        const latestRelease = cycle.project.release.latest
 
-  // We can manually set the project status instead of calling the DB again
-  cycles.map((cycle) => {
-    cycle.project.status = 'REVIEW'
-    return cycle
-  })
+        return (latestRelease.version === cycle.version)
+      })
+    })
+    // We can manually set the project status instead of calling the DB again
+    .then((cycles) => cycles.map((cycle) => {
+      cycle.project.status = 'REVIEW'
+      return cycle
+    }))
 
   return ctx.render('review', { title: 'Reviews', cycles })
 })
