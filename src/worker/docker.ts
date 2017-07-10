@@ -5,8 +5,9 @@
  * @exports {Class} Docker - A helpful class for using docker.
  */
 
-import Dockerode from 'dockerode'
+import * as Dockerode from 'dockerode'
 import * as fs from 'fs-extra'
+import * as Stream from 'stream'
 
 import { Config } from '../lib/config/class'
 
@@ -45,13 +46,19 @@ export class Docker {
   protected name: string
 
   /**
-   * mountes
+   * tag
+   * The docker image tag
+   */
+  protected tag = 'latest'
+
+  /**
+   * mounts
    * All of the directories that will be mounted on the container.
    * NOTE: Key is local folder, value is container folder.
    *
    * @var {object}
    */
-  protected mountes = {}
+  protected mounts = {}
 
   /**
    * Creates a new docker container class
@@ -67,6 +74,24 @@ export class Docker {
   }
 
   /**
+   * options
+   * All of the docker options that will get passed on running the container.
+   *
+   * @return {object}
+   */
+  public get options () {
+    const options = {
+      Binds: [] as string[]
+    }
+
+    Object.keys(this.mounts).forEach((local) => {
+      options.Binds.push(`${local}:${this.mounts[local]}:rw`)
+    })
+
+    return options
+  }
+
+  /**
    * mount
    * Adds a mount point to the container
    *
@@ -75,7 +100,7 @@ export class Docker {
    * @return {void}
    */
   public mount (from: string, to: string): void {
-    this.mountes[from] = to
+    this.mounts[from] = to
   }
 
   /**
@@ -86,16 +111,22 @@ export class Docker {
    * @param {string} tag - Docker image tag to check for
    * @return {boolean}
    */
-  public async exists (tag = 'latest'): Promise<boolean> {
+  public async exists (tag = this.tag): Promise<boolean> {
     const images = await this.docker.listImages()
 
-    const foundImage = images.find((image) => {
-      return image.RepoTags.find((imageTag) => {
-        return (imageTag === `${this.name}:${tag}`)
+    const foundImages = images.filter((image) => {
+      let found = false
+
+      image.RepoTags.forEach((imageTag) => {
+        if (imageTag === `${this.name}:${tag}`) {
+          found = true
+        }
       })
+
+      return found
     })
 
-    return (foundImage != null)
+    return (foundImages.length !== 0)
   }
 
   /**
@@ -120,10 +151,18 @@ export class Docker {
    * Runs a container with the given command and mounts
    *
    * @param {string} cmd - Command to run
+   * @param {object} [opts] - Additional options to pass to container
    * @return {number} - Container exit code
    */
-  public async run (cmd: string): Promise<number> {
-    return 0
+  public async run (cmd: string, opts = {}): Promise<number> {
+    const log = await this.setupLog()
+    const commands = cmd.split(' ')
+    const options = Object.assign({}, this.options, opts)
+
+    const res = await this.docker.run(this.name, commands, log, options)
+
+    await res.container.remove()
+    return res.data.StatusCode
   }
 
   /**
@@ -131,13 +170,14 @@ export class Docker {
    * Creates / Clears the log file
    *
    * @async
-   * @return {void}
+   * @return {Stream}
    */
-  protected async setupLog (): Promise<void> {
+  protected async setupLog (): Promise<Stream> {
     if (this.log == null) {
-      return
+      return new Stream()
     }
 
     await fs.ensureFile(this.log)
+    return fs.createWriteStream(this.log)
   }
 }

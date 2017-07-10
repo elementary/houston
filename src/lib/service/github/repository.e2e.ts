@@ -10,10 +10,12 @@ import * as uuid from 'uuid/v4'
 
 import { Repository } from './repository'
 
+import { timeout } from '../../../../test/utility/jasmine'
+
 const testingDir = path.resolve(os.tmpdir(), 'houston-test', 'process', uuid())
 
 // Extend the default timeout time due to long running tests
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
+timeout(10)
 
 afterAll(async() => {
   await fs.remove(testingDir)

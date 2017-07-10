@@ -12,12 +12,13 @@ import { Repository as GithubRepository } from '../lib/service/github/repository
 import { Worker } from './worker'
 
 import { setup as setupConfig } from '../../test/utility/config'
+import { timeout } from '../../test/utility/jasmine'
 
 let config = null
-const testingDir = path.resolve(os.tmpdir(), 'houston-test', 'process', uuid())
+const testingDir = path.resolve(os.tmpdir(), 'houston-test', 'worker', uuid())
 
 // Extend the default timeout time due to long running tests
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
+timeout(30)
 
 // Change the default workspace location for testing
 Worker.tempDir = testingDir
