@@ -168,6 +168,16 @@ pre.highlighted .pre-numbering {
     }
 }
 
+.pitch-appcenter li {
+  text-align: left;
+  line-height: 1.65;
+  margin: 16px 0;
+}
+
+.pitch-appcenter .fa-li {
+  font-size: 1.5em;
+}
+
 .third .fa {
     color: #4d4267;
 }

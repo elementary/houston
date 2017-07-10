@@ -41,9 +41,10 @@ block body
     div.grid.payments
       div.half
         h2 Make an app, get paid
-        p <i class="fa fa-credit-card"></i> Enable monetization for fast, easy pay-what-you-want downloads from users of elementary OS. 
-        p <i class="fa fa-cc-stripe"></i> Payments are powered by Stripe Connect ensuring simplicity, security, and compliance. 
-        p <i class="fa fa-pie-chart"></i> With an industry-standard 70/30 payment split, you keep the majority of your profits.
+        ul.fa-ul
+          li <i class="fa fa-credit-card fa-li"></i> Enable monetization for fast, easy pay-what-you-want downloads from users of elementary OS. 
+          li <i class="fa fa-cc-stripe fa-li"></i> Payments are powered by Stripe Connect ensuring simplicity, security, and compliance. 
+          li <i class="fa fa-pie-chart fa-li"></i> With an industry-standard 70/30 payment split, you keep the majority of your profits.
         p: a(href='https://github.com/elementary/houston/wiki/Monetizing-Your-App').read-more Learn more about monetizing your app
       div.half
         img(src="/images/appcenter-payment-dialog.png")
@@ -53,17 +54,19 @@ block body
         img(src='https://elementary.io/images/screenshots/appcenter.jpg')
       div.half
         h2 Get in front of users
-        p <i class="fa fa-star"></i> New apps get featured front and center as soon as they're published with a large, beautiful, branded banner in AppCenter. Plus, trending and recently-updated apps are featured right on the front page. 
-        p <i class="fa fa-search"></i> Define your app's keywords, categories, and subcategories to help people find it. 
-        p <i class="fa fa-share-alt"></i> With built-in social media sharing and app URLs, users can easily share your app right from AppCenter.
+        ul.fa-ul
+          li <i class="fa fa-star fa-li"></i> New apps get featured front and center as soon as they're published with a large, beautiful, branded banner in AppCenter. Plus, trending and recently-updated apps are featured right on the front page. 
+          li <i class="fa fa-search fa-li"></i> Define your app's keywords, categories, and subcategories to help people find it. 
+          li <i class="fa fa-share-alt fa-li"></i> With built-in social media sharing and app URLs, users can easily share your app right from AppCenter.
         p: a(href='https://elementary.io/docs/code/getting-started#the-desktop-file').read-more Learn more about app metadata
 
     div.grid.github
       div.half
         h2 Use the tools you know and love
-        p <i class="fa fa-github"></i> AppCenter is built around a GitHub workflow to keep your planning, issue tracking, and release management where you're familiar. 
-        p <i class="fa fa-check-circle"></i> The minimal AppCenter Dashboard lets you submit updates and shows the status of automated testing and fast human reviews. 
-        p <i class="fa fa-exclamation-circle"></i> Automatic and human-filed reviews use GitHub issues to track any problems found in your app.
+        ul.fa-ul
+          li <i class="fa fa-github fa-li"></i> AppCenter is built around a GitHub workflow to keep your planning, issue tracking, and release management where you're familiar. 
+          li <i class="fa fa-check-circle fa-li"></i> The minimal AppCenter Dashboard lets you submit updates and shows the status of automated testing and fast human reviews. 
+          li <i class="fa fa-exclamation-circle fa-li"></i> Both automatic and human reviews use GitHub issues to track any problems found in your app.
         p: a(href='https://github.com/elementary/houston/wiki/Submission-Process').read-more Learn more about the submission process
         if user
           a(href='/dashboard').button.suggested-action Welcome Back
@@ -72,7 +75,7 @@ block body
           a(href='/dashboard').button.suggested-action Log In with GitHub
             i.fa.fa-github
       div.half
-        img(src='https://assets-cdn.github.com/images/modules/logos_page/Octocat.png')
+        img(src="/images/octocat.png")
 
   div.grid: div.two-thirds
     img(src='https://elementary.io/images/icons/places/128/distributor-logo.svg')
