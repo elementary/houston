@@ -6,7 +6,7 @@
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
-import { Process } from '../worker'
+import { Worker } from '../worker'
 
 import { run as runBuildDeb } from '../task/build/deb'
 
@@ -15,17 +15,17 @@ import { run as runBuildDeb } from '../task/build/deb'
  * Runs the building
  *
  * @async
- * @param {Process} process - The process to use
+ * @param {Worker} worker - The worker to use
  * @return {void}
  */
-export async function run (process: Process) {
-  await process.setup()
+export async function run (worker: Worker) {
+  await worker.setup()
 
-  const repositoryFolder = path.resolve(process.workspace, 'repository')
-  const debFolder = path.resolve(process.workspace, 'build', 'deb')
+  const repositoryFolder = path.resolve(worker.workspace, 'repository')
+  const debFolder = path.resolve(worker.workspace, 'build', 'deb')
 
   await fs.copy(repositoryFolder, debFolder)
-  await runBuildDeb(process, debFolder)
+  await runBuildDeb(worker, debFolder)
 
-  await process.teardown()
+  await worker.teardown()
 }

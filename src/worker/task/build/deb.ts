@@ -9,7 +9,6 @@ import * as fs from 'fs-extra'
 import * as os from 'os'
 import * as path from 'path'
 
-import { Config } from '../../../lib/config/class'
 import { Docker } from '../../docker'
 import { Worker } from '../../worker'
 
