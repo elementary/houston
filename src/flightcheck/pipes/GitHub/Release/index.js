@@ -91,7 +91,7 @@ export default class GitHubRelease extends Pipe {
       if (ext === '.deb') {
         const arch = file.split('_')[2].split('.')[0]
 
-        label = `apphub ${arch} (deb)`
+        label = `appcenter ${arch} (deb)`
         name = `${this.pipeline.build.name}_${this.pipeline.build.version}_${arch}.deb`
         type = 'application/vnd.debian.binary-package'
       }
