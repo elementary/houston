@@ -40,14 +40,14 @@ block body
   section.pitch-appcenter.grey
     div.grid.payments
       div.half
+        img(src="/images/appcenter-payment-dialog.png")
+      div.half
         h2 Make an app, get paid
         ul.fa-ul
           li <i class="fa fa-credit-card fa-li"></i> Enable monetization for fast, easy pay-what-you-want downloads from users of elementary OS. 
           li <i class="fa fa-cc-stripe fa-li"></i> Payments are powered by Stripe Connect ensuring simplicity, security, and compliance. 
           li <i class="fa fa-pie-chart fa-li"></i> Keep the majority of your profits. Payments are split between you and elementary 70/30, with a minimum platform fee of 50&cent;. No enrollment fees or subscription costs.
         p: a(href='https://github.com/elementary/houston/wiki/Monetizing-Your-App').read-more Learn more about monetizing your app
-      div.half
-        img(src="/images/appcenter-payment-dialog.png")
 
     div.grid.discovery
       div.half
@@ -62,6 +62,8 @@ block body
 
     div.grid.github
       div.half
+        img(src="/images/octocat.png")
+      div.half
         h2 Use the tools you know and love
         ul.fa-ul
           li <i class="fa fa-github fa-li"></i> AppCenter is built around a GitHub workflow to keep your planning, issue tracking, and release management where you're familiar. 
@@ -74,8 +76,6 @@ block body
         else
           a(href='/dashboard').button.suggested-action Log In with GitHub
             i.fa.fa-github
-      div.half
-        img(src="/images/octocat.png")
 
   div.grid: div.two-thirds
     img(src='https://elementary.io/images/icons/places/128/distributor-logo.svg')

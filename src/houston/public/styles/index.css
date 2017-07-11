@@ -161,6 +161,10 @@ pre.highlighted .pre-numbering {
         align-items: center;
     }
 
+    .pitch-appcenter .grid:nth-child(odd) .half:first-child {
+      order: 2;
+    }
+
     .pitch-appcenter .discovery img {
         transform: scale(1.25);
         position: relative;
@@ -169,13 +173,13 @@ pre.highlighted .pre-numbering {
 }
 
 .pitch-appcenter li {
-  text-align: left;
-  line-height: 1.65;
-  margin: 16px 0;
+    text-align: left;
+    line-height: 1.65;
+    margin: 16px 0;
 }
 
 .pitch-appcenter .fa-li {
-  font-size: 1.25em;
+    font-size: 1.25em;
 }
 
 .third .fa {
