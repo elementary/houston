@@ -157,8 +157,8 @@ pre.highlighted .pre-numbering {
     }
 
     .pitch-appcenter .grid {
-        display: flex;
         align-items: center;
+        display: flex;
     }
 
     .pitch-appcenter .grid:nth-child(odd) .half:first-child {
@@ -166,16 +166,16 @@ pre.highlighted .pre-numbering {
     }
 
     .pitch-appcenter .discovery img {
-        transform: scale(1.25);
-        position: relative;
         left: -15%;
+        position: relative;
+        transform: scale(1.25);
     }
 }
 
 .pitch-appcenter li {
-    text-align: left;
     line-height: 1.65;
     margin: 16px 0;
+    text-align: left;
 }
 
 .pitch-appcenter .fa-li {
