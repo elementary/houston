@@ -44,7 +44,7 @@ export default class AppData extends Pipe {
     const fileFound = await file.exists()
 
     if (fileFound == null) {
-      return this.log('warn', 'AppData/existance.md', appdataName)
+      return this.log('error', 'AppData/existance.md', appdataName)
     }
 
     const filePath = path.relative(this.pipeline.build.dir, fileFound)
@@ -55,36 +55,39 @@ export default class AppData extends Pipe {
         const file = new File(path.resolve(this.pipeline.build.dir, returned.log))
         const log = await file.read()
 
-        return this.log('warn', 'AppData/invalid.md', log)
+        const type = (log.indexOf('errors: ') !== -1) ? 'error' : 'warn'
+
+        await this.log(type, 'AppData/invalid.md', log, false)
+
+        if (type === 'error') return
       } catch (e) {
         log.debug('Unable to fetch log of failed AppData validation')
         log.debug(e)
 
-        return this.log('warn', 'AppData/invalid.md')
+        return this.log('error', 'AppData/invalid.md')
       }
     }
 
     if (this.pipeline.build.stripe != null) {
-      log.debug('Saving AppCenter Stripe key')
-      this.data = await file.parse()
-
-      if (this.data['component']['custom'] == null) this.data['component']['custom'] = []
-      if (this.data['component']['custom'].length < 1) this.data['component']['custom'][0] = {}
-      if (this.data['component']['custom'][0]['value'] == null) this.data['component']['custom'][0]['value'] = []
-
-      this.data['component']['custom'][0]['value'].push({
-        '_': this.pipeline.build.stripe,
-        '$': {
-          key: 'x-appcenter-stripe'
-        }
-      })
-
       try {
+        log.debug('Saving AppCenter Stripe key')
+        this.data = await file.parse()
+
+        if (this.data['component']['custom'] == null) this.data['component']['custom'] = []
+        if (this.data['component']['custom'].length < 1) this.data['component']['custom'][0] = {}
+        if (this.data['component']['custom'][0]['value'] == null) this.data['component']['custom'][0]['value'] = []
+
+        this.data['component']['custom'][0]['value'].push({
+          '_': this.pipeline.build.stripe,
+          '$': {
+            key: 'x-appcenter-stripe'
+          }
+        })
+
         await file.stringify(this.data)
       } catch (err) {
-        log.warn('Unable to save AppCenter Stripe key to AppData')
-        log.warn(err)
         log.report(err, this.pipeline.build)
+        await this.log('error', 'AppData/stripe.md')
       }
     }
   }

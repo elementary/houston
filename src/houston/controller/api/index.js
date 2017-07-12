@@ -13,6 +13,7 @@ import { ControllerError } from 'lib/error/controller'
 import { toAPI } from './error'
 import config from 'lib/config'
 
+import downloads from './downloads'
 import list from './list'
 import payment from './payment'
 
@@ -80,6 +81,7 @@ route.use((ctx, next) => {
 })
 
 // Load all api paths here
+route.use(downloads.routes(), downloads.allowedMethods())
 route.use(list.routes(), list.allowedMethods())
 route.use(payment.routes(), payment.allowedMethods())
 

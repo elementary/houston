@@ -155,6 +155,31 @@ pre.highlighted .pre-numbering {
     .grid .grid .half {
         text-align: center;
     }
+
+    .pitch-appcenter .grid {
+        align-items: center;
+        display: flex;
+    }
+
+    .pitch-appcenter .grid:nth-child(odd) .half:first-child {
+        order: 2;
+    }
+
+    .pitch-appcenter .discovery img {
+        left: -15%;
+        position: relative;
+        transform: scale(1.25);
+    }
+}
+
+.pitch-appcenter li {
+    line-height: 1.65;
+    margin: 16px 0;
+    text-align: left;
+}
+
+.pitch-appcenter .fa-li {
+    font-size: 1.25em;
 }
 
 .third .fa {

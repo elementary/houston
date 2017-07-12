@@ -38,7 +38,9 @@ const lintChangelogVersion = (changelog: Object): Array<Error> => {
     errors.push(new Error('Changelog author not found'))
   }
 
-  if (changelog.changes == null || typeof changelog.changes !== 'object') {
+  if (changelog.changes == null) {
+    errors.push(new Error('Missing list of changes'))
+  } else if (typeof changelog.changes !== 'object') {
     errors.push(new Error('Invalid changelog changes'))
   } else if (changelog.changes.length < 1) {
     errors.push(new Error('No changelog changes found'))
@@ -119,7 +121,10 @@ export default class DebianChangelog extends Pipe {
 
     const errors = lintChangelogVersion(this.data.changelog[0])
     if (errors.length > 0) {
-      await this.log('warn', 'Debian/Changelog/warn.md', errors)
+      const [owner, repo] = this.pipeline.build.id.split('/')
+      const tag = this.pipeline.build.tag
+
+      await this.log('warn', 'Debian/Changelog/warn.md', { errors, owner, repo, tag })
     }
 
     this.data.changelog = this.data.changelog.map((a) => fixChangelogVersion(a, this.pipeline.build, d))
