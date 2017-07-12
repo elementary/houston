@@ -55,7 +55,7 @@ export default class Desktop extends Pipe {
     const fileFound = await file.exists()
 
     if (fileFound == null) {
-      return this.log('warn', 'AppData/existance.md', desktopName)
+      return this.log('error', 'Desktop/existance.md', desktopName)
     } else {
       this.data.desktop = await file.parse()
     }
