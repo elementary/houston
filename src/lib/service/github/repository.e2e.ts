@@ -10,12 +10,17 @@ import * as uuid from 'uuid/v4'
 
 import { Repository } from './repository'
 
+import { tmp } from '../../../../test/utility/fs'
 import { timeout } from '../../../../test/utility/jasmine'
 
-const testingDir = path.resolve(os.tmpdir(), 'houston-test', 'process', uuid())
+let testingDir: string
 
 // Extend the default timeout time due to long running tests
 timeout(10)
+
+beforeAll(async () => {
+  testingDir = await tmp('lib/service/github')
+})
 
 afterAll(async() => {
   await fs.remove(testingDir)
