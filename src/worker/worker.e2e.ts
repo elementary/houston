@@ -12,16 +12,21 @@ import { Repository as GithubRepository } from '../lib/service/github/repository
 import { Worker } from './worker'
 
 import { setup as setupConfig } from '../../test/utility/config'
+import { tmp } from '../../test/utility/fs'
 import { timeout } from '../../test/utility/jasmine'
 
 let config = null
-const testingDir = path.resolve(os.tmpdir(), 'houston-test', 'worker', uuid())
+let testingDir: string
 
 // Extend the default timeout time due to long running tests
 timeout(30)
 
 // Change the default workspace location for testing
-Worker.tempDir = testingDir
+
+beforeAll(async () => {
+  testingDir = await tmp('worker')
+  Worker.tempDir = testingDir
+})
 
 beforeEach(async () => {
   config = await setupConfig()

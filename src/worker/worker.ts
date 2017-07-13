@@ -46,7 +46,7 @@ export class Worker extends EventEmitter {
    *
    * @var {Repository}
    */
-  protected repository: Repository
+  public repository: Repository
 
   /**
    * Creates a new worker process
@@ -72,7 +72,7 @@ export class Worker extends EventEmitter {
     if (this.workspace == null) {
       this.workspace = path.resolve(Worker.tempDir, uuid())
 
-      const repositoryFolder = path.resolve(this.workspace, 'repository')
+      const repositoryFolder = path.resolve(this.workspace, 'clean')
 
       await fs.mkdirs(repositoryFolder)
       await this.repository.clone(repositoryFolder)

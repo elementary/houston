@@ -29,7 +29,7 @@ hold the process workspace. If all tasks where ran, the workspace would end up
 looking similar to this
 ```
 /tmp/houston/ad1553ea-7a27-44cd-8eb7-66540c4ad77c/
-├── repository/ # Untouched cloned repository
+├── clean/ # Untouched cloned repository
 └── build/
     └── deb/ # Copy of the repository used when building deb file with liftoff
 ```
