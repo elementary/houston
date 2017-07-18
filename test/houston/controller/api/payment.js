@@ -370,7 +370,7 @@ test('Returns 200 with successful payment', async (t) => {
   nock('https://api.stripe.com:443', { encodedQueryParams: true })
   .replyContentLength()
   .replyDate()
-  .post('/v1/charges', 'amount=1000&currency=USD&description=Payment%20for%20com.testing.apipayments.12&source=tok_321&destination%5Baccount%5D=acct_123&destination%5Bamount%5D=700')
+  .post('/v1/charges', 'amount=1000&application_fee=241&currency=USD&description=Payment%20for%20com.testing.apipayments.12&source=tok_321')
   .reply(200, stripeFixture.mockCharge(), stripeFixture.header)
 
   return request(server.listen())
