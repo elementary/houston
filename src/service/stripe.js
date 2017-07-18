@@ -128,16 +128,14 @@ export function postCharge (account: string, token: string, amount: number, curr
 
   return api
   .post('/charges')
+  .set('Stripe-Account', account)
   .type('form')
   .send({
     amount: cut['total'],
+    application_fee: cut['elementary'],
     currency,
     description,
-    source: token,
-    destination: {
-      account,
-      amount: cut['developer']
-    }
+    source: token
   })
   .then((res) => res.body.id)
   .catch((err, res) => {
