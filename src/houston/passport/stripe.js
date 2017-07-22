@@ -14,8 +14,10 @@ import moment from 'moment'
 import Router from 'koa-router'
 
 import * as policy from 'houston/policy'
+import * as stripe from 'service/stripe'
 import config from 'lib/config'
 import Log from 'lib/log'
+import Mistake from 'lib/mistake'
 import Project from 'lib/database/project'
 
 const log = new Log('passport:stripe')
@@ -24,6 +26,8 @@ const url = 'https://connect.stripe.com/'
 const urlAuth = 'oauth/authorize'
 const urlToken = 'oauth/token'
 const auth = new OAuth2(config.stripe.client, config.stripe.secret, url, urlAuth, urlToken, null)
+
+const PREVIEW_COUNTRIES = ['BR', 'MX']
 
 // Koa server routes used for authentication
 export const router = new Router({
@@ -65,8 +69,13 @@ router.get('/callback', policy.isRole('USER'), async (ctx, next) => {
   .catch((err) => {
     log.error('Error while processing Stripe account')
     log.error(err)
-    throw new ctx.Mistake(500, 'Error while processing Stripe account')
+    throw new Mistake(500, 'Error while processing Stripe account')
   })
+
+  const account = await stripe.getAccount(data.results['stripe_user_id'])
+  if (PREVIEW_COUNTRIES.includes(account.country)) {
+    throw new Mistake(400, 'Stripe account is in preview')
+  }
 
   if (data.results['livemode'] !== true) {
     log.warn('Returned a non livemode access token. All payments made will be in development mode.')

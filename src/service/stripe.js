@@ -91,6 +91,27 @@ export function getCut (amount: number): Object {
 }
 
 /**
+ * getAccount
+ * Returns information about a Stripe connect account.
+ *
+ * @async
+ * @param {string} account - The account id to get details about
+ * @return {object}
+ */
+export async function getAccount (account: string): Object {
+  if (account.startsWith('acct_') === false) {
+    throw new error.ServiceError('Stripe', 'Invalid account id')
+  }
+
+  return api
+  .get(`/accounts/${account}`)
+  .then((res) => res.body)
+  .catch((err, res) => {
+    throw errorCheck(err, res)
+  })
+}
+
+/**
  * postCharge
  * Creates a charge for Stripe connected account
  * NOTE: this will use getCut for calculating fee
