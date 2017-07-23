@@ -27,6 +27,8 @@ const urlAuth = 'oauth/authorize'
 const urlToken = 'oauth/token'
 const auth = new OAuth2(config.stripe.client, config.stripe.secret, url, urlAuth, urlToken, null)
 
+// Some countries are in Stripe preview do not allow USD currency.
+// @see https://stripe.com/global
 const PREVIEW_COUNTRIES = ['BR', 'MX']
 
 // Koa server routes used for authentication
