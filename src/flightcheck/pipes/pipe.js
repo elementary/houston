@@ -214,7 +214,10 @@ export default class Pipe extends events.EventEmitter {
       options['Binds'].push(defaultMount)
     }
 
-    const dockerImage = `flightcheck-${this.name}-${tag}`.toLowerCase()
+    let dockerImage = `flightcheck-${this.name}-${tag}`.toLowerCase()
+    if (options['Image'] != null) {
+      dockerImage = options['Image']
+    }
 
     // TODO: we should check sha or something to make sure the image is correct version?
     const imageBool = await new Promise((resolve, reject) => {

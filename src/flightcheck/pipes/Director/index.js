@@ -37,6 +37,9 @@ export default class Director extends Pipe {
       const files = build.files.map((f) => f.file).filter((f) => (f != null))
       const debFiles = files.filter((f) => (f != null && path.extname(f) === '.deb'))
 
+      const promises = debFiles.map((file) => this.require('Extract', file))
+      await Promise.all(promises)
+
       if (apphub.endpoints.github && this.pipeline.build.source === 'github') await this.require('GitHubRelease', files)
       if (apphub.endpoints.elementary) await this.require('ElementaryAptly', debFiles)
     } catch (err) {
