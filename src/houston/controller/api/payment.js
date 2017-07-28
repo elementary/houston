@@ -189,7 +189,7 @@ route.post('/:project', async (ctx, next) => {
   if (typeof ctx.request.body === 'object' && Object.keys(ctx.request.body).length < 1) return next()
 
   if (ctx.request.body.data == null) {
-    throw new errors.ControllerPointerError(400, '/data', 'The request does not contain a data object')
+    throw new error.ControllerPointerError(400, '/data', 'The request does not contain a data object')
   }
 
   const [payload, errors] = validatePayload((status, key, msg) => {

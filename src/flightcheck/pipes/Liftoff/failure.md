@@ -4,7 +4,7 @@ AppCenter failed to build with liftoff. Here is the log:
 
 ```
 {% if data != null %}
-{{ data | langChop(50) | safe }}
+{{ data | safe }}
 {% else %}
 Unable to retrieve data
 {% endif %}
