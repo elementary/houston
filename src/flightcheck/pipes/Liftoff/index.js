@@ -49,11 +49,7 @@ export default class Liftoff extends Pipe {
    * @returns {Void}
    */
   async code (p = 'repository', a = 'amd64', d = 'xenial') {
-    await Promise.all([
-      this.require('AppData'),
-      this.require('Debian', p, d),
-      this.require('Desktop')
-    ])
+    await this.require('Debian', p, d)
 
     log.debug('Running liftoff')
 
@@ -104,6 +100,15 @@ export default class Liftoff extends Pipe {
     if (deb != null) {
       log.debug(`Found deb file for release: ${deb}`)
       this.data.file = path.join(p, deb)
+
+      const folder = await this.require('Extract', this.data.file)
+
+      await Promise.all([
+        this.require('AppData', path.join(folder, 'usr/share/metainfo')),
+        this.require('Desktop', path.join(folder, 'usr/share/applications'))
+      ])
+
+      this.data.file = await this.require('Pack', folder)
     }
   }
 }
