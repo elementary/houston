@@ -61,7 +61,7 @@ route.get('/reviews', policy.isRole('REVIEW'), policy.isAgreement, async (ctx, n
       const output = []
 
       Object.keys(projects).forEach((key) => {
-        const cycles = projects[key].sort((a, b) => semver.compare(a.version, b.version))
+        const cycles = projects[key].sort((a, b) => semver.compare(b.version, a.version))
         output.push(cycles[0])
       })
 
