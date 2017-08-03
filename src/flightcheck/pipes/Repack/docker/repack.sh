@@ -34,7 +34,8 @@ if [ "$O" == "extract" ]; then
 fi
 
 if [ "$O" == "pack" ]; then
-  find $P -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -printf '%P ' | xargs md5sum > $P/DEBIAN/md5sums
+  cd $P
+  find . -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -printf '%P ' | xargs md5sum > $P/DEBIAN/md5sums
   dpkg-deb -b $P $D
 
   rm -r $P
