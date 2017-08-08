@@ -69,24 +69,13 @@ export default class AppData extends Pipe {
     }
 
     if (this.pipeline.build.stripe != null) {
-      try {
-        log.debug('Saving AppCenter Stripe key')
-        this.data = await file.parse()
+      log.debug('Saving AppCenter Stripe key')
 
-        if (this.data['component']['custom'] == null) this.data['component']['custom'] = []
-        if (this.data['component']['custom'].length < 1) this.data['component']['custom'][0] = {}
-        if (this.data['component']['custom'][0]['value'] == null) this.data['component']['custom'][0]['value'] = []
+      const returned = await this.docker('stripe', [appdataPath, this.pipeline.build.stripe], undefined, {
+        Privileged: true // because the unpacked package has root file permissions
+      })
 
-        this.data['component']['custom'][0]['value'].push({
-          '_': this.pipeline.build.stripe,
-          '$': {
-            key: 'x-appcenter-stripe'
-          }
-        })
-
-        await file.stringify(this.data)
-      } catch (err) {
-        log.report(err, this.pipeline.build)
+      if (returned.exit !== 0) {
         await this.log('error', 'AppData/stripe.md')
       }
     }
