@@ -49,18 +49,17 @@ export default class Extract extends Pipe {
    * code
    * Extracts the deb file into editable files
    *
-   * @param {string} p - Path to the deb file relative to pipeline workspace
-   * @returns {string} - Path to extracted folder
+   * @param {string} p - Relative path to the deb file
+   * @returns {string} - Relative path to extracted folder
    */
   async code (p: string) {
-    const fullPath = path.join(this.pipeline.build.dir, p)
-    await this.fileExists(fullPath)
+    await this.fileExists(path.resolve(this.pipeline.build.dir, p))
 
     log.debug('Running extract script')
 
     const filename = path.basename(p)
-    const src = `/tmp/flightcheck/repository/${filename}`
-    const dest = `/tmp/flightcheck/${filename.slice(0, -4)}`
+    const src = path.resolve('/tmp/flightcheck', p)
+    const dest = path.resolve('/tmp/flightcheck', filename.slice(0, -4))
 
     const returned = await this.docker('repack', ['/usr/local/bin/repack.sh', 'extract', src, dest], undefined, {
       Image: 'flightcheck-repack-repack',
@@ -68,11 +67,12 @@ export default class Extract extends Pipe {
     })
 
     if (returned.exit !== 0) {
-      log.debug(`Repack returned ${returned.exit} exit code`)
+      log.debug(`Repack extract returned ${returned.exit} exit code`)
 
       return this.log('error', 'Repack/failure.md')
     }
 
-    return dest
+    this.data = filename.slice(0, -4)
+    return this.data
   }
 }
