@@ -49,17 +49,17 @@ export default class Pack extends Pipe {
    * code
    * Packs a deb file into an installable deb file
    *
-   * @param {string} p - Path to a package folder relative to build directory
-   * @returns {string} - Path to deb file
+   * @param {string} p - Relative path to a package folder
+   * @returns {string} - Relative path to deb file
    */
   async code (p: string) {
-    const fullPath = path.join(this.pipeline.build.dir, p)
-    await this.fileExists(fullPath)
+    await this.directoryExists(path.resolve(this.pipeline.build.dir, p))
 
-    log.debug('Running extract script')
+    log.debug('Running pack script')
 
-    const src = `/tmp/flightcheck/${p}`
-    const dest = `/tmp/flightcheck/${p}.deb`
+    const filename = path.basename(p)
+    const src = path.resolve('/tmp/flightcheck', p)
+    const dest = path.resolve('/tmp/flightcheck', `${filename}.deb`)
 
     const returned = await this.docker('repack', ['/usr/local/bin/repack.sh', 'pack', src, dest], undefined, {
       Image: 'flightcheck-repack-repack',
@@ -67,11 +67,12 @@ export default class Pack extends Pipe {
     })
 
     if (returned.exit !== 0) {
-      log.debug(`Repack returned ${returned.exit} exit code`)
+      log.debug(`Repack pack returned ${returned.exit} exit code`)
 
       return this.log('error', 'Repack/failure.md')
     }
 
-    return dest
+    this.data = `${filename}.deb`
+    return this.data
   }
 }

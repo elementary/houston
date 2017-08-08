@@ -39,7 +39,7 @@ const findReleases = async () => {
     { $sort: { 'releases.date.published': 1 } },
     { $group: { _id: '$_id', 'name': { $first: '$name' }, 'release': { $first: '$releases' } } },
     { $sort: { 'release.date.published': -1 } },
-    { $limit: 5 }
+    { $limit: 10 }
   ])
   .then((res) => res.map((p) => p.name))
 
@@ -71,7 +71,7 @@ const findProjects = async () => {
     { $group: { _id: '$_id', 'name': { $first: '$name' }, 'release': { $first: '$releases' } } },
     { $sort: { 'release.date.published': -1 } },
     { $match: { 'name': { $nin: cachedReleases } } },
-    { $limit: 5 }
+    { $limit: 10 }
   ])
   .then((res) => res.map((p) => p.name))
 
@@ -110,7 +110,7 @@ const findDownloads = async () => {
     }},
     { $sort: { 'count': -1, 'total': -1 } },
     { $match: { 'name': { $size: 1 }, 'name.0': { $nin: [...cachedReleases, ...cachedProjects] } } }, // Avoid deleted projects
-    { $limit: 5 }
+    { $limit: 10 }
   ])
   .then((res) => res.map((p) => p.name[0]))
 

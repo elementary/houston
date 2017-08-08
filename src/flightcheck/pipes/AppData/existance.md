@@ -1,6 +1,8 @@
 Create an AppData file
 
-AppCenter Dashboard could not find a `{{ data }}` file for your project. Please create one to provide additional data to application managers.
+AppCenter Dashboard could not find a `{{ data }}` file for your project.
+Please create one and ensure it gets installed to `/usr/share/metainfo/` to
+provide additional data to application managers.
 
 ---
 
