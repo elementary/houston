@@ -54,3 +54,15 @@ test('can clone a repository with tag', async () => {
   expect(pkg).toHaveProperty('version')
   expect(pkg.version).toEqual('0.1.8')
 })
+
+test('can clone a repository with a non-annotated tag (#511)', async () => {
+  const repo = new Repository('fluks-eos', 'gdice')
+
+  const folder = path.resolve(testingDir, uuid())
+  await fs.mkdirs(folder)
+
+  await repo.clone(folder, 'refs/tags/v1.0.1')
+
+  const stat = await fs.stat(folder)
+  expect(stat.isDirectory()).toBeTruthy()
+})
