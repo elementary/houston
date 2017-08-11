@@ -22,7 +22,7 @@ const route = new Router({
  *
  * @param {String} project - project name
  */
-route.get('/cycle', policy.isRole('ADMIN'), policy.isAgreement, async (ctx, next) => {
+route.get('/cycle', policy.isRole('USER'), policy.isAgreement, async (ctx, next) => {
   const project = await Project.findOne({
     name: ctx.params.project
   })
@@ -37,6 +37,10 @@ route.get('/cycle', policy.isRole('ADMIN'), policy.isAgreement, async (ctx, next
 
   if (project.releases.length < 1) {
     throw new error.ControllerError(400, 'The project has no releases to cycle')
+  }
+
+  if (project.release.latest._status !== 'STANDBY' && policy.ifRole(ctx.state.user, 'ADMIN') === false) {
+    throw new error.ControllerError(400, 'The project has already been cycled')
   }
 
   await project.createCycle('RELEASE')
