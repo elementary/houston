@@ -30,6 +30,7 @@ looking similar to this
 ```
 /tmp/houston/ad1553ea-7a27-44cd-8eb7-66540c4ad77c/
 ├── clean/ # Untouched cloned repository
-└── build/
-    └── deb/ # Copy of the repository used when building deb file with liftoff
+├── dirty/ # All of the edited files
+└── working/ # Folders for our currently running tasks
+    └── (uuid)/ # A random generated folder name for a currently running task
 ```

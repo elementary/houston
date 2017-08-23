@@ -31,7 +31,6 @@
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-for-in-array": false,
-    "no-increment-decrement": true,
     "no-invalid-regexp": true,
     "no-invalid-this": true,
     "no-regex-spaces": true,

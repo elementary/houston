@@ -140,10 +140,18 @@ export class Docker {
   public async create (folder: string): Promise<void> {
     const files = await fs.readdir(folder)
 
-    await this.docker.buildImage({
-      context: folder,
-      src: files
-    }, { t: this.name })
+    await new Promise((resolve, reject) => {
+      this.docker.buildImage({
+        context: folder,
+        src: files
+      }, { t: this.name }, (err, stream) => {
+        if (err != null) {
+          return reject(err)
+        }
+
+        this.docker.modem.followProgress(stream, resolve)
+      })
+    })
   }
 
   /**

@@ -4,5 +4,6 @@
  */
 
 export interface Repository {
+  url: string
   clone: (p: string, reference?: string) => Promise<void>
 }

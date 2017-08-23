@@ -14,7 +14,7 @@
     "baseUrl": "./src",
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es2015"],
+    "lib": ["ES2015"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noUnusedLocals": true,

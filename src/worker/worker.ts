@@ -13,6 +13,8 @@ import * as uuid from 'uuid/v4'
 
 import { Config } from '../lib/config/class'
 import { Repository } from '../lib/service/base/repository'
+import { Log } from './log'
+import { WorkableConstructor } from './workable'
 
 export class Worker extends EventEmitter {
 
@@ -49,6 +51,14 @@ export class Worker extends EventEmitter {
   public repository: Repository
 
   /**
+   * logs
+   * A list of logs that occured while we were working
+   *
+   * @var {Log[]}
+   */
+  public logs: Log[]
+
+  /**
    * Creates a new worker process
    *
    * @param {Config} config - The configuration to use
@@ -70,13 +80,50 @@ export class Worker extends EventEmitter {
    */
   public async setup (): Promise<void> {
     if (this.workspace == null) {
+      this.emit('setup:start')
+
       this.workspace = path.resolve(Worker.tempDir, uuid())
 
-      const repositoryFolder = path.resolve(this.workspace, 'clean')
+      const cleanFolder = path.resolve(this.workspace, 'clean')
+      const dirtyFolder = path.resolve(this.workspace, 'dirty')
 
-      await fs.mkdirs(repositoryFolder)
-      await this.repository.clone(repositoryFolder)
+      await fs.mkdirs(cleanFolder)
+      await fs.mkdirs(dirtyFolder)
+
+      await this.repository.clone(cleanFolder)
+
+      this.emit('setup:end')
     }
+  }
+
+  /**
+   * run
+   * Runs a role in the worker
+   *
+   * @async
+   * @param {WorkableConstructor} Workable
+   * @return {boolean}
+   */
+  public async run (workable: WorkableConstructor) {
+    this.emit('run:start')
+
+    try {
+      await (new workable(this)).run()
+    } catch (e) {
+      this.emit('run:error', e)
+
+      if (e.instanceOf(Log) === false) {
+        // TODO: Error report
+        const instance = new Log(Log.Level.ERROR, 'Internal Error While Running Houston')
+        e = instance.wrap(e)
+      }
+
+      this.logs.push(e)
+    }
+
+    this.emit('run:end')
+
+    return this.passes()
   }
 
   /**
@@ -88,9 +135,43 @@ export class Worker extends EventEmitter {
    */
   public async teardown (): Promise<void> {
     if (this.workspace != null) {
+      this.emit('teardown:start')
+
       await fs.remove(this.workspace)
 
       this.workspace = undefined
+
+      this.emit('teardown:end')
     }
+  }
+
+  /**
+   * passes
+   * Checks if the worker passes
+   *
+   * @return {boolean}
+   */
+  public passes (): boolean {
+    for (let i = 0; i++; i < this.logs.length) {
+      if (this.logs[i].level === Log.Level.ERROR) {
+        return true
+      }
+
+      if (this.logs[i].level === Log.Level.WARN) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  /**
+   * fails
+   * Checks if the worker failed
+   *
+   * @return {boolean}
+   */
+  public fails (): boolean {
+    return (this.passes() === false)
   }
 }

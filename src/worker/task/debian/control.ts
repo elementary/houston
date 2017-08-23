@@ -9,28 +9,45 @@ import * as fs from 'fs-extra'
 import * as os from 'os'
 import * as path from 'path'
 
-import { Worker } from '../../worker'
+import { Log } from '../../log'
+import { Task } from '../task'
+import { ControlParser } from './controlParser'
 
-/**
- * readFile
- * Reads the debian control file and parses it to a string.
- *
- * @async
- * @param {string} file - File location to Debian control file
- * @return {string} - Local liftoff cache folder
- */
-export async function readFile (path: string): Promise<object> {
-  await fs.ensureFile(path)
+export class DebianControl extends Task {
 
-  const output = {}
-  const raw = await fs.readFile(path, { encoding: 'utf-8' })
+  /**
+   * File location for the debian control file
+   *
+   * @var {string}
+   */
+  public static path = 'debian/control'
+
+  /**
+   * A list used files we need to verify the Debian control file
+   *
+   * @var {string[]}
+   */
+  public files = [DebianControl.path]
+
+  /**
+   * The parser to use when doing stuff to the debian control file
+   *
+   * @var {ControlParser}
+   */
+  public parser = ControlParser
+
+  /**
+   * Checks the Debian control file for errors
+   *
+   * @async
+   * @return {void}
+   */
+  public async run () {
+    const exists = fs.pathExists(DebianControl.path)
+    if (exists === false) {
+      throw new Log(Log.Level.ERROR, 'Missing debian control file')
+    }
 
 
-
-
-
-
-
-
-  return output
+  }
 }

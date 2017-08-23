@@ -171,10 +171,12 @@ export class Parser {
    *
    * @async
    * @param {object} data - The data to write to file
-   * @return {void}
+   * @return {string}
    */
-  public async write (data: object): Promise<void> {
+  public async write (data: object): Promise<string> {
     await fs.ensureFile(this.file)
+
+    let output = ''
 
     Object.keys(data).forEach((key) => {
       const line = data[line]
@@ -182,5 +184,7 @@ export class Parser {
 
       console.log(line, type)
     })
+
+    return output
   }
 }

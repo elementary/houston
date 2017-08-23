@@ -1,31 +1,47 @@
 /**
  * houston/src/worker/role/build.ts
  * Builds a package and edits contents for appcenter.
- */
-
-import * as fs from 'fs-extra'
-import * as path from 'path'
-
-import { Worker } from '../worker'
-
-import { run as runBuildDeb } from '../task/build/deb'
-
-/**
- * run
- * Runs the building
  *
- * @async
- * @param {Worker} worker - The worker to use
- * @return {void}
+ * @export {Role} Build
  */
-export async function run (worker: Worker) {
-  await worker.setup()
 
-  const repositoryFolder = path.resolve(worker.workspace, 'repository')
-  const debFolder = path.resolve(worker.workspace, 'build', 'deb')
+import { Role } from './role'
 
-  await fs.copy(repositoryFolder, debFolder)
-  await runBuildDeb(worker, debFolder)
+export class Build extends Role {
+  /**
+   * Tasks to run before building
+   *
+   * @var {Task[]}
+   */
+  public prebuild = []
 
-  await worker.teardown()
+  /**
+   * Tasks to run for building
+   *
+   * @var {Task[]}
+   */
+  public build = [
+
+  ]
+
+  /**
+   * Tasks to run before testing
+   *
+   * @var {Task[]}
+   */
+  public pretest = []
+
+  /**
+   * Tasks to run for testing
+   *
+   * @var {Task[]}
+   */
+  public test = []
+
+  /**
+   * Tasks to run after testing
+   *
+   * @var {Task[]}
+   */
+  public posttest = []
 }
