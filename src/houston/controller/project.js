@@ -39,6 +39,10 @@ route.get('/cycle', policy.isRole('USER'), policy.isAgreement, async (ctx, next)
     throw new error.ControllerError(400, 'The project has no releases to cycle')
   }
 
+  if (project.release.latest._status !== 'STANDBY' && policy.ifRole(ctx.state.user, 'ADMIN') === false) {
+    throw new error.ControllerError(400, 'The project has already been cycled')
+  }
+
   await project.createCycle('RELEASE')
   .catch((err) => {
     throw new error.ControllerError(500, 'An error occured while creating a new release cycle', err, true)

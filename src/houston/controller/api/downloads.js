@@ -44,6 +44,34 @@ const findTotal = async () => {
 }
 
 /**
+ * findMonth
+ * Finds total amount of downloads for the month.
+ *
+ * @return {number}
+ */
+const findMonth = async () => {
+  const cachedRes = cache.get('findMonth')
+
+  if (cachedRes != null) {
+    return cachedRes
+  }
+
+  const downloads = await Download.aggregate([
+    { $match: { type: 'day' } },
+    { $group: { _id: 0, total: { $sum: '$current.total' } } }
+  ])
+
+  if (downloads[0] == null) {
+    return 0
+  }
+
+  const total = downloads[0]['total']
+
+  cache.set('findMonth', total)
+  return total
+}
+
+/**
  * findDay
  * Finds total amount of downloads for the current day.
  *
@@ -77,6 +105,21 @@ const findDay = async () => {
  */
 route.get('/total', async (ctx) => {
   const total = await findTotal()
+
+  ctx.status = 200
+  ctx.body = { data: {
+    total
+  }}
+
+  return
+})
+
+/**
+ * GET /api/downloads/month
+ * Returns the amount of downloads for the current month..
+ */
+route.get('/month', async (ctx) => {
+  const total = await findMonth()
 
   ctx.status = 200
   ctx.body = { data: {
