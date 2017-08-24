@@ -5,7 +5,7 @@
  * @return {class} Repository - A GitHub repository class
  */
 
-import * as Git from 'nodegit'
+import * as Git from 'simple-git'
 
 import { Repository as RepositoryInterface } from '../base/repository'
 
@@ -110,9 +110,14 @@ export class Repository implements RepositoryInterface {
    * @return {void}
    */
   public async clone (p: string, reference = this.reference): Promise<void> {
-    const repo = await Git.Clone(this.url, p)
-    const ref = await Git.Reference.lookup(repo, reference)
+    await Git(p)
+      .silent(false)
+      .clone(this.url, p, ['--depth', 1])
+      .exec()
 
-    await repo.checkoutRef(ref)
+    await Git(p)
+      .silent(false)
+      .checkout(reference)
+      .exec()
   }
 }

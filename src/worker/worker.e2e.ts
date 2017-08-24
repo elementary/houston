@@ -19,7 +19,7 @@ let config = null
 let testingDir: string
 
 // Extend the default timeout time due to long running tests
-timeout(30)
+timeout(60)
 
 // Change the default workspace location for testing
 

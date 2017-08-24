@@ -16,7 +16,7 @@ import { timeout } from '../../../../test/utility/jasmine'
 let testingDir: string
 
 // Extend the default timeout time due to long running tests
-timeout(10)
+timeout(60)
 
 beforeAll(async () => {
   testingDir = await tmp('lib/service/github')
