@@ -1,5 +1,5 @@
 /**
- * houston/src/lib/config/class.ts
+ * houston/src/lib/config/index.ts
  * The application wide configuration class
  *
  * @exports {class} config - Global configuration class

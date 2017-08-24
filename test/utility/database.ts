@@ -7,7 +7,7 @@
  * @exports {Function} setup - Creates an in memory database for use in tests
  */
 
-import { Config } from '../../src/lib/config/class'
+import { Config } from '../../src/lib/config'
 import { Database } from '../../src/lib/database/database'
 
 /**

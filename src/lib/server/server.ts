@@ -9,7 +9,7 @@ import * as http from 'http'
 import * as Koa from 'koa'
 import * as Router from 'koa-router'
 
-import { Config } from '../config/class'
+import { Config } from '../config'
 import { Database } from '../database/database'
 import { Log } from '../log'
 import * as middleware from './middleware'

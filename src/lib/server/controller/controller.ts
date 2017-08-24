@@ -5,7 +5,7 @@
  * @export {Class} Controller - The master server controller
  */
 
-import { Config } from '../../config/class'
+import { Config } from '../../config'
 import { Database } from '../../database/database'
 import { Log } from '../../log'
 import { Server } from '../server'

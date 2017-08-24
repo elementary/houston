@@ -7,7 +7,7 @@
 
 import * as path from 'path'
 
-import { Config } from '../../src/lib/config/class'
+import { Config } from '../../src/lib/config'
 import { getFileConfig } from '../../src/lib/config/loader'
 
 /**

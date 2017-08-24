@@ -11,7 +11,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
-import { Config } from './class'
+import { Config } from './index'
 
 /**
  * The prefix required for environment variables to be used.

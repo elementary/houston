@@ -12,7 +12,7 @@
 import { Client as Raven } from 'raven'
 import { inspect } from 'util'
 
-import { Config } from './config/class'
+import { Config } from './config'
 
 const levels = ['debug', 'info', 'warn', 'error', 'never']
 

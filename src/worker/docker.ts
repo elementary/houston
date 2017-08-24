@@ -9,7 +9,7 @@ import * as Dockerode from 'dockerode'
 import * as fs from 'fs-extra'
 import * as Stream from 'stream'
 
-import { Config } from '../lib/config/class'
+import { Config } from '../lib/config'
 
 export class Docker {
 

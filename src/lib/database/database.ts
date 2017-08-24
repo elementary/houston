@@ -8,7 +8,7 @@
 import * as Knex from 'knex'
 import * as path from 'path'
 
-import { Config } from '../config/class'
+import { Config } from '../config'
 import { Log } from '../log'
 
 /**

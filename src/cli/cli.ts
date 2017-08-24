@@ -6,7 +6,7 @@
 // Command line files are allowed to have console log statements
 // tslint:disable no-console
 
-import { Config } from '../lib/config/class'
+import { Config } from '../lib/config'
 import { getConfig as getConfigClass } from '../lib/config/loader'
 import { Log } from '../lib/log'
 

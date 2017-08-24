@@ -7,7 +7,7 @@
 
 import * as Dockerode from 'dockerode'
 
-import { Config } from '../../src/lib/config/class'
+import { Config } from '../../src/lib/config'
 
 /**
  * getContainers

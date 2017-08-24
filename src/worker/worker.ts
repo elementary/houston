@@ -11,7 +11,7 @@ import * as os from 'os'
 import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
-import { Config } from '../lib/config/class'
+import { Config } from '../lib/config'
 import { Repository } from '../lib/service/base/repository'
 import { Log } from './log'
 import { WorkableConstructor } from './workable'

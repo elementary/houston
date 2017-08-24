@@ -10,7 +10,7 @@
 
 import * as dgram from 'dgram'
 
-import { Config } from '../lib/config/class'
+import { Config } from '../lib/config'
 import { Database } from '../lib/database/database'
 import { Log } from '../lib/log'
 
