@@ -20,6 +20,7 @@
   "dependencies": {
     "dockerode": "^2.5.0",
     "fs-extra": "^3.0.1",
+    "inversify": "^4.3.0",
     "knex": "^0.13.0",
     "koa": "^2.2.0",
     "koa-compress": "^2.0.0",
@@ -30,9 +31,12 @@
     "lodash": "^4.17.4",
     "marko": "^4.4.5",
     "nodegit": "^0.20.1",
-    "raven": "^2.0.1",
+    "reflect-metadata": "^0.1.10",
     "uuid": "^3.0.1",
     "yargs": "^8.0.1"
+  },
+  "optionalDependencies": {
+    "raven": "^2.0.1"
   },
   "devDependencies": {
     "@types/jest": "^19.2.3",
@@ -76,6 +80,9 @@
       "json",
       "ts",
       "tsx"
+    ],
+    "setupFiles": [
+      "<rootDir>/src/bootstrap.js"
     ],
     "testRegex": "\\.(spec|e2e)\\.ts$",
     "transform": {
