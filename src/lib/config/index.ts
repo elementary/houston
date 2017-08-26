@@ -5,12 +5,14 @@
  * @exports {class} config - Global configuration class
  */
 
+import { injectable } from 'inversify'
 import { get, has, isPlainObject, merge, set } from 'lodash'
 
 /**
  * Config
  * An easy to use application wide configuration class
  */
+@injectable()
 export class Config {
 
   /**

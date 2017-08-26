@@ -17,8 +17,6 @@
     "lib": ["ES2015"],
     "module": "commonjs",
     "moduleResolution": "node",
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "outDir": "./dest",
     "pretty": true,
     "sourceMap": true,

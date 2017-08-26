@@ -3,12 +3,12 @@
  * A manager of logs and third party logging services.
  */
 
-import { injectable, multiInject } from 'inversify'
+import { inject, injectable, multiInject } from 'inversify'
 
 import { Config } from '../config'
-import { Level } from './level'
+import { Level, levelString } from './level'
 import { Log } from './log'
-import { Output, OutputConstructor, outputConstructor } from './output'
+import { Output, OutputConstructor } from './output'
 
 /**
  * Log
@@ -32,64 +32,18 @@ export class Logger {
   protected outputs: Output[] = []
 
   /**
-   * Parses a string value for a level symbol
-   *
-   * @param {String} level
-   * @return {Level}
-   */
-  protected static parseLevel (level: string): Level {
-    switch (level.toLowerCase().trim()) {
-      case ('debug'):
-        return Level.DEBUG
-      case ('info'):
-        return Level.INFO
-      case ('warn'):
-        return Level.WARN
-      case ('error'):
-        return Level.ERROR
-      default:
-        return Level.INFO
-    }
-  }
-
-  /**
-   * Does the opposite of the above function.
-   *
-   * @param {Level} level
-   * @return {Level}
-   */
-  protected static levelString (level: Level): string {
-    if (level === Level.DEBUG) {
-      return 'debug'
-    }
-
-    if (level === Level.INFO) {
-      return 'info'
-    }
-
-    if (level === Level.WARN) {
-      return 'warn'
-    }
-
-    if (level === Level.ERROR) {
-      return 'error'
-    }
-
-    return 'info'
-  }
-
-  /**
    * Creates a new logger
    *
    * @param {Config} config
+   * @param {OutputConstructor[]} outputters
    */
-  public construct (
-    config: Config,
-    @multiInject(outputConstructor) outputers: OutputConstructor[]
+  public constructor (
+    @inject(Config) config: Config,
+    @multiInject(Output) outputters: OutputConstructor[]
   ) {
     this.config = config
 
-    this.setupOutputs(outputers)
+    this.setupOutputs(outputters)
   }
 
   /**
@@ -156,7 +110,7 @@ export class Logger {
    */
   public send (log: Log) {
     this.outputs.forEach((output) => {
-      const fn = output[Logger.levelString(log.level)]
+      const fn = output[levelString(log.level)]
 
       if (fn != null) {
         fn(log)
@@ -167,13 +121,13 @@ export class Logger {
   /**
    * Sets up an output for the logger
    *
-   * @param {OutputConstructor} outputer
+   * @param {OutputConstructor} outputter
    * @return {Logger}
    */
-  protected setupOutput (outputer: OutputConstructor): this {
-    if (outputer.enabled()) {
+  protected setupOutput (outputter: OutputConstructor): this {
+    if (outputter.enabled(this.config)) {
       // I would log this here if I could.
-      this.outputs.push(new outputer(this.config))
+      this.outputs.push(new outputter(this.config))
     }
 
     return this
@@ -182,12 +136,12 @@ export class Logger {
   /**
    * Given an array of outputters, we try to set them up
    *
-   * @param {OutputConstructor[]} outputers
+   * @param {OutputConstructor[]} outputters
    * @return {Logger}
    */
-  protected setupOutputs (outputers: OutputConstructor[]): this {
-    outputers.forEach((outputer) => {
-      this.setupOutput(outputer)
+  protected setupOutputs (outputters: OutputConstructor[]): this {
+    outputters.forEach((outputter) => {
+      this.setupOutput(outputter)
     })
 
     return this

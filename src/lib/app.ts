@@ -31,7 +31,6 @@ export class App extends Container {
   public constructor (config: Config) {
     super()
 
-    this.bind<App>(App).toConstantValue(this)
     this.bind<Config>(Config).toConstantValue(config)
 
     this.setupProviders()

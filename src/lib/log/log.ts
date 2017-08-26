@@ -39,6 +39,13 @@ export class Log {
   public data: object
 
   /**
+   * An error attached to the log
+   *
+   * @var {Error}
+   */
+  public error?: Error
+
+  /**
    * The date the log was created
    *
    * @var {Date}
@@ -101,6 +108,19 @@ export class Log {
    */
   public setData (key: string, value): this {
     this.data[key] = value
+
+    return this
+  }
+
+  /**
+   * A shorthand for attaching an error message to a log
+   *
+   * @param {Error} err
+   *
+   * @return {Log}
+   */
+  public setError (err: Error): this {
+    this.error = err
 
     return this
   }

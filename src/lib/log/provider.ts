@@ -7,12 +7,15 @@ import { ContainerModule } from 'inversify'
 
 import { Log } from './log'
 import { Logger } from './logger'
-import { Output, output } from './output'
+import { Output } from './output'
+import { Console } from './outputs/console'
 import { Sentry } from './outputs/sentry'
 
 export const provider = new ContainerModule((bind) => {
-  bind<Log>(Log).toSelf()
-  bind<Logger>(Logger).toSelf()
+  bind<Output>(Output).toConstructor(Console)
+  bind<Output>(Output).toConstructor(Sentry)
 
-  bind<Output>(output).to(Sentry)
+  bind<Log>(Log).toConstructor(Log)
+
+  bind<Logger>(Logger).toSelf()
 })
