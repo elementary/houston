@@ -82,7 +82,6 @@ const fixChangelogVersion = (changelog: Object, build: Object, distribution: str
  * Creates the debian changelog
  */
 export default class DebianChangelog extends Pipe {
-
   /**
    * Creates a new Pipe
    *
@@ -130,9 +129,9 @@ export default class DebianChangelog extends Pipe {
     this.data.changelog = this.data.changelog.map((a) => fixChangelogVersion(a, this.pipeline.build, d))
 
     this.data.changelog = this.data.changelog
-    .sort((a, b) => semver.compare(b.version, a.version))
-    .map((change) => render('flightcheck/pipes/Debian/Changelog/changelog.nun', change, false).body)
-    .join('\n\n')
+      .sort((a, b) => semver.compare(b.version, a.version))
+      .map((change) => render('flightcheck/pipes/Debian/Changelog/changelog.nun', change, false).body)
+      .join('\n\n')
 
     await file.write(this.data.changelog)
   }

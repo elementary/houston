@@ -32,8 +32,8 @@ export function setup (server) {
 
   passport.deserializeUser((id, done) => {
     User.findById(id)
-    .then((user) => done(null, user))
-    .catch((error) => done(error))
+      .then((user) => done(null, user))
+      .catch((error) => done(error))
   })
 
   passport.use(github.strategy)

@@ -22,7 +22,6 @@ const log = new Log('flightcheck:AppData')
  * @extends Pipe
  */
 export default class AppData extends Pipe {
-
   /**
    * code
    * Checks for a valid appdata file

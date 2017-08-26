@@ -22,7 +22,6 @@ const log = new Log('flightcheck:ElementaryAptly')
  * @extends Pipe
  */
 export default class ElementaryAptly extends Pipe {
-
   /**
    * Creates a new Pipe
    *

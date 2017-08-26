@@ -15,7 +15,6 @@ import Pipe from 'flightcheck/pipes/pipe'
  * Creates the debian control file
  */
 export default class DebianControl extends Pipe {
-
   /**
    * Creates a new Pipe
    *

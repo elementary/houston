@@ -25,7 +25,6 @@ const client = monq(config.database)
  * @emits Worker#error
  */
 export class Worker extends events.EventEmitter {
-
   /**
    * Creates a queue worker
    *
@@ -67,8 +66,8 @@ export class Worker extends events.EventEmitter {
     this.worker.register({
       [name]: (param, callback) => {
         fn(param)
-        .then((data) => callback(null, data))
-        .catch((err) => callback(err))
+          .then((data) => callback(null, data))
+          .catch((err) => callback(err))
       }
     })
   }
@@ -79,7 +78,6 @@ export class Worker extends events.EventEmitter {
  * Adds items to worker queue
  */
 export class Sender {
-
   /**
    * Creates a new queue sender
    *

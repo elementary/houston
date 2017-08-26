@@ -19,7 +19,6 @@
  * @param {String} - Error message
  */
 class Mistake extends Error {
-
   /**
    * Creates a new error for use in server
    * WARN: unnamed arguments ahead, procead with causion

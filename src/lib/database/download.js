@@ -129,7 +129,7 @@ schema.statics.findYear = function (id: db.Types.ObjectId): Promise<?Object> {
     release: id,
     type: 'year'
   })
-  .sort('expireAt', 1)
+    .sort('expireAt', 1)
 }
 
 /**
@@ -145,7 +145,7 @@ schema.statics.findMonth = function (id: db.Types.ObjectId): Promise<?Object> {
     release: id,
     type: 'month'
   })
-  .sort('expireAt', 1)
+    .sort('expireAt', 1)
 }
 
 /**
@@ -161,7 +161,7 @@ schema.statics.findDay = function (id: db.Types.ObjectId): Promise<?Object> {
     release: id,
     type: 'day'
   })
-  .sort('expireAt', 1)
+    .sort('expireAt', 1)
 }
 
 /**
@@ -177,7 +177,7 @@ schema.statics.findHour = function (id: db.Types.ObjectId): Promise<?Object> {
     release: id,
     type: 'hour'
   })
-  .sort('expireAt', 1)
+    .sort('expireAt', 1)
 }
 
 /**

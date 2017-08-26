@@ -19,7 +19,6 @@ const log = new Log('flightcheck:GitHubIssue')
  * @extends Pipe
  */
 export default class GitHubIssue extends Pipe {
-
   /**
    * Creates a new Pipe
    *
@@ -65,8 +64,8 @@ export default class GitHubIssue extends Pipe {
     const token = await github.generateToken(Number(this.pipeline.build.auth))
 
     const hasLabel = await github.getLabel(owner, repo, apphub.log.label, token)
-    .then(() => true)
-    .catch(() => false)
+      .then(() => true)
+      .catch(() => false)
 
     if (hasLabel) {
       log.debug('Label already exists. Not posting new label')
@@ -93,11 +92,11 @@ export default class GitHubIssue extends Pipe {
         labels: [apphub.log.label]
       }))
     })
-    .catch((err) => {
-      log.error('Encountered an error trying to push logs')
-      log.error(err)
+      .catch((err) => {
+        log.error('Encountered an error trying to push logs')
+        log.error(err)
 
-      return this.log('error', 'GitHub/Issue/error.md')
-    })
+        return this.log('error', 'GitHub/Issue/error.md')
+      })
   }
 }

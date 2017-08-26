@@ -123,8 +123,8 @@ export const strategy = new github.Strategy({
   callbackURL: `${config.server.url}/auth/github/callback`
 }, (access, refresh, profile, done) => {
   upsertUser(access, refresh, profile)
-  .then((user) => done(null, user))
-  .catch((err) => done(err))
+    .then((user) => done(null, user))
+    .catch((err) => done(err))
 })
 
 // Koa server routes used for authentication

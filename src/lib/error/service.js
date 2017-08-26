@@ -14,7 +14,6 @@ import { ApplicationError } from './application'
  * @property {String} service - Name of service error is from
  */
 export class ServiceError extends ApplicationError {
-
   service: string
 
   /**
@@ -38,7 +37,6 @@ export class ServiceError extends ApplicationError {
  * @property {String} key - Configuration key that has an error
  */
 export class ServiceConfigError extends ServiceError {
-
   key: string
 
   /**
@@ -63,7 +61,6 @@ export class ServiceConfigError extends ServiceError {
  * @property {Number} status - HTTP status code of request
  */
 export class ServiceRequestError extends ServiceError {
-
   status: Number
 
   /**
@@ -88,7 +85,6 @@ export class ServiceRequestError extends ServiceError {
  * @property {Date} expire - Date when more requests will be available
  */
 export class ServiceLimitError extends ServiceError {
-
   expire: Date
 
   /**

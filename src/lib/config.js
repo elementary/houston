@@ -70,7 +70,7 @@ try {
   commit = fs.readFileSync(path.resolve(alias.resolve.alias['root'], '.git', 'ORIG_HEAD'), {
     encoding: 'utf8'
   })
-  .split('\n')[0]
+    .split('\n')[0]
 } catch (error) {}
 
 config = _.merge(config, {

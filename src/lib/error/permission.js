@@ -20,7 +20,6 @@ import { ApplicationError } from './application'
  * @property {User} user - User that does not have permission
  */
 export class PermissionError extends ApplicationError {
-
   user: Object
 
   /**
@@ -41,7 +40,6 @@ export class PermissionError extends ApplicationError {
  * An error due to the user not accepting the TOS agreement
  */
 export class PermissionAgreementError extends PermissionError {
-
   /**
    * Creates a new PermissionError
    *
@@ -59,7 +57,6 @@ export class PermissionAgreementError extends PermissionError {
  * @property {String} right - The user's needed right
  */
 export class PermissionRightError extends PermissionError {
-
   right: string
 
   /**

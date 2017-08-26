@@ -18,7 +18,6 @@ const log = new Log('flightcheck:Repack:Pack')
  * Packs a deb file into an installable deb file
  */
 export default class Pack extends Pipe {
-
   /**
    * directoryExists
    * Checks that a folder exists.

@@ -26,10 +26,7 @@ route.use(async (ctx, next) => {
     log.error(err)
 
     ctx.status = 500
-    return
   }
-
-  return
 })
 
 route.use(github.routes(), github.allowedMethods())
@@ -40,7 +37,6 @@ route.use(github.routes(), github.allowedMethods())
  */
 route.all('*', (ctx) => {
   ctx.status = 404
-  return
 })
 
 // Use event hook listeners as well

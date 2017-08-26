@@ -16,7 +16,6 @@ import File from './index'
  * @extends File
  */
 export default class Parsable extends File {
-
   /**
    * Creates a file class
    *

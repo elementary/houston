@@ -110,8 +110,6 @@ route.get('/total', async (ctx) => {
   ctx.body = { data: {
     total
   }}
-
-  return
 })
 
 /**
@@ -125,8 +123,6 @@ route.get('/month', async (ctx) => {
   ctx.body = { data: {
     total
   }}
-
-  return
 })
 
 /**
@@ -140,8 +136,6 @@ route.get('/day', async (ctx) => {
   ctx.body = { data: {
     total
   }}
-
-  return
 })
 
 export default route

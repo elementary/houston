@@ -18,7 +18,6 @@ import Pipe from 'flightcheck/pipes/pipe'
  * @extends Pipe
  */
 export default class AppHub extends Pipe {
-
   /**
    * Creates a new Pipe
    *

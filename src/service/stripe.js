@@ -15,12 +15,12 @@ import Log from 'lib/log'
 
 const log = new Log('service:stripe')
 
-const auth = new Buffer(`${config.stripe.secret}:`).toString('base64')
+const auth = Buffer.from(`${config.stripe.secret}:`).toString('base64')
 const api = domain('https://api.stripe.com/v1')
-.use((req) => {
-  req.set('Authorization', `Basic ${auth}`)
-  req.set('User-Agent', 'elementary-houston')
-})
+  .use((req) => {
+    req.set('Authorization', `Basic ${auth}`)
+    req.set('User-Agent', 'elementary-houston')
+  })
 
 export default api
 
@@ -104,11 +104,11 @@ export async function getAccount (account: string): Object {
   }
 
   return api
-  .get(`/accounts/${account}`)
-  .then((res) => res.body)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .get(`/accounts/${account}`)
+    .then((res) => res.body)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -148,18 +148,18 @@ export function postCharge (account: string, token: string, amount: number, curr
   log.debug(`Creating a new charge for the amount of ${cut['total']} with developer getting ${cut['developer']}`)
 
   return api
-  .post('/charges')
-  .set('Stripe-Account', account)
-  .type('form')
-  .send({
-    amount: cut['total'],
-    application_fee: cut['elementary'],
-    currency,
-    description,
-    source: token
-  })
-  .then((res) => res.body.id)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .post('/charges')
+    .set('Stripe-Account', account)
+    .type('form')
+    .send({
+      amount: cut['total'],
+      application_fee: cut['elementary'],
+      currency,
+      description,
+      source: token
+    })
+    .then((res) => res.body.id)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }

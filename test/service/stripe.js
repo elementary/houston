@@ -63,10 +63,10 @@ test('Can post a charge', async (t) => {
   const stripe = t.context.stripe
 
   nock('https://api.stripe.com:443', { encodedQueryParams: true })
-  .replyContentLength()
-  .replyDate()
-  .post('/v1/charges', 'amount=100&application_fee=17&currency=USD&description=Purchase%20of%20com.github.btkostner.vocal&source=tok_489z4f23g89489344g894d9a')
-  .reply(200, fixture.mockCharge(), fixture.header)
+    .replyContentLength()
+    .replyDate()
+    .post('/v1/charges', 'amount=100&application_fee=17&currency=USD&description=Purchase%20of%20com.github.btkostner.vocal&source=tok_489z4f23g89489344g894d9a')
+    .reply(200, fixture.mockCharge(), fixture.header)
 
   const one = await stripe.postCharge('acct_j8930zj093jfASDF', 'tok_489z4f23g89489344g894d9a', 100, 'USD', 'Purchase of com.github.btkostner.vocal')
 

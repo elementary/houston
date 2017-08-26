@@ -15,10 +15,13 @@ import mockConfig from 'test/fixtures/config'
 
 mock(path.resolve(alias.resolve.alias['root'], 'config.js'), mockConfig)
 
+// Disable first import due to node module cache and mocking of configuration
+/* eslint-disable import/first */
 import config from 'lib/config'
 import database from 'lib/database/connection'
 import Project from 'lib/database/project'
 import server from 'houston/index'
+/* eslint-enable import/first */
 
 database.connect(config.database)
 
@@ -64,20 +67,20 @@ const containsError = (res, str) => {
 
 test('Returns 400 with invalid Project', (t) => {
   return request(server.listen())
-  .get('/api/payment/invalidName')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .expect(400)
-  .expect((res) => containsError(res, 'project'))
+    .get('/api/payment/invalidName')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .expect(400)
+    .expect((res) => containsError(res, 'project'))
 })
 
 test('Returns 404 with unknown Project', (t) => {
   return request(server.listen())
-  .get('/api/payment/com.testing.apipayments.0')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .expect(404)
-  .expect((res) => containsError(res, 'project'))
+    .get('/api/payment/com.testing.apipayments.0')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .expect(404)
+    .expect((res) => containsError(res, 'project'))
 })
 
 test('Returns 400 with disabled Project', async (t) => {
@@ -91,11 +94,11 @@ test('Returns 400 with disabled Project', async (t) => {
   })
 
   return request(server.listen())
-  .get('/api/payment/com.testing.apipayments.1')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .expect(400)
-  .expect((res) => containsError(res, 'enabled'))
+    .get('/api/payment/com.testing.apipayments.1')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .expect(400)
+    .expect((res) => containsError(res, 'enabled'))
 })
 
 test('Returns key with enabled Project', async (t) => {
@@ -112,12 +115,12 @@ test('Returns key with enabled Project', async (t) => {
   })
 
   return request(server.listen())
-  .get('/api/payment/com.testing.apipayments.2')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .expect(200)
-  .expect((res) => (res.body.name === 'com.testing.apipayments.2'))
-  .expect((res) => (res.body.key === 'testingkey'))
+    .get('/api/payment/com.testing.apipayments.2')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .expect(200)
+    .expect((res) => (res.body.name === 'com.testing.apipayments.2'))
+    .expect((res) => (res.body.key === 'testingkey'))
 })
 
 test('Returns 400 with missing Project key', async (t) => {
@@ -134,16 +137,16 @@ test('Returns 400 with missing Project key', async (t) => {
   })
 
   return request(server.listen())
-  .post('/api/payment/com.testing.apipayments.3')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .send({
-    data: Object.assign({}, GOLD_REQ, {
-      key: null
+    .post('/api/payment/com.testing.apipayments.3')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .send({
+      data: Object.assign({}, GOLD_REQ, {
+        key: null
+      })
     })
-  })
-  .expect(400)
-  .expect((res) => containsError(res, 'key'))
+    .expect(400)
+    .expect((res) => containsError(res, 'key'))
 })
 
 test('Returns 400 with incorrect Project key', async (t) => {
@@ -160,16 +163,16 @@ test('Returns 400 with incorrect Project key', async (t) => {
   })
 
   return request(server.listen())
-  .post('/api/payment/com.testing.apipayments.4')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .send({
-    data: Object.assign({}, GOLD_REQ, {
-      key: 'thisisinvalidkey'
+    .post('/api/payment/com.testing.apipayments.4')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .send({
+      data: Object.assign({}, GOLD_REQ, {
+        key: 'thisisinvalidkey'
+      })
     })
-  })
-  .expect(400)
-  .expect((res) => containsError(res, 'key'))
+    .expect(400)
+    .expect((res) => containsError(res, 'key'))
 })
 
 test('Returns 400 with missing Project token', async (t) => {
@@ -186,16 +189,16 @@ test('Returns 400 with missing Project token', async (t) => {
   })
 
   return request(server.listen())
-  .post('/api/payment/com.testing.apipayments.5')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .send({
-    data: Object.assign({}, GOLD_REQ, {
-      token: null
+    .post('/api/payment/com.testing.apipayments.5')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .send({
+      data: Object.assign({}, GOLD_REQ, {
+        token: null
+      })
     })
-  })
-  .expect(400)
-  .expect((res) => containsError(res, 'token'))
+    .expect(400)
+    .expect((res) => containsError(res, 'token'))
 })
 
 test('Returns 400 with incorrect Project token', async (t) => {
@@ -212,16 +215,16 @@ test('Returns 400 with incorrect Project token', async (t) => {
   })
 
   return request(server.listen())
-  .post('/api/payment/com.testing.apipayments.6')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .send({
-    data: Object.assign({}, GOLD_REQ, {
-      token: 'thisisinvalidkey'
+    .post('/api/payment/com.testing.apipayments.6')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .send({
+      data: Object.assign({}, GOLD_REQ, {
+        token: 'thisisinvalidkey'
+      })
     })
-  })
-  .expect(400)
-  .expect((res) => containsError(res, 'token'))
+    .expect(400)
+    .expect((res) => containsError(res, 'token'))
 })
 
 test('Returns 400 with negative payment amount', async (t) => {
@@ -238,16 +241,16 @@ test('Returns 400 with negative payment amount', async (t) => {
   })
 
   return request(server.listen())
-  .post('/api/payment/com.testing.apipayments.7')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .send({
-    data: Object.assign({}, GOLD_REQ, {
-      amount: 'testing'
+    .post('/api/payment/com.testing.apipayments.7')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .send({
+      data: Object.assign({}, GOLD_REQ, {
+        amount: 'testing'
+      })
     })
-  })
-  .expect(400)
-  .expect((res) => containsError(res, 'amount'))
+    .expect(400)
+    .expect((res) => containsError(res, 'amount'))
 })
 
 test('Returns 400 with incorrect payment amount type', async (t) => {
@@ -264,16 +267,16 @@ test('Returns 400 with incorrect payment amount type', async (t) => {
   })
 
   return request(server.listen())
-  .post('/api/payment/com.testing.apipayments.8')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .send({
-    data: Object.assign({}, GOLD_REQ, {
-      amount: 'thisneedstobeanumber'
+    .post('/api/payment/com.testing.apipayments.8')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .send({
+      data: Object.assign({}, GOLD_REQ, {
+        amount: 'thisneedstobeanumber'
+      })
     })
-  })
-  .expect(400)
-  .expect((res) => containsError(res, 'amount'))
+    .expect(400)
+    .expect((res) => containsError(res, 'amount'))
 })
 
 test('Returns 400 with payment amount less than $1', async (t) => {
@@ -290,16 +293,16 @@ test('Returns 400 with payment amount less than $1', async (t) => {
   })
 
   return request(server.listen())
-  .post('/api/payment/com.testing.apipayments.9')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .send({
-    data: Object.assign({}, GOLD_REQ, {
-      amount: 10
+    .post('/api/payment/com.testing.apipayments.9')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .send({
+      data: Object.assign({}, GOLD_REQ, {
+        amount: 10
+      })
     })
-  })
-  .expect(400)
-  .expect((res) => containsError(res, 'amount'))
+    .expect(400)
+    .expect((res) => containsError(res, 'amount'))
 })
 
 test('Returns 400 with missing payment currency', async (t) => {
@@ -316,16 +319,16 @@ test('Returns 400 with missing payment currency', async (t) => {
   })
 
   return request(server.listen())
-  .post('/api/payment/com.testing.apipayments.10')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .send({
-    data: Object.assign({}, GOLD_REQ, {
-      currency: null
+    .post('/api/payment/com.testing.apipayments.10')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .send({
+      data: Object.assign({}, GOLD_REQ, {
+        currency: null
+      })
     })
-  })
-  .expect(400)
-  .expect((res) => containsError(res, 'currency'))
+    .expect(400)
+    .expect((res) => containsError(res, 'currency'))
 })
 
 test('Returns 400 with payment currency not USD', async (t) => {
@@ -342,16 +345,16 @@ test('Returns 400 with payment currency not USD', async (t) => {
   })
 
   return request(server.listen())
-  .post('/api/payment/com.testing.apipayments.11')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .send({
-    data: Object.assign({}, GOLD_REQ, {
-      currency: 'JPY'
+    .post('/api/payment/com.testing.apipayments.11')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .send({
+      data: Object.assign({}, GOLD_REQ, {
+        currency: 'JPY'
+      })
     })
-  })
-  .expect(400)
-  .expect((res) => containsError(res, 'currency'))
+    .expect(400)
+    .expect((res) => containsError(res, 'currency'))
 })
 
 test('Returns 200 with successful payment', async (t) => {
@@ -368,25 +371,25 @@ test('Returns 200 with successful payment', async (t) => {
   })
 
   nock('https://api.stripe.com:443', { encodedQueryParams: true })
-  .replyContentLength()
-  .replyDate()
-  .post('/v1/charges', 'amount=1000&application_fee=241&currency=USD&description=Payment%20for%20com.testing.apipayments.12&source=tok_321')
-  .reply(200, stripeFixture.mockCharge(), stripeFixture.header)
+    .replyContentLength()
+    .replyDate()
+    .post('/v1/charges', 'amount=1000&application_fee=241&currency=USD&description=Payment%20for%20com.testing.apipayments.12&source=tok_321')
+    .reply(200, stripeFixture.mockCharge(), stripeFixture.header)
 
   return request(server.listen())
-  .post('/api/payment/com.testing.apipayments.12')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .send({
-    data: Object.assign({}, GOLD_REQ, {
-      key: 'pk_123',
-      token: 'tok_321',
-      amount: 1000,
-      currency: 'USD'
+    .post('/api/payment/com.testing.apipayments.12')
+    .set('Accept', 'application/vnd.api+json')
+    .set('Content-Type', 'application/vnd.api+json')
+    .send({
+      data: Object.assign({}, GOLD_REQ, {
+        key: 'pk_123',
+        token: 'tok_321',
+        amount: 1000,
+        currency: 'USD'
+      })
     })
-  })
-  .expect(200)
-  .expect((res) => (res.body.data.name === 'com.testing.apipayments.12'))
-  .expect((res) => (res.body.data.key === 'pk_123'))
-  .expect((res) => (res.body.data.amount === 1000))
+    .expect(200)
+    .expect((res) => (res.body.data.name === 'com.testing.apipayments.12'))
+    .expect((res) => (res.body.data.key === 'pk_123'))
+    .expect((res) => (res.body.data.amount === 1000))
 })

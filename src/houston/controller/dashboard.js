@@ -31,19 +31,19 @@ route.get('', (ctx) => {
  */
 route.get('/dashboard', policy.isRole('USER'), policy.isAgreement, async (ctx, next) => {
   const githubProjects = await github.getReposForUser(ctx.state.user)
-  .map((repo) => repo.github.id)
+    .map((repo) => repo.github.id)
 
   const databaseProjects = await Project.find({
     'github.id': { $in: githubProjects }
   })
-  .populate('stripe.user')
+    .populate('stripe.user')
 
   const projects = await Promise.resolve(databaseProjects)
-  .map(async (project) => {
-    project.status = await project.getStatus()
+    .map(async (project) => {
+      project.status = await project.getStatus()
 
-    return project
-  })
+      return project
+    })
 
   return ctx.render('dashboard', { title: 'Dashboard', projects })
 })

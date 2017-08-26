@@ -20,7 +20,7 @@ route.get('/beta', async (ctx, next) => {
     right: 'USER',
     'notify.beta': true
   })
-  .sort('date.joined')
+    .sort('date.joined')
 
   return ctx.render('admin/beta', { users })
 })

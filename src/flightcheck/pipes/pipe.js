@@ -33,7 +33,6 @@ const log = new Log('flightcheck:Pipe')
  * @fires Pipe#log
  */
 export default class Pipe extends events.EventEmitter {
-
   /**
    * Creates a new Pipe
    *
@@ -60,10 +59,10 @@ export default class Pipe extends events.EventEmitter {
 
     // holds all information from log() done in the pipe
     this.logs = {
-      debug: [],   // debug - information gathered while testing (file dumps etc)
-      info: [],    // info  - information about the test, but not worthy of being talked about (extra data etc)
-      warn: [],    // warn - information that is incorrect, but automaticlly fixed (incorrect values etc)
-      error: []    // error - unrecoverable errors that end the build process (build error etc)
+      debug: [], // debug - information gathered while testing (file dumps etc)
+      info: [], // info  - information about the test, but not worthy of being talked about (extra data etc)
+      warn: [], // warn - information that is incorrect, but automaticlly fixed (incorrect values etc)
+      error: [] // error - unrecoverable errors that end the build process (build error etc)
     }
   }
 
@@ -97,20 +96,20 @@ export default class Pipe extends events.EventEmitter {
     this.promise = this.code(...args)
 
     await this.promise
-    .catch((err) => {
-      if (err.pipe != null && err.pipe === this.name) {
-        log.warn(`${err.pipe} pipe throwed an error`)
-        this.emit('error', err)
-      } else if (err.pipe != null) {
-        log.debug(`${this.name} is rethrowing an error from ${err.pipe}`)
-      } else {
-        log.error(`${this.name} has an uncaught error`)
-        err.pipe = this.name
-        this.emit('error', err)
-      }
+      .catch((err) => {
+        if (err.pipe != null && err.pipe === this.name) {
+          log.warn(`${err.pipe} pipe throwed an error`)
+          this.emit('error', err)
+        } else if (err.pipe != null) {
+          log.debug(`${this.name} is rethrowing an error from ${err.pipe}`)
+        } else {
+          log.error(`${this.name} has an uncaught error`)
+          err.pipe = this.name
+          this.emit('error', err)
+        }
 
-      throw err
-    })
+        throw err
+      })
 
     log.debug(`Finished ${this.name} pipe`)
     this.emit('finish')

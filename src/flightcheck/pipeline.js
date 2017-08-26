@@ -34,7 +34,6 @@ const log = new Log('flightcheck:Pipeline')
  * @fires Pipeline#pipe:log
  */
 export default class Pipeline extends events.EventEmitter {
-
   /**
    * Creates a new pipeline
    *
@@ -184,8 +183,8 @@ export default class Pipeline extends events.EventEmitter {
     assert(pipes[pipe], `${pipe} does not exist and therefor pipeline cannot be started`)
 
     return this.setup()
-    .then(() => this.require(pipe))
-    .finally(() => this.teardown())
+      .then(() => this.require(pipe))
+      .finally(() => this.teardown())
   }
 
   /**

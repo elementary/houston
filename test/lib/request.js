@@ -12,16 +12,16 @@ test.beforeEach((t) => {
   nock.disableNetConnect()
 
   nock('http://nope.com')
-  .post('/endpoint')
-  .reply(200, {
-    'key': 'value'
-  })
+    .post('/endpoint')
+    .reply(200, {
+      'key': 'value'
+    })
 
   nock('http://nope.com')
-  .post('/endpoint2')
-  .reply(200, {
-    'key': 'value2'
-  })
+    .post('/endpoint2')
+    .reply(200, {
+      'key': 'value2'
+    })
 })
 
 test('Can prefix a domain url', async (t) => {
@@ -36,10 +36,10 @@ test('Can prefix a domain url', async (t) => {
 
 test('Can use methods for each domain request', (t) => {
   const one = request.domain('http://nope.com')
-  .use((req) => {
-    req.url = 'http://testing.com'
-    return req
-  })
+    .use((req) => {
+      req.url = 'http://testing.com'
+      return req
+    })
 
   const two = one.post('/endpoint')
   const three = one.post('/endpoint2')

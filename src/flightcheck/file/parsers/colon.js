@@ -61,7 +61,6 @@ export async function read (str) {
       type = 'multiline'
 
       data[current] += `\n${line}` // keep any whitespace around it
-      return
     }
   })
 

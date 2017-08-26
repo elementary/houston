@@ -23,7 +23,6 @@ const log = new Log('flightcheck:Liftoff')
  * Builds projects with liftoff
  */
 export default class Liftoff extends Pipe {
-
   /**
    * Creates a new Pipe
    *
@@ -81,12 +80,12 @@ export default class Liftoff extends Pipe {
     }
 
     const debs = await fs.readdirAsync(buildPath)
-    .filter(async (p) => {
-      const stat = await fs.statAsync(path.join(buildPath, p))
+      .filter(async (p) => {
+        const stat = await fs.statAsync(path.join(buildPath, p))
 
-      if (!stat.isFile()) return false
-      return (path.extname(p) === '.deb')
-    })
+        if (!stat.isFile()) return false
+        return (path.extname(p) === '.deb')
+      })
 
     log.debug(`Found ${debs.length} deb files in folder`)
 

@@ -17,7 +17,6 @@ import Pipe from 'flightcheck/pipes/pipe'
  * @extends Pipe
  */
 export default class Build extends Pipe {
-
   /**
    * Creates a new Pipe
    *

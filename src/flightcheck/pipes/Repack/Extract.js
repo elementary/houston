@@ -18,7 +18,6 @@ const log = new Log('flightcheck:Repack:Extract')
  * Extracts the deb file into editable files
  */
 export default class Extract extends Pipe {
-
   /**
    * fileExists
    * Checks that a file exists.

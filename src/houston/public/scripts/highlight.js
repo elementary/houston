@@ -21,10 +21,10 @@ $('document').ready(function () {
     $(this).parent().addClass('highlighted')
 
     if (!$(this).hasClass('nohighlight')) {
-        // Highlight code block
+      // Highlight code block
       hljs.highlightBlock(block)
     } else {
-        // Fake highlighting for stylesheet things
+      // Fake highlighting for stylesheet things
       $(this).addClass('hljs')
     }
   })

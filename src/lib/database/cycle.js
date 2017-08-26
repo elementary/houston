@@ -158,22 +158,22 @@ schema.methods.setStatus = function (status) {
   const options = schema.paths._status.enumValues
 
   if (options.indexOf(this._status) >= options.indexOf(status)) {
-    return Promise.reject('Status is already greater than requested')
+    return Promise.reject(new Error('Status is already greater than requested'))
   }
 
   if (this.type === 'INIT' && (!final || options.indexOf(status) >= 2)) {
-    return Promise.reject('Unable to set status past "RUN" on "INIT" type cycles')
+    return Promise.reject(new Error('Unable to set status past "RUN" on "INIT" type cycles'))
   }
   if (this.type === 'ORPHAN' && (!final || options.indexOf(status) >= 3)) {
-    return Promise.reject('Unable to set status past "REVIEW" on "ORPHAN" type cycles')
+    return Promise.reject(new Error('Unable to set status past "REVIEW" on "ORPHAN" type cycles'))
   }
 
   return this.update({ _status: status })
-  .then((data) => {
-    if (data.nModified === 1) this._status = status
+    .then((data) => {
+      if (data.nModified === 1) this._status = status
 
-    return data
-  })
+      return data
+    })
 }
 
 /**
@@ -203,8 +203,8 @@ schema.pre('save', function (next) {
   if (!this.isNew) return next()
 
   return this.doFlightcheck()
-  .then(() => next())
-  .catch((error) => next(error))
+    .then(() => next())
+    .catch((error) => next(error))
 })
 
 export { schema }

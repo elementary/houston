@@ -44,10 +44,10 @@ const log = new Log('service:github')
 const GITHUB_CACHE_TIME = 1 * 60 * 60 * 60 * 1000
 
 const api = domain('https://api.github.com')
-.use((req) => {
-  req.set('Accept', 'application/vnd.github.machine-man-preview+json')
-  req.set('User-Agent', 'elementary-houston')
-})
+  .use((req) => {
+    req.set('Accept', 'application/vnd.github.machine-man-preview+json')
+    req.set('User-Agent', 'elementary-houston')
+  })
 
 export default api
 
@@ -256,8 +256,8 @@ export async function generateToken (inst: number, user: ?number): Promise<strin
   const JWT = await generateJWT()
 
   const githubReq = api
-  .post(`/installations/${inst}/access_tokens`)
-  .set('Authorization', `Bearer ${JWT}`)
+    .post(`/installations/${inst}/access_tokens`)
+    .set('Authorization', `Bearer ${JWT}`)
 
   if (user != null) {
     log.debug(`Generating a token for user ${user}`)
@@ -265,16 +265,16 @@ export async function generateToken (inst: number, user: ?number): Promise<strin
   }
 
   const githubRes = await githubReq
-  .then((res) => res.body)
-  .catch((err) => {
-    if (err.status === '404') {
-      log.error('Trying to generate GitHub token for an incorrect organization integration ID')
-      throw new error.ServiceError('GitHub', 'Incorrect organization integration ID')
-    }
+    .then((res) => res.body)
+    .catch((err) => {
+      if (err.status === '404') {
+        log.error('Trying to generate GitHub token for an incorrect organization integration ID')
+        throw new error.ServiceError('GitHub', 'Incorrect organization integration ID')
+      }
 
-    log.error(`Trying to generate GitHub token returned a ${err.status}`)
-    throw new error.ServiceRequestError('GitHub', err.status, 'Unable to generate authentication token')
-  })
+      log.error(`Trying to generate GitHub token returned a ${err.status}`)
+      throw new error.ServiceRequestError('GitHub', err.status, 'Unable to generate authentication token')
+    })
 
   if (githubRes != null && githubRes.token != null && githubRes.expires_at != null) {
     setToken(inst, githubRes.token, moment(githubRes.expires_at).toDate(), user)
@@ -302,12 +302,12 @@ export async function generateToken (inst: number, user: ?number): Promise<strin
  */
 export function getRepo (owner: string, repo: string, token: string): Promise<Object> {
   return api
-  .get(`/repos/${owner}/${repo}`)
-  .set('Authorization', `token ${token}`)
-  .then((res) => castProject(res.body))
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .get(`/repos/${owner}/${repo}`)
+    .set('Authorization', `token ${token}`)
+    .then((res) => castProject(res.body))
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -342,17 +342,17 @@ export async function getReposForUser (user: User): Promise<Array<Object>> {
   }
 
   const req = api
-  .get('/user/repos')
-  .set('Authorization', `token ${user.github.access}`)
-  .query({
-    sort: 'pushed'
-  })
+    .get('/user/repos')
+    .set('Authorization', `token ${user.github.access}`)
+    .query({
+      sort: 'pushed'
+    })
 
   const projects = await pagination(req)
-  .then((res) => res.body.map((project) => castProject(project)))
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .then((res) => res.body.map((project) => castProject(project)))
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 
   await user.update({
     'github.cache': new Date(),
@@ -378,27 +378,27 @@ export async function getReposForUser (user: User): Promise<Array<Object>> {
  */
 export function getReleases (owner: string, repo: string, token: ?string): Promise<Array<Object>> {
   let req = api
-  .get(`/repos/${owner}/${repo}/releases`)
+    .get(`/repos/${owner}/${repo}/releases`)
 
   if (token != null) req = req.set('Authorization', `token ${token}`)
 
   return pagination(req)
-  .then((res) => {
-    const releases = []
+    .then((res) => {
+      const releases = []
 
-    res.body.forEach((release) => {
-      try {
-        releases.push(castRelease(release))
-      } catch (e) {
-        log.error(e)
-      }
+      res.body.forEach((release) => {
+        try {
+          releases.push(castRelease(release))
+        } catch (e) {
+          log.error(e)
+        }
+      })
+
+      return releases
     })
-
-    return releases
-  })
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -418,15 +418,15 @@ export function getReleases (owner: string, repo: string, token: ?string): Promi
  */
 export function getReleaseByTag (owner: string, repo: string, tag: string, token: ?string): Promise<Object> {
   let req = api
-  .get(`/repos/${owner}/${repo}/releases/tags/${tag}`)
+    .get(`/repos/${owner}/${repo}/releases/tags/${tag}`)
 
   if (token != null) req = req.set('Authorization', `token ${token}`)
 
   return req
-  .then((res) => castRelease(res.body))
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .then((res) => castRelease(res.body))
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -444,12 +444,12 @@ export function getReleaseByTag (owner: string, repo: string, tag: string, token
  */
 export function getInstallations (token: string, user: ?string): Promise<Object> {
   return api
-  .get('/installation/repositories')
-  .set('Authorization', `token ${token}`)
-  .then((res) => res.body.repositories.map((repo) => castProject(repo)))
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .get('/installation/repositories')
+    .set('Authorization', `token ${token}`)
+    .then((res) => res.body.repositories.map((repo) => castProject(repo)))
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -469,13 +469,13 @@ export function getInstallations (token: string, user: ?string): Promise<Object>
  */
 export function getPermission (owner: string, repo: string, username: string, token: ?string): Promise<Boolean> {
   let req = api
-  .get(`/repos/${owner}/${repo}/collaborators/${username}`)
+    .get(`/repos/${owner}/${repo}/collaborators/${username}`)
 
   if (token != null) req = req.set('Authorization', `token ${token}`)
 
   return req
-  .then((res) => (res.status === 204))
-  .catch(() => false)
+    .then((res) => (res.status === 204))
+    .catch(() => false)
 }
 
 /**
@@ -495,12 +495,12 @@ export function getPermission (owner: string, repo: string, username: string, to
  */
 export function getLabel (owner: string, repo: string, label: string, token: string): Promise<Object> {
   return api
-  .get(`/repos/${owner}/${repo}/labels/${label}`)
-  .set('Authorization', `token ${token}`)
-  .then((res) => res.body)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .get(`/repos/${owner}/${repo}/labels/${label}`)
+    .set('Authorization', `token ${token}`)
+    .then((res) => res.body)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -520,15 +520,15 @@ export function getLabel (owner: string, repo: string, label: string, token: str
  */
 export function getAssets (owner: string, repo: string, release: string, token: ?string): Promise<Object> {
   let req = api
-  .get(`/repos/${owner}/${repo}/releases/${release}/assets`)
+    .get(`/repos/${owner}/${repo}/releases/${release}/assets`)
 
   if (token != null) req = req.set('Authorization', `token ${token}`)
 
   return req
-  .then((res) => res.body)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .then((res) => res.body)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -546,18 +546,18 @@ export function getAssets (owner: string, repo: string, release: string, token: 
  */
 export function getOrgPermission (organization: string, user: Object): Promise<Boolean> {
   return api
-  .get(`/orgs/${organization}/members/${user.username}`)
-  .set('Authorization', `token ${user.github.access}`)
-  .then((data) => {
-    if (data.status === 204) return true
+    .get(`/orgs/${organization}/members/${user.username}`)
+    .set('Authorization', `token ${user.github.access}`)
+    .then((data) => {
+      if (data.status === 204) return true
 
-    return false
-  })
-  .catch((err, res) => {
-    if (err.status === 404) return false
+      return false
+    })
+    .catch((err, res) => {
+      if (err.status === 404) return false
 
-    throw errorCheck(err, res)
-  })
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -575,19 +575,19 @@ export function getOrgPermission (organization: string, user: Object): Promise<B
  */
 export function getTeamPermission (team: number, user: Object): Promise<Boolean> {
   return api
-  .get(`/teams/${team.toString()}/memberships/${user.username}`)
-  .set('Authorization', `token ${user.github.access}`)
-  .then((data) => {
-    if (data.status !== 200) return true
-    if (data.body == null || data.body.state == null) return false
+    .get(`/teams/${team.toString()}/memberships/${user.username}`)
+    .set('Authorization', `token ${user.github.access}`)
+    .then((data) => {
+      if (data.status !== 200) return true
+      if (data.body == null || data.body.state == null) return false
 
-    return (data.body.state === 'active')
-  })
-  .catch((err, res) => {
-    if (err.status === 404) return false
+      return (data.body.state === 'active')
+    })
+    .catch((err, res) => {
+      if (err.status === 404) return false
 
-    throw errorCheck(err, res)
-  })
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -615,13 +615,13 @@ export function postLabel (owner: string, repo: string, token: string, label: Ob
   }
 
   return api
-  .post(`/repos/${owner}/${repo}/labels`)
-  .set('Authorization', `token ${token}`)
-  .send(label)
-  .then((res) => res.body)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .post(`/repos/${owner}/${repo}/labels`)
+    .set('Authorization', `token ${token}`)
+    .send(label)
+    .then((res) => res.body)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -652,13 +652,13 @@ export function postIssue (owner: string, repo: string, token: string, issue: Ob
   }
 
   return api
-  .post(`/repos/${owner}/${repo}/issues`)
-  .set('Authorization', `token ${token}`)
-  .send(issue)
-  .then((res) => res.body.number)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .post(`/repos/${owner}/${repo}/issues`)
+    .set('Authorization', `token ${token}`)
+    .send(issue)
+    .then((res) => res.body.number)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -709,12 +709,12 @@ export async function postFile (owner: string, repo: string, release: number, to
   })
 
   return api
-  .post(`https://uploads.github.com/repos/${owner}/${repo}/releases/${release}/assets`)
-  .set('Authorization', `token ${token}`)
-  .query(file)
-  .attach('file', filePath, file.name)
-  .then((res) => res.body.id)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .post(`https://uploads.github.com/repos/${owner}/${repo}/releases/${release}/assets`)
+    .set('Authorization', `token ${token}`)
+    .query(file)
+    .attach('file', filePath, file.name)
+    .then((res) => res.body.id)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }

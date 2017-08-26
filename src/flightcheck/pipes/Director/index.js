@@ -19,7 +19,6 @@ const log = new Log('flightcheck:Director')
  * @extends Pipe
  */
 export default class Director extends Pipe {
-
   /**
    * code
    * Requires pipes based on apphub settings

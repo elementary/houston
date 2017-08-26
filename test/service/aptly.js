@@ -47,10 +47,10 @@ test('Can delete files', async (t) => {
   const aptly = t.context.aptly
 
   nock('http://localhost:4321', { encodedQueryparams: true })
-  .replyContentLength()
-  .replyDate()
-  .delete('/files/test/file.txt')
-  .reply(200, {})
+    .replyContentLength()
+    .replyDate()
+    .delete('/files/test/file.txt')
+    .reply(200, {})
 
   const one = await aptly.del('test/file.txt')
 
@@ -61,11 +61,11 @@ test('Can get package key', async (t) => {
   const aptly = t.context.aptly
 
   nock('http://localhost:4321', { encodedQueryparams: true })
-  .replyContentLength()
-  .replyDate()
-  .get(`/repos/stable/packages`)
-  .query({ q: 'project (= 1.0.0)' })
-  .reply(200, ['test'])
+    .replyContentLength()
+    .replyDate()
+    .get(`/repos/stable/packages`)
+    .query({ q: 'project (= 1.0.0)' })
+    .reply(200, ['test'])
 
   const one = await aptly.get('stable', 'project', '1.0.0')
 
@@ -77,17 +77,17 @@ test('Can add files', async (t) => {
   const aptly = t.context.aptly
 
   nock('http://localhost:4321', { encodedQueryparams: true })
-  .replyContentLength()
-  .replyDate()
-  .post('/repos/stable/packages', {
-    PackageRefs: ['test']
-  })
-  .reply(200, {
-    Name: 'stable',
-    Comment: 'a testing repository',
-    DefaultDistribution: '',
-    DefaultComponent: 'main'
-  })
+    .replyContentLength()
+    .replyDate()
+    .post('/repos/stable/packages', {
+      PackageRefs: ['test']
+    })
+    .reply(200, {
+      Name: 'stable',
+      Comment: 'a testing repository',
+      DefaultDistribution: '',
+      DefaultComponent: 'main'
+    })
 
   const one = await aptly.add('stable', ['test'])
 
@@ -99,17 +99,17 @@ test('Can remove files', async (t) => {
   const aptly = t.context.aptly
 
   nock('http://localhost:4321', { encodedQueryparams: true })
-  .replyContentLength()
-  .replyDate()
-  .delete('/repos/stable/packages', {
-    PackageRefs: ['test']
-  })
-  .reply(200, {
-    Name: 'stable',
-    Comment: 'a testing repository',
-    DefaultDistribution: '',
-    DefaultComponent: 'main'
-  })
+    .replyContentLength()
+    .replyDate()
+    .delete('/repos/stable/packages', {
+      PackageRefs: ['test']
+    })
+    .reply(200, {
+      Name: 'stable',
+      Comment: 'a testing repository',
+      DefaultDistribution: '',
+      DefaultComponent: 'main'
+    })
 
   const one = await aptly.remove('stable', ['test'])
 
@@ -121,30 +121,30 @@ test('Can move files', async (t) => {
   const aptly = t.context.aptly
 
   nock('http://localhost:4321', { encodedQueryparams: true })
-  .replyContentLength()
-  .replyDate()
-  .post('/repos/stable/packages', {
-    PackageRefs: ['test']
-  })
-  .reply(200, {
-    Name: 'stable',
-    Comment: 'a testing repository',
-    DefaultDistribution: '',
-    DefaultComponent: 'main'
-  })
+    .replyContentLength()
+    .replyDate()
+    .post('/repos/stable/packages', {
+      PackageRefs: ['test']
+    })
+    .reply(200, {
+      Name: 'stable',
+      Comment: 'a testing repository',
+      DefaultDistribution: '',
+      DefaultComponent: 'main'
+    })
 
   nock('http://localhost:4321', { encodedQueryparams: true })
-  .replyContentLength()
-  .replyDate()
-  .delete('/repos/review/packages', {
-    PackageRefs: ['test']
-  })
-  .reply(200, {
-    Name: 'review',
-    Comment: 'a testing repository',
-    DefaultDistribution: '',
-    DefaultComponent: 'main'
-  })
+    .replyContentLength()
+    .replyDate()
+    .delete('/repos/review/packages', {
+      PackageRefs: ['test']
+    })
+    .reply(200, {
+      Name: 'review',
+      Comment: 'a testing repository',
+      DefaultDistribution: '',
+      DefaultComponent: 'main'
+    })
 
   await aptly.move('review', 'stable', ['test'])
 })
@@ -153,28 +153,28 @@ test('Can publish repositories', async (t) => {
   const aptly = t.context.aptly
 
   nock('http://localhost:4321', { encodedQueryparams: true })
-  .replyContentLength()
-  .replyDate()
-  .put('/publish/stable/xenial', (body) => {
-    if (body.Signing.Batch !== true) return false
-    if (body.Signing.Passphrase !== t.context.config.aptly.passphrase) return false
+    .replyContentLength()
+    .replyDate()
+    .put('/publish/stable/xenial', (body) => {
+      if (body.Signing.Batch !== true) return false
+      if (body.Signing.Passphrase !== t.context.config.aptly.passphrase) return false
 
-    return true
-  })
-  .reply(200, {
-    Architectures: ['amd64'],
-    Distribution: 'xenial',
-    Label: '',
-    Origin: '',
-    Prefix: 'stable',
-    SkipContents: false,
-    SourceKind: 'local',
-    Sources: [{
-      Component: 'main',
-      Name: 'stable'
-    }],
-    Storage: ''
-  })
+      return true
+    })
+    .reply(200, {
+      Architectures: ['amd64'],
+      Distribution: 'xenial',
+      Label: '',
+      Origin: '',
+      Prefix: 'stable',
+      SkipContents: false,
+      SourceKind: 'local',
+      Sources: [{
+        Component: 'main',
+        Name: 'stable'
+      }],
+      Storage: ''
+    })
 
   const one = await aptly.publish('stable')
 

@@ -79,7 +79,7 @@ export async function pagination (req) {
   let page = (req.qs != null && req.qs.page != null) ? req.qs.page : 1
 
   const res = await cloneDeep(req.pagination_req)
-  .query({ page })
+    .query({ page })
 
   if (!Array.isArray(res.body)) {
     throw new Error('Tried to pagination on non array response body')

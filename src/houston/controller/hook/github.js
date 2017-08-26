@@ -79,13 +79,13 @@ export async function createRepository (repo: Object, installation: number): Pro
   repo.releases = await github.getReleases(repo.github.owner, repo.github.name, token)
 
   repo.releases = repo.releases
-  .filter((release) => (release.version != null))
-  .map((release) => {
-    release.version = semver.clean(release.version)
-    return release
-  })
-  .filter((release) => semver.valid(release.version))
-  .sort((a, b) => semver(a.version, b.version))
+    .filter((release) => (release.version != null))
+    .map((release) => {
+      release.version = semver.clean(release.version)
+      return release
+    })
+    .filter((release) => semver.valid(release.version))
+    .sort((a, b) => semver(a.version, b.version))
 
   if (repo.releases.length > 0) {
     repo._status = 'DEFER'
@@ -127,7 +127,6 @@ route.all('/', (ctx, next) => {
 
   ctx.status = 503
   ctx.body = 'Service Unavailable'
-  return
 })
 
 /**
@@ -149,9 +148,9 @@ route.all('/', async (ctx, next) => {
   }
 
   const hash = crypto
-  .createHmac('sha1', config.github.integration.secret)
-  .update(ctx.request.rawBody)
-  .digest('hex')
+    .createHmac('sha1', config.github.integration.secret)
+    .update(ctx.request.rawBody)
+    .digest('hex')
 
   const signature = `sha1=${hash}`
 
@@ -177,7 +176,6 @@ route.post('/', (ctx, next) => {
 
   ctx.status = 200
   ctx.body = 'Pong'
-  return
 })
 
 /**
@@ -248,7 +246,6 @@ route.post('/', async (ctx, next) => {
 
   ctx.status = 404
   ctx.body = 'Unknown action'
-  return
 })
 
 /**
@@ -289,11 +286,11 @@ route.post('/', async (ctx, next) => {
     try {
       const promises = ctx.request.body['repositories_added'].map((req) => {
         return github.generateToken(installationId)
-        .then((token) => {
-          const [owner, repo] = req['full_name'].split('/')
-          return github.getRepo(owner, repo, token)
-        })
-        .then((repo) => createRepository(repo, installationId))
+          .then((token) => {
+            const [owner, repo] = req['full_name'].split('/')
+            return github.getRepo(owner, repo, token)
+          })
+          .then((repo) => createRepository(repo, installationId))
       })
       await Promise.all(promises)
     } catch (err) {
@@ -347,7 +344,6 @@ route.post('/', async (ctx, next) => {
 
   ctx.status = 404
   ctx.body = 'Unknown action'
-  return
 })
 
 /**
@@ -398,7 +394,6 @@ route.post('/', async (ctx, next) => {
 
   ctx.status = 200
   ctx.body = 'Release added'
-  return
 })
 
 export default route

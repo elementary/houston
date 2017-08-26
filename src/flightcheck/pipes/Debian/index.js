@@ -14,8 +14,7 @@ import Pipe from 'flightcheck/pipes/pipe'
  * Creates the debian folder
  */
 export default class Debian extends Pipe {
-
- /**
+  /**
   * code
   * Creates the debian folder
   *

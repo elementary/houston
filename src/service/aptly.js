@@ -25,9 +25,9 @@ const arch = 'amd64'
 const dist = 'xenial'
 
 const api = domain(config.aptly.url)
-.use((req) => {
-  req.set('User-Agent', 'elementary-houston')
-})
+  .use((req) => {
+    req.set('User-Agent', 'elementary-houston')
+  })
 
 export default api
 
@@ -73,12 +73,12 @@ const errorCheck = (err: Object, res: ?Object): error.ServiceError => {
  */
 export function upload (project: string, version: string, file: string): Promise<string[]> {
   return api
-  .post(`/files/${project}`)
-  .attach('file', file, `${project}_${version}_${arch}.deb`)
-  .then((data) => data.body)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .post(`/files/${project}`)
+    .attach('file', file, `${project}_${version}_${arch}.deb`)
+    .then((data) => data.body)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -92,11 +92,11 @@ export function upload (project: string, version: string, file: string): Promise
  */
 export function del (file: string): Promise<Object> {
   return api
-  .delete(`/files/${file}`)
-  .then((data) => data.body)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .delete(`/files/${file}`)
+    .then((data) => data.body)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -112,12 +112,12 @@ export function del (file: string): Promise<Object> {
  */
 export function get (repo: string, project: string, version: string): Promise<string[]> {
   return api
-  .get(`/repos/${repo}/packages`)
-  .query({ q: `${project} (= ${version})` })
-  .then((data) => data.body)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .get(`/repos/${repo}/packages`)
+    .query({ q: `${project} (= ${version})` })
+    .then((data) => data.body)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -133,18 +133,18 @@ export function get (repo: string, project: string, version: string): Promise<st
  */
 export async function ingest (repo: string, project: string, version: string): Promise<string[]> {
   await api
-  .post(`/repos/${repo}/file/${project}/${project}_${version}_${arch}.deb`)
-  .then((data) => data.body.Report.Added)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .post(`/repos/${repo}/file/${project}/${project}_${version}_${arch}.deb`)
+    .then((data) => data.body.Report.Added)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 
   await del(`${project}/${project}_${version}_${arch}.deb`)
 
   return api
-  .get(`/repos/${repo}/packages`)
-  .query({ q: `${project} (= ${version})` })
-  .then((data) => data.body)
+    .get(`/repos/${repo}/packages`)
+    .query({ q: `${project} (= ${version})` })
+    .then((data) => data.body)
 }
 
 /**
@@ -159,12 +159,12 @@ export async function ingest (repo: string, project: string, version: string): P
  */
 export function add (repo: string, pkg: string[]): Promise<Object> {
   return api
-  .post(`/repos/${repo}/packages`)
-  .send({ PackageRefs: pkg })
-  .then((data) => data.body)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .post(`/repos/${repo}/packages`)
+    .send({ PackageRefs: pkg })
+    .then((data) => data.body)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -179,12 +179,12 @@ export function add (repo: string, pkg: string[]): Promise<Object> {
  */
 export function remove (repo: string, pkg: string[]): Promise<Object> {
   return api
-  .delete(`/repos/${repo}/packages`)
-  .send({ PackageRefs: pkg })
-  .then((data) => data.body)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .delete(`/repos/${repo}/packages`)
+    .send({ PackageRefs: pkg })
+    .then((data) => data.body)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**
@@ -214,17 +214,17 @@ export async function move (from: string, to: string, pkg: string[]): Promise<> 
  */
 export function publish (repo: string): Promise<string> {
   return api
-  .put(`/publish/${repo}/${dist}`)
-  .send({
-    Signing: {
-      Batch: true,
-      Passphrase: config.aptly.passphrase
-    }
-  })
-  .then((data) => data.body.Sources[0].Name)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+    .put(`/publish/${repo}/${dist}`)
+    .send({
+      Signing: {
+        Batch: true,
+        Passphrase: config.aptly.passphrase
+      }
+    })
+    .then((data) => data.body.Sources[0].Name)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }
 
 /**

@@ -21,7 +21,6 @@ const fs = Promise.promisifyAll(require('fs'))
  * @property {String} type - File extension
  */
 export default class File {
-
   _glob: string
   _match: Function
   _path: string
@@ -54,8 +53,8 @@ export default class File {
    */
   async exists (): Promise<string|null> {
     const pathExists = await fs.statAsync(this._path)
-    .then((stat) => stat.isFile())
-    .catch({ code: 'ENOENT' }, () => false)
+      .then((stat) => stat.isFile())
+      .catch({ code: 'ENOENT' }, () => false)
 
     if (pathExists) return this._path
     if (this._glob == null) return null

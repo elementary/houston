@@ -91,7 +91,6 @@ worker.register('release', async (param) => {
   log.debug(payload)
 
   sender.add('finish', payload)
-  return
 })
 
 worker.start()

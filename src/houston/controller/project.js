@@ -44,9 +44,9 @@ route.get('/cycle', policy.isRole('USER'), policy.isAgreement, async (ctx, next)
   }
 
   await project.createCycle('RELEASE')
-  .catch((err) => {
-    throw new error.ControllerError(500, 'An error occured while creating a new release cycle', err, true)
-  })
+    .catch((err) => {
+      throw new error.ControllerError(500, 'An error occured while creating a new release cycle', err, true)
+    })
 
   return ctx.redirect('/dashboard')
 })

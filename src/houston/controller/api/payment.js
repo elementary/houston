@@ -75,8 +75,6 @@ route.get('/:project', async (ctx) => {
       key: ctx.project.stripe.public
     }
   }
-
-  return
 })
 
 /**

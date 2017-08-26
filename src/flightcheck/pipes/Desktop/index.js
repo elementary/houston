@@ -21,7 +21,6 @@ const log = new Log('flightcheck:Desktop')
  * @extends Pipe
  */
 export default class Desktop extends Pipe {
-
   /**
    * Creates a new Pipe
    *

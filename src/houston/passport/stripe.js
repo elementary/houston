@@ -68,11 +68,11 @@ router.get('/callback', policy.isRole('USER'), async (ctx, next) => {
       })
     })
   })
-  .catch((err) => {
-    log.error('Error while processing Stripe account')
-    log.error(err)
-    throw new Mistake(500, 'Error while processing Stripe account')
-  })
+    .catch((err) => {
+      log.error('Error while processing Stripe account')
+      log.error(err)
+      throw new Mistake(500, 'Error while processing Stripe account')
+    })
 
   const account = await stripe.getAccount(data.results['stripe_user_id'])
   if (PREVIEW_COUNTRIES.includes(account.country)) {

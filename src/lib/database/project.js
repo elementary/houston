@@ -265,10 +265,10 @@ schema.methods.setStatus = function (status) {
   }
 
   return this.update({ _status: status })
-  .then((data) => {
-    if (data.nModified === 1) this._status = status
-    return data
-  })
+    .then((data) => {
+      if (data.nModified === 1) this._status = status
+      return data
+    })
 }
 
 /**
@@ -282,8 +282,13 @@ schema.methods.setStatus = function (status) {
  * @returns {Void}
  */
 schema.methods.postIssue = async function (issue) {
-  if (typeof issue.title !== 'string') return Promise.reject('Issue needs a title')
-  if (typeof issue.body !== 'string') return Promise.reject('Issue needs a body')
+  if (typeof issue.title !== 'string') {
+    return Promise.reject(new Error('Issue needs a title'))
+  }
+
+  if (typeof issue.body !== 'string') {
+    return Promise.reject(new Error('Issue needs a body'))
+  }
 
   const gh = this.github
   const token = await github.generateToken(gh.installation)

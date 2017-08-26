@@ -15,7 +15,6 @@ import { ApplicationError } from './application'
  * @property {Number} status - HTTP status code
  */
 export class ControllerError extends ApplicationError {
-
   friendly: string
   status: number
 
@@ -41,7 +40,6 @@ export class ControllerError extends ApplicationError {
  * @property {String} param - Parameter message is about
  */
 export class ControllerParameterError extends ControllerError {
-
   param: string
 
   /**
@@ -67,7 +65,6 @@ export class ControllerParameterError extends ControllerError {
  * @property {String} pointer - Request body JSON pointer
  */
 export class ControllerPointerError extends ControllerError {
-
   pointer: string
 
   /**

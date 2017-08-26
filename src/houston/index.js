@@ -91,7 +91,7 @@ app.use(async (ctx, next) => {
     length: ctx.req.headers['content-length'],
     limit: '1mb'
   })
-  .then((buf) => buf.toString())
+    .then((buf) => buf.toString())
 
   const jsonTypes = [
     'application/json',

@@ -60,7 +60,6 @@ route.use(async (ctx, next) => {
 
     ctx.status = API.status
     ctx.body = { errors: [API] }
-    return
   }
 })
 

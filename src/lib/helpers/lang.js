@@ -12,7 +12,7 @@ import pluralize from 'pluralize'
 pluralize.addUncountableRule('the')
 pluralize.addUncountableRule('in')
 
- /**
+/**
   * S
   * Pluralizes string based on number or length
   *
@@ -29,9 +29,9 @@ export function s (string, len = 0) {
   }
 
   const after = string.split(' ')
-  .map((word) => {
-    return pluralize(word, len)
-  })
+    .map((word) => {
+      return pluralize(word, len)
+    })
   after.unshift(len)
 
   return after.join(' ')

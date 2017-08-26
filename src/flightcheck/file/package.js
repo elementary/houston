@@ -18,7 +18,6 @@ import File from './index'
  * @property {String} [dist] - Distribution for the package
  */
 export default class Package extends File {
-
   arch: string
   dist: string
 

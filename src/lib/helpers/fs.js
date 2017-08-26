@@ -65,23 +65,23 @@ export async function walk (directory, filter = () => true, max = 10, iteration 
   }
 
   return fs.readdirAsync(directory)
-  .map(async (abstract) => {
-    const ePath = path.join(directory, abstract)
-    const stat = await fs.statAsync(ePath)
+    .map(async (abstract) => {
+      const ePath = path.join(directory, abstract)
+      const stat = await fs.statAsync(ePath)
 
-    if (stat.isDirectory()) {
-      return walk(ePath, filter, max, iteration + 1)
-      .map((file) => path.join(abstract, file))
-    }
+      if (stat.isDirectory()) {
+        return walk(ePath, filter, max, iteration + 1)
+          .map((file) => path.join(abstract, file))
+      }
 
-    return abstract
-  })
-  .then((files) => {
-    files = _.flattenDeep(files)
+      return abstract
+    })
+    .then((files) => {
+      files = _.flattenDeep(files)
 
-    if (iteration !== 1) return files
-    return _.filter(files, filter)
-  })
+      if (iteration !== 1) return files
+      return _.filter(files, filter)
+    })
 }
 
 /**
@@ -98,11 +98,11 @@ export function mkdirp (directory) {
   return Promise.map(chunks, (chunk, i) => {
     return chunks.slice(0, i + 1).join(path.sep)
   })
-  .each((chunk) => {
-    if (chunk == null || chunk === '') return
-    return fs.mkdirAsync(chunk)
-    .catch({ code: 'EEXIST' }, () => true)
-  })
+    .each((chunk) => {
+      if (chunk == null || chunk === '') return
+      return fs.mkdirAsync(chunk)
+        .catch({ code: 'EEXIST' }, () => true)
+    })
 }
 
 /**

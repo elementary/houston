@@ -15,9 +15,9 @@ import Project from 'lib/database/project'
 const log = new Log('service:mandrill')
 
 const api = domain('https://mandrillapp.com/api/1.0')
-.use((req) => {
-  req.set('User-Agent', 'elementary-houston')
-})
+  .use((req) => {
+    req.set('User-Agent', 'elementary-houston')
+  })
 
 export default api
 
@@ -101,36 +101,36 @@ export function postReceipt (project: Project, email: string, amount: number): P
   }]
 
   return api
-  .post('/messages/send-template.json')
-  .send({
-    'key': config.mandrill.key,
-    'template_name': config.mandrill.purchaseTemplate,
-    'template_content': [req],
-    'message': {
-      'subject': 'AppCenter Purchase',
-      'from_email': 'payment@elementary.io',
-      'from_name': 'elementary',
-      'to': [{
-        email,
-        'type': 'to'
-      }],
-      'headers': {
-        'Reply-To': 'payment@elementary.io'
+    .post('/messages/send-template.json')
+    .send({
+      'key': config.mandrill.key,
+      'template_name': config.mandrill.purchaseTemplate,
+      'template_content': [req],
+      'message': {
+        'subject': 'AppCenter Purchase',
+        'from_email': 'payment@elementary.io',
+        'from_name': 'elementary',
+        'to': [{
+          email,
+          'type': 'to'
+        }],
+        'headers': {
+          'Reply-To': 'payment@elementary.io'
+        },
+        'important': false,
+        'merge': true,
+        'merge_language': 'handlebars',
+        'global_merge_vars': [req],
+        'merge_vars': [{
+          'rcpt': email,
+          'vars': req
+        }],
+        'tags': ['appcenter', 'purchase']
       },
-      'important': false,
-      'merge': true,
-      'merge_language': 'handlebars',
-      'global_merge_vars': [req],
-      'merge_vars': [{
-        'rcpt': email,
-        'vars': req
-      }],
-      'tags': ['appcenter', 'purchase']
-    },
-    'async': true
-  })
-  .then((res) => res.body[0]._id)
-  .catch((err, res) => {
-    throw errorCheck(err, res)
-  })
+      'async': true
+    })
+    .then((res) => res.body[0]._id)
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
 }

@@ -41,7 +41,7 @@ const findReleases = async () => {
     { $sort: { 'release.date.published': -1 } },
     { $limit: 10 }
   ])
-  .then((res) => res.map((p) => p.name))
+    .then((res) => res.map((p) => p.name))
 
   cache.set('findReleases', projects)
   return projects
@@ -73,7 +73,7 @@ const findProjects = async () => {
     { $match: { 'name': { $nin: cachedReleases } } },
     { $limit: 10 }
   ])
-  .then((res) => res.map((p) => p.name))
+    .then((res) => res.map((p) => p.name))
 
   cache.set('findProjects', projects)
   return projects
@@ -112,7 +112,7 @@ const findDownloads = async () => {
     { $match: { 'name': { $size: 1 }, 'name.0': { $nin: [...cachedReleases, ...cachedProjects] } } }, // Avoid deleted projects
     { $limit: 10 }
   ])
-  .then((res) => res.map((p) => p.name[0]))
+    .then((res) => res.map((p) => p.name[0]))
 
   cache.set('findDownloads', projects)
   return projects
@@ -127,8 +127,6 @@ route.get('/project', async (ctx) => {
 
   ctx.status = 200
   ctx.body = { data: projects }
-
-  return
 })
 
 /**
@@ -141,8 +139,6 @@ route.get('/', async (ctx) => {
 
   ctx.status = 200
   ctx.body = { data: projects }
-
-  return
 })
 
 /**
@@ -154,8 +150,6 @@ route.get('/release', async (ctx) => {
 
   ctx.status = 200
   ctx.body = { data: projects }
-
-  return
 })
 
 /**
@@ -167,8 +161,6 @@ route.get('/downloads', async (ctx) => {
 
   ctx.status = 200
   ctx.body = { data: projects }
-
-  return
 })
 
 export default route

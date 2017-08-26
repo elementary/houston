@@ -21,7 +21,6 @@ const log = new Log('flightcheck:GitHubRelease')
  * @extends Pipe
  */
 export default class GitHubRelease extends Pipe {
-
   /**
    * Creates a new Pipe
    *
@@ -59,24 +58,24 @@ export default class GitHubRelease extends Pipe {
     const token = await github.generateToken(Number(this.pipeline.build.auth))
 
     const releaseId = await github.getReleaseByTag(owner, repo, this.pipeline.build.tag, token)
-    .then((res) => Number(res.github.id))
-    .catch((err) => {
-      log.error('Error while trying to get release id')
-      log.error(err)
+      .then((res) => Number(res.github.id))
+      .catch((err) => {
+        log.error('Error while trying to get release id')
+        log.error(err)
 
-      return this.log('error', 'GitHub/Release/error.md')
-    })
+        return this.log('error', 'GitHub/Release/error.md')
+      })
 
     log.debug(`Found release id: ${releaseId}`)
 
     const releasedAssets = await github.getAssets(owner, repo, releaseId, token)
-    .then((body) => body.map((res) => res.label))
-    .catch((err) => {
-      log.error('Error while trying to get published assets')
-      log.error(err)
+      .then((body) => body.map((res) => res.label))
+      .catch((err) => {
+        log.error('Error while trying to get published assets')
+        log.error(err)
 
-      return this.log('error', 'GitHub/Release/error.md')
-    })
+        return this.log('error', 'GitHub/Release/error.md')
+      })
 
     log.debug(`Found ${releasedAssets.length} published assets`)
 
@@ -112,11 +111,11 @@ export default class GitHubRelease extends Pipe {
         type: file.type
       })
     })
-    .catch((err) => {
-      log.error('Error while trying to push files')
-      log.error(err)
+      .catch((err) => {
+        log.error('Error while trying to push files')
+        log.error(err)
 
-      return this.error('error', 'GitHub/Release/error.md')
-    })
+        return this.error('error', 'GitHub/Release/error.md')
+      })
   }
 }

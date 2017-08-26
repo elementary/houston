@@ -190,10 +190,10 @@ schema.methods.setStatus = async function (status) {
   }
 
   return this.update({ _status: status })
-  .then((data) => {
-    if (data.nModified === 1) this._status = status
-    return data
-  })
+    .then((data) => {
+      if (data.nModified === 1) this._status = status
+      return data
+    })
 }
 
 /**
@@ -252,10 +252,10 @@ schema.methods.createCycle = async function (type) {
  */
 schema.methods.createChangelog = function () {
   const uptoRelease = this.project.releases
-  .filter((release) => semver.lte(release.version, this.version))
-  .sort((a, b) => semver.compare(a.version, b.version))
-  .map((release) => release.toObject())
-  .reverse()
+    .filter((release) => semver.lte(release.version, this.version))
+    .sort((a, b) => semver.compare(a.version, b.version))
+    .map((release) => release.toObject())
+    .reverse()
 
   return uptoRelease.map((release) => {
     return {
