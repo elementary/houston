@@ -1,6 +1,4 @@
 {
-  "name": "houston",
-
   "plugins": ["ava"],
 
   "extends": ["a-standard", "plugin:ava/recommended"],
