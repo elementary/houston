@@ -306,7 +306,7 @@ export function getRepo (owner: string, repo: string, token: string): Promise<Ob
   .set('Authorization', `token ${token}`)
   .then((res) => castProject(res.body))
   .catch((err, res) => {
-    throw errorCheck(err, res, 'getRepos')
+    throw errorCheck(err, res)
   })
 }
 

@@ -92,7 +92,6 @@ app.use(async (ctx, next) => {
     limit: '1mb'
   })
   .then((buf) => buf.toString())
-  .catch((err) => { throw new Error(500, err.message) })
 
   const jsonTypes = [
     'application/json',
