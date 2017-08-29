@@ -97,10 +97,12 @@ export class Docker {
    *
    * @param {string} from - The local directory to attach
    * @param {string} to - The container directory to mount to
-   * @return {void}
+   * @return {Docker}
    */
-  public mount (from: string, to: string): void {
+  public mount (from: string, to: string): this {
     this.mounts[from] = to
+
+    return this
   }
 
   /**

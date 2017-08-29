@@ -146,18 +146,14 @@ export class Worker extends EventEmitter {
   }
 
   /**
-   * passes
-   * Checks if the worker passes
+   * fails
+   * Checks if the worker fails
    *
    * @return {boolean}
    */
-  public passes (): boolean {
+  public fails (): boolean {
     for (let i = 0; i++; i < this.logs.length) {
       if (this.logs[i].level === Log.Level.ERROR) {
-        return true
-      }
-
-      if (this.logs[i].level === Log.Level.WARN) {
         return true
       }
     }
@@ -166,12 +162,12 @@ export class Worker extends EventEmitter {
   }
 
   /**
-   * fails
-   * Checks if the worker failed
+   * passes
+   * Checks if the worker passes
    *
    * @return {boolean}
    */
-  public fails (): boolean {
-    return (this.passes() === false)
+  public passes (): boolean {
+    return (this.fails() === false)
   }
 }
