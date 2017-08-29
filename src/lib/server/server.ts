@@ -6,17 +6,13 @@
  */
 
 import * as http from 'http'
+import { inject, injectable, multiInject } from 'inversify'
 import * as Koa from 'koa'
 import * as Router from 'koa-router'
 
 import { Config } from '../config'
-import { Database } from '../database/database'
-import { Log } from '../log'
-import * as middleware from './middleware'
-
-import { ServerError } from './error'
-
-import { Health } from './controller/health'
+import { Logger } from '../log'
+import { Controller } from './controller'
 
 /**
  * Server
@@ -32,71 +28,90 @@ import { Health } from './controller/health'
  * @property {Server} server
  * @property {number} port
  */
+@injectable()
 export class Server {
+  /**
+   * A basic http server. Used for low level access (mostly testing)
+   *
+   * @var {http.Server}
+   */
+  public server?: http.Server
 
-  public config: Config
-  public database: Database
-  public log: Log
+  /**
+   * The http port we will bind to
+   *
+   * @var {Number}
+   */
+  public port = 0
 
-  public koa: Koa
-  public router: Router
+  /**
+   * The application configuration
+   *
+   * @var {Config}
+   */
+  protected config: Config
 
-  public server: http.Server
-  public port: number
+  /**
+   * A list of controllers this server has
+   *
+   * @var {Controller}
+   */
+  protected controllers: Controller[]
+
+  /**
+   * A logger instance for the whole server.
+   *
+   * @var {Logger}
+   */
+  protected logger: Logger
+
+  /**
+   * Our Koa server instance
+   *
+   * @var {Koa}
+   */
+  protected koa: Koa
+
+  /**
+   * The koa router via koa-router
+   *
+   * @var {Router} router
+   */
+  protected router: Router
 
   /**
    * Creates a new web server
    *
    * @param {Config} config - The configuration to use
-   * @param {Database} [database] - The database connection to use
-   * @param {Log} [log] - The log instance to use
+   * @param {Log} log - The logger instance to use
+   * @param {Controller} controllers[]
    */
-  constructor (config: Config, database?: Database, log?: Log) {
+  constructor (
+    @inject(Config) config: Config,
+    @multiInject(Controller) controllers: Controller[],
+    @inject(Logger) logger: Logger
+  ) {
     this.config = config
-    this.database = database || new Database(config)
-    this.log = log || new Log(config)
+    this.controllers = controllers
+    this.logger = logger
 
     this.koa = new Koa()
     this.router = new Router()
 
     this.koa.env = config.get('environment', 'production')
-
-    this.registerMiddleware()
-    this.registerRoutes()
-
-    this.koa.use(this.router.routes())
-    this.koa.use(this.router.allowedMethods())
   }
 
   /**
-   * registerMiddleware
-   * Registers all the koa middleware the server is going to use.
+   * Adds all of the controllers to the server.
    *
-   * @return {void}
+   * @return {Server}
    */
-  public registerMiddleware (): void {
-    this.koa.on('error', middleware.onError(this))
-
-    this.router.use(middleware.Compress(this))
-    this.router.use(middleware.Logger(this))
-  }
-
-  /**
-   * registerRoutes
-   * Registers all the koa routes the server is going to use.
-   *
-   * @return {void}
-   */
-  public registerRoutes (): void {
-    const health = new Health(this)
-
-    this.router.get('/health', health.view)
-
-    this.router.all('*', (ctx) => {
-      if (ctx.status === 404 && ctx.body == null) {
-        throw new ServerError('Endpoint Not Found', 404, ctx.url)
-      }
+  public registerControllers () {
+    this.controllers.forEach((controller) => {
+      this.koa.use(controller.middleware())
     })
+
+    return this
   }
 
   /**
@@ -111,10 +126,10 @@ export class Server {
    */
   public async listen (port = 0): Promise<this> {
     const env = this.config.get('environment')
-    this.server = this.http()
 
     try {
       await new Promise((resolve, reject) => {
+        this.server = this.registerControllers().http()
         this.server.listen(port, undefined, undefined, (err: Error) => {
           if (err) {
             return reject(err)
@@ -124,14 +139,17 @@ export class Server {
         })
       })
     } catch (err) {
-      this.log.error(`Server unable to listen on port ${port} with ${env} configuration`)
-      this.log.error(err)
+      this.logger.error(`Server unable to listen on port ${port} with ${env} configuration`)
+        .setError(err)
+        .send()
 
       throw err
     }
 
-    this.port = this.server.address().port
-    this.log.info(`Server listening on port ${this.port} with ${env} configuration`)
+    if (this.server != null) {
+      this.port = this.server.address().port
+      this.logger.info(`Server listening on port ${this.port} with ${env} configuration`).send()
+    }
 
     return this
   }
@@ -146,8 +164,8 @@ export class Server {
    * @return {Server} - An inactive Server class
    */
   public async close (): Promise<this> {
-    if (this.server != null) {
-      await new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
+      if (this.server != null) {
         this.server.close((err) => {
           if (err != null) {
             return reject(err)
@@ -155,10 +173,10 @@ export class Server {
 
           return resolve()
         })
-      })
+      }
+    })
 
-      this.port = 0
-    }
+    this.port = 0
 
     return this
   }

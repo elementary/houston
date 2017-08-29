@@ -20,7 +20,8 @@ export class App extends Container {
    * @var ContainerModule[]
    */
   public static providers: ContainerModule[] = [
-    require('./log/provider').provider
+    require('./log/provider').provider,
+    require('./server/provider').provider
   ]
 
   /**

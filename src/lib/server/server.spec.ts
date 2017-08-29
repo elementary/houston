@@ -5,17 +5,17 @@
 
 import * as supertest from 'supertest'
 
-import { ServerError } from './error'
+import { create } from '../../../test/utility/app'
+
+import { App } from '../app'
 import { Server } from './server'
 
-import { setup as setupConfig } from '../../../test/utility/config'
-
-let config = null
-let server = null
+let app: App
+let server: Server
 
 beforeEach(async () => {
-  config = await setupConfig()
-  server = new Server(config)
+  app = await create()
+  server = app.get<Server>(Server)
 })
 
 afterEach(async () => {
@@ -30,7 +30,7 @@ test('can listen on random port', async () => {
     .expect(404)
 })
 
-test('http function returns a server for testing on', async () => {
+test('http function returns a server for testing on', () => {
   return supertest(server.http())
     .get('/')
     .expect(404)
