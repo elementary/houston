@@ -110,11 +110,7 @@ export class Logger {
    */
   public send (log: Log) {
     this.outputs.forEach((output) => {
-      const fn = output[levelString(log.level)]
-
-      if (fn != null) {
-        fn(log)
-      }
+      output[levelString(log.level)](log)
     })
   }
 
