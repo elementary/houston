@@ -18,15 +18,10 @@ import { Controller } from './controller'
  * Server
  * A basic HTTP web server
  *
- * @property {Config} config
- * @property {Database} database
- * @property {Log} log
- *
- * @property {Koa} koa
- * @property {Router} router
- *
  * @property {Server} server
  * @property {number} port
+ *
+ * @property {boolean} active
  */
 @injectable()
 export class Server {
@@ -42,7 +37,7 @@ export class Server {
    *
    * @var {Number}
    */
-  public port = 0
+  public port?: number
 
   /**
    * The application configuration
@@ -56,7 +51,7 @@ export class Server {
    *
    * @var {Controller}
    */
-  protected controllers: Controller[]
+  protected controllers: Controller[] = []
 
   /**
    * A logger instance for the whole server.
@@ -84,21 +79,27 @@ export class Server {
    *
    * @param {Config} config - The configuration to use
    * @param {Log} log - The logger instance to use
-   * @param {Controller} controllers[]
    */
   constructor (
     @inject(Config) config: Config,
-    @multiInject(Controller) controllers: Controller[],
     @inject(Logger) logger: Logger
   ) {
     this.config = config
-    this.controllers = controllers
     this.logger = logger
 
     this.koa = new Koa()
     this.router = new Router()
 
     this.koa.env = config.get('environment', 'production')
+  }
+
+  /**
+   * Returns true if the http server is currently active.
+   *
+   * @return {boolean}
+   */
+  public get active (): boolean {
+    return (this.server !== undefined)
   }
 
   /**
@@ -128,8 +129,9 @@ export class Server {
     const env = this.config.get('environment')
 
     try {
+      this.server = this.registerControllers().http()
+
       await new Promise((resolve, reject) => {
-        this.server = this.registerControllers().http()
         this.server.listen(port, undefined, undefined, (err: Error) => {
           if (err) {
             return reject(err)
@@ -146,10 +148,8 @@ export class Server {
       throw err
     }
 
-    if (this.server != null) {
-      this.port = this.server.address().port
-      this.logger.info(`Server listening on port ${this.port} with ${env} configuration`).send()
-    }
+    this.port = this.server.address().port
+    this.logger.info(`Server listening on port ${this.port} with ${env} configuration`).send()
 
     return this
   }
@@ -164,8 +164,8 @@ export class Server {
    * @return {Server} - An inactive Server class
    */
   public async close (): Promise<this> {
-    await new Promise((resolve, reject) => {
-      if (this.server != null) {
+    if (this.server != null) {
+      await new Promise((resolve, reject) => {
         this.server.close((err) => {
           if (err != null) {
             return reject(err)
@@ -173,10 +173,11 @@ export class Server {
 
           return resolve()
         })
-      }
-    })
+      })
+    }
 
-    this.port = 0
+    this.server = null
+    this.port = null
 
     return this
   }

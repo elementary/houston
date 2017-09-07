@@ -18,16 +18,12 @@ beforeEach(async () => {
   server = app.get<Server>(Server)
 })
 
-afterEach(async () => {
-  await server.close()
+afterEach(() => {
+  return server.close()
 })
 
-test('can listen on random port', async () => {
-  await server.listen(0)
-
-  await supertest(`localhost:${server.port}`)
-    .get('/')
-    .expect(404)
+test('can listen on random port', () => {
+  return server.listen(0)
 })
 
 test('http function returns a server for testing on', () => {

@@ -5,6 +5,7 @@
 
 import { ContainerModule } from 'inversify'
 
+import { Controller } from './controller'
 import { Server } from './server'
 
 export const provider = new ContainerModule((bind) => {

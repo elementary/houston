@@ -5,7 +5,7 @@
 
 import { Context } from 'koa'
 
-import { transform } from '../error/transformer'
+import { transform } from '../error/transform'
 
 /**
  * Reports error logs

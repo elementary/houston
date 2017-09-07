@@ -5,14 +5,14 @@
 
 import { Context } from 'koa'
 
-export interface Error {
+export interface HttpError {
 
   /**
    * Returns the http status code
    *
-   * @return {Number}
+   * @var {Number}
    */
-  status (): number
+  httpStatus: number
 
   /**
    * Renders error to an http output
@@ -21,5 +21,5 @@ export interface Error {
    * @param {Context} ctx
    * @return {void}
    */
-  render (ctx: Context)
+  httpRender (ctx: Context): Promise<void>
 }
