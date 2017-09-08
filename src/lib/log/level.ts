@@ -60,7 +60,7 @@ export function parseLevel (level: string): Level {
 }
 
 /**
- * Does the opposite of the above function.
+ * Returns a string given a level symbol
  *
  * @param {Level} level
  * @return {Level}

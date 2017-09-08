@@ -96,15 +96,14 @@ export class Console extends Output {
    *
    * @return {Boolean}
    */
-  protected allows (level: Level) {
+  public allows (level: Level) {
     if (this.config.has('log.console') === false) {
       return false
     }
 
-    const levels = [Level.DEBUG, Level.INFO, Level.WARN, Level.ERROR]
-    const configLevel = levels.indexOf(parseLevel(this.config.get('log.console')))
+    const configLevel = parseLevel(this.config.get('log.console'))
 
-    if (levels.indexOf(level) > configLevel) {
+    if (level >= configLevel) {
       return true
     }
 

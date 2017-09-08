@@ -21,7 +21,6 @@
     "pretty": true,
     "sourceMap": true,
     "emitDecoratorMetadata": true,
-    "strictNullChecks": true,
     "target": "es6"
   }
 }

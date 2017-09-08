@@ -39,7 +39,7 @@ export class Logger {
    */
   public constructor (
     @inject(Config) config: Config,
-    @multiInject(Output) outputters: OutputConstructor[]
+    @multiInject(Output) outputters: OutputConstructor[] = []
   ) {
     this.config = config
 
@@ -115,6 +115,18 @@ export class Logger {
   }
 
   /**
+   * Adds an output to this logger.
+   *
+   * @param {Output} outputter
+   * @return {Logger}
+   */
+  public addOutput (outputter: Output): this {
+    this.outputs.push(outputter)
+
+    return this
+  }
+
+  /**
    * Sets up an output for the logger
    *
    * @param {OutputConstructor} outputter
@@ -122,8 +134,7 @@ export class Logger {
    */
   protected setupOutput (outputter: OutputConstructor): this {
     if (outputter.enabled(this.config)) {
-      // I would log this here if I could.
-      this.outputs.push(new outputter(this.config))
+      this.addOutput(new outputter(this.config))
     }
 
     return this
