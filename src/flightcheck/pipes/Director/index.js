@@ -37,7 +37,9 @@ export default class Director extends Pipe {
       const files = build.files.map((f) => f.file).filter((f) => (f != null))
       const debFiles = files.filter((f) => (f != null && path.extname(f) === '.deb'))
 
-      if (apphub.endpoints.github && this.pipeline.build.source === 'github') await this.require('GitHubRelease', files)
+      // TODO: Update GitHub release pipe to fix #399
+      // if (apphub.endpoints.github && this.pipeline.build.source === 'github') await this.require('GitHubRelease', files)
+      
       if (apphub.endpoints.elementary) await this.require('ElementaryAptly', debFiles)
     } catch (err) {
       log.error('Error while trying to publish content to sources')
