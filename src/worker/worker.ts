@@ -14,6 +14,7 @@ import * as uuid from 'uuid/v4'
 import { Config } from '../lib/config'
 import { Repository } from '../lib/service/base/repository'
 import { Log } from './log'
+import { Storable } from './storable'
 import { WorkableConstructor } from './workable'
 
 export class Worker extends EventEmitter {
@@ -35,20 +36,28 @@ export class Worker extends EventEmitter {
   public config: Config
 
   /**
-   * workspace
-   * The directory that contains the working files
-   *
-   * @var {string}
-   */
-  public workspace?: string
-
-  /**
    * repository
    * A repository to use for this process
    *
    * @var {Repository}
    */
   public repository: Repository
+
+  /**
+   * storage
+   * The data to use for the build
+   *
+   * @var {Storable}
+   */
+  public storage: Storable
+
+  /**
+   * workspace
+   * The directory that contains the working files
+   *
+   * @var {string}
+   */
+  public workspace?: string
 
   /**
    * logs
@@ -63,12 +72,14 @@ export class Worker extends EventEmitter {
    *
    * @param {Config} config - The configuration to use
    * @param {Repository} repository - The repository to process on
+   * @param {Storable} storage - Storage for the worker information
    */
-  constructor (config: Config, repository: Repository) {
+  constructor (config: Config, repository: Repository, storage: Storable) {
     super()
 
     this.config = config
     this.repository = repository
+    this.storage = storage
   }
 
   /**

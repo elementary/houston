@@ -9,39 +9,11 @@ import { Role } from './role'
 
 export class Build extends Role {
   /**
-   * Tasks to run before building
+   * Tasks to run for building an application
    *
    * @var {Task[]}
    */
-  public prebuild = []
-
-  /**
-   * Tasks to run for building
-   *
-   * @var {Task[]}
-   */
-  public build = [
-
+  public tasks = [
+    require('../task/debian/control').DebianControl
   ]
-
-  /**
-   * Tasks to run before testing
-   *
-   * @var {Task[]}
-   */
-  public pretest = []
-
-  /**
-   * Tasks to run for testing
-   *
-   * @var {Task[]}
-   */
-  public test = []
-
-  /**
-   * Tasks to run after testing
-   *
-   * @var {Task[]}
-   */
-  public posttest = []
 }

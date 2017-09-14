@@ -9,6 +9,7 @@ import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
 import { Repository as GithubRepository } from '../lib/service/github/repository'
+import { Build } from './role/build'
 import { Worker } from './worker'
 
 import { setup as setupConfig } from '../../test/utility/config'
@@ -43,6 +44,7 @@ test('needle-and-thread/vocal passes release process', async () => {
   const proc = new Worker(config, repo)
 
   await proc.setup()
+  await proc.run(Build)
   await proc.teardown()
 })
 
@@ -53,5 +55,6 @@ test('Philip-Scott/Spice-up passes release process', async () => {
   const proc = new Worker(config, repo)
 
   await proc.setup()
+  await proc.run(Build)
   await proc.teardown()
 })

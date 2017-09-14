@@ -1,6 +1,6 @@
 /**
- * houston/src/worker/task/taskInterface.ts
- * An interface for for OOP stuffs
+ * houston/src/worker/workable.ts
+ * An interface for OOP stuffs
  *
  * @exports {Interface} TaskI
  */
