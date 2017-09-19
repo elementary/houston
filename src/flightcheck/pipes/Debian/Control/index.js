@@ -31,7 +31,7 @@ export default class DebianControl extends Pipe {
 
       Section: null,
       Priority: 'optional',
-      'Standards-Version': '3.9.3',
+      'Standards-Version': '3.9.8',
 
       'Vcs-Git': pipeline.build.repo
     }
