@@ -120,6 +120,8 @@ export default class Pipeline extends events.EventEmitter {
       log.warn('Pipeline was not given auth code. Will not be able to post logs or builds')
     }
 
+    this.build.name = this.build.name.toLowerCase()
+
     // Setup some dynamic variables
     this.build.dir = path.join(config.flightcheck.directory, 'projects', this.build.name)
 
