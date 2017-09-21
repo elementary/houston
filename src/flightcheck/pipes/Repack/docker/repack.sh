@@ -26,17 +26,18 @@ if [ "$O" == "pack" ] && [ ! -d "$P" ]; then
 fi
 
 if [ "$O" == "extract" ]; then
-  cd $P
-
   # Extracting a package
   dpkg-deb -x $P $D
   dpkg-deb -e $P $D/DEBIAN
 
   rm $P
 
+  # Time to start patching the deb contents
+  cd $D
+
   # Creates a list of all the original package permissions for each file
   touch $D/FILES
-  find $P -exec stat -c "%a;%n" {} \; > $D/FILES
+  find $D -exec stat -c "0%a;%n" {} \; > $D/FILES
 
   # Sets everything to an open permission to allow edits without root access
   chmod -R 777 $D
@@ -62,4 +63,7 @@ if [ "$O" == "pack" ]; then
   dpkg-deb -b $P $D
 
   rm -r $P
+
+  # And set this to 777 so we can remove it if needed
+  chmod 777 $D
 fi
