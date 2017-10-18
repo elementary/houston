@@ -18,6 +18,6 @@ export async function report (ctx: Context, next: (ctx?: Context) => Promise<voi
   try {
     await next(ctx)
   } catch (e) {
-    transform(e).httpRender(ctx)
+    transform(e).apiRender(ctx)
   }
 }

@@ -5,6 +5,7 @@
 
 import * as Koa from 'koa'
 
+import { Context as FakeContext } from '../../../../test/utility/koa'
 import { BasicHttpError } from './error'
 import { transform } from './transform'
 
@@ -15,7 +16,7 @@ test('a standard error returns a 500 code', () => {
   expect(after.httpStatus).toEqual(500)
 })
 
-test('an HttpError can pass without being transformed', () => {
+test('an BasicHttpError can pass without being transformed', () => {
   const before = new BasicHttpError(404, 'Page Not Found')
   const after = transform(before)
 
@@ -26,8 +27,7 @@ test('adds a basic httpRender function to standard errors', async () => {
   const before = new Error()
   const after = transform(before)
 
-  // NOTE: This might need to be replaced with a better mock later on.
-  const ctx = {}
+  const ctx = FakeContext()
   await after.httpRender(ctx)
 
   expect(ctx.status).toEqual(500)
@@ -42,7 +42,7 @@ test('does not touch any already set render function', async () => {
 
   const after = transform(before)
 
-  const ctx = {}
+  const ctx = FakeContext()
   await after.httpRender(ctx)
 
   expect(ctx.status).toEqual(400)

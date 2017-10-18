@@ -1,20 +1,22 @@
 /**
- * houston/src/lib/server/error/interface.ts
+ * houston/src/api/error/transform.ts
  * An interface for any error able to be rendered
  */
 
 import { Context } from 'koa'
 
-import { BasicHttpError } from './error'
-import { HttpError } from './interface'
+import { HttpError } from '../../lib/server/error/interface'
+import { upsert } from '../../lib/utility'
+import { BasicApiError } from './error'
+import { ApiError } from './interface'
 
 /**
- * Makes any sort of error an HTTP handleable error.
+ * Makes any sort of error an API handleable error.
  *
  * @param {Error} error
- * @return {HttpError}
+ * @return {ApiError}
  */
-export function transform (e: Error): HttpError {
+export function transform (e: Error): ApiError {
   // TODO: I have yet to find a nice way to convert things. More ninja skill needed
   // tslint:disable-next-line no-any
   const error = e as any
@@ -29,17 +31,20 @@ export function transform (e: Error): HttpError {
       error.httpStatus = 500
     }
 
-    if (typeof error.httpRender !== 'function') {
+    if (typeof error.apiRender !== 'function') {
       // We can just set the status and let koa or the browser deal with what to show.
-      error.httpRender = async (ctx: Context) => {
+      error.apiRender = async (ctx: Context) => {
         ctx.status = error.httpStatus
 
-        return
+        upsert(ctx.response, 'body.errors', [{
+          status: error.httpStatus,
+          title: error.httpMessage || 'Error'
+        }])
       }
     }
   } catch (e) {
     // If there was some weird error trying to convert, cover it up and hope we don't expose secrets.
-    return new BasicHttpError()
+    return new BasicApiError()
   }
 
   return error

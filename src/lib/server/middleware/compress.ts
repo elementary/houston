@@ -4,11 +4,11 @@
  */
 
 import { Context } from 'koa'
-import * as compress from 'koa-compress'
+import * as Compress from 'koa-compress'
 
 /**
  * Compresses output of the page.
  *
  * @var {compress}
  */
-export const compress = compress()
+export const compress = Compress()

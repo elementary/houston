@@ -90,7 +90,7 @@
     "indent": [true, "spaces"],
     "linebreak-style": [true, "LF"],
     "max-classes-per-file": [true, 20],
-    "max-line-length": [true, 120],
+    "max-line-length": [false, 120],
     "no-require-imports": false,
     "no-trailing-whitespace": true,
     "object-literal-sort-keys": true,
