@@ -5,43 +5,47 @@
  * @export {Server} Api - An API server
  */
 
-import { Context } from '../lib/server/middleware'
+import { inject, injectable, multiInject } from 'inversify'
+
 import { Server } from '../lib/server/server'
-import * as middleware from './middleware'
+
+import { compress } from '../lib/server/middleware/compress'
+import { checkHeaders } from './middleware/checkHeaders'
+import { report } from './middleware/report'
+import { setResponse } from './middleware/setResponse'
 
 import { NewestProject } from './controller/newest/project'
 import { NewestRelease } from './controller/newest/release'
 
+/**
+ * The full API server with registered middleware and controllers
+ *
+ * @extends {Server}
+ *
+ * @property {Controller[]} controllers
+ * @property {Middleware[]} middlewares
+ */
+@injectable()
 export class Api extends Server {
+  /**
+   * A list of controllers this server has
+   *
+   * @var {Controller[]}
+   */
+  protected controllers = [
+    NewestProject,
+    NewestRelease
+  ]
 
   /**
-   * registerMiddleware
-   * Registers all the koa middleware the server is going to use.
+   * A list of middlewares that will be ran on every route
    *
-   * @return {void}
+   * @var {Middleware[]}
    */
-  public registerMiddleware (): void {
-    this.router.use(middleware.catchError(this))
-    this.router.use(middleware.checkHeaders(this))
-    this.router.use(middleware.setResponse(this))
-    this.router.use(middleware.wrapBody(this))
-
-    super.registerMiddleware()
-  }
-
-  /**
-   * registerRoutes
-   * Registers all the koa routes the server is going to use.
-   *
-   * @return {void}
-   */
-  public registerRoutes (): void {
-    const newestProject = new NewestProject(this)
-    const newestRelease = new NewestRelease(this)
-
-    this.router.get('/newest/project', (ctx: Context) => newestProject.view(ctx))
-    this.router.get('/newest/release', (ctx: Context) => newestRelease.view(ctx))
-
-    super.registerRoutes()
-  }
+  protected middlewares = [
+    checkHeaders,
+    compress,
+    report,
+    setResponse
+  ]
 }

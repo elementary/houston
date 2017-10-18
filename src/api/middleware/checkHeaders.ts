@@ -5,15 +5,16 @@
 
 import { Context } from 'koa'
 
+import { Config } from '../../lib/config'
 import { BasicHttpError } from '../../lib/server/error/error'
 
 /**
- * checkHeaders
- * Checks headers for JSON api requirements
+ * Middleware factory function for checking headers
  *
+ * @param {Config} config
  * @return {Function} - A middleware function
  */
-export function checkHeaders () {
+export function checkHeaders (config: Config) {
 
   /**
    * Checks headers for incomming requests

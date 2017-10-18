@@ -6,9 +6,11 @@
 import { Context } from 'koa'
 import * as Compress from 'koa-compress'
 
+import { Config } from '../../config'
+
 /**
  * Compresses output of the page.
  *
- * @var {compress}
+ * @var {Function} - A server middleware factory for compressing things
  */
-export const compress = Compress()
+export const compress = (config: Config) => Compress()

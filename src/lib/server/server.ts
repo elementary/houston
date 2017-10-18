@@ -10,9 +10,14 @@ import { inject, injectable, multiInject } from 'inversify'
 import * as Koa from 'koa'
 import * as Router from 'koa-router'
 
+import { compress } from './middleware/compress'
+import { report } from './middleware/report'
+
 import { Config } from '../config'
 import { Logger } from '../log'
 import { Controller } from './controller'
+
+export type Middleware = (config: Config) => (ctx: Koa.Context, next?: Promise<void>) => void
 
 /**
  * Server
@@ -49,9 +54,19 @@ export class Server {
   /**
    * A list of controllers this server has
    *
-   * @var {Controller}
+   * @var {Controller[]}
    */
   protected controllers: Controller[] = []
+
+  /**
+   * A list of middlewares that will be ran on every route
+   *
+   * @var {Middleware[]}
+   */
+  protected middlewares: Middleware[] = [
+    compress,
+    report
+  ]
 
   /**
    * A logger instance for the whole server.
@@ -103,19 +118,6 @@ export class Server {
   }
 
   /**
-   * Adds all of the controllers to the server.
-   *
-   * @return {Server}
-   */
-  public registerControllers () {
-    this.controllers.forEach((controller) => {
-      this.koa.use(controller.middleware())
-    })
-
-    return this
-  }
-
-  /**
    * listen
    * Starts web server services
    *
@@ -129,7 +131,10 @@ export class Server {
     const env = this.config.get('environment')
 
     try {
-      this.server = this.registerControllers().http()
+      this.server = this
+        .registerControllers()
+        .registerMiddleware()
+        .http()
 
       await new Promise((resolve, reject) => {
         this.server.listen(port, undefined, undefined, (err: Error) => {
@@ -191,5 +196,31 @@ export class Server {
    */
   public http (): http.Server {
     return http.createServer(this.koa.callback())
+  }
+
+  /**
+   * Adds all of the controllers to the server.
+   *
+   * @return {Server}
+   */
+  protected registerControllers () {
+    this.controllers.forEach((controller) => {
+      this.koa.use(controller.middleware())
+    })
+
+    return this
+  }
+
+  /**
+   * Adds all of the middleware functions to the server.
+   *
+   * @return {Server}
+   */
+  protected registerMiddleware () {
+    this.middlewares.forEach((middleware) => {
+      this.koa.use(middleware(this.config))
+    })
+
+    return this
   }
 }

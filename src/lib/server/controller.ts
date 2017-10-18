@@ -27,21 +27,25 @@ export abstract class Controller {
   protected router: Router
 
   /**
-   * Creates a new controller
+   * Sets up the basic router with prefixes and needed settings.
+   *
+   * @return {Controller}
    */
-  public constructor () {
+  public setupRouter () {
     this.router = new Router({
       prefix: this.prefix
     })
+
+    return this
   }
 
   /**
    * Sets up all of the given routes with the router.
    *
-   * @return {void}
+   * @return {Controller}
    */
   public setupRoutes () {
-     return
+     return this
   }
 
   /**
@@ -50,7 +54,14 @@ export abstract class Controller {
    * @async
    * @return {IMiddleware}
    */
-  public middleware (): (ctx: Context, next: () => void) => Promise<void> {
-    return async (ctx, next) => next()
+  public middleware (): (ctx: Context, next: () => Promise<any>) => Promise<void> {
+    this
+      .setupRouter()
+      .setupRoutes()
+
+    return async (ctx, next) => {
+      this.router.routes()(ctx, null)
+      this.router.allowedMethods()(ctx, null)
+    }
   }
 }

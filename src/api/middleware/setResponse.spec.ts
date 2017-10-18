@@ -23,19 +23,17 @@ const next = async (ctx: Context) => {
 }
 
 test('sets an empty body', async () => {
-  const middleware = setResponse(config)
   const ctx = FakeContext()
 
-  await middleware(ctx, next)
+  await setResponse(config)(ctx, next)
 
   return expect(ctx.response.body).toMatchObject({})
 })
 
 test('sets response type', async () => {
-  const middleware = setResponse(config)
   const ctx = FakeContext()
 
-  await middleware(ctx, next)
+  await setResponse(config)(ctx, next)
 
   return expect(ctx.response.type).toBe('application/vnd.api+json')
 })
@@ -46,19 +44,17 @@ test('sets the configuration environment', async () => {
     .set('houston.environment', 'noop')
     .freeze()
 
-  const middleware = setResponse(config)
   const ctx = FakeContext()
 
-  await middleware(ctx, next)
+  await setResponse(config)(ctx, next)
 
   return expect(ctx.response.body.meta.environment).toBe('noop')
 })
 
 test('sets the houston version', async () => {
-  const middleware = setResponse(config)
   const ctx = FakeContext()
 
-  await middleware(ctx, next)
+  await setResponse(config)(ctx, next)
 
   const version = config.get('houston.commit', config.get('houston.version'))
 
@@ -66,10 +62,9 @@ test('sets the houston version', async () => {
 })
 
 test('sets the json API version', async () => {
-  const middleware = setResponse(config)
   const ctx = FakeContext()
 
-  await middleware(ctx, next)
+  await setResponse(config)(ctx, next)
 
   return expect(ctx.response.body.jsonapi.version).toBe('1.0')
 })

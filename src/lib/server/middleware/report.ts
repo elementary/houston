@@ -5,19 +5,29 @@
 
 import { Context } from 'koa'
 
+import { Config } from '../../config'
 import { transform } from '../error/transform'
 
 /**
- * Reports error logs
+ * A middleware factory function for reporting errors
  *
- * @async
- * @param {Context} context
- * @return {Function} - A compression function
+ * @param {Config} config
+ * @return {Function}
  */
-export async function report (ctx: Context, next: (ctx?: Context) => Promise<void>) {
-  try {
-    await next(ctx)
-  } catch (e) {
-    transform(e).httpRender(ctx)
+export function report (config: Config) {
+
+  /**
+   * Reports error logs
+   *
+   * @async
+   * @param {Context} context
+   * @return {Function} - A compression function
+   */
+  return async (ctx: Context, next: (ctx?: Context) => Promise<void>) => {
+    try {
+      await next(ctx)
+    } catch (e) {
+      transform(e).httpRender(ctx)
+    }
   }
 }

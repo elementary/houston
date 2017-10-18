@@ -4,6 +4,8 @@
  */
 
 import { Context } from 'koa'
+
+import { create } from '../../../test/utility/app'
 import { Context as FakeContext } from '../../../test/utility/koa'
 
 import { Config } from '../../lib/config'
@@ -11,13 +13,20 @@ import { BasicHttpError } from '../../lib/server/error/error'
 
 import { checkHeaders } from './checkHeaders'
 
+let config: Config
+
 const next = async (ctx: Context) => {
   ctx.status = 200
   ctx.body = 'win'
 }
 
+beforeEach(async () => {
+  const app = await create()
+  config = app.get<Config>(Config)
+})
+
 test('checkHeaders fails with incorrect accept header', () => {
-  const middleware = checkHeaders()
+  const middleware = checkHeaders(config)
   const ctx = FakeContext({ headers: {
     'accept': 'text*',
     'content-length': 12,
@@ -28,7 +37,7 @@ test('checkHeaders fails with incorrect accept header', () => {
 })
 
 test('checkHeaders fails with incorrect content-type header', () => {
-  const middleware = checkHeaders()
+  const middleware = checkHeaders(config)
   const ctx = FakeContext({ headers: {
     'accept': 'application/vnd.api+json',
     'content-length': 12,
@@ -39,7 +48,7 @@ test('checkHeaders fails with incorrect content-type header', () => {
 })
 
 test('checkHeaders passes with correct headers', async () => {
-  const middleware = checkHeaders()
+  const middleware = checkHeaders(config)
   const ctx = FakeContext({ headers: {
     'accept': 'application/vnd.api+json',
     'content-length': 12,

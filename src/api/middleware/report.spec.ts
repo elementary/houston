@@ -4,9 +4,19 @@
  */
 
 import { Context } from 'koa'
+
+import { create } from '../../../test/utility/app'
 import { Context as FakeContext } from '../../../test/utility/koa'
 
+import { Config } from '../../lib/config'
 import { report } from './report'
+
+let config: Config
+
+beforeEach(async () => {
+  const app = await create()
+  config = app.get<Config>(Config)
+})
 
 test('sets status to 500', async () => {
   const ctx = FakeContext()
@@ -15,7 +25,7 @@ test('sets status to 500', async () => {
     throw new Error('this is a basic error')
   }
 
-  await report(ctx, next)
+  await report(config)(ctx, next)
 
   return expect(ctx.status).toBe(500)
 })
@@ -27,7 +37,7 @@ test('does not leak stack trace', async () => {
     throw new Error('this is a basic error')
   }
 
-  await report(ctx, next)
+  await report(config)(ctx, next)
 
   expect(ctx.response.body.errors[0].title || '').not.toMatch('basic error')
   expect(ctx.response.body.errors[0].detail || '').not.toMatch('basic error')
