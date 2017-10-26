@@ -42,7 +42,7 @@ export async function seed (database: Database): Promise<void> {
  * @param {Config} config - Configuration to use for database setup
  * @return {Database} - A fully setup database connection
  */
-export async function setup (config: Config): Promise<Config> {
+export async function setup (config: Config): Promise<Database> {
   const database = new Database(config)
 
   await migrate(database)

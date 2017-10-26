@@ -16,7 +16,7 @@ import { Controller } from '../../../lib/server/controller'
  * NewestRelease
  * Lists the newest released applications to houston
  */
-export class NewestRelease extends Controller {
+export class NewestReleaseController extends Controller {
 
   /**
    * A database we can use for making queries

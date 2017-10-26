@@ -5,15 +5,35 @@
  * @export {Controller} NewestProject - Lists the newest released application
  */
 
+import { Context } from 'koa'
+
+import { Database } from '../../../lib/database'
 import { Project } from '../../../lib/database/model/project'
-import { Controller } from '../../../lib/server/controller/controller'
-import { Context } from '../../../lib/server/middleware'
+import { Controller } from '../../../lib/server/controller'
 
 /**
  * NewestProject
  * Lists the newest released applications to houston
  */
-export class NewestProject extends Controller {
+export class NewestProjectController extends Controller {
+
+  /**
+   * A useable database instance.
+   *
+   * @var {Database}
+   */
+  protected database: Database
+
+  /**
+   * Sets up a database for query
+   *
+   * @param {Database} database
+   */
+  public constructor (database: Database) {
+    super()
+
+    this.database = database
+  }
 
   /**
    * view

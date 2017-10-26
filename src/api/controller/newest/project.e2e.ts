@@ -5,33 +5,32 @@
 
 import * as supertest from 'supertest'
 
-import { Api as Server } from '../../api'
+import { Config } from '../../../lib/config'
 
-import { setup as setupConfig } from '../../../../test/utility/config'
+import { create } from '../../../../test/utility/app'
 import { setup as setupDatabase } from '../../../../test/utility/database'
+import { Context as FakeContext } from '../../../../test/utility/koa'
 
-let config = null
-let database = null
-let server = null
+import { NewestProjectController } from './project'
+
+let database: Database
 
 beforeEach(async () => {
-  config = await setupConfig()
+  const app = await create()
+  const config = app.get<Config>(Config)
+
   database = await setupDatabase(config)
-  server = new Server(config, database)
 })
 
-afterEach(async () => {
-  await server.close()
-})
+test('returns correct apps from view', async () => {
+  const controller = new NewestProjectController(database)
+  const ctx = FakeContext()
 
-test('view', async () => {
-  const res = await supertest(server.http())
-    .get('/newest/project')
-    .expect(200)
+  await controller.view(ctx)
 
-  expect(res.body).toHaveProperty('data')
-  expect(res.body.data).toHaveLength(3)
-  expect(res.body.data).toEqual([
+  expect(ctx.response.body).toHaveProperty('data')
+  expect(ctx.response.body.data).toHaveLength(3)
+  expect(ctx.response.body.data).toEqual([
     'com.github.elementary.terminal.desktop',
     'com.github.elementary.appcenter.desktop',
     'com.github.btkostner.keymaker.desktop'
