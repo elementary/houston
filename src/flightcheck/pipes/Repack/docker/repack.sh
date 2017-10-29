@@ -25,18 +25,45 @@ if [ "$O" == "pack" ] && [ ! -d "$P" ]; then
   exit 1
 fi
 
-# Extracting a package
 if [ "$O" == "extract" ]; then
+  # Extracting a package
   dpkg-deb -x $P $D
   dpkg-deb -e $P $D/DEBIAN
 
   rm $P
+
+  # Time to start patching the deb contents
+  cd $D
+
+  # Creates a list of all the original package permissions for each file
+  touch $D/FILES
+  find $D -exec stat -c "0%a;%n" {} \; > $D/FILES
+
+  # Sets everything to an open permission to allow edits without root access
+  chmod -R 777 $D
 fi
 
 if [ "$O" == "pack" ]; then
   cd $P
+
+  # Restores the original package permissions
+  while read l in; do
+    IFS=';' read o f <<< "$l"
+
+    chmod "$o" "$f"
+  done < $P/FILES
+
+  # Remove any extra files that are not part of the package
+  rm $P/FILES
+
+  # And build the package
+  mkdir -p $P/DEBIAN
+  touch $P/DEBIAN/md5sums
   find . -type f ! -regex '.*.hg.*' ! -regex '.*?debian-binary.*' ! -regex '.*?DEBIAN.*' -printf '%P ' | xargs md5sum > $P/DEBIAN/md5sums
   dpkg-deb -b $P $D
 
   rm -r $P
+
+  # And set this to 777 so we can remove it if needed
+  chmod 777 $D
 fi

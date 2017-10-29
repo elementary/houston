@@ -103,6 +103,11 @@ export default class Pipeline extends events.EventEmitter {
       this.build.version = semver.valid(this.build.tag)
     }
 
+    // TODO: Allow changing RDNN in web interface. Less if statements.
+    if (this.build.source === 'github' && owner.toLowerCase() === 'elementary') {
+      this.build.name = `io.elementary.${repo}`
+    }
+
     // Check to make sure we have everything we need to run
     // This includes all generated data from above
     assert(this.build['name'], 'Pipeline needs a package name to use in build')
@@ -113,6 +118,8 @@ export default class Pipeline extends events.EventEmitter {
     if (this.build['auth'] == null) {
       log.warn('Pipeline was not given auth code. Will not be able to post logs or builds')
     }
+
+    this.build.name = this.build.name.toLowerCase()
 
     // Setup some dynamic variables
     this.build.dir = path.join(config.flightcheck.directory, 'projects', this.build.name)

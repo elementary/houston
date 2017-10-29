@@ -152,8 +152,14 @@ export function castProject (project: Object, installation: ?Number): Object {
     project.git_url = `https://${project.git_url.substr(4)}`
   }
 
+  // TODO: Allow custom domains with web UI (#436)
+  let name = `com.github.${owner}.${repo}`
+  if (owner.toLowerCase() === 'elementary') {
+    name = `io.elementary.${repo}`
+  }
+
   return {
-    name: `com.github.${owner}.${repo}`,
+    name,
     repo: project.git_url,
     tag: project.default_branch,
     github: {

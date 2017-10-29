@@ -242,10 +242,12 @@ export default class Pipe extends events.EventEmitter {
     return new Promise((resolve, reject) => {
       docker.run(`${dockerImage}:latest`, cmd, logStream, options, (err, data, container) => {
         if (err) return reject(err)
-
-        return resolve({
-          exit: data.StatusCode,
-          log: `${dockerImage}.log`
+        container.remove(() => {
+          // ignore remove errors, we tried our best
+          return resolve({
+            exit: data.StatusCode,
+            log: `${dockerImage}.log`
+          })
         })
       })
     })

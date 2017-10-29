@@ -30,7 +30,7 @@ export default class DebianControl extends Pipe {
 
       Section: null,
       Priority: 'optional',
-      'Standards-Version': pipeline.build.version,
+      'Standards-Version': '3.9.8',
 
       'Vcs-Git': pipeline.build.repo
     }
@@ -58,9 +58,7 @@ export default class DebianControl extends Pipe {
       return this.log('error', 'Debian/Control/parse.md', e)
     }
 
-    const lintedControl = Object.assign({}, this.data.control, contents, {
-      'Standards-Version': this.pipeline.build.version
-    })
+    const lintedControl = Object.assign({}, this.data.control, contents)
     const errors = []
 
     /**

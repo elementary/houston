@@ -155,7 +155,7 @@ test('Can get single repo', async (t) => {
   const one = await github.getRepo('elementary', 'test')
 
   t.is(typeof one, 'object')
-  t.is(one.name, 'com.github.elementary.test')
+  t.is(one.name, 'io.elementary.test')
 })
 
 test('Can get list of repos for user', async (t) => {
@@ -171,7 +171,7 @@ test('Can get list of repos for user', async (t) => {
   const one = await github.getReposForUser(user)
 
   t.is(typeof one, 'object')
-  t.is(one[0].name, 'com.github.elementary.test1')
+  t.is(one[0].name, 'io.elementary.test1')
   t.is(one[0].repo, 'https://github.com/elementary/test1.git')
   t.is(one[0].github.id, 1)
   t.is(typeof one[0].github.integration, 'undefined')
