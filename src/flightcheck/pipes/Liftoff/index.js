@@ -105,6 +105,7 @@ export default class Liftoff extends Pipe {
 
       await Promise.all([
         this.require('AppData', path.join(folder, 'usr/share/metainfo')),
+        this.require('BinTest', path.join(folder, 'usr/bin')),
         this.require('Desktop', path.join(folder, 'usr/share/applications'))
       ])
 
