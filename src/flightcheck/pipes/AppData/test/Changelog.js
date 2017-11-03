@@ -34,7 +34,7 @@ export default class AppDataChangelog extends Pipe {
         }
       })
     } catch (err) {
-      return this.log('error', 'AppData/test/changelog.md')
+      return this.log('warn', 'AppData/test/changelog.md')
     }
   }
 }
