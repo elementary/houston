@@ -21,6 +21,29 @@ type LineType = 'simple' | 'folded' | 'multiline'
 export class Parser {
 
   /**
+   * The order that debian control file properties should be in
+   *
+   * @var {string[]}
+   */
+  protected static order = [
+    'Source',
+    'Maintainer',
+    'Section',
+    'Priority',
+    'Standards-Version',
+    'Vcs-Git',
+    'Vcs-Browser',
+    'Homepage',
+    'Build-Depends',
+    'Build-Depends-Indep',
+    'Package',
+    'Architecture',
+    'Depends',
+    'Recommends',
+    'Description'
+  ]
+
+  /**
    * The location to the file.
    *
    * @var {string}
@@ -68,6 +91,40 @@ export class Parser {
     }
 
     return 'simple'
+  }
+
+  /**
+   * Sorts an object to an array. It's pretty hacky, but we need to keep order.
+   *
+   * @param {Object} data
+   * @return {array}
+   */
+  private static sortProperties (data: object) {
+    return Object.keys(data)
+      .map((key) => [key, data[key]])
+      .sort((a, b) => {
+        const ai = this.order.indexOf(a[0])
+        const bi = this.order.indexOf(b[0])
+
+        if (ai === -1) {
+          return 1
+        } else if (bi === -1) {
+          return -1
+        } else {
+          return ai - bi
+        }
+      })
+  }
+
+  /**
+   * Pads the left side of a string by a length
+   *
+   * @param {string} str
+   * @param {Number} len
+   * @return {string}
+   */
+  private static leftPad (str: string, len: number): string {
+    return ' '.repeat(len) + str
   }
 
   /**
@@ -178,13 +235,45 @@ export class Parser {
 
     let output = ''
 
-    Object.keys(data).forEach((key) => {
-      const line = data[line]
+    Parser.sortProperties(data).forEach(([key, line]) => {
       const type = Parser.writeLineType(line)
 
-      console.log(line, type)
+      switch (type) {
+        case 'folded':
+          output += `${key}: ${line[0]}`
+
+          if (line.length < 2) {
+            break
+          }
+
+          output += ',\n'
+
+          output += line
+            .slice(1)
+            .map((l) => Parser.leftPad(l, key.length + 2))
+            .join(',\n')
+
+          output += '\n\n'
+          break
+
+        case 'multiline':
+          output += `${key}:`
+
+          output += line
+            .split('\n')
+            .map((l) => ` ${l}`)
+            .join('\n')
+
+          output += '\n'
+          break
+
+        default:
+          output += `${key}: ${line}\n`
+          break
+      }
     })
 
+    await fs.writeFile(this.file, output, 'utf8')
     return output
   }
 }

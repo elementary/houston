@@ -66,6 +66,36 @@ const gold2Data = {
   'Vcs-Git': 'git://github.com/jendrikseipp/rednotebook.git'
 }
 
+const gold2Raw = `
+Source: com.github.jendrikseipp.rednotebook-elementary
+Maintainer: Jendrik Seipp <xxxxxxxx@xxxxxx.com>
+Section: text
+Priority: optional
+Standards-Version: 3.9.6
+Vcs-Git: git://github.com/jendrikseipp/rednotebook.git
+Vcs-Browser: https://github.com/jendrikseipp/rednotebook
+Homepage: http://rednotebook.sourceforge.net/
+Build-Depends: debhelper (>= 9)
+Build-Depends-Indep: python3, dh-python
+Package: com.github.jendrikseipp.rednotebook-elementary
+Architecture: all
+Depends: \${misc:Depends},
+         \${python3:Depends},
+         gir1.2-gdkpixbuf-2.0,
+         gir1.2-glib-2.0,
+         gir1.2-gtk-3.0,
+         gir1.2-pango-1.0,
+         gir1.2-webkit2-4.0,
+         python3-gi,
+         python3-yaml
+
+Recommends: python3-enchant
+Description: RedNotebook is a modern desktop journal. It lets you
+ format, tag and search your entries. You can also add pictures, links
+ and customizable templates, spell check your notes, and export to
+ plain text, HTML, Latex or PDF.
+`
+
 let testingDir: string
 
 beforeAll(async () => {
@@ -141,4 +171,14 @@ test('can read gold2 file', async () => {
 
   const data = await parser.read()
   expect(data).toEqual(gold2Data)
+})
+
+test('can write gold2 file', async () => {
+  const testFile = path.resolve(os.tmpdir(), 'houston-test/worker/task/debian/controlParser/gold2')
+  const parser = new Parser(testFile)
+
+  await parser.write(gold2Data)
+
+  const file = await fs.readFile(testFile, 'utf-8')
+  expect(file.trim()).toEqual(gold2Raw.trim())
 })
