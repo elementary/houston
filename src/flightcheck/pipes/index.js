@@ -8,6 +8,7 @@
 export AppData from './AppData'
 export AppDataChangelog from './AppData/test/Changelog'
 export AppHub from './AppHub'
+export BinTest from './BinTest'
 export Build from './Build'
 export Debian from './Debian'
 export DebianChangelog from './Debian/Changelog'
