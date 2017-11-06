@@ -159,6 +159,18 @@ multi: this is a multi
   expect(Parser.readLineType(raw, 7)).toEqual('multiline')
 })
 
+test('mutliline ending with columns does not become folded type', () => {
+  const raw = `
+Description: this is a testing description,
+ that happends to end with a , because
+ of parsing tests.
+  `.trim()
+
+  expect(Parser.readLineType(raw, 1)).toEqual('multiline')
+  expect(Parser.readLineType(raw, 2)).toEqual('multiline')
+  expect(Parser.readLineType(raw, 3)).toEqual('multiline')
+})
+
 test('can read gold1 file', async () => {
   const parser = new Parser(gold1File)
 
