@@ -1,5 +1,5 @@
 /**
- * flightcheck/pipes/AppData/test/changelog.js
+ * flightcheck/pipes/AppData/test/Id.js
  * Checks appdata has id key and matches the RDNN
  * @flow
  *
@@ -10,7 +10,7 @@ import Parseable from 'flightcheck/file/parsable'
 import Pipe from 'flightcheck/pipes/pipe'
 
 /**
- * AppDataChangelog
+ * AppDataId
  * Checks appdata has id key and matches the RDNN
  *
  * @extends Pipe
@@ -32,7 +32,11 @@ export default class AppDataId extends Pipe {
       if (!file.component.id) {
         throw new Error('Missing id');
       }
+    } catch (err) {
+      return this.log('warn', 'AppData/test/id.md');
+    }
 
+    try {
       if (file.component.id[0] !== expectedId) {
         throw new Error(`Id [${file.component.id[0]}] does not match expected RDNN [${expectedId}]`);
       }

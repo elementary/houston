@@ -30,7 +30,8 @@ export default class AppData extends Pipe {
    */
   tests () {
     return [
-      'AppDataChangelog'
+      'AppDataChangelog',
+      'AppDataId'
     ]
   }
 
