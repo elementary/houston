@@ -33,7 +33,7 @@ export default class AppDataId extends Pipe {
         throw new Error('Missing id')
       }
     } catch (err) {
-      return this.log('warn', 'AppData/test/id.md')
+      return this.log('warn', 'AppData/test/id.md', this.pipeline.build.name)
     }
 
     try {
@@ -41,7 +41,7 @@ export default class AppDataId extends Pipe {
         throw new Error(`Id [${file.component.id[0]}] does not match expected RDNN [${expectedId}]`)
       }
     } catch (err) {
-      return this.log('warn', 'AppData/test/id.md')
+      return this.log('warn', 'AppData/test/id.md', this.pipeline.build.name)
     }
   }
 }
