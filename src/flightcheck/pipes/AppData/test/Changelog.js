@@ -1,9 +1,9 @@
 /**
  * flightcheck/pipes/AppData/test/changelog.js
- * Checks appdata has screenshot key
+ * Checks appdata has changelog key
  * @flow
  *
- * @exports {Pipe} - Checks appdata has screenshot key
+ * @exports {Pipe} - Checks appdata has changelog key
  */
 
 import Parseable from 'flightcheck/file/parsable'
@@ -11,7 +11,7 @@ import Pipe from 'flightcheck/pipes/pipe'
 
 /**
  * AppDataChangelog
- * Checks appdata has screenshot key
+ * Checks appdata has changelog key
  *
  * @extends Pipe
  */
@@ -19,7 +19,7 @@ export default class AppDataChangelog extends Pipe {
 
   /**
    * code
-   * Checks appdata has screenshot key
+   * Checks appdata has changelog key
    *
    * @param {Parseable} f - The AppData file
    * @returns {Void}
