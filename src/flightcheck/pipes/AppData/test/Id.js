@@ -26,22 +26,22 @@ export default class AppDataId extends Pipe {
    */
   async code (f: Parseable) {
     const file = await f.parse()
-    const expectedId = `${this.pipeline.build.name}.desktop`;
+    const expectedId = `${this.pipeline.build.name}.desktop`
 
     try {
       if (!file.component.id) {
-        throw new Error('Missing id');
+        throw new Error('Missing id')
       }
     } catch (err) {
-      return this.log('warn', 'AppData/test/id.md');
+      return this.log('warn', 'AppData/test/id.md')
     }
 
     try {
       if (file.component.id[0] !== expectedId) {
-        throw new Error(`Id [${file.component.id[0]}] does not match expected RDNN [${expectedId}]`);
+        throw new Error(`Id [${file.component.id[0]}] does not match expected RDNN [${expectedId}]`)
       }
     } catch (err) {
-      return this.log('warn', 'AppData/test/id.md');
+      return this.log('warn', 'AppData/test/id.md')
     }
   }
 }
