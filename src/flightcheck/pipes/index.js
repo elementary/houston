@@ -7,6 +7,7 @@
 
 export AppData from './AppData'
 export AppDataChangelog from './AppData/test/Changelog'
+export AppDataDeveloperName from './AppData/test/DeveloperName'
 export AppDataId from './AppData/test/Id'
 export AppHub from './AppHub'
 export BinTest from './BinTest'
