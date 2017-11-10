@@ -32,7 +32,7 @@ export default class AppDataProjectLicense extends Pipe {
         throw new Error('Missing project_license')
       }
 
-      if (file.component.project_license.length == 0) {
+      if (file.component.project_license.length === 0) {
         throw new Error('Empty project_license')
       }
     } catch (err) {
