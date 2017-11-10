@@ -32,7 +32,7 @@ export default class AppDataDeveloperName extends Pipe {
         throw new Error('Missing developer_name')
       }
 
-      if (file.component.developer_name[0].length == 0) {
+      if (file.component.developer_name[0].length === 0) {
         throw new Error('developer_name is empty')
       }
     } catch (err) {
