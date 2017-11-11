@@ -32,7 +32,8 @@ export default class AppData extends Pipe {
     return [
       'AppDataChangelog',
       'AppDataId',
-      'AppDataDeveloperName'
+      'AppDataDeveloperName',
+      'AppDataProjectLicense'
     ]
   }
 
