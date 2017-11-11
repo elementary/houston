@@ -24,6 +24,20 @@ const log = new Log('flightcheck:AppData')
 export default class AppData extends Pipe {
 
   /**
+   * A list of AppData tests to run.
+   *
+   * @return {String[]}
+   */
+  tests () {
+    return [
+      'AppDataChangelog',
+      'AppDataId',
+      'AppDataDeveloperName',
+      'AppDataProjectLicense'
+    ]
+  }
+
+  /**
    * code
    * Checks for a valid appdata file
    *
@@ -67,6 +81,8 @@ export default class AppData extends Pipe {
         return this.log('error', 'AppData/invalid.md')
       }
     }
+
+    await Promise.all(this.tests().map((test) => this.require(test, file)))
 
     if (this.pipeline.build.stripe != null) {
       log.debug('Saving AppCenter Stripe key')
