@@ -75,8 +75,8 @@ test('Can generate an accurate JWT', async (t) => {
 
   t.is(typeof three, 'object')
   t.is(typeof four, 'object')
-  t.is(three.iss, config.github.integration.id)
-  t.is(four.iss, config.github.integration.id)
+  t.is(three.iss, config.github.app.id)
+  t.is(four.iss, config.github.app.id)
   t.true(three.iat < new Date().getTime())
   t.true(four.iat < new Date().getTime())
   t.true(three.exp > Math.floor(Date.now() / 1000))
