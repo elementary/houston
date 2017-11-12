@@ -195,6 +195,7 @@ export async function read (str: string): Promise<Object> {
         return
       }
 
+      // FLOW disable next line because flow things it's an array, not a string
       output[lastKey] += `\n${line.trim()}`
     }
   })

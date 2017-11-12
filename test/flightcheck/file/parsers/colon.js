@@ -43,11 +43,11 @@ test('can read a file', async (t) => {
   t.is(one['Maintainer'], 'Nathan Dyer')
   // eslint-disable-next-line no-template-curly-in-string
   t.is(one['Depends'], '${misc:Depends}, ${shlibs:Depends}')
-  t.is(one['Description'], 'Vocal\n     Simple podcast client for the modern desktop.')
+  t.is(one['Description'], 'Vocal\nSimple podcast client for the modern desktop.')
 
   t.is(typeof one['Build-Depends'], 'object')
   t.is(one['Build-Depends'].length, 17)
-  t.is(one['Build-Depends'][3], 'libgranite-dev')
+  t.true(one['Build-Depends'].includes('libgranite-dev'))
 })
 
 test('can write a file', async (t) => {
@@ -67,20 +67,20 @@ test('can write a file', async (t) => {
 
   t.is(one, [
     'Source: vocal',
+    'Maintainer: Nathan Dyer',
     'Section: sound',
     'Priority: optional',
-    'Maintainer: Nathan Dyer',
+    'Standards-Version: 3.9.3',
     'Build-Depends: cmake (>= 2.8),',
     '               debhelper (>= 8.0.0),',
     '               libgee-0.8-dev',
     '',
-    'Standards-Version: 3.9.3',
     'Package: vocal',
     'Architecture: any',
     // eslint-disable-next-line no-template-curly-in-string
     'Depends: ${misc:Depends}, ${shlibs:Depends}',
     'Description: Vocal',
-    ' Simple podcast client for the modern desktop.',
+    '  Simple podcast client for the modern desktop.',
     ''
   ].join('\n'))
 })
