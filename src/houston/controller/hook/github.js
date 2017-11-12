@@ -135,7 +135,7 @@ route.all('/', (ctx, next) => {
  * Checks for accurate webhook secret
  */
 route.all('/', async (ctx, next) => {
-  if (config.github.integration.secret == null || !config.github.integration.secret) {
+  if (config.github.app.secret == null || !config.github.app.secret) {
     log.warn('Using insecure settings. Please setup integration webhook secret')
     return next()
   }
@@ -149,7 +149,7 @@ route.all('/', async (ctx, next) => {
   }
 
   const hash = crypto
-  .createHmac('sha1', config.github.integration.secret)
+  .createHmac('sha1', config.github.app.secret)
   .update(ctx.request.rawBody)
   .digest('hex')
 
@@ -185,7 +185,7 @@ route.post('/', (ctx, next) => {
  * Handles the creation of new installations
  */
 route.post('/', async (ctx, next) => {
-  if (ctx.request.header['x-github-event'] !== 'integration_installation') return next()
+  if (ctx.request.header['x-github-event'] !== 'installation') return next()
 
   if (typeof ctx.request.body !== 'object') {
     ctx.status = 400
@@ -256,7 +256,7 @@ route.post('/', async (ctx, next) => {
  * Handles adding and removing of installations
  */
 route.post('/', async (ctx, next) => {
-  if (ctx.request.header['x-github-event'] !== 'integration_installation_repositories') return next()
+  if (ctx.request.header['x-github-event'] !== 'installation_repositories') return next()
 
   if (typeof ctx.request.body !== 'object') {
     ctx.status = 400
