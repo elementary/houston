@@ -216,7 +216,7 @@ export async function generateJWT (exp: Date = moment().add(1, 'minutes').toDate
   const key = await new Promise((resolve, reject) => {
     log.debug('Reading integration key')
 
-    fs.readFile(config.github.integration.key, (err, data) => {
+    fs.readFile(config.github.app.key, (err, data) => {
       if (err) return reject(err)
       return resolve(data)
     })
@@ -226,7 +226,7 @@ export async function generateJWT (exp: Date = moment().add(1, 'minutes').toDate
   const payload = {
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(exp.getTime() / 1000),
-    iss: config.github.integration.id
+    iss: config.github.app.id
   }
 
   return new Promise((resolve, reject) => {
@@ -333,12 +333,9 @@ export async function getReposForUser (user: User): Promise<Array<Object>> {
   if (user.github != null && user.github.cache != null) {
     if (moment().diff(user.github.cache) <= GITHUB_CACHE_TIME) {
       if (user.github.projects != null && user.github.projects.length > 0) {
-        // DEPRECATED let the old object storage format rest in peace.
-        if (typeof user.github.projects[0] === 'number') {
-          return Project.find({
-            'github.id': { $in: user.github.projects }
-          })
-        }
+        return Project.find({
+          'github.id': { $in: user.github.projects }
+        })
       }
     }
   }

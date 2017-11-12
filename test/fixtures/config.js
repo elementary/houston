@@ -12,7 +12,7 @@ module.exports.env = 'test'
 module.exports.github = {
   client: '123456789yoloswagomg',
   secret: 'butwait%20letmetakeaselfeshutthefrackup!',
-  integration: {
+  app: {
     id: 11,
     key: path.resolve(__dirname, 'github', 'private.pem'),
     secret: 'asecretwebhookkey'

@@ -12,8 +12,8 @@ module.exports.github = {
   client: '78zx9c4vb8xc4v5647ar',
   secret: '4ra56dsv489asd4r56b456a489sd7ft89a75s4b8',
 
-  // GitHub integration https://developer.github.com/early-access/integrations
-  integration: {
+  // GitHub integration https://developer.github.com/apps/
+  app: {
     id: 11,
 
     // Full path to GitHub integration private key.
