@@ -35,6 +35,17 @@ export default class Desktop extends Pipe {
   }
 
   /**
+   * A list of AppData tests to run.
+   *
+   * @return {String[]}
+   */
+  tests () {
+    return [
+      'DesktopIcon'
+    ]
+  }
+
+  /**
    * code
    * Checks for a valid desktop file
    *
@@ -76,5 +87,7 @@ export default class Desktop extends Pipe {
         return this.log('error', 'Desktop/error.md')
       }
     }
+
+    await Promise.all(this.tests().map((test) => this.require(test, file)))
   }
 }
