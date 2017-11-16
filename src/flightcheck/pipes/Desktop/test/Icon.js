@@ -33,15 +33,15 @@ export default class DesktopIcon extends Pipe {
         throw new Error('Missing icon')
       }
     } catch (err) {
-      return this.log('error', 'Desktop/test/icon.md', this.pipeline.build.name)
+      return this.log('error', 'Desktop/test/icon.md', expectedIcon)
     }
 
     try {
       if (file['Desktop Entry']['Icon'] !== expectedIcon) {
-        throw new Error(`Icon does not match expected RDNN [${expectedIcon}]`)
+        throw new Error(`Icon value is unexpected. Should be ${expectedIcon}`)
       }
     } catch (err) {
-      return this.log('error', 'Desktop/test/icon.md', this.pipeline.build.name)
+      return this.log('error', 'Desktop/test/icon.md', expectedIcon)
     }
   }
 }
