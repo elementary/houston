@@ -46,7 +46,7 @@ export default class AppDataScreenshot extends Pipe {
         }
       })
     } catch (err) {
-      return this.log('warn', 'AppData/test/Screenshot.md')
+      return this.log('error', 'AppData/test/screenshot.md')
     }
   }
 }
