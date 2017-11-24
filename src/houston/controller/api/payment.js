@@ -217,7 +217,7 @@ route.post('/:project', async (ctx, next) => {
   ctx.status = 200
   ctx.body = {
     data: {
-      name: ctx.project.name,
+      name: ctx.github.name,
       key: ctx.project.stripe.public,
       amount: payload.amount
     }
