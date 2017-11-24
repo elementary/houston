@@ -82,7 +82,7 @@ export function postReceipt (project: Project, email: string, amount: number): P
 
   const req = [{
     name: 'app-name',
-    content: project.name
+    content: project.github.name
   }, {
     name: 'app-icon',
     content: 'https://developer.elementary.io/images/system-software-install.svg'
