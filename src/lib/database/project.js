@@ -345,7 +345,7 @@ schema.methods.findDownloadTotal = async function (): Promise<number> {
   releaseIDs.forEach((id) => promises.push(Download.findTotal(id)))
 
   if (promises.length === 0) {
-    return 0;
+    return 0
   }
 
   const totals = await Promise.all(promises)
