@@ -153,13 +153,22 @@ export default class Pipeline extends events.EventEmitter {
       if (e.code === 'ENOENT') {
         await fsHelper.mkdirp(repoFolder)
         repo = await git.Clone(this.build.repo, repoFolder)
-        const recursiveClone = async(clonePath) => {
+
+        /**
+         * Clones all of the Git submodules for a given repo path
+         *
+         * @async
+         * @param {String} clonePath - Path of the repository
+         * @return {void}
+         */
+        const recursiveClone = async (clonePath) => {
           const subRepo = await git.Repository.open(clonePath)
-          await git.Submodule.foreach(subRepo, async(submodule) => {
+          await git.Submodule.foreach(subRepo, async (submodule) => {
             await submodule.update(1, new git.SubmoduleUpdateOptions())
             await recursiveClone(path.join(clonePath, submodule.path()))
           })
         }
+
         await recursiveClone(repoFolder)
       } else {
         throw e
