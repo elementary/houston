@@ -33,7 +33,8 @@ export default class AppData extends Pipe {
       'AppDataChangelog',
       'AppDataId',
       'AppDataDeveloperName',
-      'AppDataProjectLicense'
+      'AppDataProjectLicense',
+      'AppDataScreenshot'
     ]
   }
 
