@@ -361,6 +361,7 @@ test('Returns 200 with successful payment', async (t) => {
     name: 'com.testing.apipayments.12',
     repo: 'https://testing.com/apipayments/12.git',
     'github.id': 376451,
+    'github.name': 'test-app',
     'stripe.enabled': true,
     'stripe.id': 'acct_123',
     'stripe.access': 'tok_123',
