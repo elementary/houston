@@ -19,6 +19,10 @@ mongoose.connection.on('error', (msg) => {
   log.error(msg)
 
   log.report(msg)
+
+  // Disconnect on error, calling the close event, crashing the process, and
+  // hoping the sys-admin has some service to start it!
+  mongoose.disconnect()
 })
 
 mongoose.connection.on('open', () => {
