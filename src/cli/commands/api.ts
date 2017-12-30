@@ -1,16 +1,16 @@
 /**
- * houston/src/cli/client.ts
+ * houston/src/cli/commands/api.ts
  * Runs the API server
  */
 
 // Command line files are allowed to have console log statements
 // tslint:disable no-console
 
-import { Client as Server } from '../client/client'
-import * as cli from './cli'
+import { Api as Server } from '../../api/api'
+import { setup } from '../utilities'
 
-export const command = 'client'
-export const describe = 'Starts the client web server'
+export const command = 'api'
+export const describe = 'Starts the API web server'
 
 export const builder = (yargs) => {
     return yargs
@@ -18,9 +18,8 @@ export const builder = (yargs) => {
 }
 
 export async function handler (argv) {
-  const config = cli.getConfig(argv)
-  const server = new Server(config)
-  cli.setupLog(config)
+  const { app } = setup(argv)
+  const server = app.get<Server>(Server)
 
   await server.listen(argv.port)
 }

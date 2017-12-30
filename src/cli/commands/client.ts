@@ -1,16 +1,16 @@
 /**
- * houston/src/cli/repo.ts
- * Runs the repository syslogd server
+ * houston/src/cli/commands/client.ts
+ * Runs the Client server
  */
 
 // Command line files are allowed to have console log statements
 // tslint:disable no-console
 
-import { Repo as Server } from '../repo/repo'
-import * as cli from './cli'
+import { Client as Server } from '../../client/client'
+import { setup } from '../utilities'
 
-export const command = 'repo'
-export const describe = 'Starts the repository syslogd server'
+export const command = 'client'
+export const describe = 'Starts the client web server'
 
 export const builder = (yargs) => {
     return yargs
@@ -18,9 +18,8 @@ export const builder = (yargs) => {
 }
 
 export async function handler (argv) {
-  const config = cli.getConfig(argv)
-  const server = new Server(config)
-  cli.setupLog(config)
+  const { app } = setup(argv)
+  const server = app.get<Server>(Server)
 
   await server.listen(argv.port)
 }

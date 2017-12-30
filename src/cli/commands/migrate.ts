@@ -1,13 +1,13 @@
 /**
- * houston/src/cli/migrate.ts
+ * houston/src/cli/commands/migrate.ts
  * Runs database migration scripts
  */
 
 // Command line files are allowed to have console log statements
 // tslint:disable no-console
 
-import { Database } from '../lib/database/database'
-import { getConfig } from './cli'
+import { Database } from '../../lib/database'
+import { setup } from '../utilities'
 
 export const command = 'migrate'
 export const describe = 'Changes database tables based on houston schemas'
@@ -18,8 +18,8 @@ export const builder = (yargs) => {
 }
 
 export async function handler (argv) {
-  const config = getConfig(argv)
-  const database = new Database(config)
+  const { app, config } = setup(argv)
+  const database = app.get<Database>(Database)
 
   if (argv.direction === 'up') {
     const version = config.get('houston.version', 'latest')
