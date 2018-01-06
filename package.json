@@ -2,12 +2,12 @@
   "name": "houston",
   "version": "2.0.0",
   "description": "Backend to AppCenter",
-  "main": "dist/cli/index.js",
+  "main": "dist/app.js",
   "repository": "https://github.com/elementary/houston",
   "author": "Blake Kostner <btkostner@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "node dest/cli/houston.js",
+    "start": "node dest/app.js",
     "build": "gulp --gulpfile 'build/gulpfile.ts' build",
     "build:dev": "gulp --gulpfile 'build/gulpfile.ts' watch",
     "test": "jest --no-cache",
@@ -30,16 +30,17 @@
     "lasso-marko": "^2.4.0",
     "lodash": "^4.17.4",
     "marko": "^4.7.4",
+    "minimist": "^1.2.0",
     "nodegit": "^0.20.3",
     "reflect-metadata": "^0.1.10",
-    "uuid": "^3.0.1",
-    "yargs": "^8.0.1"
+    "uuid": "^3.0.1"
   },
   "optionalDependencies": {
     "raven": "^2.0.1"
   },
   "devDependencies": {
     "@types/jest": "^19.2.3",
+    "@types/knex": "0.0.68",
     "@types/koa-router": "^7.0.27",
     "@types/node": "^7.0.51",
     "del": "^2.2.2",
