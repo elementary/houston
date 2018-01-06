@@ -21,7 +21,7 @@ export function setup (argv) {
   const app = new App(config)
   const logger = app.get(Logger)
 
-  process.on('unhandledRejection', (reason) => logger.warn(reason))
+  process.on('unhandledRejection', (reason) => console.error(reason))
 
   return { app, config, logger }
 }
