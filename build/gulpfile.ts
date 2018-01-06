@@ -38,6 +38,7 @@ gulp.task('copy', () => {
   const dest = path.resolve(common.paths.dest)
 
   return gulp.src([
+    path.resolve(src, 'bootstrap.js'),
     path.resolve(src, 'client', '**', '*.json'),
     path.resolve(src, 'client', '**', '*.marko'),
     path.resolve(src, 'public', '**', '*')
