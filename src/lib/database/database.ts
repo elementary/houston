@@ -5,6 +5,7 @@
  * @exports {Class} Database - The master database connection class
  */
 
+import { inject, injectable } from 'inversify'
 import * as Knex from 'knex'
 import * as path from 'path'
 
@@ -17,12 +18,13 @@ import { Log } from '../log'
  *
  * @property {Knex} knex - A knex instance for queries
  */
+@injectable()
 export class Database {
 
   public knex: Knex
-  public log: Log
 
   protected config: Config
+  protected log: Log
 
   /**
    * Creates a Database class
@@ -30,7 +32,7 @@ export class Database {
    * @param {Config} config - Configuration for database connection
    * @param {Log} [log] - The log instance to use for reporting
    */
-  constructor (config: Config, log?: Log) {
+  constructor (@inject(Config) config: Config, @inject(Log) log: Log) {
     const migrationPath = path.resolve(__dirname, 'migration')
     const seedPath = path.resolve(__dirname, 'seed')
 
@@ -47,9 +49,9 @@ export class Database {
     })
 
     this.config = config
+    this.log = log
 
     this.knex = new Knex(databaseConfig)
-    this.log = log || new Log(config)
   }
 
 }

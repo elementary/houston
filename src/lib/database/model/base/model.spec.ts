@@ -1,5 +1,5 @@
 /**
- * houston/src/lib/database/model/model.spec.ts
+ * houston/src/lib/database/model/base/model.spec.ts
  * Tests the master model class
  */
 

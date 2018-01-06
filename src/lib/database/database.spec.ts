@@ -5,17 +5,16 @@
 
 import { Database } from './database'
 
-import { setup as setupConfig } from '../../../test/utility/config'
+import { create } from '../../../test/utility/app'
 
-let config = null
-let database = null
+let database: Database
 
 beforeEach(async () => {
-  config = await setupConfig()
-  database = new Database(config)
+  const app = await create()
+  database = app.get<Database>(Database)
 })
 
-test('can migrate to latest version', async () => {
+test('can migrate to latest version', () => {
   return database.knex.migrate.latest()
 })
 

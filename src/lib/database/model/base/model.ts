@@ -1,5 +1,5 @@
 /**
- * houston/src/lib/database/model/model.ts
+ * houston/src/lib/database/model/base/model.ts
  * A basic master model inherited by everything
  */
 
@@ -7,7 +7,8 @@ import * as Knex from 'knex'
 import { camelCase, isArray } from 'lodash'
 import * as uuid from 'uuid/v4'
 
-import { Database } from '../database'
+import { Database } from '../../database'
+import { Query } from './query'
 
 /**
  * Model
@@ -27,7 +28,7 @@ export class Model {
    *
    * @var {string}
    */
-  protected static table: string
+  public static table: string
 
   public id: string
 
@@ -75,6 +76,14 @@ export class Model {
       cammelCasedValues[camelCase(key)] = values[key]
     })
 
+    // Date converting all of the `xxxxAt` columns
+    Object.keys(cammelCasedValues)
+      .filter((key) => key.endsWith('At'))
+      .filter((key) => (cammelCasedValues[key] != null))
+      .forEach((key) => {
+        cammelCasedValues[key] = new Date(cammelCasedValues[key])
+      })
+
     const record = new this(cammelCasedValues)
 
     record.exists = true
@@ -85,39 +94,14 @@ export class Model {
   /**
    * query
    * This is a super master query function so we can put data in a model
-   * TODO: can't we just do some fancy magic and overwrite a knex thing?
    *
    * @param {Database} database - The database to query
-   * @param {Function} fn - A function given a query and returning a query
-   * @return {mixed}
+   * @return {Query}
    */
-  public static async query (database: Database, fn: (q: Knex) => Knex) {
-    const query = fn(database.knex.table(this.table))
-    const result = await query
-
-    if (result == null) return null
-
-    if (isArray(result)) {
-      return result.map((res) => this.castFromDatabase(res))
-    }
-
-    return this.castFromDatabase(result)
-  }
-
-  /**
-   * findById
-   * Finds a record in the database
-   *
-   * @async
-   * @return {Model}
-   */
-  public static async findById (database: Database, id: string) {
-    return this.query(database, (q) => {
-      return q
-        .where('id', id)
-        .where('deleted_at', null)
-        .first()
-    })
+  public static query (database: Database): Query {
+    return (new Query(database))
+      .setModel(Model)
+      .from(Model.table)
   }
 
   /**
@@ -183,7 +167,7 @@ export class Model {
   public toObject () {
     const res = {}
 
-    Object.keys(this).forEach((key) => {
+    Object.getOwnPropertyNames(this).forEach((key) => {
       if (this.guarded.indexOf(key) === -1) {
         res[key] = this[key]
       }
