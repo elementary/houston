@@ -349,13 +349,17 @@ section.tools ul {
     margin-top: 24px;
 }
 
+section.tools p {
+    text-align: center;
+}
+
 @media only screen and (min-width: 640px) {
     section.tools > div {
         margin: 0 auto;
         max-width: 1200px;
     }
 
-    section.tools .card {
+    section.tools > div > div {
         flex: 0 0 calc(50% - 32px);
         max-width: 468px;
     }
