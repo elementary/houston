@@ -282,6 +282,10 @@ section.tools > div {
     justify-content: space-evenly;
 }
 
+section.tools .card {
+    margin-bottom: 32px;
+}
+
 section.tools .card > img {
     height: 36px;
     margin: 0 auto 24px;
@@ -331,18 +335,23 @@ section.tools .banner svg {
 
 section.tools .banner .fa {
     color: #fff;
-    line-height: 1.33em;
 }
 
 section.tools .workflow {
     display: flex;
     align-items: baseline;
     justify-content: space-around;
+
 }
 
 section.tools .workflow div {
     flex: 0 0 30%;
     text-align: center;
+}
+
+section.tools .workflow,
+section.tools .workflow p {
+    margin-top: 22px;
 }
 
 section.tools ul {
@@ -382,4 +391,8 @@ footer,
 
 .fa-ul li {
     margin-bottom: 32px;
+}
+
+.fa-li {
+    width: 16px;
 }
