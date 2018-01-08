@@ -283,14 +283,16 @@ section.tools > div {
 }
 
 section.tools .card > img {
-    height: 48px;
+    height: 36px;
     margin: 0 auto 24px;
     display: block;
 }
 
 section.tools .banner {
     background-color: #7a36b1;
+    background-image: linear-gradient(to right bottom, #4c158a, #Ad65d6);
     color: #fff;
+    height: 180px;
     margin: 0 -24px;
     padding: 6px 24px;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -309,8 +311,27 @@ section.tools .banner p.small {
     font-size: 0.8em;
 }
 
+section.tools .banner p.split {
+    font-size: 3em;
+    font-weight: 300;
+    line-height: 1.2em;
+    margin: 0;
+}
+
+section.tools .banner p.split span {
+    font-size: 0.5em;
+    opacity: 0.8;
+    vertical-align: middle;
+}
+
+section.tools .banner svg {
+    height: 46px;
+    vertical-align: bottom;
+}
+
 section.tools .banner .fa {
     color: #fff;
+    line-height: 1.33em;
 }
 
 section.tools .workflow {
@@ -336,7 +357,7 @@ section.tools ul {
 
     section.tools .card {
         flex: 0 0 calc(50% - 32px);
-        max-width: 416px;
+        max-width: 468px;
     }
 }
 

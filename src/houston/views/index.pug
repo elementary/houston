@@ -55,8 +55,8 @@ block body
         img(src='/images/stripe_logo.svg')
         div.banner
           p Payments are split between you and elementary
-          h1 70 / 30
-          p.small with a minimum payment of 50¢
+          p.split 70 <span>/</span> 30
+          p.small with a minimum platform fee of 50¢
         ul.fa-ul
           li <i class="fa fa-credit-card fa-li"></i> Fast, easy pay-what-you-want downloads from users of elementary OS. 
           li <i class="fa fa-lock fa-li"></i> Powered by Stripe Connect ensuring simplicity, security, and compliance. 
@@ -69,16 +69,18 @@ block body
           p Publish without distrupting your workflow
           div.workflow
             div
-              i.fa.fa-2x.fa-github
+              i.fa.fa-3x.fa-github
               p.small Git Tag
             i.fa.fa-angle-right
             div
-              i.fa.fa-2x.fa-gears
+              i.fa.fa-3x.fa-gears
               p.small Automated Testing
             i.fa.fa-angle-right
             div
-              img(src='https://elementary.io/images/icons/apps/32/system-software-install.svg')
-              p.small Published in AppCenter
+              svg(xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4.2333 3.7042')
+                path(class='logotype-svg' style='text-align:start' d='m0.26314-0.0055-0.26458 0.79374v0.26458c0 0.52916 0.52916 0.52916 0.52916 0.52916 0.29315 0 0.52916-0.23601 0.52916-0.52916 0 0.29315 0.23601 0.52916 0.52916 0.52916s0.52916-0.23601 0.52916-0.52916c0 0.29315 0.23601 0.52916 0.52916 0.52916s0.52916-0.23601 0.52916-0.52916c0 0.29315 0.23601 0.52916 0.52916 0.52916 0 0 0.52916 0 0.52916-0.52916v-0.26458l-0.26458-0.79374zm0 1.8521v1.5875s0 0.26458 0.26458 0.26458h3.175c0.26458 0 0.26458-0.26458 0.26458-0.26458v-1.5875h-0.26458v1.5875h-0.52916v-0.92603c0-0.21987-0.177-0.39687-0.39687-0.39687s-0.39687 0.177-0.39687 0.39687v0.92603h-1.8521v-1.5875zm0.79374 0.26458v0.79374h0.79374v-0.79374z' fill='#fff')
+
+              p.small Published
         ul.fa-ul
           li <i class="fa fa-code-fork fa-li"></i> Keep issue tracking &amp; release management where you're familiar. 
           li <i class="fa fa-refresh fa-li"></i> Submit updates and view the status of automated testing and fast human reviews. 
