@@ -276,16 +276,56 @@ section.tools h2 {
     text-align: center;
 }
 
-section.tools img {
-    height: 48px;
-    margin: 0 auto;
-    display: block;
-}
-
 section.tools > div {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-evenly;
+}
+
+section.tools .card > img {
+    height: 48px;
+    margin: 0 auto 24px;
+    display: block;
+}
+
+section.tools .banner {
+    background-color: #7a36b1;
+    color: #fff;
+    margin: 0 -24px;
+    padding: 6px 24px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+section.tools .banner h1 {
+    font-size: 4em;
+}
+
+section.tools .banner h1,
+section.tools .banner p {
+    text-align: center;
+}
+
+section.tools .banner p.small {
+    font-size: 0.8em;
+}
+
+section.tools .banner .fa {
+    color: #fff;
+}
+
+section.tools .workflow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-around;
+}
+
+section.tools .workflow div {
+    flex: 0 0 30%;
+    text-align: center;
+}
+
+section.tools ul {
+    margin-top: 24px;
 }
 
 @media only screen and (min-width: 640px) {
@@ -296,7 +336,7 @@ section.tools > div {
 
     section.tools .card {
         flex: 0 0 calc(50% - 32px);
-        max-width: 400px;
+        max-width: 416px;
     }
 }
 
