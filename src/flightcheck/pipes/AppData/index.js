@@ -100,7 +100,6 @@ export default class AppData extends Pipe {
           '$': { key: 'x-appcenter-stripe' }
         })
 
-        console.log(data)
         await file.stringify(data)
       } catch (err) {
         log.error('Unable to insert stripe key to file', err)
