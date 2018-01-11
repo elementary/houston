@@ -99,6 +99,42 @@ const findDay = async () => {
   return total
 }
 
+route.get('/', async (ctx) => {
+  if (cache.get('index') == null) {
+    // I'm so sorry about how bad this query is. Mongodb sucks. Weird hacks
+    // and questionable tactics incoming.
+    const raw = await new Promise((resolve, reject) => {
+      const raw = []
+
+      Download.aggregate([
+        { $match: { 'type': 'year' } },
+        { $lookup: { from: 'projects', localField: 'release', foreignField: 'releases._id', as: 'project' } },
+        { $group: { _id: { $max: '$project.name' }, total: { $sum: '$current.total' } } }
+      ])
+        .cursor({ batchSize: 2500 })
+        .exec()
+        .on('data', (d) => raw.push(d))
+        .on('error', reject)
+        .on('end', () => resolve(raw))
+    })
+
+    const data = raw.map((row) => ({
+      project: row._id,
+      downloads: row.total
+    }))
+      .sort((a, b) => (b.downloads - a.downloads))
+
+    cache.set('index', data)
+  }
+
+  const data = cache.get('index')
+
+  ctx.status = 200
+  ctx.body = { data }
+
+  return
+})
+
 /**
  * GET /api/downloads/total
  * Returns the amount of downloads that have hit the server.
