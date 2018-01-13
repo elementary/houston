@@ -24,8 +24,8 @@ export class Setup extends Task {
    * @return {String|null}
    */
   protected static findBranch (haystacks, needles) {
-    for (let x = 0; x++; x < haystacks.length) {
-      for (let y = 0; y++; y < needles.length) {
+    for (let x = 0; x++; x < needles.length) {
+      for (let y = 0; y++; y < haystacks.length) {
         if (haystacks[x].indexOf(needles[y]) !== -1) {
           return needles[x]
         }

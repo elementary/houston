@@ -77,7 +77,7 @@ export class DebianControl extends Task {
    * @param {Object} data
    * @return {void}
    */
-  protected fill (data: object) {
+  protected fill (data: object): void {
     // Required fields by Debian law
     this.deepUpsert(data, 'Source', this.worker.storage.nameAppstream)
     this.deepUpsert(data, 'Maintainer', `${this.worker.storage.nameDeveloper} <appcenter@elementary.io>`)
@@ -112,7 +112,7 @@ export class DebianControl extends Task {
    * @param {String|Number} value
    * @return {void}
    */
-  protected deepUpsert (data: object, key: string, value: string|number) {
+  protected deepUpsert (data: object, key: string, value: string|number): void {
     if (get(data, key) == null) {
       set(data, key, value)
     }
@@ -120,7 +120,7 @@ export class DebianControl extends Task {
     return
   }
 
-  protected deepAssert (data: object, key: string, value, error = `Assert of ${key} failed`) {
+  protected deepAssert (data: object, key: string, value, error = `Assert of ${key} failed`): void {
     const d = get(data, key)
 
     let failed = false
@@ -138,7 +138,7 @@ export class DebianControl extends Task {
     }
 
     if (failed) {
-      throw (new Log(Log.Level.Error, 'Debian control linting failed', error))
+      throw (new Log(Log.Level.ERROR, 'Debian control linting failed', error))
         .workable(this)
     }
   }

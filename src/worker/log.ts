@@ -5,6 +5,7 @@
 
 import { Level } from '../lib/log/level'
 import { Task } from './task/task'
+import { Workable } from './workable'
 
 export class Log extends Error {
   /**
