@@ -16,8 +16,11 @@ import { report } from './middleware/report'
 import { Config } from '../config'
 import { Logger } from '../log'
 import { Controller } from './controller'
+import { Servable } from './servable'
 
-export type Middleware = (config: Config) => (ctx: Koa.Context, next?: Promise<void>) => void
+// To match the Koa middleware signature requires an any type
+// tslint:disable-next-line no-any
+export type Middleware = (config: Config) => (ctx: Koa.Context, next?: () => Promise<any>) => void
 
 /**
  * Server
@@ -29,7 +32,7 @@ export type Middleware = (config: Config) => (ctx: Koa.Context, next?: Promise<v
  * @property {boolean} active
  */
 @injectable()
-export class Server {
+export class Server implements Servable {
   /**
    * A basic http server. Used for low level access (mostly testing)
    *

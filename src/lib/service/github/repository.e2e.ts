@@ -20,6 +20,9 @@ timeout(60)
 
 beforeAll(async () => {
   testingDir = await tmp('lib/service/github')
+
+  // Redirect tmp folder for testing because testing
+  Repository.tmpFolder = testingDir
 })
 
 afterAll(async() => {
@@ -55,7 +58,7 @@ test('can clone a repository with tag', async () => {
   expect(pkg.version).toEqual('0.1.8')
 })
 
-test('can clone a repository with a non-annotated tag (#511)', async () => {
+test.skip('can clone a repository with a non-annotated tag (#511)', async () => {
   const repo = new Repository('fluks-eos', 'gdice')
 
   const folder = path.resolve(testingDir, uuid())
@@ -65,4 +68,13 @@ test('can clone a repository with a non-annotated tag (#511)', async () => {
 
   const stat = await fs.stat(folder)
   expect(stat.isDirectory()).toBeTruthy()
+})
+
+test('can list all references for a repository', async () => {
+  const repo = new Repository('elementary', 'houston')
+
+  const references = await repo.references()
+
+  expect(references).toContain('refs/heads/master')
+  expect(references).toContain('refs/remotes/origin/v2') // TODO: Future me: remove this
 })

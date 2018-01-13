@@ -5,3 +5,4 @@
 
 export { Controller } from './controller'
 export { Server } from './server'
+export { Servable } from './servable'

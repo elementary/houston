@@ -9,6 +9,7 @@ import { Config } from '../config'
 import { Level, levelString } from './level'
 import { Log } from './log'
 import { Output, OutputConstructor } from './output'
+import * as outputs from './outputs'
 
 /**
  * Log
@@ -25,7 +26,7 @@ export class Logger {
   protected config: Config
 
   /**
-   * A list of outputs we should use for logs
+   * A list of outputs that we will use when a log gets sent
    *
    * @var {Output[]}
    */
@@ -35,15 +36,12 @@ export class Logger {
    * Creates a new logger
    *
    * @param {Config} config
-   * @param {OutputConstructor[]} outputters
    */
-  public constructor (
-    @inject(Config) config: Config,
-    @multiInject(Output) outputters: OutputConstructor[] = []
-  ) {
+  public constructor (@inject(Config) config: Config) {
     this.config = config
 
-    this.setupOutputs(outputters)
+    // TODO: At some point we can replace this with `Object.values()`
+    this.setupOutputs(Object.keys(outputs).map((key) => outputs[key]))
   }
 
   /**
@@ -115,18 +113,6 @@ export class Logger {
   }
 
   /**
-   * Adds an output to this logger.
-   *
-   * @param {Output} outputter
-   * @return {Logger}
-   */
-  public addOutput (outputter: Output): this {
-    this.outputs.push(outputter)
-
-    return this
-  }
-
-  /**
    * Sets up an output for the logger
    *
    * @param {OutputConstructor} outputter
@@ -134,7 +120,7 @@ export class Logger {
    */
   protected setupOutput (outputter: OutputConstructor): this {
     if (outputter.enabled(this.config)) {
-      this.addOutput(new outputter(this.config))
+      this.outputs.push(new outputter(this.config))
     }
 
     return this

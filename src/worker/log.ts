@@ -1,17 +1,10 @@
 /**
+ * houston/src/worker/log.ts
  * A log to be passed around during a worker role
- *
- * @exports {Class} Log
  */
 
+import { Level } from '../lib/log/level'
 import { Task } from './task/task'
-
-export enum Level {
-  ERROR,
-  WARN,
-  INFO,
-  DEBUG
-}
 
 export class Log extends Error {
   /**
@@ -31,7 +24,7 @@ export class Log extends Error {
   /**
    * The log body
    *
-   * @var {string}
+   * @var {string|null}
    */
   public body?: string
 
@@ -43,11 +36,18 @@ export class Log extends Error {
   public level: Level
 
   /**
-   * The task the log was from
+   * The workable item this error occured on
    *
-   * @var {Task|null}
+   * @var {Workable|null}
    */
-  public task: Task
+  public work?: Workable
+
+  /**
+   * A wrapped native error
+   *
+   * @var {Error|null}
+   */
+  public error?: Error
 
   /**
    * Creates a new log from a file
@@ -73,8 +73,21 @@ export class Log extends Error {
   constructor (level: Level, title: string, body?: string) {
     super(title)
 
-    this.body = body
     this.level = level
+    this.title = title
+    this.body = body
+  }
+
+  /**
+   * Sets the workable item for the log
+   *
+   * @param {Workable} work
+   * @return {Log}
+   */
+  public workable (work: Workable): Log {
+    this.work = work
+
+    return this
   }
 
   /**
@@ -85,6 +98,7 @@ export class Log extends Error {
    */
   public wrap (error: Error): Log {
     this.message = error.message
+    this.error = error
 
     return this
   }

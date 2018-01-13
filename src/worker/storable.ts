@@ -5,14 +5,23 @@
  * @exports {Interface} Storable
  */
 
-export interface Storable {
-  nameDeveloper: string,
-  nameDomain: string,
-  nameAppstream: string,
-  nameHuman: string,
+import { Log } from './log'
 
-  version: string,
+export interface Storable {
+  nameDeveloper: string
+  nameDomain: string
+  nameAppstream: string
+  nameHuman: string
+
+  version: string
+
+  distribution: string
+  architecture: string
+  packageSystem: string
+  branches: string[]
 
   appcenter: object
   appstream: object
+
+  logs: Log[]
 }

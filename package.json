@@ -14,7 +14,7 @@
     "test:unit": "jest --no-cache .spec.ts",
     "test:e2e": "jest --no-cache .e2e.ts",
     "test:dev": "jest --no-cache --watch .spec.ts",
-    "lint": "tslint --type-check --project 'tsconfig.json'",
+    "lint": "tslint --project 'tsconfig.json'",
     "coverage": "jest --coverage"
   },
   "dependencies": {

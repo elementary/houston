@@ -54,6 +54,7 @@ export abstract class Controller {
    * @async
    * @return {IMiddleware}
    */
+  // tslint:disable-next-line no-any
   public middleware (): (ctx: Context, next: () => Promise<any>) => Promise<void> {
     this
       .setupRouter()

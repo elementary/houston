@@ -41,7 +41,7 @@ export enum Level { DEBUG, INFO, WARN, ERROR }
 /**
  * Parses a string value for a level symbol
  *
- * @param {String} level
+ * @param {string} level
  * @return {Level}
  */
 export function parseLevel (level: string): Level {
@@ -63,24 +63,40 @@ export function parseLevel (level: string): Level {
  * Returns a string given a level symbol
  *
  * @param {Level} level
- * @return {Level}
+ * @return {string}
  */
 export function levelString (level: Level): string {
-  if (level === Level.DEBUG) {
-    return 'debug'
+  switch (level) {
+    case (Level.DEBUG):
+      return 'debug'
+    case (Level.INFO):
+      return 'info'
+    case (Level.WARN):
+      return 'warn'
+    case (Level.ERROR):
+      return 'error'
+    default:
+      return 'info'
   }
+}
 
-  if (level === Level.INFO) {
-    return 'info'
+/**
+ * Returns a number index of severity for a level symbol
+ *
+ * @param {Level} level
+ * @return {Number}
+ */
+export function levelIndex (level: Level): number {
+  switch (level) {
+    case (Level.DEBUG):
+      return 0
+    case (Level.INFO):
+      return 1
+    case (Level.WARN):
+      return 2
+    case (Level.ERROR):
+      return 3
+    default:
+      return 1
   }
-
-  if (level === Level.WARN) {
-    return 'warn'
-  }
-
-  if (level === Level.ERROR) {
-    return 'error'
-  }
-
-  return 'info'
 }

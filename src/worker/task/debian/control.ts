@@ -10,7 +10,7 @@ import { get, set } from 'lodash'
 import * as os from 'os'
 import * as path from 'path'
 
-import { Level, Log } from '../../log'
+import { Log } from '../../log'
 import { Task } from '../task'
 import { Parser } from './controlParser'
 
@@ -62,10 +62,10 @@ export class DebianControl extends Task {
 
     this.fill(data)
 
-    const logs = this.lint(data)
-    const highestLog = logs.sort((a, b) => (b.level - a.level))
+    const logs = (this.lint(data) || [])
+    const highestLogs = logs.sort((a, b) => (b.level - a.level))
 
-    if (logs.length > 0) {
+    if (highestLogs.length > 0) {
       // TODO: Report errors
     }
   }
@@ -89,6 +89,22 @@ export class DebianControl extends Task {
   }
 
   /**
+   * Lints an object representation of the Debian control file.
+   *
+   * @async
+   * @param {Object} data
+   * @return {Log[]}
+   */
+  protected lint (data: object): Log[] {
+    this.deepAssert(data, 'Source', this.worker.storage.nameAppstream, `Source should be \`${this.worker.storage.nameAppstream}\``)
+
+    this.deepAssert(data, 'Maintainer', null, 'Missing maintainer')
+    this.deepAssert(data, 'Maintainer', /^.*\s<.*>$/, 'Maintainer should be in the form of `Maintainer Name <maintainer@email.com>`')
+
+    this.deepAssert(data, 'Package', this.worker.storage.nameDomain, `Package should be \`${this.worker.storage.nameDomain}\``)
+  }
+
+  /**
    * Upserts a deep key in an object.
    *
    * @param {Object} data
@@ -104,31 +120,26 @@ export class DebianControl extends Task {
     return
   }
 
-  /**
-   * Lints an object representation of the Debian control file.
-   *
-   * @async
-   * @param {Object} data
-   * @return {Log[]}
-   */
-  protected lint (data: object): Log[] {
-    const logs = []
+  protected deepAssert (data: object, key: string, value, error = `Assert of ${key} failed`) {
+    const d = get(data, key)
 
-    if (get(data, 'Source') !== this.worker.storage.nameAppstream) {
-      logs.push(new Log(Level.ERROR, 'Source is not correct', `Source should be \`${this.worker.storage.nameAppstream}\``))
+    let failed = false
+
+    if (typeof value === 'string' || typeof value === 'number') {
+      failed = (d !== value)
+    } else if (value instanceof RegExp) {
+      failed = !value.test(d)
+    } else if (typeof value === 'function') {
+      failed = !value(d)
+    } else if (value == null) {
+      failed = (d == null)
+    } else {
+      throw new Error(`Unknown deepAssert value for "${value}"`)
     }
 
-    const maintainerMessage = 'Maintainer should be in the form of `Maintainer Name <maintainer@email.com>`'
-    if (get(data, 'Maintainer') == null) {
-      logs.push(new Log(Level.ERROR, 'Maintainer is missing', maintainerMessage))
-    } else if (/^.*\s<.*>$/.test(get(data, 'Maintainer')) === false) {
-      logs.push(new Log(Level.ERROR, 'Maintainer is incorrect', maintainerMessage))
+    if (failed) {
+      throw (new Log(Log.Level.Error, 'Debian control linting failed', error))
+        .workable(this)
     }
-
-    if (get(data, 'Package') !== this.worker.storage.nameDomain) {
-      logs.push(new Log(Level.ERROR, 'Package is missing', `Package should be \`${this.worker.storage.nameDomain}\``))
-    }
-
-    return logs
   }
 }

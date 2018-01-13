@@ -5,11 +5,23 @@
  * @return {class} Repository - A GitHub repository class
  */
 
+import * as fs from 'fs-extra'
 import * as Git from 'nodegit'
+import * as os from 'os'
+import * as path from 'path'
+import * as uuid from 'uuid/v4'
 
 import { Repository as RepositoryInterface } from '../base/repository'
 
 export class Repository implements RepositoryInterface {
+
+  /**
+   * tmpFolder
+   * Folder to use as scratch space for cloning repos
+   *
+   * @var {string}
+   */
+  protected static tmpFolder = path.resolve(os.tmpdir(), 'houston')
 
   /**
    * username
@@ -42,6 +54,21 @@ export class Repository implements RepositoryInterface {
    * @var {string}
    */
   public reference = 'refs/heads/master'
+
+  /**
+   * Creates a new GitHub repository based on the URL
+   * TODO: Heh. Yeah. We might need to rethink this interface...
+   *
+   * @param {string} url - A github repository URL
+   * @return {Repository}
+   */
+  public static create (url: string) {
+    const repository = new Repository('', '')
+
+    repository.url = url
+
+    return repository
+  }
 
   /**
    * Creates a new GitHub Repository
@@ -114,5 +141,26 @@ export class Repository implements RepositoryInterface {
     const ref = await Git.Reference.lookup(repo, reference)
 
     await repo.checkoutRef(ref)
+
+    await fs.remove(path.resolve(p, '.git'))
+  }
+
+  /**
+   * references
+   * Returns a list of references this repository has
+   * TODO: Try to figure out a more optimized way
+   *
+   * @async
+   * @return {string[]}
+   */
+  public async references (): Promise<string[]> {
+    const p = path.resolve(Repository.tmpFolder, uuid())
+    const repo = await Git.Clone(this.url, p)
+
+    const branches = await repo.getReferenceNames(Git.Reference.TYPE.LISTALL)
+
+    await fs.remove(p)
+
+    return branches
   }
 }

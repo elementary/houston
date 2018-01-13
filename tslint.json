@@ -1,6 +1,12 @@
 {
   "extends": "tslint:recommended",
 
+  "linterOptions": {
+    "exclude": [
+      "src/bootstrap.js"
+    ]
+  },
+
   "rules": {
     "insecure-random": true,
     "no-banned-terms": true,
@@ -125,10 +131,6 @@
     "space-before-function-paren": [true, "always"],
     "variable-name": [true, "check-format"],
     "naming-convention": [true, "camelCase"]
-  },
-
-  "jsRules": {
-
   },
 
   "rulesDirectory": [

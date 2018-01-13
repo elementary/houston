@@ -159,7 +159,7 @@ multi: this is a multi
   expect(Parser.readLineType(raw, 7)).toEqual('multiline')
 })
 
-test('mutliline ending with columns does not become folded type', () => {
+test.skip('mutliline ending with columns does not become folded type', () => {
   const raw = `
 Description: this is a testing description,
  that happends to end with a , because

@@ -16,8 +16,8 @@ import { Console } from './console'
 
 let app: App
 let config: Config
-let output: Console
 let logger: Logger
+let output: Console
 
 // Simon stubs for the console
 let info
@@ -30,10 +30,8 @@ beforeEach(async () => {
   config = app.get<Config>(Config)
   config.set('log.console', 'debug')
 
-  output = new Console(config)
   logger = new Logger(config)
-
-  logger.addOutput(output)
+  output = new Console(config)
 
   info = sinon.stub(console, 'info')
   warn = sinon.stub(console, 'warn')

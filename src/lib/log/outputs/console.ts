@@ -6,14 +6,11 @@
 // Disabled because this file is all about console logs
 // tslint:disable:no-console
 
-import { inject, injectable } from 'inversify'
-
 import { Config } from '../../config'
 import { Level, parseLevel } from '../level'
 import { Log } from '../log'
 import { Output } from '../output'
 
-@injectable()
 export class Console extends Output {
 
   /**
@@ -35,7 +32,7 @@ export class Console extends Output {
       return false
     }
 
-    return true
+    return (config.get('log.console') !== 'never')
   }
 
   /**
@@ -43,7 +40,7 @@ export class Console extends Output {
    *
    * @param {Config} config
    */
-  public constructor (@inject(Config) config: Config) {
+  public constructor (config: Config) {
     super(config)
 
     this.config = config
@@ -96,7 +93,7 @@ export class Console extends Output {
    *
    * @return {Boolean}
    */
-  public allows (level: Level) {
+  protected allows (level: Level) {
     if (this.config.has('log.console') === false) {
       return false
     }

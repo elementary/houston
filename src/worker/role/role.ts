@@ -5,6 +5,7 @@
  * @return {Class} Role
  */
 
+import { Log } from '../log'
 import { Workable, WorkableConstructor } from '../workable'
 import { Worker } from '../worker'
 
@@ -39,10 +40,23 @@ export class Role implements Workable {
    * @return {void}
    */
   public async run () {
-    for (let s = 0; s++; s < this.tasks.length) {
-      const instance = new this.tasks[s](this.worker)
+    for (const task of this.tasks) {
+      const work = new task(this.worker)
 
-      await instance.run()
+      try {
+        await work.run()
+      } catch (e) {
+        // If it's a Log, but not just a simple Error
+        if (!(e instanceof Log)) {
+          const log = new Log(Log.Level.ERROR, 'Internal error while running Role')
+            .workable(work)
+            .wrap(e)
+
+          this.worker.storage.logs.push(log)
+        } else {
+          this.worker.storage.logs.push(e)
+        }
+      }
     }
   }
 }

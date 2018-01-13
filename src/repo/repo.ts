@@ -9,42 +9,44 @@
  */
 
 import * as dgram from 'dgram'
+import { inject, injectable } from 'inversify'
 
 import { Config } from '../lib/config'
 import { Database } from '../lib/database/database'
-import { Log } from '../lib/log'
+import { Logger } from '../lib/log'
 
 /**
  * Repo
  * A repository syslog server. Tries to mirror the Server class methods.
  *
- * @property {Config} config
- * @property {Database} database
- * @property {Log} log
- *
  * @property {Socket} server
  * @property {number} port
  */
+@injectable()
 export class Repo {
-
-  public config: Config
-  public database: Database
-  public log: Log
 
   public server: dgram.Socket
   public port: number
+
+  protected config: Config
+  protected database: Database
+  protected logger: Logger
 
   /**
    * Creates a new web server
    *
    * @param {Config} config - The configuration to use
-   * @param {Database} [database] - The database connection to use
-   * @param {Log} [log] - The log instance to use
+   * @param {Database} database - The database connection to use
+   * @param {Logger} logger - The log instance to use
    */
-  constructor (config: Config, database?: Database, log?: Log) {
+  constructor (
+    @inject(Config) config: Config,
+    @inject(Database) database: Database,
+    @inject(Logger) logger: Logger
+  ) {
     this.config = config
-    this.database = database || new Database(config)
-    this.log = log || new Log(config)
+    this.database = database
+    this.logger = logger
   }
 
   /**
@@ -56,7 +58,10 @@ export class Repo {
    * @return {void}
    */
   public onError (err: Error): void {
-    this.log.error('Internal server error', err)
+    this.logger
+      .error('Internal server error')
+      .setError(err)
+      .send()
   }
 
   /**
@@ -115,14 +120,18 @@ export class Repo {
         })
       })
     } catch (err) {
-      this.log.error(`Server unable to listen on port ${port} with ${env} configuration`)
-      this.log.error(err)
+      this.logger
+        .error(`Server unable to listen on port ${port} with ${env} configuration`)
+        .setError(err)
+        .send()
 
       throw err
     }
 
     this.port = this.server.address().port
-    this.log.info(`Server listening on port ${this.port} with ${env} configuration`)
+    this.logger
+      .info(`Server listening on port ${this.port} with ${env} configuration`)
+      .send()
 
     return this
   }
@@ -139,9 +148,7 @@ export class Repo {
   public async close (): Promise<this> {
     if (this.server != null) {
       await new Promise((resolve) => {
-        this.server.close(() => {
-          return resolve()
-        })
+        this.server.close(() => resolve())
       })
 
       this.port = 0

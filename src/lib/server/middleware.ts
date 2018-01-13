@@ -3,6 +3,10 @@
  * A basic interface for a server controller.
  */
 
+import { injectable } from 'inversify'
+import { Context } from 'koa'
+import * as Router from 'koa-router'
+
 @injectable()
 export abstract class Controller {
 

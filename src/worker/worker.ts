@@ -60,14 +60,6 @@ export class Worker extends EventEmitter {
   public workspace?: string
 
   /**
-   * logs
-   * A list of logs that occured while we were working
-   *
-   * @var {Log[]}
-   */
-  public logs: Log[]
-
-  /**
    * Creates a new worker process
    *
    * @param {Config} config - The configuration to use
@@ -95,14 +87,6 @@ export class Worker extends EventEmitter {
 
       this.workspace = path.resolve(Worker.tempDir, uuid())
 
-      const cleanFolder = path.resolve(this.workspace, 'clean')
-      const dirtyFolder = path.resolve(this.workspace, 'dirty')
-
-      await fs.mkdirs(cleanFolder)
-      await fs.mkdirs(dirtyFolder)
-
-      await this.repository.clone(cleanFolder)
-
       this.emit('setup:end')
     }
   }
@@ -118,18 +102,23 @@ export class Worker extends EventEmitter {
   public async run (workable: WorkableConstructor) {
     this.emit('run:start')
 
+    const work = new workable(this)
+
     try {
-      await (new workable(this)).run()
+      await work.run()
     } catch (e) {
       this.emit('run:error', e)
 
-      if (e.instanceOf(Log) === false) {
-        // TODO: Error report
-        const instance = new Log(Log.Level.ERROR, 'Internal Error While Running Houston')
-        e = instance.wrap(e)
-      }
+      // If it's a Log, but not just a simple Error
+      if (!(e instanceof Log)) {
+        const log = new Log(Log.Level.ERROR, 'Internal error while running worker')
+          .workable(work)
+          .wrap(e)
 
-      this.logs.push(e)
+        this.storage.logs.push(log)
+      } else {
+        this.storage.logs.push(e)
+      }
     }
 
     this.emit('run:end')
@@ -163,8 +152,8 @@ export class Worker extends EventEmitter {
    * @return {boolean}
    */
   public fails (): boolean {
-    for (let i = 0; i++; i < this.logs.length) {
-      if (this.logs[i].level === Log.Level.ERROR) {
+    for (const log of this.storage.logs) {
+      if (log.level === Log.Level.ERROR) {
         return true
       }
     }

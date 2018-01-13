@@ -3,13 +3,10 @@
  * Handles logging errors to sentry
  */
 
-import { inject, injectable } from 'inversify'
-
 import { Config } from '../../config'
 import { Log } from '../log'
 import { Output } from '../output'
 
-@injectable()
 export class Sentry extends Output {
 
   /**
@@ -39,7 +36,9 @@ export class Sentry extends Output {
    * @return {boolean}
    */
   public static enabled (config: Config): boolean {
-    if (config.has('service.sentry.secret') === false) {
+    if (config.has('log.sentry') === false) {
+      return false
+    } else if (config.has('service.sentry.secret') === false) {
       return false
     }
 
@@ -49,7 +48,7 @@ export class Sentry extends Output {
       return false
     }
 
-    return true
+    return (config.get('log.sentry') !== 'never')
   }
 
   /**
@@ -57,7 +56,7 @@ export class Sentry extends Output {
    *
    * @param {Config} config
    */
-  public constructor (@inject(Config) config: Config) {
+  public constructor (config: Config) {
     super(config)
 
     this.config = config

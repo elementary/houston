@@ -16,9 +16,19 @@ import { Config } from './index'
 /**
  * The prefix required for environment variables to be used.
  *
- * @var string
+ * @var {string}
  */
 const environmentPrefix = 'HOUSTON'
+
+/**
+ * A list of possible paths the houston configuration file could be.
+ *
+ * @var {string[]}
+ */
+const configurationPaths = [
+  path.resolve(process.cwd(), 'config.js'),
+  path.resolve('/etc/houston/config.js')
+]
 
 /**
  * stringToDot
@@ -127,22 +137,30 @@ export function getProgramConfig (): Config {
  * getFileConfig
  * Tries to read configuration from a file.
  *
- * @param {string} p - The path to the file
+ * @param {string} [p] - The path to the file
  *
  * @throws {Error} - On 404 file not found
  * @return {Config}
  */
-export function getFileConfig (p: string): Config {
+export function getFileConfig (p?: string): Config {
   const config = new Config()
 
   let file = {}
 
-  if (p.startsWith('/')) {
+  if (p != null && p.startsWith('/')) {
     file = require(p) // tslint:disable-line non-literal-require
-  } else {
+  } else if (p != null) {
     const relativeP = path.resolve(process.cwd(), p)
 
     file = require(relativeP) // tslint:disable-line non-literal-require
+  } else {
+    // Test for other global config file paths
+    for (const possible of configurationPaths) {
+      if (fs.statSync(possible).isFile()) {
+        file = require(possible) // tslint:disable-line non-literal-require
+        break
+      }
+    }
   }
 
   return config
@@ -154,12 +172,12 @@ export function getFileConfig (p: string): Config {
  * getConfig
  * This creates a Config from all possible places.
  *
- * @param {string} p - The path to the configuration file
+ * @param {string} [p] - The path to the configuration file
  *
  * @throws {Error} - On 404 file not found
  * @return {Config}
  */
-export function getConfig (p: string): Config {
+export function getConfig (p?: string): Config {
   const environment = getEnvironmentConfig()
   const program = getProgramConfig()
   const file = getFileConfig(p)

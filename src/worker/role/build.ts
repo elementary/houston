@@ -14,6 +14,7 @@ export class Build extends Role {
    * @var {Task[]}
    */
   public tasks = [
+    require('../task/workspace/setup').Setup,
     require('../task/debian/control').DebianControl
   ]
 }

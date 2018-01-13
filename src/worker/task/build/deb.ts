@@ -64,7 +64,7 @@ export async function liftoff (worker: Worker, dist = 'xenial', arch = 'amd64'):
 
   const cacheFolder = await liftoffCache()
   const liftoffFolder = path.resolve(worker.workspace, 'build', 'deb')
-  docker.mount(cacheFolder, 'var/cache/liftoff')
+  docker.mount(cacheFolder, '/var/cache/liftoff')
   docker.mount(liftoffFolder, '/tmp/liftoff')
 
   const exit = await docker.run(`-a ${arch} -d ${dist} -o /tmp/liftoff`, {
