@@ -15,8 +15,9 @@ addons:
       - libstdc++-4.9-dev
 
 node_js:
+  - node
+  - lts/*
   - 6
-  - 7
 
 before_install:
   - docker pull ubuntu:16.04
