@@ -3,6 +3,7 @@
 
   "linterOptions": {
     "exclude": [
+      "src/bin.js",
       "src/bootstrap.js"
     ]
   },
