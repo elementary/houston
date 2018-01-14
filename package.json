@@ -1,10 +1,10 @@
 {
-  "name": "houston",
+  "name": "@elementary/houston",
   "version": "2.0.0-alpha.1",
   "description": "Backend to AppCenter",
   "main": "dist/app.js",
   "repository": "https://github.com/elementary/houston",
-  "author": "elementary (elementary.io)",
+  "author": "elementary (https://elementary.io)",
   "license": "MIT",
   "engines": {
     "node": "^6.10.0"
