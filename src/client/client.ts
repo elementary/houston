@@ -1,45 +1,24 @@
 /**
- * houston/src/api/api.ts
- * An API http server for houston things
- *
- * @export {Server} Api - An API server
+ * houston/src/client/client.ts
+ * A http server for server side rendering of our vue app.
  */
 
-import * as path from 'path'
+import { inject, injectable, multiInject } from 'inversify'
 
-import { Server } from '../lib/server/server'
-import * as middleware from './middleware'
+import { Controller, Server } from '../lib/server'
 
-import { Homepage } from './controller/homepage'
-
+/**
+ * Server
+ * A server for server side rendering.
+ */
+@injectable()
 export class Client extends Server {
-
   /**
-   * registerMiddleware
-   * Registers all the koa middleware the server is going to use.
+   * A list of controllers this server has
    *
-   * @return {void}
+   * @var {Controller}
    */
-  public registerMiddleware (): void {
-    this.router.use(middleware.render(this))
-    this.router.use(middleware.catchError(this))
-    this.router.use(middleware.assets(this, path.resolve(__dirname, 'public')))
+  protected controllers: Controller[] = [
 
-    super.registerMiddleware()
-  }
-
-  /**
-   * registerRoutes
-   * Registers all the koa routes the server is going to use.
-   *
-   * @return {void}
-   */
-  public registerRoutes (): void {
-    const homepage = new Homepage(this)
-
-    this.router.get('/', homepage.view)
-    this.router.get('/homepage', homepage.view)
-
-    super.registerRoutes()
-  }
+  ]
 }

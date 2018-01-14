@@ -19,6 +19,8 @@ export const describe = 'Builds a repository with the worker process'
 
 export const builder = (yargs) => {
     return yargs
+      .positional('repo', { describe: 'Full repository URL', type: 'string' })
+      .positional('version', { describe: 'Semver version to build for', type: 'string' })
       .option('architecture', { describe: 'Architecture to build for', type: 'string', default: 'amd64' })
       .option('distribution', { describe: 'Distribution to build for', type: 'string', default: 'loki' })
       .option('name-appstream', { describe: 'AppStream id', type: 'string' })
@@ -89,6 +91,8 @@ export async function handler (argv) {
   const storage = buildStorage(argv, repository)
 
   const worker = new Worker(config, repository, storage)
+
+  console.log(`Running build for ${argv.repo} version ${argv.version}`)
 
   await worker.setup()
   await worker.run(Build)

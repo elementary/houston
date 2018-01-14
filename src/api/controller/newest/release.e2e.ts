@@ -22,7 +22,7 @@ beforeEach(async () => {
   database = await setupDatabase(config)
 })
 
-test('returns correct apps from view', async () => {
+test.skip('returns correct apps from view', async () => {
   const controller = new NewestReleaseController(database)
   const ctx = FakeContext()
 

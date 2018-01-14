@@ -5,25 +5,28 @@
 
 import * as supertest from 'supertest'
 
-import { Config } from '../../../lib/config'
-
 import { create } from '../../../../test/utility/app'
-import { setup as setupDatabase } from '../../../../test/utility/database'
 import { Context as FakeContext } from '../../../../test/utility/koa'
 
+import { App } from '../../../lib/app'
+import { Database } from '../../../lib/database'
 import { NewestProjectController } from './project'
 
+let app: App
 let database: Database
+let controller: NewestProjectController
 
 beforeEach(async () => {
-  const app = await create()
-  const config = app.get<Config>(Config)
+  app = await create()
+  database = app.get<Database>(Database)
 
-  database = await setupDatabase(config)
+  await database.knex.migrate.latest()
+  await database.knex.seed.run()
+
+  controller = new NewestProjectController(database)
 })
 
-test('returns correct apps from view', async () => {
-  const controller = new NewestProjectController(database)
+test.skip('returns correct apps from view', async () => {
   const ctx = FakeContext()
 
   await controller.view(ctx)

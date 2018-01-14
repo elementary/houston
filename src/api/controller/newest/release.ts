@@ -8,8 +8,7 @@
 import { Context } from 'koa'
 
 import { Database } from '../../../lib/database/database'
-import { Project } from '../../../lib/database/model/project'
-import { Release } from '../../../lib/database/model/release'
+import { Project, Release } from '../../../lib/database/model'
 import { Controller } from '../../../lib/server/controller'
 
 /**
@@ -17,6 +16,13 @@ import { Controller } from '../../../lib/server/controller'
  * Lists the newest released applications to houston
  */
 export class NewestReleaseController extends Controller {
+
+  /**
+   * The URL prefix for this controller
+   *
+   * @var {String}
+   */
+  protected prefix = '/newest/release'
 
   /**
    * A database we can use for making queries
@@ -42,10 +48,11 @@ export class NewestReleaseController extends Controller {
    * @return {void}
    */
   public async view (ctx: Context) {
-    const releases = await Release.findNewestReleased(this.database)
-    const projects = await Promise.all(releases.map((release) => {
-      return Project.findById(this.database, release.projectId)
-    }))
+    const releases = await Release.query(this.database)
+      .whereNewestReleased()
+
+    const projects = await Project.query(this.database)
+      .whereIn('id', releases.map((release) => release.id))
 
     const appstreamNames = projects.map((project) => project.nameAppstream)
 

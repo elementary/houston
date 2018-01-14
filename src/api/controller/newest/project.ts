@@ -8,7 +8,7 @@
 import { Context } from 'koa'
 
 import { Database } from '../../../lib/database'
-import { Project } from '../../../lib/database/model/project'
+import { Project } from '../../../lib/database/model'
 import { Controller } from '../../../lib/server/controller'
 
 /**
@@ -16,6 +16,13 @@ import { Controller } from '../../../lib/server/controller'
  * Lists the newest released applications to houston
  */
 export class NewestProjectController extends Controller {
+
+  /**
+   * The URL prefix for this controller
+   *
+   * @var {String}
+   */
+  protected prefix = '/newest/project'
 
   /**
    * A useable database instance.
@@ -43,7 +50,9 @@ export class NewestProjectController extends Controller {
    * @return {void}
    */
   public async view (ctx: Context) {
-    const projects = await Project.findNewestReleased(this.database)
+    const projects = await Project.query(this.database)
+      .whereNewestReleased()
+
     const appstreamNames = projects.map((project) => project.nameAppstream)
 
     ctx.status = 200

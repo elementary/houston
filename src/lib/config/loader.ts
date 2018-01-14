@@ -156,10 +156,12 @@ export function getFileConfig (p?: string): Config {
   } else {
     // Test for other global config file paths
     for (const possible of configurationPaths) {
-      if (fs.statSync(possible).isFile()) {
-        file = require(possible) // tslint:disable-line non-literal-require
-        break
-      }
+      try {
+        if (fs.statSync(possible).isFile()) {
+          file = require(possible) // tslint:disable-line non-literal-require
+          break
+        }
+      } catch (e) {} // tslint:disable-line no-empty
     }
   }
 

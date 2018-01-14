@@ -1,6 +1,6 @@
 {
   "name": "@elementaryos/houston",
-  "version": "2.0.0-alpha.2",
+  "version": "2.0.0-alpha.3",
   "description": "Backend to AppCenter",
   "main": "dist/app.js",
   "repository": "https://github.com/elementary/houston",
@@ -22,7 +22,8 @@
     "test:e2e": "jest --no-cache .e2e.ts",
     "test:dev": "jest --no-cache --watch .spec.ts",
     "lint": "tslint --project 'tsconfig.json'",
-    "coverage": "jest --coverage"
+    "coverage": "jest --coverage",
+    "prepublishOnly": "npm run lint && npm run test && npm run build"
   },
   "dependencies": {
     "dockerode": "^2.5.3",
@@ -35,7 +36,6 @@
     "koa-router": "^7.3.0",
     "koa-static": "^3.0.0",
     "lodash": "^4.17.4",
-    "minimist": "^1.2.0",
     "nodegit": "^0.20.3",
     "reflect-metadata": "^0.1.10",
     "uuid": "^3.0.1",
