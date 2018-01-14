@@ -1,11 +1,17 @@
 {
   "name": "houston",
-  "version": "2.0.0",
+  "version": "2.0.0-alpha.1",
   "description": "Backend to AppCenter",
   "main": "dist/app.js",
   "repository": "https://github.com/elementary/houston",
-  "author": "Blake Kostner <btkostner@gmail.com>",
+  "author": "elementary (elementary.io)",
   "license": "MIT",
+  "engines": {
+    "node": "^6.10.0"
+  },
+  "bin": {
+    "houston": "dest/bin.js"
+  },
   "scripts": {
     "start": "node dest/app.js",
     "build": "gulp --gulpfile 'build/gulpfile.ts' build",
@@ -15,10 +21,12 @@
     "test:e2e": "jest --no-cache .e2e.ts",
     "test:dev": "jest --no-cache --watch .spec.ts",
     "lint": "tslint --project 'tsconfig.json'",
-    "coverage": "jest --coverage"
+    "coverage": "jest --coverage",
+    "prepublishOnly": "npm run lint && npm run test && npm run build"
   },
   "dependencies": {
     "dockerode": "^2.5.3",
+    "ejs": "^2.5.7",
     "fs-extra": "^3.0.1",
     "inversify": "^4.9.0",
     "knex": "^0.13.0",
@@ -26,10 +34,7 @@
     "koa-compress": "^2.0.0",
     "koa-router": "^7.3.0",
     "koa-static": "^3.0.0",
-    "lasso": "^2.11.23",
-    "lasso-marko": "^2.4.0",
     "lodash": "^4.17.4",
-    "marko": "^4.7.4",
     "minimist": "^1.2.0",
     "nodegit": "^0.20.3",
     "reflect-metadata": "^0.1.10",
@@ -59,6 +64,9 @@
     "tslint-microsoft-contrib": "^5.0.0",
     "typescript": "^2.6.2"
   },
+  "files": [
+    "dest/"
+  ],
   "jest": {
     "collectCoverage": true,
     "collectCoverageFrom": [
