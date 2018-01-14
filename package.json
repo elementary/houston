@@ -17,6 +17,7 @@
     "build": "gulp --gulpfile 'build/gulpfile.ts' build",
     "build:dev": "gulp --gulpfile 'build/gulpfile.ts' watch",
     "test": "jest --no-cache",
+    "test:watch": "jest --no-cache --watch --no-coverage",
     "test:unit": "jest --no-cache .spec.ts",
     "test:e2e": "jest --no-cache .e2e.ts",
     "test:dev": "jest --no-cache --watch .spec.ts",
@@ -78,10 +79,10 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 0,
+        "branches": 70,
         "functions": 80,
-        "lines": 80,
-        "statements": 80
+        "lines": 60,
+        "statements": 60
       }
     },
     "mapCoverage": true,

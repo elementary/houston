@@ -19,33 +19,43 @@ export const describe = 'Builds a repository with the worker process'
 
 export const builder = (yargs) => {
     return yargs
-      .option('architecture', { describe: 'The architecture to build for', type: 'string', default: 'amd64' })
-      .option('distribution', { describe: 'The distribution to build for', type: 'string', default: 'loki' })
-      .option('name-appstream', { describe: 'The appstream id to use during build', type: 'string' })
-      .option('name-developer', { describe: 'The developer\'s name to place in Appstream data', type: 'string' })
-      .option('name-domain', { describe: 'The RDNN name to use during build', type: 'string' })
-      .option('name-human', { describe: 'The human readable name to use during build', type: 'string' })
+      .option('architecture', { describe: 'Architecture to build for', type: 'string', default: 'amd64' })
+      .option('distribution', { describe: 'Distribution to build for', type: 'string', default: 'loki' })
+      .option('name-appstream', { describe: 'AppStream id', type: 'string' })
+      .option('name-developer', { describe: 'Developer\'s name', type: 'string' })
+      .option('name-domain', { describe: 'Reverse Domain Name Notation', type: 'string' })
+      .option('name-human', { describe: 'Human readable name', type: 'string' })
+      .option('package-system', { describe: 'Package system', type: 'string', default: 'deb' })
+      .option('references', { describe: 'References to pull', type: 'array', default: ['refs/heads/master'] })
 }
 
 /**
  * Creates a basic storage object for information about the build
+ * TODO: All the things
  *
  * @param {object} argv
+ * @param {Repository} repository
  * @return {object}
  */
-function buildStorage (argv) {
+function buildStorage (argv, repository) {
+  const nameDomain = argv['name-domain'] || repository.rdnn
+  const nameAppstream = argv['name-appstream'] || `${nameDomain}.desktop`
+  const nameDeveloper = argv['name-developer'] || 'Rabbitbot'
+  const nameHuman = argv['name-human'] || 'Application' // TODO: Better name?
+
   const obj : Storable = {
     appcenter: {},
     appstream: {},
     architecture: argv.architecture,
-    branches: ['refs/heads/master', 'refs/tags/3.2.6'],
+    changelog: [],
     distribution: argv.distribution,
     logs: [],
-    nameAppstream: 'com.github.btkostner.vocal.desktop',
-    nameDeveloper: 'Blake Kostner',
-    nameDomain: 'com.github.btkostner.vocal',
-    nameHuman: 'Vocal',
-    packageSystem: 'debian',
+    nameAppstream,
+    nameDeveloper,
+    nameDomain,
+    nameHuman,
+    packageSystem: argv['package-system'],
+    references: argv.references,
     version: argv.version
   }
 
@@ -76,7 +86,7 @@ export async function handler (argv) {
 
   const config = app.get<Config>(Config)
   const repository = createRepository(argv.repo)
-  const storage = buildStorage(argv)
+  const storage = buildStorage(argv, repository)
 
   const worker = new Worker(config, repository, storage)
 
