@@ -12,6 +12,7 @@ import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
 import { Repository as RepositoryInterface } from '../base/repository'
+import { sanitize } from '../rdnn'
 
 export class Repository implements RepositoryInterface {
 
@@ -56,31 +57,12 @@ export class Repository implements RepositoryInterface {
   public reference = 'refs/heads/master'
 
   /**
-   * Creates a new GitHub repository based on the URL
-   * TODO: Heh. Yeah. We might need to rethink this interface...
-   *
-   * @param {string} url - A github repository URL
-   * @return {Repository}
-   */
-  public static create (url: string) {
-    const repository = new Repository('', '')
-
-    repository.url = url
-
-    return repository
-  }
-
-  /**
    * Creates a new GitHub Repository
    *
-   * @param {string} username - The GitHub username or organization
-   * @param {string} repository - The GitHub user's repository name
-   * @param {string} [auth] - AUthentication to use when interacting
+   * @param {string} url - The full github url
    */
-  constructor (username: string, repository: string, auth?: string) {
-    this.username = username
-    this.repository = repository
-    this.auth = auth
+  constructor (url: string) {
+    this.url = url
   }
 
   /**
@@ -125,6 +107,15 @@ export class Repository implements RepositoryInterface {
         this.auth = chunks[3]
       }
     }
+  }
+
+  /**
+   * Returns the default RDNN value for this repository
+   *
+   * @return {string}
+   */
+  public get rdnn () {
+    return sanitize(`com.github.${this.username}.${this.repository}`)
   }
 
   /**

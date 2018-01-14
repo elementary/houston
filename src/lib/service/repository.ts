@@ -15,5 +15,5 @@ import { Repository as GitHub } from './github/repository'
  * @return {Repository}
  */
 export function create (url: string): Repository {
-  return GitHub.create(url)
+  return new GitHub(url)
 }

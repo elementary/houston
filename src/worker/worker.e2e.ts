@@ -38,7 +38,7 @@ afterAll(async () => {
 })
 
 test('needle-and-thread/vocal passes build process', async () => {
-  const repo = new GithubRepository('needle-and-thread', 'vocal')
+  const repo = new GithubRepository('https://github.com/needle-and-thread/vocal')
 
   const storage : Storable = {
     appcenter: {},
@@ -66,7 +66,7 @@ test('needle-and-thread/vocal passes build process', async () => {
 })
 
 test('Philip-Scott/Spice-up passes build process', async () => {
-  const repo = new GithubRepository('Philip-Scott', 'Spice-up')
+  const repo = new GithubRepository('https://github.com/Philip-Scott/Spice-up')
 
   const storage : Storable = {
     appcenter: {},

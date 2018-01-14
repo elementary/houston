@@ -6,19 +6,19 @@
 import { Repository } from './repository'
 
 test('url returns correct string without authentication', () => {
-  const repo = new Repository('elementary', 'houston')
+  const repo = new Repository('https://github.com/elementary/houston')
 
   expect(repo.url).toEqual('https://github.com/elementary/houston.git')
 })
 
 test('url returns correct string with authentication', () => {
-  const repo = new Repository('elementary', 'houston', 'fakeauthcode')
+  const repo = new Repository('https://fakeauthcode@github.com/elementary/houston')
 
   expect(repo.url).toEqual('https://fakeauthcode@github.com/elementary/houston.git')
 })
 
 test('can set values based on url', () => {
-  const repo = new Repository('test', 'test')
+  const repo = new Repository('https://github.com/noop/repo')
 
   repo.url = 'https://github.com/elementary/houston'
 
@@ -27,7 +27,7 @@ test('can set values based on url', () => {
 })
 
 test('can set values based on url with auth', () => {
-  const repo = new Repository('test', 'test', 'test')
+  const repo = new Repository('https://test@github.com/test/test')
 
   repo.url = 'https://auth@github.com/elementary/houston'
 
@@ -37,7 +37,7 @@ test('can set values based on url with auth', () => {
 })
 
 test('can set values based on ssh url', () => {
-  const repo = new Repository('test', 'test', 'test')
+  const repo = new Repository('https://test@github.com/test/test')
 
   repo.url = 'git@github.com:elementary/houston.git'
 

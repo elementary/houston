@@ -30,7 +30,7 @@ afterAll(async() => {
 })
 
 test('can clone a repository', async () => {
-  const repo = new Repository('elementary', 'houston')
+  const repo = new Repository('https://github.com/elementary/houston')
 
   const folder = path.resolve(testingDir, uuid())
   await fs.mkdirs(folder)
@@ -42,7 +42,7 @@ test('can clone a repository', async () => {
 })
 
 test('can clone a repository with tag', async () => {
-  const repo = new Repository('elementary', 'houston')
+  const repo = new Repository('https://github.com/elementary/houston')
 
   const folder = path.resolve(testingDir, uuid())
   await fs.mkdirs(folder)
@@ -59,7 +59,7 @@ test('can clone a repository with tag', async () => {
 })
 
 test.skip('can clone a repository with a non-annotated tag (#511)', async () => {
-  const repo = new Repository('fluks-eos', 'gdice')
+  const repo = new Repository('https://github.com/fluks-eos/gdice')
 
   const folder = path.resolve(testingDir, uuid())
   await fs.mkdirs(folder)
@@ -71,7 +71,7 @@ test.skip('can clone a repository with a non-annotated tag (#511)', async () => 
 })
 
 test('can list all references for a repository', async () => {
-  const repo = new Repository('elementary', 'houston')
+  const repo = new Repository('https://github.com/elementary/houston')
 
   const references = await repo.references()
 

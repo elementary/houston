@@ -5,7 +5,7 @@
 
 export interface Repository {
   url: string,
-  reference: string,
+  rdnn: string,
   clone: (p: string, reference?: string) => Promise<void>
   references: () => Promise<string[]>
 }

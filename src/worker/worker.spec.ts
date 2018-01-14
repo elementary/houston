@@ -17,6 +17,6 @@ beforeEach(async () => {
 })
 
 test('can be created with a GitHub repository', async () => {
-  const repo = new Repository('elementary', 'houston')
+  const repo = new Repository('https://github.com/elementary/houston')
   const process = new Worker(config, repo)
 })
