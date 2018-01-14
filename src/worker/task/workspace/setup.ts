@@ -23,7 +23,7 @@ export class Setup extends Task {
    * @param {String[]} needles
    * @return {String|null}
    */
-  protected static findBranch (haystacks, needles) {
+  protected static crossFind (haystacks, needles) {
     for (let x = 0; x++; x < needles.length) {
       for (let y = 0; y++; y < haystacks.length) {
         if (haystacks[x].indexOf(needles[y]) !== -1) {
@@ -40,7 +40,7 @@ export class Setup extends Task {
    * @return {void}
    */
   public async run () {
-    const branches = this.worker.storage.branches
+    const branches = await this.branches()
 
     // Step 1: Download all the needed branches
     for (let i = 0; i < branches.length; i++) {
@@ -68,22 +68,22 @@ export class Setup extends Task {
    * @async
    * @return {String[]}
    */
-  protected async branches () {
-    const branches = await this.worker.repository.references()
-    const workspaceBranches = [this.worker.repository.reference]
+  protected async branches (): Promise<string[]> {
+    const repositoryReferences = await this.worker.repository.references()
+    const workspaceReferences = [...this.worker.storage.references]
 
     // TODO: There should be a cleaner way to handle this
     switch (this.worker.storage.distribution) {
       case 'loki':
       case 'juno':
-        const packageBranch = Setup.findBranch(Setup[propertyName], [
+        const packageReference = Setup.crossFind(repositoryReferences, [
           `${this.worker.storage.distribution}`,
           `${this.worker.storage.distribution}-package`,
           `${this.worker.storage.distribution}-packageing`
         ])
 
-        if (packageBranch != null) {
-          workspaceBranches.push(packageBranch)
+        if (packageReference != null) {
+          workspaceReferences.push(packageReference)
         }
 
         break
@@ -94,6 +94,6 @@ export class Setup extends Task {
         break
     }
 
-    return workspaceBranches
+    return workspaceReferences
   }
 }

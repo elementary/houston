@@ -1,0 +1,8 @@
+<% storage.changelog.forEach(function (change) { %>
+<%= storage.nameDomain %> (<%= change.version %>) <%= storage.distribution %>; urgency=low
+
+  <%= change.changes %>
+
+ -- <%= change.author %> <developer@elementary.io> <%= change.date.toUTCString().replace('GMT', '+0000') %>
+
+<% }) %>

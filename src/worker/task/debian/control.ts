@@ -1,8 +1,6 @@
 /**
  * houston/src/worker/task/debian/control.ts
  * Updates, lints, and validates the Debian control file.
- *
- * @exports {Function} run - Update, lint and validate control file.
  */
 
 import * as fs from 'fs-extra'
@@ -79,13 +77,13 @@ export class DebianControl extends Task {
    */
   protected fill (data: object): void {
     // Required fields by Debian law
-    this.deepUpsert(data, 'Source', this.worker.storage.nameAppstream)
-    this.deepUpsert(data, 'Maintainer', `${this.worker.storage.nameDeveloper} <appcenter@elementary.io>`)
-    this.deepUpsert(data, 'Package', this.worker.storage.nameDomain)
+    this.deepFill(data, 'Source', this.worker.storage.nameAppstream)
+    this.deepFill(data, 'Maintainer', `${this.worker.storage.nameDeveloper} <appcenter@elementary.io>`)
+    this.deepFill(data, 'Package', this.worker.storage.nameDomain)
 
     // Extra optional fun stuff
-    this.deepUpsert(data, 'Priority', 'optional')
-    this.deepUpsert(data, 'Standards-Version', this.worker.storage.version)
+    this.deepFill(data, 'Priority', 'optional')
+    this.deepFill(data, 'Standards-Version', this.worker.storage.version)
   }
 
   /**
@@ -96,23 +94,27 @@ export class DebianControl extends Task {
    * @return {Log[]}
    */
   protected lint (data: object): Log[] {
-    this.deepAssert(data, 'Source', this.worker.storage.nameAppstream, `Source should be \`${this.worker.storage.nameAppstream}\``)
+    const logs = []
 
-    this.deepAssert(data, 'Maintainer', null, 'Missing maintainer')
-    this.deepAssert(data, 'Maintainer', /^.*\s<.*>$/, 'Maintainer should be in the form of `Maintainer Name <maintainer@email.com>`')
+    this.deepAssert(logs, data, 'Source', this.worker.storage.nameAppstream, `Source should be \`${this.worker.storage.nameAppstream}\``)
 
-    this.deepAssert(data, 'Package', this.worker.storage.nameDomain, `Package should be \`${this.worker.storage.nameDomain}\``)
+    this.deepAssert(logs, data, 'Maintainer', null, 'Missing maintainer')
+    this.deepAssert(logs, data, 'Maintainer', /^.*\s<.*>$/, 'Maintainer should be in the form of `Maintainer Name <maintainer@email.com>`')
+
+    this.deepAssert(logs, data, 'Package', this.worker.storage.nameDomain, `Package should be \`${this.worker.storage.nameDomain}\``)
+
+    return logs
   }
 
   /**
-   * Upserts a deep key in an object.
+   * Inserts value into object it it does not yet exist
    *
    * @param {Object} data
    * @param {String} key
    * @param {String|Number} value
    * @return {void}
    */
-  protected deepUpsert (data: object, key: string, value: string|number): void {
+  protected deepFill (data: object, key: string, value: string|number): void {
     if (get(data, key) == null) {
       set(data, key, value)
     }
@@ -120,7 +122,17 @@ export class DebianControl extends Task {
     return
   }
 
-  protected deepAssert (data: object, key: string, value, error = `Assert of ${key} failed`): void {
+  /**
+   * Asserts a deep value in the debian control file
+   *
+   * @param {Log[]} logs
+   * @param {Object} data
+   * @param {String} key
+   * @param {String|Number|RegExp|Function|null} value
+   * @param {String} [error]
+   * @return {void}
+   */
+  protected deepAssert (logs: Log[], data: object, key: string, value, error = `Assert of ${key} failed`): void {
     const d = get(data, key)
 
     let failed = false
@@ -138,8 +150,10 @@ export class DebianControl extends Task {
     }
 
     if (failed) {
-      throw (new Log(Log.Level.ERROR, 'Debian control linting failed', error))
+      const log = new Log(Log.Level.ERROR, 'Debian control linting failed', error)
         .workable(this)
+
+      logs.push(log)
     }
   }
 }

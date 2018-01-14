@@ -7,6 +7,17 @@
 
 import { Log } from './log'
 
+type architecture = 'amd64'
+type distribution = 'loki' | 'juno'
+type packageSystem = 'deb'
+
+export interface Change {
+  version: string
+  author: string
+  changes: string
+  date: Date
+}
+
 export interface Storable {
   nameDeveloper: string
   nameDomain: string
@@ -15,10 +26,12 @@ export interface Storable {
 
   version: string
 
-  distribution: string
-  architecture: string
-  packageSystem: string
-  branches: string[]
+  references: string[]
+  changelog: Change[]
+
+  distribution: distribution
+  architecture: architecture
+  packageSystem: packageSystem
 
   appcenter: object
   appstream: object

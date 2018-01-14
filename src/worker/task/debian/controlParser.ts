@@ -4,8 +4,6 @@
  * Debian documentation about the Control file before editing too much of this
  * file.
  * @see https://www.debian.org/doc/debian-policy/ch-controlfields.html
- *
- * @exports {Class} Parser - Reads and writes a Debian control file
  */
 
 import * as fs from 'fs-extra'
