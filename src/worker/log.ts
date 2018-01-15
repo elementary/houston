@@ -121,12 +121,25 @@ export class Log extends Error {
   public toString () {
     const out = []
 
-    const bodyIndented = this.body
-      .split('\n')
-      .map((l) => `  ${l}`)
+    if (this.title != null) {
+      out.push(this.title)
+    } else {
+      out.push(this.message)
+    }
 
-    out.push(this.title)
-    out.push(...bodyIndented)
+    if (this.body != null) {
+      const bodyIndented = this.body
+        .split('\n')
+        .map((l) => `  ${l}`)
+
+      out.push(...bodyIndented)
+    } else {
+      const stackIndented = this.stack
+        .split('\n')
+        .map((l) => `  ${l}`)
+
+      out.push(...stackIndented)
+    }
 
     return out.join('\n')
   }
