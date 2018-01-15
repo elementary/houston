@@ -15,7 +15,6 @@ import { Log } from '../../log'
 import { Task } from '../task'
 
 export class Setup extends Task {
-
   /**
    * Given two lists of strings we can find the first most common string.
    *
@@ -57,7 +56,13 @@ export class Setup extends Task {
       await fs.copy(from, to, { overwrite: true })
     }
 
-    // Step 3: ???
+    // Step 3: Copy pasta to the dirty directory
+    const clean = path.resolve(this.worker.workspace, 'clean')
+    const dirty = path.resolve(this.worker.workspace, 'dirty')
+
+    await fs.ensureDir(dirty)
+    await fs.copy(clean, dirty)
+
     // Step 4: Profit
   }
 
@@ -72,26 +77,14 @@ export class Setup extends Task {
     const repositoryReferences = await this.worker.repository.references()
     const workspaceReferences = [...this.worker.storage.references]
 
-    // TODO: There should be a cleaner way to handle this
-    switch (this.worker.storage.distribution) {
-      case 'loki':
-      case 'juno':
-        const packageReference = Setup.crossFind(repositoryReferences, [
-          `${this.worker.storage.distribution}`,
-          `${this.worker.storage.distribution}-package`,
-          `${this.worker.storage.distribution}-packageing`
-        ])
+    const packageReference = Setup.crossFind(repositoryReferences, [
+      `refs/heads/${this.worker.storage.distribution}`,
+      `refs/heads/${this.worker.storage.distribution}-package`,
+      `refs/heads/${this.worker.storage.distribution}-packageing`
+    ])
 
-        if (packageReference != null) {
-          workspaceReferences.push(packageReference)
-        }
-
-        break
-      default:
-        // TODO: At this point there is only a single reference to download.
-        // This should include the code and the packaging instructions or else
-        // We will fail later on.
-        break
+    if (packageReference != null) {
+      workspaceReferences.push(packageReference)
     }
 
     return workspaceReferences

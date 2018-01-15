@@ -72,14 +72,7 @@ function buildStorage (argv, repository) {
  */
 function logLogs (logs) {
   for (const log of logs.sort((a, b) => (b.level - a.level))) {
-    const task = (log.work != null) ? log.work.constructor.name : 'Worker'
-    console.log(`${task}: ${log.title}`)
-
-    if (log.error) {
-      console.log(`  ${log.stack}`)
-    } else if (log.body != null) {
-      console.log(`  ${log.body}`)
-    }
+    console.log(log.toString())
   }
 }
 

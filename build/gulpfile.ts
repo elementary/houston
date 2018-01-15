@@ -38,11 +38,8 @@ gulp.task('copy', () => {
   const dest = path.resolve(common.paths.dest)
 
   return gulp.src([
-    path.resolve(src, 'bin.js'),
-    path.resolve(src, 'bootstrap.js'),
-    path.resolve(src, 'client', '**', '*.json'),
-    path.resolve(src, 'client', '**', '*.marko'),
-    path.resolve(src, 'public', '**', '*')
+    path.resolve(src, '**/*'),
+    '!' + path.resolve(src, '**/*.ts')
   ], { base: src })
     .pipe(gulp.dest(dest))
 })

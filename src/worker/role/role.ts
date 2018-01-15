@@ -46,6 +46,8 @@ export class Role implements Workable {
       try {
         await work.run()
       } catch (e) {
+        this.worker.emit('run:error', e)
+
         // If it's a Log, but not just a simple Error
         if (!(e instanceof Log)) {
           const log = new Log(Log.Level.ERROR, 'Internal error while running Role')

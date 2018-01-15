@@ -169,10 +169,10 @@ export class Docker {
     const commands = cmd.split(' ')
     const options = Object.assign({}, this.options, opts)
 
-    const res = await this.docker.run(this.name, commands, log, options)
+    const container = await this.docker.run(this.name, commands, log, options)
 
-    await res.container.remove()
-    return res.data.StatusCode
+    await container.remove()
+    return container.output.StatusCode
   }
 
   /**

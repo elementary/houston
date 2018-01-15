@@ -3,7 +3,10 @@
  * A log to be passed around during a worker role
  */
 
+import * as fs from 'fs-extra'
+
 import { Level } from '../lib/log/level'
+import render from '../lib/template'
 import { Task } from './task/task'
 import { Workable } from './workable'
 
@@ -51,7 +54,8 @@ export class Log extends Error {
   public error?: Error
 
   /**
-   * Creates a new log from a file
+   * Creates a new log from a file. This will take the first non-whitespace line
+   * as the title, and the rest as the Log body
    *
    * @param {Level} level
    * @param {string} path
@@ -59,9 +63,13 @@ export class Log extends Error {
    * @return {Log}
    */
   public static template (level: Level, path: string, data = {}): Log {
-    const instance = new Log(level, 'test', 'test')
+    const template = fs.readFileSync(path, 'utf8')
+    const raw = render(template, data)
 
-    return instance
+    const title = raw.trim().split('\n')[0]
+    const body = raw.trim().split('\n').slice(1).join('\n').trim()
+
+    return new Log(level, title, body)
   }
 
   /**
@@ -102,5 +110,24 @@ export class Log extends Error {
     this.error = error
 
     return this
+  }
+
+  /**
+   * Returns a nice string version of the log
+   * BUG: This should override the default node `Error.toString()`
+   *
+   * @return {string}
+   */
+  public toString () {
+    const out = []
+
+    const bodyIndented = this.body
+      .split('\n')
+      .map((l) => `  ${l}`)
+
+    out.push(this.title)
+    out.push(...bodyIndented)
+
+    return out.join('\n')
   }
 }

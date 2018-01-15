@@ -16,6 +16,7 @@ export class Build extends Role {
   public tasks = [
     require('../task/workspace/setup').Setup,
     require('../task/debian/changelog').DebianChangelog,
-    require('../task/debian/control').DebianControl
+    require('../task/debian/control').DebianControl,
+    require('../task/build/deb').BuildDeb
   ]
 }

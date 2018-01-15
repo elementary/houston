@@ -1,8 +1,6 @@
 /**
  * houston/src/worker/workable.ts
  * An interface for OOP stuffs
- *
- * @exports {Interface} TaskI
  */
 
 import { Worker } from './worker'

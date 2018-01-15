@@ -9,14 +9,6 @@ import { Workable } from '../workable'
 import { Worker } from '../worker'
 
 export class Task implements Workable {
-
-  /**
-   * A list used files used in this Task
-   *
-   * @var {string[]}
-   */
-  public files = ['*']
-
   /**
    * The current running worker
    *

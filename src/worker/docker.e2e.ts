@@ -12,12 +12,8 @@ import { Docker } from './docker'
 
 import { setup as setupConfig } from '../../test/utility/config'
 import * as dockerUtility from '../../test/utility/docker'
-import { timeout } from '../../test/utility/jasmine'
 
 let config = null
-
-// Extend the default timeout time due to long running tests
-timeout(30)
 
 // TODO: Figure out a better way of testing with Docker
 beforeEach(async () => {
@@ -46,4 +42,4 @@ test('can create a docker image', async () => {
   const existance = await docker.exists()
 
   expect(existance).toBeTruthy()
-})
+}, 600000) // 10 minutes because docker checks

@@ -16,13 +16,9 @@ import { Worker } from './worker'
 
 import { create } from '../../test/utility/app'
 import { tmp } from '../../test/utility/fs'
-import { timeout } from '../../test/utility/jasmine'
 
 let config: Config
 let testingDir: string
-
-// Extend the default timeout time due to long running tests
-timeout(60)
 
 // Change the default workspace location for testing
 beforeAll(async () => {
@@ -58,12 +54,14 @@ test('needle-and-thread/vocal passes build process', async () => {
 
   const proc = new Worker(config, repo, storage)
 
+  proc.on('run:error', (e) => console.error(e))
+
   await proc.setup()
   await proc.run(Build)
   await proc.teardown()
 
   expect(proc.passes()).toBeTruthy()
-})
+}, 3600000) // An hour long timeout because we are building things
 
 test('Philip-Scott/Spice-up passes build process', async () => {
   const repo = new GithubRepository('https://github.com/Philip-Scott/Spice-up')
@@ -86,9 +84,11 @@ test('Philip-Scott/Spice-up passes build process', async () => {
 
   const proc = new Worker(config, repo, storage)
 
+  proc.on('run:error', (e) => console.error(e))
+
   await proc.setup()
   await proc.run(Build)
   await proc.teardown()
 
   expect(proc.passes()).toBeTruthy()
-})
+}, 3600000) // An hour long timeout because we are building things

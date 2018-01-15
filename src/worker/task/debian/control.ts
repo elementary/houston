@@ -22,13 +22,6 @@ export class DebianControl extends Task {
   public static path = 'debian/control'
 
   /**
-   * A list used files we need to verify the Debian control file
-   *
-   * @var {string[]}
-   */
-  public files = [DebianControl.path]
-
-  /**
    * The parser to use when doing stuff to the debian control file
    *
    * @var {Parser}

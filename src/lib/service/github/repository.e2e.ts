@@ -11,12 +11,8 @@ import * as uuid from 'uuid/v4'
 import { Repository } from './repository'
 
 import { tmp } from '../../../../test/utility/fs'
-import { timeout } from '../../../../test/utility/jasmine'
 
 let testingDir: string
-
-// Extend the default timeout time due to long running tests
-timeout(60)
 
 beforeAll(async () => {
   testingDir = await tmp('lib/service/github')
@@ -39,7 +35,7 @@ test('can clone a repository', async () => {
 
   const stat = await fs.stat(folder)
   expect(stat.isDirectory()).toBeTruthy()
-})
+}, 600000) // 10 minutes because of git clone
 
 test('can clone a repository with tag', async () => {
   const repo = new Repository('https://github.com/elementary/houston')
@@ -56,7 +52,7 @@ test('can clone a repository with tag', async () => {
   const pkg = require(path.resolve(folder, 'package.json'))
   expect(pkg).toHaveProperty('version')
   expect(pkg.version).toEqual('0.1.8')
-})
+}, 600000) // 10 minutes because of git clone
 
 test.skip('can clone a repository with a non-annotated tag (#511)', async () => {
   const repo = new Repository('https://github.com/fluks-eos/gdice')
@@ -68,7 +64,7 @@ test.skip('can clone a repository with a non-annotated tag (#511)', async () => 
 
   const stat = await fs.stat(folder)
   expect(stat.isDirectory()).toBeTruthy()
-})
+}, 600000) // 10 minutes because of git clone
 
 test('can list all references for a repository', async () => {
   const repo = new Repository('https://github.com/elementary/houston')
@@ -77,4 +73,4 @@ test('can list all references for a repository', async () => {
 
   expect(references).toContain('refs/heads/master')
   expect(references).toContain('refs/remotes/origin/v2') // TODO: Future me: remove this
-})
+}, 600000) // 10 minutes because of git clone for references
