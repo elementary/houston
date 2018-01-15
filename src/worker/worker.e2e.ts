@@ -48,8 +48,8 @@ test('needle-and-thread/vocal passes build process', async () => {
     nameDomain: 'com.github.needle-and-thread.vocal',
     nameHuman: 'Vocal',
     packageSystem: 'deb',
-    references: ['refs/tags/2.0.19'],
-    version: '2.0.19'
+    references: ['refs/tags/2.1.5'],
+    version: '2.1.5'
   }
 
   const proc = new Worker(config, repo, storage)
