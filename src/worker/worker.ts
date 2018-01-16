@@ -14,8 +14,7 @@ import * as uuid from 'uuid/v4'
 import { Config } from '../lib/config'
 import { Repository } from '../lib/service/base/repository'
 import { Log } from './log'
-import { Storable } from './storable'
-import { WorkableConstructor } from './workable'
+import { Storable, WorkableConstructor } from './type'
 
 export class Worker extends EventEmitter {
 

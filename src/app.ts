@@ -1,7 +1,7 @@
 /**
  * houston/src/app.ts
- * Entry point to the whole app. Loads bootstrap, then redirects to CLI entry.
+ * Helpful entry points for if houston is being used as a library
  */
 
-import './bootstrap'
-import './cli/cli'
+export { App } from './lib/app'
+export { Config } from './lib/config'

@@ -6,7 +6,7 @@
  */
 
 import { Log } from '../log'
-import { Workable, WorkableConstructor } from '../workable'
+import { Workable, WorkableConstructor } from '../type'
 import { Worker } from '../worker'
 
 export class Role implements Workable {

@@ -16,7 +16,7 @@ import { report } from './middleware/report'
 import { Config } from '../config'
 import { Logger } from '../log'
 import { Controller } from './controller'
-import { Servable } from './servable'
+import { Servable } from './type'
 
 // To match the Koa middleware signature requires an any type
 // tslint:disable-next-line no-any

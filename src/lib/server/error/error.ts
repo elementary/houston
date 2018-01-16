@@ -5,7 +5,7 @@
 
 import { Context } from 'koa'
 
-import { HttpError } from './interface'
+import { Error as HttpError } from '../type'
 
 export class BasicHttpError extends Error implements HttpError {
 

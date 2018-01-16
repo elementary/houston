@@ -9,7 +9,7 @@ import * as path from 'path'
 
 import render from '../../../lib/template'
 import { Log } from '../../log'
-import { Change } from '../../storable'
+import { Change } from '../../type'
 import { Task } from '../task'
 
 export class DebianChangelog extends Task {

@@ -8,7 +8,7 @@ import * as fs from 'fs-extra'
 import { Level } from '../lib/log/level'
 import render from '../lib/template'
 import { Task } from './task/task'
-import { Workable } from './workable'
+import { Workable } from './type'
 
 export class Log extends Error {
   /**

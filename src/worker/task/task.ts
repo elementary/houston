@@ -5,7 +5,7 @@
  * @exports {Class} Task
  */
 
-import { Workable } from '../workable'
+import { Workable } from '../type'
 import { Worker } from '../worker'
 
 export class Task implements Workable {

@@ -3,7 +3,7 @@
  * Utility for setting up a new app for testing.
  */
 
-import { App } from '../../src/lib/app'
+import { App } from '../../src/app'
 import { setup as setupConfig } from './config'
 
 /**

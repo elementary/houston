@@ -1,12 +1,18 @@
 /**
- * houston/src/lib/server/error/interface.ts
- * An interface for any error able to be rendered
+ * houston/src/lib/server/type.d.ts
+ * Useful server interfaces
  */
 
 import { Context } from 'koa'
 
-export interface HttpError {
+export interface Servable {
+  active: boolean
 
+  listen (port?: number): Promise<Servable>
+  close (): Promise<Servable>
+}
+
+export interface Error {
   /**
    * Returns the http status code
    *

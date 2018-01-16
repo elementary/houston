@@ -13,7 +13,7 @@
     "houston": "dest/bin.js"
   },
   "scripts": {
-    "start": "node dest/app.js",
+    "start": "node dest/bin.js",
     "build": "gulp --gulpfile 'build/gulpfile.ts' build",
     "build:dev": "gulp --gulpfile 'build/gulpfile.ts' watch",
     "test": "jest --no-cache",
@@ -75,7 +75,8 @@
       "!src/cli/**/*.ts"
     ],
     "coveragePathIgnorePatterns": [
-      "/node_modules/"
+      "/node_modules/",
+      "/.*\\.d\\.ts"
     ],
     "coverageThreshold": {
       "global": {

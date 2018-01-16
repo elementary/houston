@@ -1,5 +1,5 @@
 /**
- * houston/src/lib/service/base/repository.ts
+ * houston/src/lib/service/base/repository.d.ts
  * A generaic repository interface
  */
 

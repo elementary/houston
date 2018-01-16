@@ -1,11 +1,10 @@
 /**
- * houston/src/worker/storable.ts
- * An interface for storing worker data.
- *
- * @exports {Interface} Storable
+ * houston/src/worker/type.d.ts
+ * A bunch of type definitions for the worker process
  */
 
 import { Log } from './log'
+import { Worker } from './worker'
 
 type architecture = 'amd64'
 type distribution = 'loki' | 'juno'
@@ -37,4 +36,12 @@ export interface Storable {
   appstream: object
 
   logs: Log[]
+}
+
+export interface WorkableConstructor {
+  new (worker: Worker): Workable
+}
+
+export interface Workable {
+  run (): Promise<void>
 }

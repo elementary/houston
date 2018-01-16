@@ -1,3 +1,4 @@
 #! /usr/bin/env node
 
-require('./app')
+require('./bootstrap')
+require('./cli/cli')

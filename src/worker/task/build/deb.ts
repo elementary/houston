@@ -10,7 +10,7 @@ import * as path from 'path'
 import render from '../../../lib/template'
 import { Docker } from '../../docker'
 import { Log } from '../../log'
-import { Change } from '../../storable'
+import { Change } from '../../type'
 import { Task } from '../task'
 
 export class BuildDeb extends Task {

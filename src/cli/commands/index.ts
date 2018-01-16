@@ -4,9 +4,7 @@
  */
 
 export default [
-  require('./api'),
   require('./build'),
-  require('./client'),
   require('./migrate'),
   require('./repo'),
   require('./seed'),

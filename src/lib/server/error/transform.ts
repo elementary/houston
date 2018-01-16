@@ -5,8 +5,8 @@
 
 import { Context } from 'koa'
 
+import { Error as HttpError } from '../type'
 import { BasicHttpError } from './error'
-import { HttpError } from './interface'
 
 /**
  * Makes any sort of error an HTTP handleable error.

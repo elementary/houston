@@ -6,7 +6,7 @@
  */
 
 import { Repository } from '../lib/service/base/repository'
-import { Storable } from './storable'
+import { Storable } from './type'
 
 export class Server {
 
