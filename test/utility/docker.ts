@@ -1,6 +1,7 @@
 /**
  * houston/test/utility/docker.ts
- * Usefull utility functions for testing with docker
+ * Usefull utility functions for testing with docker.
+ * TODO: This has very similar content to the `worker/docker.ts` file.
  *
  * @exports {Function} teardown - Removes all current containers
  */
@@ -69,6 +70,10 @@ export async function removeImages (config: Config): Promise<void> {
   const images = await docker.listImages()
   .then((imageInfos) => {
     return imageInfos.filter((imageInfo) => {
+      if (imageInfo.RepoTags == null) {
+        return false
+      }
+
       let found = false
 
       imageInfo.RepoTags.forEach((tag) => {
