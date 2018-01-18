@@ -3,7 +3,7 @@
  * Builds all of houston. Places everything in houston/dest directory.
  */
 
-import * as del from 'del'
+import * as fs from 'fs-extra'
 import * as gulp from 'gulp'
 import * as path from 'path'
 
@@ -24,7 +24,7 @@ const tsProject = typescript.createProject(tsConfig)
  * @return {string[]} - A list of removed files
  */
 gulp.task('clean', () => {
-  return del([common.paths.dest], { force: true })
+  return fs.remove(common.paths.dest)
 })
 
 /**

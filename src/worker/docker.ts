@@ -180,11 +180,11 @@ export class Docker {
    * Creates / Clears the log file
    *
    * @async
-   * @return {Stream}
+   * @return {Stream|null}
    */
-  protected async setupLog (): Promise<Stream> {
+  protected async setupLog (): Promise<Stream|null> {
     if (this.log == null) {
-      return new Stream()
+      return null
     }
 
     await fs.ensureFile(this.log)

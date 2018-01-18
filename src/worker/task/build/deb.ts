@@ -8,6 +8,7 @@ import * as os from 'os'
 import * as path from 'path'
 
 import render from '../../../lib/template'
+import { glob } from '../../../lib/utility/glob'
 import { Docker } from '../../docker'
 import { Log } from '../../log'
 import { Change } from '../../type'
@@ -30,7 +31,16 @@ export class BuildDeb extends Task {
    * @return {string}
    */
   protected get logPath () {
-    return path.resolve(this.worker.workspace, 'build-deb.log')
+    return path.resolve(this.worker.workspace, 'build.log')
+  }
+
+  /**
+   * Location of the directory to build
+   *
+   * @return {string}
+   */
+  protected get path () {
+    return path.resolve(this.worker.workspace, 'build')
   }
 
   /**
@@ -60,8 +70,7 @@ export class BuildDeb extends Task {
   public async run () {
     await this.setup()
 
-    const p = path.resolve(this.worker.workspace, 'build-deb')
-    const docker = await this.docker(p)
+    const docker = await this.docker()
 
     const arch = this.worker.storage.architecture
     const dist = this.distribution
@@ -71,16 +80,45 @@ export class BuildDeb extends Task {
     const exit = await docker.run(cmd, { Privileged: true })
 
     if (exit !== 0) {
-      throw await this.log()
+      const err = await this.log()
+      await this.teardown()
+
+      throw err
+    } else {
+      await this.teardown()
     }
   }
 
+  /**
+   * Ensures the build directory is ready for docker
+   *
+   * @async
+   * @return {void}
+   */
   protected async setup () {
     const from = path.resolve(this.worker.workspace, 'clean')
-    const to = path.resolve(this.worker.workspace, 'build-deb')
 
-    await fs.ensureDir(to)
-    await fs.copy(from, to)
+    await fs.ensureDir(this.path)
+    await fs.copy(from, this.path)
+  }
+
+  /**
+   * Removes the messy build directory after copying the package to workspace
+   *
+   * @async
+   * @return {void}
+   */
+  protected async teardown () {
+    const deb = await glob(path.resolve(this.path, '*.deb'))
+
+    if (deb[0] == null) {
+      throw new Log(Log.Level.ERROR, 'Build completed but no Debian package was found')
+    }
+
+    const to = path.resolve(this.worker.workspace, 'package.deb')
+    await fs.copy(deb[0], to)
+
+    await fs.remove(this.path)
   }
 
   /**
@@ -103,10 +141,9 @@ export class BuildDeb extends Task {
    * Returns a docker instance to use for liftoff
    *
    * @async
-   * @param {string} p - Folder to mount for building
    * @return {Docker}
    */
-  protected async docker (p: string): Promise<Docker> {
+  protected async docker (): Promise<Docker> {
     const docker = new Docker(this.worker.config, 'build-deb')
 
     const exists = await docker.exists()
@@ -118,7 +155,7 @@ export class BuildDeb extends Task {
     docker.log = this.logPath
 
     docker.mount(BuildDeb.cachePath, '/var/cache/liftoff')
-    docker.mount(p, '/tmp/houston')
+    docker.mount(this.path, '/tmp/houston')
 
     return docker
   }

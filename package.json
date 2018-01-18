@@ -29,6 +29,7 @@
     "dockerode": "^2.5.3",
     "ejs": "^2.5.7",
     "fs-extra": "^3.0.1",
+    "glob": "^7.1.2",
     "inversify": "^4.9.0",
     "knex": "^0.13.0",
     "koa": "^2.4.1",
@@ -49,7 +50,6 @@
     "@types/knex": "0.0.68",
     "@types/koa-router": "^7.0.27",
     "@types/node": "^7.0.51",
-    "del": "^2.2.2",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-sourcemaps": "^2.6.2",
     "gulp-typescript": "^3.2.3",
@@ -76,6 +76,7 @@
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
+      "/cli/",
       "/.*\\.d\\.ts"
     ],
     "coverageThreshold": {
