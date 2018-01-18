@@ -38,9 +38,9 @@
     "koa-static": "^3.0.0",
     "lodash": "^4.17.4",
     "nodegit": "^0.20.3",
-    "reflect-metadata": "^0.1.10",
-    "uuid": "^3.0.1",
-    "yargs": "^10.1.1"
+    "reflect-metadata": "^0.1.12",
+    "uuid": "^3.2.1",
+    "yargs": "^10.1.2"
   },
   "optionalDependencies": {
     "raven": "^2.0.1"
@@ -49,9 +49,9 @@
     "@types/jest": "^19.2.3",
     "@types/knex": "0.0.68",
     "@types/koa-router": "^7.0.27",
-    "@types/node": "^7.0.51",
+    "@types/node": "^7.0.52",
     "gulp": "github:gulpjs/gulp#4.0",
-    "gulp-sourcemaps": "^2.6.2",
+    "gulp-sourcemaps": "^2.6.3",
     "gulp-typescript": "^3.2.3",
     "jest": "^20.0.3",
     "sinon": "^3.2.1",
@@ -59,10 +59,10 @@
     "supertest": "^3.0.0",
     "ts-jest": "^20.0.14",
     "ts-node": "^3.0.4",
-    "tslint": "^5.8.0",
+    "tslint": "^5.9.1",
     "tslint-consistent-codestyle": "^1.11.0",
     "tslint-jsdoc-rules": "^0.1.2",
-    "tslint-microsoft-contrib": "^5.0.0",
+    "tslint-microsoft-contrib": "^5.0.2",
     "typescript": "^2.6.2"
   },
   "files": [
