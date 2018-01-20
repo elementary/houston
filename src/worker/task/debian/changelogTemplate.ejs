@@ -1,8 +1,11 @@
-<% storage.changelog.forEach(function (change) { %>
+<%_ storage.changelog.forEach(function (change, i) { _%>
 <%= storage.nameDomain %> (<%= change.version %>) <%= storage.distribution %>; urgency=low
 
-  <%= change.changes %>
+<% changes[i].forEach(function (c) { _%>
+  * <%= c %>
+<%_ }) _%>
 
- -- <%= change.author %> <developer@elementary.io> <%= change.date.toUTCString().replace('GMT', '+0000') %>
+ -- <%= change.author %> <developer@elementary.io>  <%= change.date.toUTCString().replace('GMT', '+0000') _%>
+
 
 <% }) %>

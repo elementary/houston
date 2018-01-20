@@ -6,7 +6,7 @@
 import * as fs from 'fs-extra'
 
 import { Level } from '../lib/log/level'
-import render from '../lib/template'
+import render from '../lib/utility/template'
 import { Task } from './task/task'
 import { Workable } from './type'
 

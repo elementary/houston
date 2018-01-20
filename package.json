@@ -26,6 +26,7 @@
     "prepublishOnly": "npm run lint && npm run test && npm run build"
   },
   "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
     "dockerode": "^2.5.3",
     "ejs": "^2.5.7",
     "fs-extra": "^3.0.1",
@@ -37,6 +38,7 @@
     "koa-router": "^7.3.0",
     "koa-static": "^3.0.0",
     "lodash": "^4.17.4",
+    "markdown-it": "^8.4.0",
     "nodegit": "^0.20.3",
     "reflect-metadata": "^0.1.12",
     "uuid": "^3.2.1",

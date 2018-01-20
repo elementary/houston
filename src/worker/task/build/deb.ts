@@ -7,7 +7,7 @@ import * as fs from 'fs-extra'
 import * as os from 'os'
 import * as path from 'path'
 
-import render from '../../../lib/template'
+import render from '../../../lib/utility/template'
 import { glob } from '../../../lib/utility/glob'
 import { Docker } from '../../docker'
 import { Log } from '../../log'

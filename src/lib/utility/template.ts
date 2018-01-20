@@ -1,10 +1,10 @@
 /**
- * houston/src/lib/template.ts
+ * houston/src/lib/utility/template.ts
  * A simple way to template strings using ejs
  *
  * @example
  * ```
- *   import template from 'lib/template'
+ *   import template from 'lib/utility/template'
  *
  *   return template('# <%= title %>', { title: 'testing' })
  * ```
