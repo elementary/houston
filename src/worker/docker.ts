@@ -117,6 +117,10 @@ export class Docker {
     const images = await this.docker.listImages()
 
     const foundImages = images.filter((image) => {
+      if (image.RepoTags == null) {
+        return false
+      }
+
       let found = false
 
       image.RepoTags.forEach((imageTag) => {

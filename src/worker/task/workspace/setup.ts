@@ -78,9 +78,13 @@ export class Setup extends Task {
     const workspaceReferences = [...this.worker.storage.references]
 
     const packageReference = Setup.crossFind(repositoryReferences, [
-      `refs/heads/${this.worker.storage.distribution}`,
+      `refs/heads/${this.worker.storage.packageSystem}-package-${this.worker.storage.distribution}`,
+      `refs/heads/${this.worker.storage.packageSystem}-packaging-${this.worker.storage.distribution}`,
+      `refs/heads/${this.worker.storage.packageSystem}-package`,
+      `refs/heads/${this.worker.storage.packageSystem}-packageing`,
       `refs/heads/${this.worker.storage.distribution}-package`,
-      `refs/heads/${this.worker.storage.distribution}-packageing`
+      `refs/heads/${this.worker.storage.distribution}-packageing`,
+      `refs/heads/${this.worker.storage.distribution}`
     ])
 
     if (packageReference != null) {
