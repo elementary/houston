@@ -14,11 +14,11 @@ export class Build extends Role {
    * @var {Task[]}
    */
   public tasks = [
-    require('../task/workspace/setup').Setup,
+    require('../task/workspace/setup').WorkspaceSetup,
     require('../task/debian/changelog').DebianChangelog,
     require('../task/debian/control').DebianControl,
     require('../task/build/deb').BuildDeb,
     require('../task/extract/deb').ExtractDeb,
-    require('../task/binary/exist').BinaryExist
+    require('../task/file/deb').FileDeb
   ]
 }

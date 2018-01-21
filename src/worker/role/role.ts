@@ -41,23 +41,16 @@ export class Role implements Workable {
    */
   public async run () {
     for (const task of this.tasks) {
+      if (this.worker.running === false) {
+        return
+      }
+
       const work = new task(this.worker)
 
       try {
         await work.run()
       } catch (e) {
-        this.worker.emit('run:error', e)
-
-        // If it's a Log, but not just a simple Error
-        if (!(e instanceof Log)) {
-          const log = new Log(Log.Level.ERROR, 'Internal error while running Role')
-            .workable(work)
-            .wrap(e)
-
-          this.worker.storage.logs.push(log)
-        } else {
-          this.worker.storage.logs.push(e)
-        }
+        this.worker.report(e, work)
       }
     }
   }

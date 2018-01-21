@@ -14,7 +14,7 @@ import * as uuid from 'uuid/v4'
 import { Config } from '../lib/config'
 import { Repository } from '../lib/service/base/repository'
 import { Log } from './log'
-import { Storable, WorkableConstructor } from './type'
+import { Storable, Workable, WorkableConstructor } from './type'
 
 export class Worker extends EventEmitter {
 
@@ -59,6 +59,13 @@ export class Worker extends EventEmitter {
   public workspace?: string
 
   /**
+   * If we are currently running the worker
+   *
+   * @var {Boolean}
+   */
+  public running = false
+
+  /**
    * Creates a new worker process
    *
    * @param {Config} config - The configuration to use
@@ -100,27 +107,18 @@ export class Worker extends EventEmitter {
    */
   public async run (workable: WorkableConstructor) {
     this.emit('run:start')
+    this.running = true
 
     const work = new workable(this)
 
     try {
       await work.run()
     } catch (e) {
-      this.emit('run:error', e)
-
-      // If it's a Log, but not just a simple Error
-      if (!(e instanceof Log)) {
-        const log = new Log(Log.Level.ERROR, 'Internal error while running worker')
-          .workable(work)
-          .wrap(e)
-
-        this.storage.logs.push(log)
-      } else {
-        this.storage.logs.push(e)
-      }
+      this.report(e)
     }
 
     this.emit('run:end')
+    this.running = false
 
     return this.passes()
   }
@@ -142,6 +140,46 @@ export class Worker extends EventEmitter {
 
       this.emit('teardown:end')
     }
+  }
+
+  /**
+   * Adds a log/error to storage
+   *
+   * @param {Error} e
+   * @param {Workable} [workable]
+   * @return {Worker}
+   */
+  public report (e: Error, workable?: Workable) {
+    // A real error. Not a Log
+    if (!(e instanceof Log)) {
+      this.emit('run:error', e)
+
+      const log = new Log(Log.Level.ERROR, 'Internal error while running')
+        .workable(workable)
+        .wrap(e)
+
+      this.storage.logs.push(log)
+      this.stop()
+    } else {
+      this.storage.logs.push(e)
+
+      if (e.level === Log.Level.ERROR) {
+        this.stop()
+      }
+    }
+
+    return this
+  }
+
+  /**
+   * Stops the build if it's currently running
+   *
+   * @return {Worker}
+   */
+  public stop () {
+    this.running = false
+
+    return this
   }
 
   /**

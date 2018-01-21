@@ -15,7 +15,7 @@ import * as Glob from 'glob'
  *
  * @return {String[]}
  */
-export function glob (pattern, options = {}) {
+export function glob (pattern, options = {}): Promise<string[]> {
   return new Promise((resolve, reject) => {
     Glob(pattern, options, (err, res) => {
       if (err != null) {

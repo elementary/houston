@@ -1,8 +1,6 @@
 /**
  * houston/src/worker/task/workspace/setup.ts
  * Fills the workspace with files from git
- *
- * @exports {Function} run - Fill the workspace
  */
 
 import * as fs from 'fs-extra'
@@ -14,7 +12,7 @@ import * as uuid from 'uuid/v4'
 import { Log } from '../../log'
 import { Task } from '../task'
 
-export class Setup extends Task {
+export class WorkspaceSetup extends Task {
   /**
    * Given two lists of strings we can find the first most common string.
    *
@@ -77,7 +75,7 @@ export class Setup extends Task {
     const repositoryReferences = await this.worker.repository.references()
     const workspaceReferences = [...this.worker.storage.references]
 
-    const packageReference = Setup.crossFind(repositoryReferences, [
+    const packageReference = WorkspaceSetup.crossFind(repositoryReferences, [
       `refs/heads/${this.worker.storage.packageSystem}-package-${this.worker.storage.distribution}`,
       `refs/heads/${this.worker.storage.packageSystem}-packaging-${this.worker.storage.distribution}`,
       `refs/heads/${this.worker.storage.packageSystem}-package`,

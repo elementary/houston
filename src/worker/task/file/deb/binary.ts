@@ -1,16 +1,16 @@
 /**
- * houston/src/worker/task/binary/exist.ts
- * Checks for a shipped binary file
+ * houston/src/worker/task/file/deb/binary.ts
+ * Tests debian packages for needed binary file
  */
 
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
-import { glob } from '../../../lib/utility/glob'
-import { Log } from '../../log'
-import { Task } from '../task'
+import { glob } from '../../../../lib/utility/glob'
+import { Log } from '../../../log'
+import { Task } from '../../task'
 
-export class BinaryExist extends Task {
+export class FileDebBinary extends Task {
   /**
    * Location of the directory to build
    *
