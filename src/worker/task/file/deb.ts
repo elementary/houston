@@ -12,6 +12,7 @@ export class FileDeb extends ParallelTask {
    * @var {Task[]}
    */
   public tasks = [
-    require('./deb/binary').FileDebBinary
+    require('./deb/binary').FileDebBinary,
+    require('./deb/nonexistent').FileDebNonexistent
   ]
 }
