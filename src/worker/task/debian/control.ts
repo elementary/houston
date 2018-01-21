@@ -49,6 +49,10 @@ export class DebianControl extends Task {
       throw new Log(Log.Level.ERROR, 'Missing debian control file')
     }
 
+    // TODO: Disabled Debian parser until we can handle multi package control
+    // Files like the one used by io.elementary.code
+    return
+
     const data = await this.parser.read()
 
     this.fill(data)

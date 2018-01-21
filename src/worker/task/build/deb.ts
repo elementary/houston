@@ -80,13 +80,10 @@ export class BuildDeb extends Task {
     const exit = await docker.run(cmd, { Privileged: true })
 
     if (exit !== 0) {
-      const err = await this.log()
-      await this.teardown()
-
-      throw err
-    } else {
-      await this.teardown()
+      throw await this.log()
     }
+
+    await this.teardown()
   }
 
   /**

@@ -20,11 +20,14 @@ export class WorkspaceSetup extends Task {
    * @param {String[]} needles
    * @return {String|null}
    */
-  protected static crossFind (haystacks, needles) {
-    for (let x = 0; x++; x < needles.length) {
-      for (let y = 0; y++; y < haystacks.length) {
-        if (haystacks[x].indexOf(needles[y]) !== -1) {
-          return needles[x]
+  protected static crossFindRef (haystacks, needles): string|null {
+    for (const needle of needles) {
+      for (const haystack of haystacks) {
+        const n = needle.split('/').reverse()[0]
+        const h = haystack.split('/').reverse()[0]
+
+        if (h === n) {
+          return haystack
         }
       }
     }
@@ -37,6 +40,9 @@ export class WorkspaceSetup extends Task {
    * @return {void}
    */
   public async run () {
+    await this.worker.emitAsync(`task:${this.constructor.name}:start`)
+    await fs.ensureDir(this.worker.workspace)
+
     const branches = await this.branches()
 
     // Step 1: Download all the needed branches
@@ -58,10 +64,12 @@ export class WorkspaceSetup extends Task {
     const clean = path.resolve(this.worker.workspace, 'clean')
     const dirty = path.resolve(this.worker.workspace, 'dirty')
 
+    await fs.ensureDir(clean)
     await fs.ensureDir(dirty)
     await fs.copy(clean, dirty)
 
     // Step 4: Profit
+    await this.worker.emitAsync(`task:${this.constructor.name}:end`)
   }
 
   /**
@@ -75,14 +83,14 @@ export class WorkspaceSetup extends Task {
     const repositoryReferences = await this.worker.repository.references()
     const workspaceReferences = [...this.worker.storage.references]
 
-    const packageReference = WorkspaceSetup.crossFind(repositoryReferences, [
-      `refs/heads/${this.worker.storage.packageSystem}-package-${this.worker.storage.distribution}`,
-      `refs/heads/${this.worker.storage.packageSystem}-packaging-${this.worker.storage.distribution}`,
-      `refs/heads/${this.worker.storage.packageSystem}-package`,
-      `refs/heads/${this.worker.storage.packageSystem}-packageing`,
-      `refs/heads/${this.worker.storage.distribution}-package`,
-      `refs/heads/${this.worker.storage.distribution}-packageing`,
-      `refs/heads/${this.worker.storage.distribution}`
+    const packageReference = WorkspaceSetup.crossFindRef(repositoryReferences, [
+      `${this.worker.storage.packageSystem}-package-${this.worker.storage.distribution}`,
+      `${this.worker.storage.packageSystem}-packaging-${this.worker.storage.distribution}`,
+      `${this.worker.storage.packageSystem}-package`,
+      `${this.worker.storage.packageSystem}-packaging`,
+      `${this.worker.storage.distribution}-package`,
+      `${this.worker.storage.distribution}-packaging`,
+      `${this.worker.storage.distribution}`
     ])
 
     if (packageReference != null) {

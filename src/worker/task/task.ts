@@ -32,6 +32,8 @@ export class Task implements Workable {
    * @return {void}
    */
   public async run () {
+    this.worker.emit(`task:${this.constructor.name}:start`)
     //
+    this.worker.emit(`task:${this.constructor.name}:end`)
   }
 }

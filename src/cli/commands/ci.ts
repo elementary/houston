@@ -1,10 +1,13 @@
 /**
- * houston/src/cli/commands/build.ts
- * Builds a project with the worker
+ * houston/src/cli/commands/ci.ts
+ * Tests a project with the worker. Used when a code base is local.
  */
 
 // Command line files are allowed to have console log statements
 // tslint:disable no-console
+
+import * as fs from 'fs-extra'
+import * as path from 'path'
 
 import { Config } from '../../lib/config'
 import { levelIndex } from '../../lib/log/level'
@@ -14,13 +17,16 @@ import { Storable } from '../../worker/type'
 import { Worker } from '../../worker/worker'
 import { setup } from '../utilities'
 
-export const command = 'build <repo> <version>'
-export const describe = 'Builds a repository with the worker process'
+export const command = 'ci [directory]'
+export const describe = 'Tests a local project with the worker process'
+
+const REPO = `https://github.com/${process.env.TRAVIS_REPO_SLUG}`
 
 export const builder = (yargs) => {
     return yargs
-      .positional('repo', { describe: 'Full repository URL', type: 'string' })
-      .positional('version', { describe: 'Semver version to build for', type: 'string' })
+      .positional('directory', { describe: 'The project directory to build', type: 'string', default: '.' })
+      .option('repo', { describe: 'Full repository URL', type: 'string', default: REPO })
+      .option('version', { describe: 'Semver version to build for', type: 'string', default: '0.0.1' })
       .option('architecture', { describe: 'Architecture to build for', type: 'string', default: 'amd64' })
       .option('distribution', { describe: 'Distribution to build for', type: 'string', default: 'loki' })
       .option('name-appstream', { describe: 'AppStream id', type: 'string' })
@@ -28,7 +34,7 @@ export const builder = (yargs) => {
       .option('name-domain', { describe: 'Reverse Domain Name Notation', type: 'string' })
       .option('name-human', { describe: 'Human readable name', type: 'string' })
       .option('package-system', { describe: 'Package system', type: 'string', default: 'deb' })
-      .option('references', { describe: 'References to pull', type: 'array', default: ['refs/heads/master'] })
+      .option('references', { describe: 'References to pull', type: 'array', default: [] })
 }
 
 /**
@@ -77,6 +83,9 @@ function logLogs (logs) {
 }
 
 export async function handler (argv) {
+  console.warn('THIS COMMAND IS NOT FULLY COMPLETE')
+  console.warn('IT ONLY WORKS ON GITHUB WITH TRAVIS AT THIS TIME')
+
   const { app } = setup(argv)
 
   const config = app.get<Config>(Config)
@@ -85,7 +94,16 @@ export async function handler (argv) {
 
   const worker = new Worker(config, repository, storage)
 
-  console.log(`Running build for ${argv.repo} version ${argv.version}`)
+  const projectDir = path.resolve(process.cwd(), argv.directory)
+
+  console.log(`Testing "${projectDir}" project for "${argv.repo}"`)
+
+  // We listen for when after the WorkspaceSetup role completes so we can
+  // Copy over the current directory.
+  worker.on('task:WorkspaceSetup:end', async () => {
+    await fs.copy(projectDir, path.resolve(worker.workspace, 'clean'), { overwrite: true })
+    await fs.copy(projectDir, path.resolve(worker.workspace, 'dirty'), { overwrite: true })
+  })
 
   await worker.setup()
   await worker.run(Build)

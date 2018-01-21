@@ -121,10 +121,17 @@ export class Log extends Error {
   public toString () {
     const out = []
 
-    if (this.title != null) {
-      out.push(this.title)
-    } else {
-      out.push(this.message)
+    if (this.workable != null) {
+      let o = this.workable.name || this.workable.constructor.name
+      o += ': '
+
+      if (this.title != null) {
+        o += this.title
+      } else {
+        o += this.message
+      }
+
+      out.push(o)
     }
 
     if (this.body != null) {

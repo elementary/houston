@@ -5,6 +5,7 @@
 
 export default [
   require('./build'),
+  require('./ci'),
   require('./migrate'),
   require('./repo'),
   require('./seed'),

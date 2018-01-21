@@ -2,22 +2,22 @@
 
 AppCenter failed to build <%= storage.nameHuman %>.
 
-<% if (log != null) { %>
+<%_ if (log != null) { _%>
 
 <details>
 
 <summary> Build Log </summary>
 
 ```
-<%= log %>
+<%- log %>
 ```
 
 </details>
 
-<% } else { %>
+<%_ } else { _%>
 
 ```
 Unable to retrieve build log
 ```
 
-<% } %>
+<%_ } %>

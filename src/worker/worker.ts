@@ -5,7 +5,6 @@
  * @exports {Class} Worker - A processing class
  */
 
-import { EventEmitter } from 'events'
 import * as fs from 'fs-extra'
 import * as os from 'os'
 import * as path from 'path'
@@ -13,6 +12,7 @@ import * as uuid from 'uuid/v4'
 
 import { Config } from '../lib/config'
 import { Repository } from '../lib/service/base/repository'
+import { EventEmitter } from '../lib/utility/eventemitter'
 import { Log } from './log'
 import { Storable, Workable, WorkableConstructor } from './type'
 
@@ -89,11 +89,12 @@ export class Worker extends EventEmitter {
    */
   public async setup (): Promise<void> {
     if (this.workspace == null) {
-      this.emit('setup:start')
+      await this.emitAsync('setup:start')
 
       this.workspace = path.resolve(Worker.tempDir, uuid())
+      await fs.ensureDir(this.workspace)
 
-      this.emit('setup:end')
+      await this.emitAsync('setup:end')
     }
   }
 
@@ -106,7 +107,7 @@ export class Worker extends EventEmitter {
    * @return {boolean}
    */
   public async run (workable: WorkableConstructor) {
-    this.emit('run:start')
+    await this.emitAsync('run:start')
     this.running = true
 
     const work = new workable(this)
@@ -117,7 +118,7 @@ export class Worker extends EventEmitter {
       this.report(e)
     }
 
-    this.emit('run:end')
+    await this.emitAsync('run:end')
     this.running = false
 
     return this.passes()
@@ -132,13 +133,13 @@ export class Worker extends EventEmitter {
    */
   public async teardown (): Promise<void> {
     if (this.workspace != null) {
-      this.emit('teardown:start')
+      await this.emitAsync('teardown:start')
 
       await fs.remove(this.workspace)
 
       this.workspace = undefined
 
-      this.emit('teardown:end')
+      await this.emitAsync('teardown:end')
     }
   }
 
