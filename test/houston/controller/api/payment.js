@@ -120,58 +120,6 @@ test('Returns key with enabled Project', async (t) => {
   .expect((res) => (res.body.key === 'testingkey'))
 })
 
-test('Returns 400 with missing Project key', async (t) => {
-  await Project.remove({ name: 'com.testing.apipayments.3' })
-
-  await Project.create({
-    name: 'com.testing.apipayments.3',
-    repo: 'https://testing.com/apipayments/3.git',
-    'github.id': 448912,
-    'stripe.enabled': true,
-    'stripe.id': 'acct_123',
-    'stripe.access': 'tok_123',
-    'stripe.public': 'pk_123'
-  })
-
-  return request(server.listen())
-  .post('/api/payment/com.testing.apipayments.3')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .send({
-    data: Object.assign({}, GOLD_REQ, {
-      key: null
-    })
-  })
-  .expect(400)
-  .expect((res) => containsError(res, 'key'))
-})
-
-test('Returns 400 with incorrect Project key', async (t) => {
-  await Project.remove({ name: 'com.testing.apipayments.4' })
-
-  await Project.create({
-    name: 'com.testing.apipayments.4',
-    repo: 'https://testing.com/apipayments/4.git',
-    'github.id': 791567,
-    'stripe.enabled': true,
-    'stripe.id': 'acct_123',
-    'stripe.access': 'tok_123',
-    'stripe.public': 'pk_123'
-  })
-
-  return request(server.listen())
-  .post('/api/payment/com.testing.apipayments.4')
-  .set('Accept', 'application/vnd.api+json')
-  .set('Content-Type', 'application/vnd.api+json')
-  .send({
-    data: Object.assign({}, GOLD_REQ, {
-      key: 'thisisinvalidkey'
-    })
-  })
-  .expect(400)
-  .expect((res) => containsError(res, 'key'))
-})
-
 test('Returns 400 with missing Project token', async (t) => {
   await Project.remove({ name: 'com.testing.apipayments.5' })
 
