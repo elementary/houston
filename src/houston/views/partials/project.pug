@@ -12,9 +12,11 @@ mixin project(project, status, review)
         else
           p #{project.github.fullName}
         if review && project.release.current
-          p.subtext: a(href="https://github.com/" + project.github.fullName + "/compare/"+ project.release.current.version + "..." + project.release.latest.version) #{project.name} #{project.release.current.version} to #{project.release.latest.version}
+          p.subtext: a(href="https://github.com/" + project.github.fullName + "/compare/"+ project.release.current.github.tag + "..." + project.release.latest.github.tag) #{project.name} #{project.release.current.version} to #{project.release.latest.version}
         else
           p.subtext: a(href="https://github.com/" + project.github.fullName, target="_blank")= project.name
+        if project.downloads
+          p.repo__downloads #{project.downloads} downloads
       div.repo__action
         if status === true
           if project.status === 'NEW'

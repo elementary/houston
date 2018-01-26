@@ -41,6 +41,7 @@ route.get('/dashboard', policy.isRole('USER'), policy.isAgreement, async (ctx, n
   const projects = await Promise.resolve(databaseProjects)
   .map(async (project) => {
     project.status = await project.getStatus()
+    project.downloads = await project.findDownloadTotal()
 
     return project
   })

@@ -7,12 +7,10 @@
  */
 
 import _ from 'lodash'
+import fs from 'fs-extra'
 import path from 'path'
-import Promise from 'bluebird'
 
 import config from 'lib/config'
-
-const fs = Promise.promisifyAll(require('fs'))
 
 /**
  * smartPath
@@ -84,42 +82,8 @@ export async function walk (directory, filter = () => true, max = 10, iteration 
   })
 }
 
-/**
- * mkdirp
- * Ensures given path exists
- *
- * @param {String} directory - directory to ensure exists
- * @returns {Promise} - result of creation
- */
-export function mkdirp (directory) {
-  directory = smartPath(directory)
-  const chunks = directory.split(path.sep)
+export default fs
 
-  return Promise.map(chunks, (chunk, i) => {
-    return chunks.slice(0, i + 1).join(path.sep)
-  })
-  .each((chunk) => {
-    if (chunk == null || chunk === '') return
-    return fs.mkdirAsync(chunk)
-    .catch({ code: 'EEXIST' }, () => true)
-  })
-}
-
-/**
- * rmp
- * Removes EVERYTHING you ever loved or wanted to keep
- *
- * @param {String} directory - directory to destroy
- * @returns {Promise} - result of destruction
- */
-export async function rmp (directory) {
-  directory = smartPath(directory)
-  const stat = await fs.statAsync(directory)
-
-  if (stat.isFile()) {
-    return fs.unlinkAsync(directory)
-  } else if (stat.isDirectory()) {
-    await Promise.each(fs.readdirAsync(directory), (item) => rmp(path.join(directory, item)))
-    return fs.rmdirAsync(directory)
-  }
-}
+// DEPRECATED: 12/20/17 replace custom modules with fs-extra.
+export const mkdirp = fs.ensureDir
+export const rmp = fs.remove

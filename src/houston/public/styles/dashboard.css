@@ -126,8 +126,8 @@
 }
 
 .repo__icon .app-icon {
+    align-self: center;
     height: 64px;
-    vertical-align: middle;
     width: 64px;
 }
 
@@ -138,6 +138,11 @@
     text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.repo__body .repo__downloads {
+    font-size: 12px;
+    opacity: 0.9;
 }
 
 .repo__action {
@@ -169,6 +174,7 @@
 
     .repo__icon,
     .repo__action {
+        align-self: center;
         flex: 0 0 auto;
     }
 
