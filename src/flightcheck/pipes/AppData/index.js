@@ -55,7 +55,7 @@ export default class AppData extends Pipe {
     const appdataAbsPath = path.join(this.pipeline.build.dir, appdataPath)
     const globAbsPath = path.join(this.pipeline.build.dir, globPath)
 
-    const file = new Parsable(appdataAbsPath, globAbsPath)
+    const file = new Parsable(appdataAbsPath, globAbsPath, 'xml')
     const fileFound = await file.exists()
 
     if (fileFound == null) {
@@ -88,11 +88,21 @@ export default class AppData extends Pipe {
     if (this.pipeline.build.stripe != null) {
       log.debug('Saving AppCenter Stripe key')
 
-      const returned = await this.docker('stripe', [appdataPath, this.pipeline.build.stripe], undefined, {
-        Privileged: true // because the unpacked package has root file permissions
-      })
+      const data = await file.parse()
+      try {
+        if (data.component == null) data.component = {}
+        if (data.component.custom == null) data.component.custom = []
+        if (data.component.custom.length < 1) data.component.custom[0] = {}
+        if (data.component.custom[0].value == null) data.component.custom[0].value = []
 
-      if (returned.exit !== 0) {
+        data.component.custom[0].value.push({
+          '_': this.pipeline.build.stripe,
+          '$': { key: 'x-appcenter-stripe' }
+        })
+
+        await file.stringify(data)
+      } catch (err) {
+        log.error('Unable to insert stripe key to file', err)
         await this.log('error', 'AppData/stripe.md')
       }
     }
