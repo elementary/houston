@@ -21,7 +21,7 @@ export class Config {
    *
    * @var {object}
    */
-  private tree: object
+  protected tree: object
 
   /**
    * immutable
@@ -29,7 +29,7 @@ export class Config {
    *
    * @var {boolean}
    */
-  private immutable: boolean
+  protected immutable: boolean
 
   /**
    * freeze
@@ -38,7 +38,7 @@ export class Config {
    * @param {object} obj - The object to freeze
    * @return {object} - A newly frozen object
    */
-  private static freeze (obj: object): object {
+  protected static freeze (obj: object): object {
     const newObject = {}
 
     Object.getOwnPropertyNames(obj).forEach((key) => {
@@ -59,7 +59,7 @@ export class Config {
    * @param {object} obj - The object to unfreeze
    * @return {object} - A new unfrozzen object
    */
-  private static unfreeze (obj: object): object {
+  protected static unfreeze (obj: object): object {
     const newObject = {}
 
     Object.getOwnPropertyNames(obj).forEach((key) => {

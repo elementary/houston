@@ -36,7 +36,7 @@ test('can check if image exists', async () => {
 test('can create a docker image', async () => {
   const docker = new Docker(config, `houston-image1-${uuid()}`)
 
-  const imageDirectory = path.resolve(__dirname, '..', '..', 'test', 'worker', 'docker', 'image1')
+  const imageDirectory = path.resolve(__dirname, '../../test/fixture/worker/docker/image1')
   await docker.create(imageDirectory)
 
   const existance = await docker.exists()

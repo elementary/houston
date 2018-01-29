@@ -1,12 +1,12 @@
 /**
- * houston/src/lib/database/provider.ts
+ * houston/src/lib/utility/faker/provider.ts
  * Provides the app with the needed Log classes
  */
 
 import { ContainerModule } from 'inversify'
 
-import { Database } from './database'
+import { Faker } from './index'
 
 export const provider = new ContainerModule((bind) => {
-  bind<Database>(Database).toSelf()
+  bind<Faker>(Faker).toSelf()
 })

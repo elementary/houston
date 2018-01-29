@@ -17,19 +17,21 @@ export class App extends Container {
   /**
    * A list of all the providers to load in the application.
    *
-   * @var ContainerModule[]
+   * @var {ContainerModule[]}
    */
-  public static providers: ContainerModule[] = [
+  protected static providers: ContainerModule[] = [
     require('../repo/provider').provider,
     require('./database/provider').provider,
     require('./log/provider').provider,
-    require('./server/provider').provider
+    require('./queue/provider').provider,
+    require('./server/provider').provider,
+    require('./utility/faker/provider').provider
   ]
 
   /**
    * Creates a new App
    *
-   * @param Config config
+   * @param {Config} config
    */
   public constructor (config: Config) {
     super()

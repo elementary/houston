@@ -8,7 +8,7 @@ import * as path from 'path'
 import { Log } from './log'
 
 test('it can render a template', () => {
-  const test1 = path.resolve(__dirname, '../../test/worker/log/test1.md')
+  const test1 = path.resolve(__dirname, '../../test/fixture/worker/log/test1.md')
 
   const log = Log.template(Log.Level.ERROR, test1, {
     body: '## This is a subheader',

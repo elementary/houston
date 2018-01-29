@@ -12,8 +12,8 @@ import { Parser } from './controlParser'
 
 import { tmp } from '../../../../test/utility/fs'
 
-const gold1File = path.resolve(__dirname, '../../../../test/worker/task/debian/control/gold1')
-const gold2File = path.resolve(__dirname, '../../../../test/worker/task/debian/control/gold2')
+const gold1File = path.resolve(__dirname, '../../../../test/fixture/worker/task/debian/control/gold1')
+const gold2File = path.resolve(__dirname, '../../../../test/fixture/worker/task/debian/control/gold2')
 
 const gold1Data = {
   'Architecture': 'any',
@@ -186,7 +186,7 @@ test('can read gold2 file', async () => {
 })
 
 test('can write gold2 file', async () => {
-  const testFile = path.resolve(os.tmpdir(), 'houston-test/worker/task/debian/controlParser/gold2')
+  const testFile = path.resolve(os.tmpdir(), 'houston-test/fixture/worker/task/debian/controlParser/gold2')
   const parser = new Parser(testFile)
 
   await parser.write(gold2Data)

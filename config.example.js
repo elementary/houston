@@ -40,6 +40,31 @@ module.exports = {
   },
 
   /**
+   * The Queue configuration
+   * NOTE: Currently only supports a redis backend
+   *
+   * @property {string} client
+   *
+   * @property {object} connection
+   */
+  queue: {
+    client: 'redis',
+
+    /**
+     * Queue connection configuration.
+     * Take a look at the Bull GitHub page for information
+     *
+     * @see https://github.com/OptimalBits/bull#basic-usage
+     */
+    connection: {
+      host: 'localhost',
+      prefix: '{queue}',
+      password: '',
+      port: 6379,
+    }
+  },
+
+  /**
    * Docker configuration
    * This is passed to dockerode directly.
    * @see https://github.com/apocas/dockerode#getting-started

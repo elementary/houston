@@ -3,9 +3,9 @@
  * Tests debian packages for needed file paths
  */
 
-import { ParallelTask } from '../parallelTask'
+import { WrapperTask } from '../wrapperTask'
 
-export class FileDeb extends ParallelTask {
+export class FileDeb extends WrapperTask {
   /**
    * Tasks to run for checking file paths
    *

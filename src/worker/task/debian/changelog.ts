@@ -50,6 +50,23 @@ export class DebianChangelog extends Task {
   }
 
   /**
+   * Recursivly gets a list of changes for each changelog item
+   *
+   * @async
+   * @param {Object[]} changelogs
+   * @return {Array[]}
+   */
+  protected static async getChanges (changelogs = []): Promise<string[][]> {
+    const changes = []
+
+    for (const version of changelogs) {
+      changes.push(await this.parseMarkdown(version.changes))
+    }
+
+    return changes
+  }
+
+  /**
    * Parses a markdown string to find a list of changes
    *
    * @param {string} changes
@@ -77,23 +94,6 @@ export class DebianChangelog extends Task {
     }
 
     return values
-  }
-
-  /**
-   * Recursivly gets a list of changes for each changelog item
-   *
-   * @async
-   * @param {Object[]} changelogs
-   * @return {Array[]}
-   */
-  protected static async getChanges (changelogs = []): Promise<string[][]> {
-    const changes = []
-
-    for (const version of changelogs) {
-      changes.push(await this.parseMarkdown(version.changes))
-    }
-
-    return changes
   }
 
   /**
@@ -128,7 +128,6 @@ export class DebianChangelog extends Task {
    */
   public async fill () {
     await fs.ensureFile(this.path)
-
 
     if (this.worker.storage.changelog.length === 0) {
       this.worker.storage.changelog.push(this.noopChange())

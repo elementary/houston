@@ -82,7 +82,7 @@
     "no-empty-interface": true,
     "no-inferrable-types": true,
     "no-internal-module": true,
-    "no-namespace": true,
+    "no-namespace": false,
     "no-reference": true,
     "no-var-requires": false,
     "prefer-for-of": true,
@@ -90,7 +90,7 @@
     "typedef": false,
     "unified-signatures": true,
 
-    "cyclomatic-complexity": [true, 20],
+    "cyclomatic-complexity": [true, 10],
     "eofline": true,
     "indent": [true, "spaces"],
     "linebreak-style": [true, "LF"],

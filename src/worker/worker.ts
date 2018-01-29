@@ -78,6 +78,8 @@ export class Worker extends EventEmitter {
     this.config = config
     this.repository = repository
     this.storage = storage
+
+    this.workspace = path.resolve(this.constructor.tempDir, uuid())
   }
 
   /**
@@ -88,14 +90,11 @@ export class Worker extends EventEmitter {
    * @return {void}
    */
   public async setup (): Promise<void> {
-    if (this.workspace == null) {
-      await this.emitAsync('setup:start')
+    await this.emitAsync('setup:start')
 
-      this.workspace = path.resolve(Worker.tempDir, uuid())
-      await fs.ensureDir(this.workspace)
+    await fs.ensureDir(this.workspace)
 
-      await this.emitAsync('setup:end')
-    }
+    await this.emitAsync('setup:end')
   }
 
   /**
@@ -132,15 +131,11 @@ export class Worker extends EventEmitter {
    * @return {void}
    */
   public async teardown (): Promise<void> {
-    if (this.workspace != null) {
-      await this.emitAsync('teardown:start')
+    await this.emitAsync('teardown:start')
 
-      await fs.remove(this.workspace)
+    await fs.remove(this.workspace)
 
-      this.workspace = undefined
-
-      await this.emitAsync('teardown:end')
-    }
+    await this.emitAsync('teardown:end')
   }
 
   /**

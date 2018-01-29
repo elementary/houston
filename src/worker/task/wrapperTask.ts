@@ -1,15 +1,13 @@
 /**
- * houston/src/worker/task/parallelTask.ts
- * Runs a bunch of tasks in parallel.
- *
- * @exports {Class} ParallelTask
+ * houston/src/worker/task/wrapperTask.ts
+ * Runs a bunch of tasks in a row, collecting errors for later.
  */
 
 import { Log } from '../log'
 import { WorkableConstructor } from '../type'
 import { Task } from './task'
 
-export class ParallelTask extends Task {
+export class WrapperTask extends Task {
   /**
    * The tasks to run
    *
@@ -53,20 +51,17 @@ export class ParallelTask extends Task {
 
   /**
    * Runs all the tasks. This is out of the `run` method to allow easier
-   * custom logic for ParallelTask runners
+   * custom logic for WrapperTask runners
    *
    * @async
-   * @param {...*} values
    * @return {void}
    */
-  protected async runTasks (...values) {
-    const promises = this.tasks.map((T) => {
+  protected async runTasks () {
+    for (const T of this.tasks) {
       const task = new T(this.worker)
 
-      return task.run(...values).catch(this.catchError)
-    })
-
-    await Promise.all(promises)
+      await task.run().catch(this.catchError)
+    }
   }
 
   /**

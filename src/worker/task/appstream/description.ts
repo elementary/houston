@@ -1,0 +1,46 @@
+/**
+ * houston/src/worker/task/appstream/description.ts
+ * Checks we have a description.
+ */
+
+import * as cheerio from 'cheerio'
+import * as fs from 'fs-extra'
+import * as path from 'path'
+
+import { Log } from '../../log'
+import { Task } from '../task'
+
+export class AppstreamDescription extends Task {
+
+  /**
+   * Path the appstream file should exist at
+   *
+   * @return {string}
+   */
+  public get path () {
+    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.storage.nameAppstream}.xml`)
+  }
+
+  /**
+   * Runs all the appstream tests
+   *
+   * @async
+   * @return {void}
+   */
+  public async run () {
+    const raw = await fs.readFile(this.path)
+    const $ = cheerio.load(raw, { xmlMode: true })
+
+    const description = $('component > description')
+
+    if (description.length === 0) {
+      throw new Log(Log.Level.ERROR, 'Missing "description" field')
+    }
+
+    const text = description.text()
+
+    if (text.toLowerCase().replace(/\W/, '').indexOf('elementaryos') !== -1) {
+      throw new Log(Log.Level.ERROR, '"description" field calls out elementary OS')
+    }
+  }
+}
