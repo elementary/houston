@@ -3,12 +3,13 @@
 *.tmp
 
 # Application files
-/.cache
-/config*
-/coverage/
-/dest/
+.cache
+config*
+coverage/
+dest/
+.nuxt
 
-!/config.example.js
+!config.example.js
 
 # Node files
 node_modules
