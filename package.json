@@ -49,6 +49,7 @@
     "markdown-it": "^8.4.0",
     "nodegit": "^0.20.3",
     "reflect-metadata": "^0.1.12",
+    "sanitize-html": "^1.17.0",
     "uuid": "^3.2.1",
     "vue": "^2.5.13",
     "vue-meta": "^1.4.2",

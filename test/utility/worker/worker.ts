@@ -21,6 +21,16 @@ export class TestWorker extends Worker {
   protected static tempDir = path.resolve(os.tmpdir(), 'houston-test/worker')
 
   /**
+   * Returns the full path of a file in the workspace
+   *
+   * @param {string} p
+   * @return {string}
+   */
+  public get (p) {
+    return path.resolve(this.workspace, p)
+  }
+
+  /**
    * Mocks files from the fixture worker directory to the current workspace
    *
    * @async
@@ -30,9 +40,8 @@ export class TestWorker extends Worker {
    */
   public async mock (from, to) {
     const fullFrom = path.resolve(__dirname, '../../fixture/worker', from)
-    const fullTo = path.resolve(this.workspace, to)
 
-    return fs.copy(fullFrom, fullTo, { overwrite: true })
+    return fs.copy(fullFrom, this.get(to), { overwrite: true })
   }
 
 }

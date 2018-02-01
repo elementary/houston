@@ -5,7 +5,7 @@
 
 import { AppstreamId } from './id'
 
-import { mock, TestWorker } from '../../../../test/utility/worker'
+import { mock } from '../../../../test/utility/worker'
 
 test('passes with a matching ID', async () => {
   const worker = await mock({

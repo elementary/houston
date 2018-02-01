@@ -5,7 +5,7 @@
 
 import { Appstream } from './index'
 
-import { mock, TestWorker } from '../../../../test/utility/worker'
+import { mock } from '../../../../test/utility/worker'
 
 test('failures stop the build', async () => {
   const worker = await mock()

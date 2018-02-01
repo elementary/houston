@@ -6,6 +6,7 @@
 import * as cheerio from 'cheerio'
 import * as fs from 'fs-extra'
 import * as path from 'path'
+import * as sanitize from 'sanitize-html'
 import * as semver from 'semver'
 
 import markdown from '../../../lib/utility/markdown'
@@ -13,6 +14,24 @@ import { Log } from '../../log'
 import { Task } from '../task'
 
 export class AppstreamRelease extends Task {
+  /**
+   * A list of valid tags for an appstream release
+   *
+   * @var {String[]}
+   */
+  protected static WHITELISTED_TAGS = [
+    'p', 'ul', 'li'
+  ]
+
+  /**
+   * The options needed for cheerio parsing
+   *
+   * @var {object}
+   */
+  protected static CHEERIO_OPTS = {
+    useHtmlParser2: true,
+    xmlMode: true
+  }
 
   /**
    * Path the appstream file should exist at
@@ -31,15 +50,13 @@ export class AppstreamRelease extends Task {
    */
   public async run () {
     const raw = await fs.readFile(this.path)
-    const $ = cheerio.load(raw, { xmlMode: true })
+    const $ = cheerio.load(raw, AppstreamRelease.CHEERIO_OPTS)
 
     const releases = $('component > releases')
 
     // NOTE: We want to allow people to fill this in theirself for translations
     if (releases.length === 0) {
-      this.fill($)
-
-      await fs.writeFile(this.path, $.xml())
+      await fs.writeFile(this.path, this.fill($))
     }
   }
 
@@ -47,23 +64,26 @@ export class AppstreamRelease extends Task {
    * Fills in the missing releases section
    *
    * @param {Object} $ - cheerio appstream document
-   * @return {void}
+   * @return {string} - The full appstream document after filling releases
    */
   protected fill ($) {
     if ($('component > releases').length === 0) {
-      $('component').append('<releases></releases')
+      $('component').append('<releases></releases>')
     }
 
     this.worker.storage.changelog
       .sort((a, b) => semver.rcompare(a.version, b.version))
       .forEach((change) => {
-        const release = $('component > releases').prepend('<release></release>')
+        $('component > releases').prepend('<release></release>')
+        const release = $('component > releases > release:last-of-type')
 
         release.attr('version', change.version)
         release.attr('date', change.date.toISOString())
         release.attr('urgency', this.urgency(change.changes))
-        release.html(this.html(change.changes))
+        release.html(`<description>${this.html(change.changes)}</description>`)
       })
+
+    return $.xml()
   }
 
   /**
@@ -73,13 +93,22 @@ export class AppstreamRelease extends Task {
    * @return {String} - "low" "medium" "high" or "critical". "medium" is default
    */
   protected urgency (change) {
-    const grepable = change.replace(/\W/img, '')
+    const grepable = change
+      .toLowerCase()
+      .replace(/\W\s/img, '')
+      .replace(/\s+/img, ' ')
 
-    if (grepable.indexOf('security') || grepable.indexOf('critical')) {
-      return 'critical'
-    } else {
-      return 'medium'
-    }
+    const CRITICAL_WORDS = [
+      'security', 'critical'
+    ]
+
+    CRITICAL_WORDS.forEach((word) => {
+      if (grepable.indexOf(word) !== -1) {
+        return 'critical'
+      }
+    })
+
+    return 'medium'
   }
 
   /**
@@ -90,12 +119,33 @@ export class AppstreamRelease extends Task {
    */
   protected html (change) {
     const html = markdown(change)
-    const $ = cheerio.load(html)
+    const $ = cheerio.load(html, AppstreamRelease.CHEERIO_OPTS)
 
-    $(':not(p, ul, li)').forEach(function () {
-      $(this).replaceWith(`<p>${$(this).html()}</p>`)
+    const lists = $('ul')
+    const paragraphs = $('p')
+
+    if (lists.length === 0 && paragraphs.length === 1) {
+      const items = paragraphs.text().split('\n').join('</li><li>')
+      $.root().html(`<ul><li>${items}</li></ul>`)
+    }
+
+    return this.sanitize($.xml())
+  }
+
+  /**
+   * Sanitizes the html input to only allowed valid appstream tags
+   *
+   * @param {String} change
+   * @return {String}
+   */
+  protected sanitize (change) {
+    const $el = cheerio.load(change, AppstreamRelease.CHEERIO_OPTS)
+
+    const sanitized = sanitize($el.xml(), {
+      allowedTags: AppstreamRelease.WHITELISTED_TAGS,
+      parser: AppstreamRelease.CHEERIO_OPTS
     })
 
-    return $.html()
+    return cheerio.load(sanitized, AppstreamRelease.CHEERIO_OPTS).xml()
   }
 }
