@@ -6,6 +6,7 @@
  * @exports {Pipe} - Checks for a valid appdata file
  */
 
+import cheerio from 'cheerio'
 import path from 'path'
 
 import File from 'flightcheck/file'
@@ -86,25 +87,32 @@ export default class AppData extends Pipe {
     await Promise.all(this.tests().map((test) => this.require(test, file)))
 
     if (this.pipeline.build.stripe != null) {
-      log.debug('Saving AppCenter Stripe key')
-
-      const data = await file.parse()
-      try {
-        if (data.component == null) data.component = {}
-        if (data.component.custom == null) data.component.custom = []
-        if (data.component.custom.length < 1) data.component.custom[0] = {}
-        if (data.component.custom[0].value == null) data.component.custom[0].value = []
-
-        data.component.custom[0].value.push({
-          '_': this.pipeline.build.stripe,
-          '$': { key: 'x-appcenter-stripe' }
-        })
-
-        await file.stringify(data)
-      } catch (err) {
-        log.error('Unable to insert stripe key to file', err)
-        await this.log('error', 'AppData/stripe.md')
-      }
+      await this.insertAppstream(file)
     }
+  }
+
+  /**
+   * Writes appstream information to file
+   *
+   * @param {File} file - The file to write to
+   * @return {void}
+   */
+  async insertAppstream (file: File) {
+    log.debug('Saving AppCenter Stripe key')
+
+    const raw = await file.read()
+    const $ = cheerio.load(raw, { xmlMode: true })
+
+    if ($('component > custom').length === 0) {
+      $('component').append('<custom></custom>')
+    }
+
+    $('component > custom').append('<value></value>')
+    const $el = $('component > custom > value:last-of-type')
+
+    $el.attr('key', 'x-appcenter-stripe')
+    $el.text(this.pipeline.build.stripe)
+
+    await file.write($.xml())
   }
 }
