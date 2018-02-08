@@ -21,7 +21,8 @@ export class Appstream extends WrapperTask {
     require('./license').AppstreamLicense,
     require('./summary').AppstreamSummary,
     require('./description').AppstreamDescription,
-    require('./release').AppstreamRelease
+    require('./release').AppstreamRelease,
+    require('./stripe').AppstreamStripe
   ]
 
   /**

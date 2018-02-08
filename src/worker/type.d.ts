@@ -35,6 +35,8 @@ export interface Storable {
   appcenter: object
   appstream: object
 
+  stripe?: string
+
   logs: Log[]
 }
 
