@@ -1,10 +1,12 @@
 <div align="center">
-  <a href="https://developer.elementary.io">
-    <img src="brand/AppCenter.png" alt="AppCenter">
+  <a href="https://developer.elementary.io" align="center">
+    <center>
+      <img src="https://raw.githubusercontent.com/elementary/houston/v2/brand/AppCenter.png" alt="AppCenter" align="center">
+    </center>
   </a>
   <br>
-  <h1>Houston</h1>
-  <h3>Backend to AppCenter</h3>
+  <h1 align="center"><center>Houston</center></h1>
+  <h3 align="center"><center>Backend to AppCenter</center></h3>
   <br>
   <br>
 </div>
@@ -35,10 +37,12 @@ and making users' life easier. Houston includes processes for building, testing,
 and publishing packages, as well as the front end website.
 
 For more information about the architecture and processes that make up Houston
-please see the [architecture file](ARCHITECTURE.md).
+please see the [architecture
+file](https://github.com/elementary/houston/blob/v2/ARCHITECTURE.md).
 
-For development information see the [various readme files](src/README.md) in the
+For development information see the [various readme
+files](https://github.com/elementary/houston/blob/v2/src/README.md) in the
 `src/` directory.
 
 For building and setting up your own instance read the
-[install file](INSTALL.md).
+[install file](https://github.com/elementary/houston/blob/v2/INSTALL.md).
