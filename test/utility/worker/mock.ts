@@ -15,7 +15,7 @@ export async function mock (values = {}): Promise<TestWorker> {
 
   const config = app.get<Config>(Config)
   const store = storage(values)
-  const repo = new Repository('fasdf')
+  const repo = new Repository('testrepo')
 
   return new TestWorker(config, repo, store)
 }

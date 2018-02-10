@@ -31,7 +31,7 @@ export class Appstream extends WrapperTask {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.storage.nameAppstream}.xml`)
+    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.storage.nameDomain}.appdata.xml`)
   }
 
   /**
@@ -54,5 +54,8 @@ export class Appstream extends WrapperTask {
     if (this.errorLogs.length > 0) {
       this.worker.stop()
     }
+
+    // Save the appstream information
+    this.worker.storage.appstream = await fs.readFile(this.path)
   }
 }

@@ -30,7 +30,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await fs.remove(testingDir)
+  // await fs.remove(testingDir)
 })
 
 test('needle-and-thread/vocal passes build process', async () => {
@@ -38,7 +38,7 @@ test('needle-and-thread/vocal passes build process', async () => {
 
   const storage : Storable = {
     appcenter: {},
-    appstream: {},
+    appstream: '',
     architecture: 'amd64',
     changelog: [],
     distribution: 'loki',
@@ -68,7 +68,7 @@ test('Philip-Scott/Spice-up passes build process', async () => {
 
   const storage : Storable = {
     appcenter: {},
-    appstream: {},
+    appstream: '',
     architecture: 'amd64',
     changelog: [],
     distribution: 'loki',

@@ -60,7 +60,8 @@ export class WrapperTask extends Task {
     for (const T of this.tasks) {
       const task = new T(this.worker)
 
-      await task.run().catch(this.catchError)
+      await task.run()
+        .catch((e) => this.catchError(e)) // Binding issue
     }
   }
 

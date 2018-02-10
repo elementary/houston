@@ -50,10 +50,11 @@ This is another change I made`,
       date: new Date(),
       version: '1.0.0'
     }],
-    nameAppstream: 'com.github.elementary.houston.desktop'
+    nameAppstream: 'com.github.elementary.houston.desktop',
+    nameDomain: 'com.github.elementary.houston'
   })
 
-  const p = 'package/usr/share/metainfo/com.github.elementary.houston.desktop.xml'
+  const p = 'package/usr/share/metainfo/com.github.elementary.houston.appdata.xml'
 
   await worker.mock('task/appstream/blank.xml', p)
 
@@ -94,10 +95,11 @@ This is a bunch of cool things that are updated.
       date: new Date(),
       version: '1.0.0'
     }],
-    nameAppstream: 'com.github.elementary.houston.desktop'
+    nameAppstream: 'com.github.elementary.houston.desktop',
+    nameDomain: 'com.github.elementary.houston'
   })
 
-  const p = 'package/usr/share/metainfo/com.github.elementary.houston.desktop.xml'
+  const p = 'package/usr/share/metainfo/com.github.elementary.houston.appdata.xml'
 
   await worker.mock('task/appstream/blank.xml', p)
 

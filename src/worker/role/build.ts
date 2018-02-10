@@ -19,6 +19,8 @@ export class Build extends Role {
     require('../task/debian/control').DebianControl,
     require('../task/build/deb').BuildDeb,
     require('../task/extract/deb').ExtractDeb,
-    require('../task/file/deb').FileDeb
+    require('../task/file/deb').FileDeb,
+    require('../task/appstream').Appstream,
+    require('../task/desktop').Desktop
   ]
 }

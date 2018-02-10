@@ -13,10 +13,11 @@ import { mock } from '../../../../test/utility/worker'
 test('can insert a basic list of changes', async () => {
   const worker = await mock({
     nameAppstream: 'com.github.elementary.houston.desktop',
+    nameDomain: 'com.github.elementary.houston',
     stripe: 'testingvaluehere'
   })
 
-  const p = 'package/usr/share/metainfo/com.github.elementary.houston.desktop.xml'
+  const p = 'package/usr/share/metainfo/com.github.elementary.houston.appdata.xml'
   await worker.mock('task/appstream/blank.xml', p)
 
   await worker.setup()

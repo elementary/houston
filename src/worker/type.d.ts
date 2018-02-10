@@ -33,7 +33,7 @@ export interface Storable {
   packageSystem: packageSystem
 
   appcenter: object
-  appstream: object
+  appstream: string // An XML formatted string
 
   stripe?: string
 
