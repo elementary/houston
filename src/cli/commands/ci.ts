@@ -98,15 +98,17 @@ export async function handler (argv) {
 
   console.log(`Testing "${projectDir}" project for "${argv.repo}"`)
 
-  // We listen for when after the WorkspaceSetup role completes so we can
-  // Copy over the current directory.
-  worker.on('task:WorkspaceSetup:end', async () => {
-    await fs.copy(projectDir, path.resolve(worker.workspace, 'clean'), { overwrite: true })
-    await fs.copy(projectDir, path.resolve(worker.workspace, 'dirty'), { overwrite: true })
-  })
+  // Copy over the current folder to the workspace for CI testing.
+  await fs.copy(projectDir, path.resolve(worker.workspace, 'clean'), { overwrite: true })
+  await fs.copy(projectDir, path.resolve(worker.workspace, 'dirty'), { overwrite: true })
 
   await worker.setup()
   await worker.run(Build)
+
+  const packagePath = path.resolve(worker.workspace, `package.${storage.packageSystem}`)
+  if (await fs.exists(packagePath)) {
+    await fs.copy(packagePath, projectDir, { overwrite: true })
+  }
 
   if (worker.fails()) {
     console.error(`Error while running build for ${argv.repo} for ${argv.version}`)

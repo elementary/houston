@@ -6,6 +6,9 @@
 // Command line files are allowed to have console log statements
 // tslint:disable no-console
 
+import * as fs from 'fs-extra'
+import * as path from 'path'
+
 import { Config } from '../../lib/config'
 import { levelIndex } from '../../lib/log/level'
 import { create as createRepository } from '../../lib/service/repository'
@@ -89,6 +92,11 @@ export async function handler (argv) {
 
   await worker.setup()
   await worker.run(Build)
+
+  const packagePath = path.resolve(worker.workspace, `package.${storage.packageSystem}`)
+  if (await fs.exists(packagePath)) {
+    await fs.copy(packagePath, process.cwd(), { overwrite: true })
+  }
 
   if (worker.fails()) {
     console.error(`Error while running build for ${argv.repo} for ${argv.version}`)
