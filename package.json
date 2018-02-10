@@ -21,7 +21,7 @@
     "test:unit": "jest --no-cache .spec.ts",
     "test:e2e": "jest --no-cache .e2e.ts",
     "test:dev": "jest --no-cache --watch .spec.ts",
-    "ci": "jest --coverage --no-cache -w 2",
+    "ci": "jest --clearCache && jest --ci --coverage --no-cache --maxWorkers=4",
     "lint": "tslint --project 'tsconfig.json'",
     "coverage": "jest --coverage",
     "prepublishOnly": "npm run lint && npm run test && npm run build"
@@ -53,9 +53,6 @@
     "reflect-metadata": "^0.1.12",
     "sanitize-html": "^1.17.0",
     "uuid": "^3.2.1",
-    "vue": "^2.5.13",
-    "vue-meta": "^1.4.2",
-    "vue-router": "^3.0.1",
     "yargs": "^10.1.2"
   },
   "optionalDependencies": {
@@ -70,11 +67,11 @@
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-sourcemaps": "^2.6.3",
     "gulp-typescript": "^3.2.3",
-    "jest": "^20.0.3",
+    "jest": "^22.2.2",
     "sinon": "^3.2.1",
     "sqlite3": "^3.1.13",
     "supertest": "^3.0.0",
-    "ts-jest": "^20.0.14",
+    "ts-jest": "^22.0.3",
     "ts-node": "^3.0.4",
     "tslint": "^5.9.1",
     "tslint-consistent-codestyle": "^1.11.0",

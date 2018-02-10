@@ -26,6 +26,7 @@ before_install:
   - docker pull ubuntu:16.04
 
 script:
-  - yarn build
-  - yarn lint
-  - yarn ci
+  - npm run build
+  - npm run lint
+  - npm run ci
+  - npm run coverage

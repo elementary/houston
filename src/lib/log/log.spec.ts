@@ -50,5 +50,5 @@ test('log can attach an error', () => {
 test('log sets date on creation', () => {
   const log = new Log(logger)
 
-  expect(typeof log.getDate(), 'Date')
+  expect(log.getDate() instanceof Date).toBeTruthy()
 })
