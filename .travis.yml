@@ -28,4 +28,4 @@ before_install:
 script:
   - yarn build
   - yarn lint
-  - yarn coverage
+  - yarn ci

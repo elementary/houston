@@ -21,6 +21,7 @@
     "test:unit": "jest --no-cache .spec.ts",
     "test:e2e": "jest --no-cache .e2e.ts",
     "test:dev": "jest --no-cache --watch .spec.ts",
+    "ci": "jest --coverage --no-cache -w 2",
     "lint": "tslint --project 'tsconfig.json'",
     "coverage": "jest --coverage",
     "prepublishOnly": "npm run lint && npm run test && npm run build"
