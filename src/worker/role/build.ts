@@ -21,6 +21,7 @@ export class Build extends Role {
     require('../task/extract/deb').ExtractDeb,
     require('../task/file/deb').FileDeb,
     require('../task/appstream').Appstream,
-    require('../task/desktop').Desktop
+    require('../task/desktop').Desktop,
+    require('../task/pack/deb').PackDeb
   ]
 }
