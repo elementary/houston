@@ -53,7 +53,7 @@ function buildStorage (argv, repository) {
 
   const obj : Storable = {
     appcenter: {},
-    appstream: {},
+    appstream: '',
     architecture: argv.architecture,
     changelog: [],
     distribution: argv.distribution,
