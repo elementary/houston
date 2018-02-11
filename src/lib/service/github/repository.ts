@@ -9,6 +9,7 @@ import * as fs from 'fs-extra'
 import * as Git from 'nodegit'
 import * as os from 'os'
 import * as path from 'path'
+import * as agent from 'superagent'
 import * as uuid from 'uuid/v4'
 
 import { Repository as RepositoryInterface } from '../base/repository'
@@ -153,5 +154,47 @@ export class Repository implements RepositoryInterface {
     await fs.remove(p)
 
     return branches
+  }
+
+  /**
+   * Uploads an asset to a GitHub release.
+   *
+   * @async
+   * @param {string} reference
+   * @param {string} p
+   * @param {string} type - The HTTP Content-Type ("text/markdown")
+   * @param {string} name
+   * @param {string} [description]
+   * @return {void}
+   */
+  public async asset (reference, p, type, name, description) {
+    const url = `${this.username}/${this.repository}/releases/tags/${reference}`
+    const { body } = await agent
+      .get(`https://api.github.com/repos/${url}`)
+      .set('accept', 'application/vnd.github.v3+json')
+      .set('authorization', `token ${this.auth}`)
+
+    if (body.upload_url == null) {
+      throw new Error('No Upload URL for GitHub release')
+    }
+
+    // TODO: Should we remove existing assets that would conflict?
+
+    const stat = await fs.stat(p)
+    const file = await fs.createReadStream(p)
+
+    return new Promise((resolve, reject) => {
+      const res = agent
+        .post(body.upload_url.replace('{?name,label}', ''))
+        .set('content-type', type)
+        .set('content-length', stat.size)
+        .set('authorization', `token ${this.auth}`)
+        .query({ name })
+        .query((description != null) ? { label: description } : {})
+        .on('error', reject)
+        .on('end', resolve)
+
+      file.pipe(res)
+    })
   }
 }

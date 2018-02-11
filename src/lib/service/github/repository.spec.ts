@@ -3,6 +3,9 @@
  * Tests the GitHub repository class.
  */
 
+import * as path from 'path'
+
+import { record } from '../../../../test/utility/http'
 import { Repository } from './repository'
 
 test('url returns correct string without authentication', () => {
@@ -44,4 +47,14 @@ test('can set values based on ssh url', () => {
   expect(repo.username).toEqual('elementary')
   expect(repo.repository).toEqual('houston')
   expect(repo.auth).toEqual('test')
+})
+
+test('can post assets to reference', async () => {
+  const { done } = await record('lib/service/github/asset.json')
+  const repo = new Repository('https://github.com/btkostner/vocal')
+  const file = path.resolve(__dirname, '../../../../test/fixture/lib/service/github/vocal.deb')
+
+  await repo.asset('3.2.6', file, 'application/vnd.debian.binary-package', 'package.deb', 'Vocal 3.2.6 Loki (amd64)')
+
+  await done()
 })

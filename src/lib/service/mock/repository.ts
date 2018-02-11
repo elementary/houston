@@ -66,4 +66,17 @@ export class Repository implements RepositoryInterface {
   public async references (): Promise<string[]> {
     return []
   }
+
+  /**
+   * Fake uploads an asset.
+   *
+   * @async
+   * @param {string} reference
+   * @param {string} name
+   * @param {string} p
+   * @return {void}
+   */
+  public async asset (reference, name, p) {
+    return
+  }
 }
