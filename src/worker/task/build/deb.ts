@@ -125,7 +125,7 @@ export class BuildDeb extends Task {
    * @return {Log}
    */
   protected async log () {
-    const p = path.resolve(__dirname, 'debLog.md')
+    const p = path.resolve(__dirname, 'deb.md')
     const log = await fs.readFile(this.logPath, 'utf8')
 
     return Log.template(Log.Level.ERROR, p, {
