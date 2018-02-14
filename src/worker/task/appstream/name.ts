@@ -34,11 +34,10 @@ export class AppstreamName extends Task {
     const name = $('component > name')
 
     if (name.length === 0) {
-      this.worker.report(new Log(Log.Level.WARN, 'Missing "name" field'))
-
       $('component').prepend(`<name>${this.worker.storage.nameHuman}</name>`)
-
       await fs.writeFile(this.path, $.xml())
+
+      throw new Log(Log.Level.WARN, 'Missing "name" field')
     }
   }
 }

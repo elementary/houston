@@ -66,7 +66,13 @@ export class Log extends Error {
     const template = fs.readFileSync(path, 'utf8')
     const raw = render(template, data)
 
-    const title = raw.trim().split('\n')[0]
+    let title = raw.trim().split('\n')[0].trim()
+    // Most issues start with an h1 markdown header. It's easier to read and
+    // Edit, but it's not supported in most repos as the title is plain text.
+    if (title.startsWith('#')) {
+      title = title.substring(2)
+    }
+
     const body = raw.trim().split('\n').slice(1).join('\n').trim()
 
     return new Log(level, title, body)

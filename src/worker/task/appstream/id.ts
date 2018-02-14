@@ -34,15 +34,15 @@ export class AppstreamId extends Task {
     const id = $('component > id')
 
     if (id.length === 0) {
-      this.worker.report(new Log(Log.Level.WARN, 'Missing "id" field'))
-
       $('component').prepend(`<id>${this.worker.storage.nameAppstream}`)
+      await fs.writeFile(this.path, $.xml())
+
+      throw new Log(Log.Level.WARN, 'Missing "id" field')
     } else if (id.text() !== this.worker.storage.nameAppstream) {
-      this.worker.report(new Log(Log.Level.INFO, `"id" field should be "${this.worker.storage.nameAppstream}"`))
-
       id.text(this.worker.storage.nameAppstream)
-    }
+      await fs.writeFile(this.path, $.xml())
 
-    await fs.writeFile(this.path, $.xml())
+      throw new Log(Log.Level.WARN, `"id" field should be "${this.worker.storage.nameAppstream}"`)
+    }
   }
 }

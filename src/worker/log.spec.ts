@@ -15,6 +15,6 @@ test('it can render a template', () => {
     title: 'testing'
   })
 
-  expect(log.title).toBe('# testing')
+  expect(log.title).toBe('testing')
   expect(log.body).toBe('This is a basic test1 Log template.\n\n## This is a subheader')
 })

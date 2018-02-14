@@ -34,7 +34,7 @@ export class AppstreamLicense extends Task {
     const license = $('component > project_license')
 
     if (license.length === 0) {
-      this.worker.report(new Log(Log.Level.WARN, 'Missing "project_license" field'))
+      throw new Log(Log.Level.WARN, 'Missing "project_license" field')
     }
   }
 }
