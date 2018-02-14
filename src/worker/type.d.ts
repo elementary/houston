@@ -6,6 +6,7 @@
 import { Log } from './log'
 import { Worker } from './worker'
 
+type type = 'app' | 'system-app'
 type architecture = 'amd64'
 type distribution = 'loki' | 'juno'
 type packageSystem = 'deb'
@@ -18,6 +19,8 @@ export interface Change {
 }
 
 export interface Storable {
+  type: type
+
   nameDeveloper: string
   nameDomain: string
   nameAppstream: string

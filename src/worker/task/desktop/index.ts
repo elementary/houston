@@ -9,16 +9,30 @@ import * as path from 'path'
 import { Log } from '../../log'
 import { WrapperTask } from '../wrapperTask'
 
+import { DesktopExec } from './exec'
+import { DesktopIcon } from './icon'
+
 export class Desktop extends WrapperTask {
   /**
    * All of the fun tests we should run on the desktop file
    *
    * @var {Task[]}
    */
-  public tasks = [
-    require('./exec').DesktopExec,
-    require('./icon').DesktopIcon
-  ]
+  public get tasks () {
+    switch (this.worker.storage.type) {
+      // System apps are allowed system icons
+      case 'system-app':
+        return [
+          DesktopExec
+        ]
+
+      default:
+        return [
+          DesktopExec,
+          DesktopIcon
+        ]
+    }
+  }
 
   /**
    * Path the desktop file should exist at

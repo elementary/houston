@@ -17,7 +17,7 @@ import { Storable } from '../../../src/worker/type'
 export function storage (override = {}) {
   const def: Storable = {
     appcenter: {},
-    appstream: {},
+    appstream: '',
     architecture: 'amd64',
     changelog: [],
     distribution: 'loki',
@@ -28,6 +28,7 @@ export function storage (override = {}) {
     nameHuman: 'Houston',
     packageSystem: 'deb',
     references: ['refs/heads/master'],
+    type: 'app',
     version: '0.0.1'
   }
 

@@ -10,23 +10,51 @@ import * as path from 'path'
 import { Log } from '../../log'
 import { WrapperTask } from '../wrapperTask'
 
+import { AppstreamDescription } from './description'
+import { AppstreamId } from './id'
+import { AppstreamLicense } from './license'
+import { AppstreamName } from './name'
+import { AppstreamRelease } from './release'
+import { AppstreamScreenshot } from './screenshot'
+import { AppstreamStripe } from './stripe'
+import { AppstreamSummary } from './summary'
+import { AppstreamValidate } from './validate'
+
 export class Appstream extends WrapperTask {
   /**
    * All of the fun tests we should run on the appstream file
    *
    * @var {Task[]}
    */
-  public tasks = [
-    require('./id').AppstreamId,
-    require('./name').AppstreamName,
-    require('./license').AppstreamLicense,
-    require('./summary').AppstreamSummary,
-    require('./description').AppstreamDescription,
-    require('./screenshot').AppstreamScreenshot,
-    require('./release').AppstreamRelease,
-    require('./stripe').AppstreamStripe,
-    require('./validate').AppstreamValidate
-  ]
+  public get tasks () {
+    switch (this.worker.storage.type) {
+      // System apps will never have a stripe key
+      case 'system-app':
+        return [
+          AppstreamId,
+          AppstreamName,
+          AppstreamDescription,
+          AppstreamSummary,
+          AppstreamLicense,
+          AppstreamScreenshot,
+          AppstreamRelease,
+          AppstreamValidate
+        ]
+
+      default:
+        return [
+          AppstreamId,
+          AppstreamName,
+          AppstreamDescription,
+          AppstreamSummary,
+          AppstreamLicense,
+          AppstreamScreenshot,
+          AppstreamRelease,
+          AppstreamStripe,
+          AppstreamValidate
+        ]
+    }
+  }
 
   /**
    * Path the appstream file should exist at

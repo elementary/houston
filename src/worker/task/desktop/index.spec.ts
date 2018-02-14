@@ -3,6 +3,7 @@
  * Tests that known good appstream files pass appstream testing
  */
 
+import { DesktopIcon } from './icon'
 import { Desktop } from './index'
 
 import { mock } from '../../../../test/utility/worker'
@@ -30,4 +31,16 @@ test('com.github.philip-scott.spice-up passes desktop tests', async () => {
   await worker.teardown()
 
   expect(worker.passes()).toBeTruthy()
+})
+
+test('system apps do not have icon validation #590', async () => {
+  const worker = await mock({
+    nameAppstream: 'io.elementary.appcenter.desktop',
+    nameDomain: 'io.elementary.appcenter',
+    type: 'system-app'
+  })
+
+  const desktop = new Desktop(worker)
+
+  expect(desktop.tasks.includes(DesktopIcon)).toBeFalsy()
 })

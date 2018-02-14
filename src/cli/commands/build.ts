@@ -8,9 +8,11 @@
 
 import * as fs from 'fs-extra'
 import * as path from 'path'
+import * as semver from 'semver'
 
 import { Config } from '../../lib/config'
 import { levelIndex } from '../../lib/log/level'
+import { sanitize } from '../../lib/service/rdnn'
 import { create as createRepository } from '../../lib/service/repository'
 import { Build } from '../../worker/role/build'
 import { Storable } from '../../worker/type'
@@ -21,17 +23,62 @@ export const command = 'build <repo> <version>'
 export const describe = 'Builds a repository with the worker process'
 
 export const builder = (yargs) => {
-    return yargs
-      .positional('repo', { describe: 'Full repository URL', type: 'string' })
-      .positional('version', { describe: 'Semver version to build for', type: 'string' })
-      .option('architecture', { describe: 'Architecture to build for', type: 'string', default: 'amd64' })
-      .option('distribution', { describe: 'Distribution to build for', type: 'string', default: 'loki' })
-      .option('name-appstream', { describe: 'AppStream id', type: 'string' })
-      .option('name-developer', { describe: 'Developer\'s name', type: 'string' })
-      .option('name-domain', { describe: 'Reverse Domain Name Notation', type: 'string' })
-      .option('name-human', { describe: 'Human readable name', type: 'string' })
-      .option('package-system', { describe: 'Package system', type: 'string', default: 'deb' })
-      .option('references', { describe: 'References to pull', type: 'array', default: ['refs/heads/master'] })
+  return yargs
+    .positional('repo', {
+      describe: 'Full repository URL',
+      type: 'string'
+    })
+    .positional('version', {
+      coerce: semver.valid,
+      default: '0.0.1',
+      describe: 'Semver version to build for',
+      type: 'string'
+    })
+    .option('type', {
+      choices: ['app', 'system-app'],
+      default: 'app',
+      describe: 'The type of project',
+      type: 'string'
+    })
+    .option('architecture', {
+      default: 'amd64',
+      describe: 'Architecture to build for',
+      type: 'string'
+    })
+    .option('distribution', {
+      default: 'loki',
+      describe: 'Distribution to build for',
+      type: 'string'
+    })
+    .option('name-appstream', {
+      describe: 'AppStream id',
+      type: 'string'
+    })
+    .option('name-developer', {
+      describe: 'Developer\'s name',
+      type: 'string'
+    })
+    .option('name-domain', {
+      alias: 'n',
+      coerce: sanitize,
+      describe: 'Reverse Domain Name Notation',
+      type: 'string'
+    })
+    .option('name-human', {
+      describe: 'Human readable name',
+      type: 'string'
+    })
+    .option('package-system', {
+      choices: ['deb'],
+      default: 'deb',
+      describe: 'Package system',
+      type: 'string'
+    })
+    .option('references', {
+      default: [],
+      describe: 'References to pull',
+      type: 'array'
+    })
 }
 
 /**
@@ -61,6 +108,7 @@ function buildStorage (argv, repository) {
     nameHuman,
     packageSystem: argv['package-system'],
     references: argv.references,
+    type: argv.type,
     version: argv.version
   }
 

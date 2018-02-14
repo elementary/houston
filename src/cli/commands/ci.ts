@@ -8,9 +8,11 @@
 
 import * as fs from 'fs-extra'
 import * as path from 'path'
+import * as semver from 'semver'
 
 import { Config } from '../../lib/config'
 import { levelIndex } from '../../lib/log/level'
+import { sanitize } from '../../lib/service/rdnn'
 import { create as createRepository } from '../../lib/service/repository'
 import { Build } from '../../worker/role/build'
 import { Storable } from '../../worker/type'
@@ -20,21 +22,74 @@ import { setup } from '../utilities'
 export const command = 'ci [directory]'
 export const describe = 'Tests a local project with the worker process'
 
-const REPO = `https://github.com/${process.env.TRAVIS_REPO_SLUG}`
+const SLUG = process.env.TRAVIS_REPO_SLUG
+const REPO = `https://github.com/${SLUG}`
 
 export const builder = (yargs) => {
     return yargs
-      .positional('directory', { describe: 'The project directory to build', type: 'string', default: '.' })
-      .option('repo', { describe: 'Full repository URL', type: 'string', default: REPO })
-      .option('version', { describe: 'Semver version to build for', type: 'string', default: '0.0.1' })
-      .option('architecture', { describe: 'Architecture to build for', type: 'string', default: 'amd64' })
-      .option('distribution', { describe: 'Distribution to build for', type: 'string', default: 'loki' })
-      .option('name-appstream', { describe: 'AppStream id', type: 'string' })
-      .option('name-developer', { describe: 'Developer\'s name', type: 'string' })
-      .option('name-domain', { describe: 'Reverse Domain Name Notation', type: 'string' })
-      .option('name-human', { describe: 'Human readable name', type: 'string' })
-      .option('package-system', { describe: 'Package system', type: 'string', default: 'deb' })
-      .option('references', { describe: 'References to pull', type: 'array', default: [] })
+      .positional('directory', {
+        coerce: (v) => path.resolve(process.cwd(), v),
+        default: '.',
+        describe: 'The project directory to build',
+        type: 'string'
+      })
+      .option('type', {
+        choices: ['app', 'system-app'],
+        default: 'app',
+        describe: 'The type of project',
+        type: 'string'
+      })
+      .option('repo', {
+        ...(SLUG != null) ? { default: REPO } : {},
+        demandOption: true,
+        describe: 'Full repository URL',
+        type: 'string'
+      })
+      .option('version', {
+        coerce: semver.valid,
+        default: '0.0.1',
+        describe: 'Semver version to build for',
+        type: 'string'
+      })
+      .option('architecture', {
+        default: 'amd64',
+        describe: 'Architecture to build for',
+        type: 'string'
+      })
+      .option('distribution', {
+        default: 'loki',
+        describe: 'Distribution to build for',
+        type: 'string'
+      })
+      .option('name-appstream', {
+        describe: 'AppStream id',
+        type: 'string'
+      })
+      .option('name-developer', {
+        describe: 'Developer\'s name',
+        type: 'string'
+      })
+      .option('name-domain', {
+        alias: 'n',
+        coerce: sanitize,
+        describe: 'Reverse Domain Name Notation',
+        type: 'string'
+      })
+      .option('name-human', {
+        describe: 'Human readable name',
+        type: 'string'
+      })
+      .option('package-system', {
+        choices: ['deb'],
+        default: 'deb',
+        describe: 'Package system',
+        type: 'string'
+      })
+      .option('references', {
+        default: [],
+        describe: 'References to pull',
+        type: 'array'
+      })
 }
 
 /**
@@ -64,6 +119,7 @@ function buildStorage (argv, repository) {
     nameHuman,
     packageSystem: argv['package-system'],
     references: argv.references,
+    type: argv.type,
     version: argv.version
   }
 

@@ -13,7 +13,14 @@ export class WrapperTask extends Task {
    *
    * @var {WorkableConstructor[]}
    */
-  public tasks: WorkableConstructor[] = []
+  public get tasks (): WorkableConstructor[] {
+    return []
+  }
+
+  // BUG: We have to set a no-op setter because Jest will error if we don't
+  public set tasks (tasks: WorkableConstructor[]) {
+    return
+  }
 
   /**
    * All of the logs that where gathered
