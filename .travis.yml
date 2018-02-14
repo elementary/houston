@@ -14,18 +14,28 @@ addons:
     packages:
       - libstdc++-4.9-dev
 
-node_js:
-  - node
-  - lts/*
+node_js: lts/*
 
 cache:
   directories:
     - /tmp/liftoff
 
-before_install:
-  - docker pull ubuntu:16.04
-
 script:
   - npm run build
   - npm run lint
   - npm run ci
+
+jobs:
+  include:
+    - stage: Setup
+      script: docker pull ubuntu:16.04
+      # TODO: Pull testing docker images
+      # TODO: Warm up liftoff cache
+
+    - stage: Test
+      node_js: lts/*
+    - node_js: 9
+    - node_js: 8
+    - node_js: 6
+
+    - stage: Release
