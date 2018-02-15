@@ -158,8 +158,14 @@ export async function handler (argv) {
   await fs.copy(projectDir, path.resolve(worker.workspace, 'clean'), { overwrite: true })
   await fs.copy(projectDir, path.resolve(worker.workspace, 'dirty'), { overwrite: true })
 
+  // We set a simple interval to output so we don't timeout on travis
+  const interval = setInterval(() => process.stdout.write('.'), 10000)
+
   await worker.setup()
   await worker.run(Build)
+
+  clearInterval(interval)
+  console.log('.')
 
   const packagePath = path.resolve(worker.workspace, `package.${storage.packageSystem}`)
   if (await fs.exists(packagePath)) {
