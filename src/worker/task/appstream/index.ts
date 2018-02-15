@@ -96,7 +96,11 @@ export class Appstream extends WrapperTask {
   public async run () {
     const exists = await fs.exists(this.path)
     if (exists === false) {
-      throw new Log(Log.Level.ERROR, 'Appstream file does not exist')
+      const template = path.resolve(__dirname, 'exist.md')
+
+      throw Log.template(Log.Level.ERROR, template, {
+        storage: this.worker.storage
+      })
     }
 
     await this.runTasks()

@@ -34,7 +34,7 @@ export class AppstreamId extends Task {
     const id = $('component > id')
 
     if (id.length === 0) {
-      $('component').prepend(`<id>${this.worker.storage.nameAppstream}`)
+      $('component').prepend(`<id>${this.worker.storage.nameAppstream}</id>`)
       await fs.writeFile(this.path, $.xml())
 
       throw new Log(Log.Level.WARN, 'Missing "id" field')
