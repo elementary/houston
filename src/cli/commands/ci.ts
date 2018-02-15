@@ -163,7 +163,8 @@ export async function handler (argv) {
 
   const packagePath = path.resolve(worker.workspace, `package.${storage.packageSystem}`)
   if (await fs.exists(packagePath)) {
-    await fs.copy(packagePath, projectDir, { overwrite: true })
+    const fileName = path.resolve(projectDir, `${storage.nameDomain}-${storage.version}.${storage.packageSystem}`)
+    await fs.copy(packagePath, fileName, { overwrite: true })
   }
 
   if (worker.fails()) {
