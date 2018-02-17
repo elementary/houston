@@ -28,7 +28,7 @@ export class DesktopValidate extends Task {
    * @return {void}
    */
   public async run () {
-    const files = await glob(this.path, '*')
+    const files = await glob(path.resolve(this.path, '*'))
 
     const logFiles = []
 
@@ -45,7 +45,7 @@ export class DesktopValidate extends Task {
     }
 
     if (logFiles.length > 0) {
-      this.log(logFiles)
+      throw await this.log(logFiles)
     }
   }
 
