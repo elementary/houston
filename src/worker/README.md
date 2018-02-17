@@ -7,7 +7,7 @@ in this folder.
 ## worker.ts
 
 This class holds the basic information about any task we do. It holds the
-repository, working directory, and logs.
+repository, working directory, and storage of build data.
 
 ## role/
 
@@ -30,8 +30,6 @@ looking similar to this
 ```
 /tmp/houston/ad1553ea-7a27-44cd-8eb7-66540c4ad77c/
 ├── clean/ # Untouched cloned repository
-├── dirty/ # All of the edited files
-├── repository/ # Folders for each branch we used to construct the clean folder
-└── working/ # Folders for our currently running tasks
-    └── (uuid)/ # A random generated folder name for a currently running task
+├── dirty/ # Folder touched during building and testing
+└── repository/ # Folders for each branch we used to construct the clean folder
 ```

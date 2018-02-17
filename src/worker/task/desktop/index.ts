@@ -11,6 +11,7 @@ import { WrapperTask } from '../wrapperTask'
 
 import { DesktopExec } from './exec'
 import { DesktopIcon } from './icon'
+import { DesktopValidate } from './validate'
 
 export class Desktop extends WrapperTask {
   /**
@@ -23,13 +24,15 @@ export class Desktop extends WrapperTask {
       // System apps are allowed system icons
       case 'system-app':
         return [
-          DesktopExec
+          DesktopExec,
+          DesktopValidate
         ]
 
       default:
         return [
           DesktopExec,
-          DesktopIcon
+          DesktopIcon,
+          DesktopValidate
         ]
     }
   }
