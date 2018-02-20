@@ -5,7 +5,7 @@
 #
 # Version: 1.0.4
 
-FROM elementary/docker:loki
+FROM ubuntu:bionic
 
 MAINTAINER elementary
 
@@ -13,6 +13,13 @@ MAINTAINER elementary
 ENV DEBIAN_FRONTEND noninteractive
 ENV DEBIAN_PRIORITY critical
 ENV DEBCONF_NOWARNINGS yes
+
+RUN apt update && apt dist-upgrade -y -f
+
+# Add rust because it's a pain and needs to be added manually
+# see: https://github.com/arshubham/srtnr
+RUN apt update && apt install -y -f build-essential cargo openssl rustc
+RUN cargo install --git https://github.com/alexcrichton/cargo-vendor
 
 # TODO: Update liftoff with official build or ppa
 COPY liftoff_0.1_amd64.deb /tmp/liftoff.deb
