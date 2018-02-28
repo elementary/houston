@@ -33,7 +33,8 @@ afterAll(async () => {
   // await fs.remove(testingDir)
 })
 
-test('needle-and-thread/vocal passes build process', async () => {
+// TODO: Enable when AppStream OARS added
+test.skip('needle-and-thread/vocal passes build process', async () => {
   const repo = new GithubRepository('https://github.com/needle-and-thread/vocal')
 
   const storage : Storable = {
@@ -63,7 +64,8 @@ test('needle-and-thread/vocal passes build process', async () => {
   expect(proc.passes()).toBeTruthy()
 }, 3600000) // An hour long timeout because we are building things
 
-test('Philip-Scott/Spice-up passes build process', async () => {
+// TODO: Enable when AppStream OARS added
+test.skip('Philip-Scott/Spice-up passes build process', async () => {
   const repo = new GithubRepository('https://github.com/Philip-Scott/Spice-up')
 
   const storage : Storable = {

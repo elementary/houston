@@ -15,7 +15,7 @@ test('failures stop the build', async () => {
   await worker.teardown()
 
   expect(worker.fails()).toBeTruthy()
-})
+}, 300000) // A 5 minute timeout
 
 test('com.github.philip-scott.spice-up passes appstream tests', async () => {
   const worker = await mock({
@@ -30,7 +30,7 @@ test('com.github.philip-scott.spice-up passes appstream tests', async () => {
   await worker.teardown()
 
   expect(worker.passes()).toBeTruthy()
-})
+}, 300000) // A 5 minute timeout
 
 test('basic errors get concated to single log', async () => {
   const worker = await mock({
@@ -51,4 +51,4 @@ test('basic errors get concated to single log', async () => {
     .find((l) => (l.title.indexOf('tests') !== -1))
 
   expect(concatLog.body).toBeDefined()
-})
+}, 300000) // A 5 minute timeout

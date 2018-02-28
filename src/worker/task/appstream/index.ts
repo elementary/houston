@@ -10,6 +10,7 @@ import * as path from 'path'
 import { Log } from '../../log'
 import { WrapperTask } from '../wrapperTask'
 
+import { AppstreamContentRating } from './content-rating'
 import { AppstreamDescription } from './description'
 import { AppstreamId } from './id'
 import { AppstreamLicense } from './license'
@@ -37,6 +38,7 @@ export class Appstream extends WrapperTask {
           AppstreamSummary,
           AppstreamLicense,
           AppstreamScreenshot,
+          AppstreamContentRating,
           AppstreamRelease,
           AppstreamValidate
         ]
@@ -49,6 +51,7 @@ export class Appstream extends WrapperTask {
           AppstreamSummary,
           AppstreamLicense,
           AppstreamScreenshot,
+          AppstreamContentRating,
           AppstreamRelease,
           AppstreamStripe,
           AppstreamValidate

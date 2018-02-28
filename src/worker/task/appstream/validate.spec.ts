@@ -22,7 +22,7 @@ test('passes with a valid appstream file', async () => {
   await worker.teardown()
 
   expect(worker.storage.logs).toHaveLength(0)
-})
+}, 300000) // A 5 minute timeout
 
 test('fails with a blank appstream file', async () => {
   const worker = await mock({
@@ -37,4 +37,4 @@ test('fails with a blank appstream file', async () => {
   await worker.teardown()
 
   expect(worker.storage.logs).toHaveLength(1)
-})
+}, 300000) // A 5 minute timeout
