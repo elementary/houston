@@ -7,21 +7,53 @@
 
 import { Role } from './role'
 
+import { Appstream } from '../task/appstream'
+import { BuildDeb } from '../task/build/deb'
+import { DebianChangelog } from '../task/debian/changelog'
+import { DebianControl } from '../task/debian/control'
+import { Desktop } from '../task/desktop'
+import { ExtractDeb } from '../task/extract/deb'
+import { FileDeb } from '../task/file/deb'
+import { PackDeb } from '../task/pack/deb'
+import { WorkspaceSetup } from '../task/workspace/setup'
+
 export class Build extends Role {
   /**
    * Tasks to run for building an application
    *
-   * @var {Task[]}
+   * @var {WorkableConstructor[]}
    */
-  public tasks = [
-    require('../task/workspace/setup').WorkspaceSetup,
-    require('../task/debian/changelog').DebianChangelog,
-    require('../task/debian/control').DebianControl,
-    require('../task/build/deb').BuildDeb,
-    require('../task/extract/deb').ExtractDeb,
-    require('../task/file/deb').FileDeb,
-    require('../task/appstream').Appstream,
-    require('../task/desktop').Desktop,
-    require('../task/pack/deb').PackDeb
-  ]
+  public get tasks () {
+    switch (this.worker.storage.type) {
+      case 'library':
+        return [
+          WorkspaceSetup,
+          DebianChangelog,
+          DebianControl,
+          BuildDeb
+        ]
+      default:
+        return [
+          WorkspaceSetup,
+          DebianChangelog,
+          DebianControl,
+          BuildDeb,
+          ExtractDeb,
+          FileDeb,
+          Appstream,
+          Desktop,
+          PackDeb
+        ]
+    }
+  }
+
+  /**
+   * A setter for tasks to make typescript happy.
+   *
+   * @param {WorkableConstructor[]} v
+   * @return {void}
+   */
+  public set tasks (v) {
+    return
+  }
 }

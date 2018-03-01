@@ -35,7 +35,7 @@ export const builder = (yargs) => {
       type: 'string'
     })
     .option('type', {
-      choices: ['app', 'system-app'],
+      choices: ['app', 'system-app', 'library'],
       default: 'app',
       describe: 'The type of project',
       type: 'string'

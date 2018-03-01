@@ -6,7 +6,7 @@
 import { Log } from './log'
 import { Worker } from './worker'
 
-type type = 'app' | 'system-app'
+type type = 'app' | 'system-app' | 'library'
 type architecture = 'amd64'
 type distribution = 'loki' | 'juno'
 type packageSystem = 'deb'
