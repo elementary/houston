@@ -3,9 +3,9 @@
 #
 # TODO: Add liftoff to repository
 #
-# Version: 1.0.4
+# Version: 1.1.0
 
-FROM elementary/docker:loki
+FROM ubuntu:rolling
 
 MAINTAINER elementary
 
