@@ -100,20 +100,46 @@ export class BuildDeb extends Task {
   }
 
   /**
+   * Returns the first known good package path. Used for when projects make
+   * more than one package. We need to run tests on the main one.
+   * TODO: Do tests on all the packages made
+   *
+   * @return {string|null}
+   */
+  protected async package () {
+    const storage = this.worker.storage
+
+    const domainName = `${storage.nameDomain}_${storage.version}_${storage.architecture}.${storage.packageSystem}`
+    const domainNamed = await glob(path.resolve(this.path, domainName))
+    if (domainNamed[0] != null) {
+      return domainNamed[0]
+    }
+
+    // So... Last effort, we get all the package files, sort them by length, and
+    // Pick the shortest one. This is because we assume any other packages will
+    // Include '-dev' or start with 'lib'.
+    const allNames = await glob(path.resolve(this.path, `*.${storage.packageSystem}`))
+    const sortedNames = allNames.sort((a, b) => (a.length - b.length))
+    if (sortedNames[0] != null) {
+      return sortedNames[0]
+    }
+  }
+
+  /**
    * Removes the messy build directory after copying the package to workspace
    *
    * @async
    * @return {void}
    */
   protected async teardown () {
-    const deb = await glob(path.resolve(this.path, '*.deb'))
+    const deb = await this.package()
 
-    if (deb[0] == null) {
+    if (deb == null) {
       throw new Log(Log.Level.ERROR, 'Build completed but no Debian package was found')
     }
 
     const to = path.resolve(this.worker.workspace, 'package.deb')
-    await fs.copy(deb[0], to)
+    await fs.copy(deb, to)
 
     await fs.remove(this.path)
   }
