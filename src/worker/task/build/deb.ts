@@ -121,7 +121,7 @@ export class BuildDeb extends Task {
 
     // Try to intelligently filter out the _extra_ packages.
     const filteredNames = allNames
-      .map(path.basename) // The file name without full path
+      .map((n) => path.basename(n)) // The file name without full path
       .filter((n) => !n.startsWith('lib'))
       .filter((n) => (n.indexOf('-dev') === -1))
       .filter((n) => (n.indexOf('-dbg') === -1))
