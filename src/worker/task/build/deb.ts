@@ -126,7 +126,7 @@ export class BuildDeb extends Task {
       .filter((n) => (n.indexOf('-dev') === -1))
       .filter((n) => (n.indexOf('-dbg') === -1))
 
-    if (filterednames[0] != null) {
+    if (filteredNames[0] != null) {
       return path.resolve(this.path, filteredNames[0])
     }
 
