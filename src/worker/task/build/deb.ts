@@ -109,17 +109,31 @@ export class BuildDeb extends Task {
   protected async package () {
     const storage = this.worker.storage
 
+    // The correct name scheme
     const domainName = `${storage.nameDomain}_${storage.version}_${storage.architecture}.${storage.packageSystem}`
     const domainNamed = await glob(path.resolve(this.path, domainName))
+
     if (domainNamed[0] != null) {
       return domainNamed[0]
     }
 
-    // So... Last effort, we get all the package files, sort them by length, and
-    // Pick the shortest one. This is because we assume any other packages will
-    // Include '-dev' or start with 'lib'.
     const allNames = await glob(path.resolve(this.path, `*.${storage.packageSystem}`))
+
+    // Try to intelligently filter out the _extra_ packages.
+    const filteredNames = allNames
+      .map(path.basename) // The file name without full path
+      .filter((n) => !n.startsWith('lib'))
+      .filter((n) => (n.indexOf('-dev') === -1))
+      .filter((n) => (n.indexOf('-dbg') === -1))
+
+    if (filterednames[0] != null) {
+      return path.resolve(this.path, filteredNames[0])
+    }
+
+    // So... Last effort, we get all the package files, sort them by length, and
+    // Pick the shortest one.
     const sortedNames = allNames.sort((a, b) => (a.length - b.length))
+
     if (sortedNames[0] != null) {
       return sortedNames[0]
     }
