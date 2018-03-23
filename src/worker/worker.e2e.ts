@@ -94,3 +94,34 @@ test.skip('Philip-Scott/Spice-up passes build process', async () => {
 
   expect(proc.passes()).toBeTruthy()
 }, 3600000) // An hour long timeout because we are building things
+
+// TODO: Fix bugs
+test.skip('elementary/code passes build process', async () => {
+  const repo = new GithubRepository('https://github.com/elementary/code')
+
+  const storage : Storable = {
+    appcenter: {},
+    appstream: '',
+    architecture: 'amd64',
+    changelog: [],
+    distribution: 'juno',
+    logs: [],
+    nameAppstream: 'io.elementary.code.desktop',
+    nameDeveloper: 'elementary',
+    nameDomain: 'io.elementary.code',
+    nameHuman: 'Code',
+    packageSystem: 'deb',
+    references: [],
+    version: '2.4.1'
+  }
+
+  const proc = new Worker(config, repo, storage)
+
+  proc.on('run:error', (e) => console.error(e))
+
+  await proc.setup()
+  await proc.run(Build)
+  await proc.teardown()
+
+  expect(proc.passes()).toBeTruthy()
+}, 3600000) // An hour long timeout because we are building things
