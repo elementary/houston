@@ -16,130 +16,92 @@ const route = new Router({
 })
 
 /**
- * findTotal
- * Finds total amount of downloads.
+ * Finds a list of downloads for a project based on a time type
  *
- * @return {number}
+ * @async
+ * @param {String} type - "year" "month" "day" time frame
+ * @return {Object[]}
  */
-const findTotal = async () => {
-  const cachedRes = cache.get('findTotal')
-
-  if (cachedRes != null) {
-    return cachedRes
-  }
-
-  const downloads = await Download.aggregate([
-    { $match: { type: 'year' } },
-    { $group: { _id: 0, total: { $sum: '$current.total' } } }
+const findDownloads = async (type) => {
+  // I'm so sorry about how bad this query is. Mongodb sucks. Weird hacks
+  // and questionable tactics incoming.
+  const raw = await Download.aggregate([
+    { $match: { type } },
+    { $lookup: { from: 'projects', localField: 'release', foreignField: 'releases._id', as: 'project' } },
+    { $group: { _id: { $max: '$project.name' }, total: { $sum: '$current.total' } } }
   ])
 
-  if (downloads[0] == null) {
-    return 0
-  }
-
-  const total = downloads[0]['total']
-
-  cache.set('findTotal', total)
-  return total
-}
-
-/**
- * findMonth
- * Finds total amount of downloads for the month.
- *
- * @return {number}
- */
-const findMonth = async () => {
-  const cachedRes = cache.get('findMonth')
-
-  if (cachedRes != null) {
-    return cachedRes
-  }
-
-  const downloads = await Download.aggregate([
-    { $match: { type: 'day' } },
-    { $group: { _id: 0, total: { $sum: '$current.total' } } }
-  ])
-
-  if (downloads[0] == null) {
-    return 0
-  }
-
-  const total = downloads[0]['total']
-
-  cache.set('findMonth', total)
-  return total
-}
-
-/**
- * findDay
- * Finds total amount of downloads for the current day.
- *
- * @return {number}
- */
-const findDay = async () => {
-  const cachedRes = cache.get('findDay')
-
-  if (cachedRes != null) {
-    return cachedRes
-  }
-
-  const downloads = await Download.aggregate([
-    { $match: { type: 'hour' } },
-    { $group: { _id: 0, total: { $sum: '$current.total' } } }
-  ])
-
-  if (downloads[0] == null) {
-    return 0
-  }
-
-  const total = downloads[0]['total']
-
-  cache.set('findDay', total)
-  return total
+  return raw.map((row) => ({
+    project: row._id,
+    downloads: row.total
+  }))
+    .sort((a, b) => (b.downloads - a.downloads))
 }
 
 /**
  * GET /api/downloads/total
- * Returns the amount of downloads that have hit the server.
+ * Returns a list of total download numbers
  */
 route.get('/total', async (ctx) => {
-  const total = await findTotal()
+  if (cache.get('total') == null) {
+    cache.set('total', await findDownloads('year'))
+  }
+
+  const data = cache.get('total')
 
   ctx.status = 200
-  ctx.body = { data: {
-    total
-  }}
+  ctx.body = { data }
+
+  return
+})
+
+/**
+ * GET /api/downloads/year
+ * Returns a list of download numbers for the current year
+ */
+route.get('/year', async (ctx) => {
+  if (cache.get('year') == null) {
+    cache.set('year', await findDownloads('month'))
+  }
+
+  const data = cache.get('year')
+
+  ctx.status = 200
+  ctx.body = { data }
 
   return
 })
 
 /**
  * GET /api/downloads/month
- * Returns the amount of downloads for the current month..
+ * Returns the amount of downloads for the current month
  */
 route.get('/month', async (ctx) => {
-  const total = await findMonth()
+  if (cache.get('month') == null) {
+    cache.set('month', await findDownloads('day'))
+  }
+
+  const data = cache.get('month')
 
   ctx.status = 200
-  ctx.body = { data: {
-    total
-  }}
+  ctx.body = { data }
 
   return
 })
 
 /**
  * GET /api/downloads/day
- * Returns the amount of downloads for the current day.
+ * Returns the amount of downloads for the current day
  */
 route.get('/day', async (ctx) => {
-  const total = await findDay()
+  if (cache.get('day') == null) {
+    cache.set('day', await findDownloads('hour'))
+  }
+
+  const data = cache.get('day')
 
   ctx.status = 200
-  ctx.body = { data: {
-    total
-  }}
+  ctx.body = { data }
 
   return
 })

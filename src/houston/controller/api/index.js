@@ -81,8 +81,10 @@ route.use((ctx, next) => {
 })
 
 // Load all api paths here
-route.use(downloads.routes(), downloads.allowedMethods())
+// BUG: https://github.com/alexmingoia/koa-router/issues/415
+// Ensure download routes are after the list routes
 route.use(list.routes(), list.allowedMethods())
+route.use(downloads.routes(), downloads.allowedMethods())
 route.use(payment.routes(), payment.allowedMethods())
 
 /**

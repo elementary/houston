@@ -99,14 +99,6 @@ const validatePayload = (ControllerError, project, data) => {
     email: null
   }
 
-  if (data.key == null || data.key === '') {
-    errors.push(ControllerError(400, 'key', 'Missing Key'))
-  } else if (data.key.startsWith('pk_') === false) {
-    errors.push(ControllerError(400, 'key', 'Invalid Key'))
-  } else if (data.key !== project.stripe.public) {
-    errors.push(ControllerError(400, 'key', 'The given key does not match the one on file'))
-  }
-
   if (data.token == null || data.token === '') {
     errors.push(ControllerError(400, 'token', 'Missing Token'))
   } else if (data.token.startsWith('tok_') === false) {
