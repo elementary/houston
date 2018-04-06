@@ -46,7 +46,7 @@ section.hero > div {
 }
 
 section.hero img {
-    filter: drop-shadow(0px 12px 24px rgba(255, 255, 255, 0.25));
+    filter: drop-shadow(0 12px 24px rgba(255, 255, 255, 0.25));
 }
 
 section.hero h1 {
