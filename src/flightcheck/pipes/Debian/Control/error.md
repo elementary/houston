@@ -1,9 +1,9 @@
-Debian control file errors
+Errors in Debian control file
 
-Apphub failed to build with liftoff due to problems with the `debian/control`
-file.
+AppCenter Dashboard found some issues with your `debian/control` file. You will
+need to fix these issues and create a new release on GitHub.
 
-{% for p in data %}
-- {{ p.error | safe }} {% if p.critical %}(critical){% endif %}
+{% for error in data %}
+- {{ error | safe }}
 
 {% endfor %}

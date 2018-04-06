@@ -6,6 +6,7 @@
  * @exports {Pipe} - Checks for a valid appdata file
  */
 
+import cheerio from 'cheerio'
 import path from 'path'
 
 import File from 'flightcheck/file'
@@ -55,7 +56,7 @@ export default class AppData extends Pipe {
     const appdataAbsPath = path.join(this.pipeline.build.dir, appdataPath)
     const globAbsPath = path.join(this.pipeline.build.dir, globPath)
 
-    const file = new Parsable(appdataAbsPath, globAbsPath)
+    const file = new Parsable(appdataAbsPath, globAbsPath, 'xml')
     const fileFound = await file.exists()
 
     if (fileFound == null) {
@@ -86,15 +87,32 @@ export default class AppData extends Pipe {
     await Promise.all(this.tests().map((test) => this.require(test, file)))
 
     if (this.pipeline.build.stripe != null) {
-      log.debug('Saving AppCenter Stripe key')
-
-      const returned = await this.docker('stripe', [appdataPath, this.pipeline.build.stripe], undefined, {
-        Privileged: true // because the unpacked package has root file permissions
-      })
-
-      if (returned.exit !== 0) {
-        await this.log('error', 'AppData/stripe.md')
-      }
+      await this.insertAppstream(file)
     }
+  }
+
+  /**
+   * Writes appstream information to file
+   *
+   * @param {File} file - The file to write to
+   * @return {void}
+   */
+  async insertAppstream (file: File) {
+    log.debug('Saving AppCenter Stripe key')
+
+    const raw = await file.read()
+    const $ = cheerio.load(raw, { xmlMode: true })
+
+    if ($('component > custom').length === 0) {
+      $('component').append('<custom></custom>')
+    }
+
+    $('component > custom').append('<value></value>')
+    const $el = $('component > custom > value:last-of-type')
+
+    $el.attr('key', 'x-appcenter-stripe')
+    $el.text(this.pipeline.build.stripe)
+
+    await file.write($.xml())
   }
 }
