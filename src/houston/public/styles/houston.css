@@ -8,7 +8,7 @@
 ******/
 
 nav {
-    background-color: #4d4267;
+    background-color: #4c158a;
     color: #fff;
     fill: #fff;
     overflow-y: hidden;
@@ -73,7 +73,7 @@ nav#secondary {
 }
 
 .form__error {
-    color: #da4d45;
+    color: #c6262e;
     font-size: 14px;
     text-align: center;
 }
