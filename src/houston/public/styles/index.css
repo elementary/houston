@@ -177,6 +177,18 @@ section.hero > div {
     position: relative;
 }
 
+section.hero img {
+    filter: drop-shadow(0 12px 24px rgba(255, 255, 255, 0.25));
+}
+
+section.hero h1 {
+    font-weight: 900;
+}
+
+section.hero h4 {
+    font-weight: 400;
+}
+
 section.hero .button.suggested-action {
     max-width: 100%;
 }
