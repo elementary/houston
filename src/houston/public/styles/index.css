@@ -31,8 +31,8 @@ footer ul li a:focus i.fa {
 *******/
 
 section.hero {
-    background-color: #4d4267;
-    background-image: linear-gradient(to right bottom, #5d4e75, #4d4267);
+    background-color: #4c158a;
+    background-image: linear-gradient(to right bottom, #7a36b1, #260063);
     color: #fff;
     text-align: center;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -43,6 +43,18 @@ section.hero {
 
 section.hero > div {
     position: relative;
+}
+
+section.hero img {
+    filter: drop-shadow(0px 12px 24px rgba(255, 255, 255, 0.25));
+}
+
+section.hero h1 {
+    font-weight: 900;
+}
+
+section.hero h4 {
+    font-weight: 400;
 }
 
 section.hero .button.suggested-action {
@@ -56,13 +68,6 @@ section.hero .small-label a {
 
 section.hero .small-label a:hover {
     text-decoration: underline;
-}
-
-sup {
-    font-family: 'Open Sans';
-    font-size: 16px;
-    font-weight: 600;
-    margin-left: 12px;
 }
 
 /*********
@@ -183,7 +188,7 @@ pre.highlighted .pre-numbering {
 }
 
 .third .fa {
-    color: #4d4267;
+    color: #4c158a;
 }
 
 footer,
