@@ -74,13 +74,13 @@ export class DebianControl extends Task {
    */
   protected fill (data: object): void {
     // Required fields by Debian law
-    this.deepFill(data, 'Source', this.worker.storage.nameAppstream)
-    this.deepFill(data, 'Maintainer', `${this.worker.storage.nameDeveloper} <appcenter@elementary.io>`)
-    this.deepFill(data, 'Package', this.worker.storage.nameDomain)
+    this.deepFill(data, 'Source', this.worker.context.nameAppstream)
+    this.deepFill(data, 'Maintainer', `${this.worker.context.nameDeveloper} <appcenter@elementary.io>`)
+    this.deepFill(data, 'Package', this.worker.context.nameDomain)
 
     // Extra optional fun stuff
     this.deepFill(data, 'Priority', 'optional')
-    this.deepFill(data, 'Standards-Version', this.worker.storage.version)
+    this.deepFill(data, 'Standards-Version', this.worker.context.version)
   }
 
   /**
@@ -93,12 +93,12 @@ export class DebianControl extends Task {
   protected lint (data: object): Log[] {
     const logs = []
 
-    this.deepAssert(logs, data, 'Source', this.worker.storage.nameAppstream, `Source should be \`${this.worker.storage.nameAppstream}\``)
+    this.deepAssert(logs, data, 'Source', this.worker.context.nameAppstream, `Source should be \`${this.worker.context.nameAppstream}\``)
 
     this.deepAssert(logs, data, 'Maintainer', null, 'Missing maintainer')
     this.deepAssert(logs, data, 'Maintainer', /^.*\s<.*>$/, 'Maintainer should be in the form of `Maintainer Name <maintainer@email.com>`')
 
-    this.deepAssert(logs, data, 'Package', this.worker.storage.nameDomain, `Package should be \`${this.worker.storage.nameDomain}\``)
+    this.deepAssert(logs, data, 'Package', this.worker.context.nameDomain, `Package should be \`${this.worker.context.nameDomain}\``)
 
     return logs
   }
@@ -148,7 +148,6 @@ export class DebianControl extends Task {
 
     if (failed) {
       const log = new Log(Log.Level.ERROR, 'Debian control linting failed', error)
-        .workable(this)
 
       logs.push(log)
     }

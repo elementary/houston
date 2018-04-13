@@ -17,11 +17,13 @@ test('passes with a valid appstream file', async () => {
 
   await worker.mock('task/appstream/spice-up.xml', 'package/usr/share/metainfo/com.github.philip-scott.spice-up.appdata.xml')
 
+  worker.tasks.push(AppstreamValidate)
+
   await worker.setup()
-  await worker.run(AppstreamValidate)
+  await worker.run()
   await worker.teardown()
 
-  expect(worker.storage.logs).toHaveLength(0)
+  expect(worker.context.logs).toHaveLength(0)
 }, 300000) // A 5 minute timeout
 
 test('fails with a blank appstream file', async () => {
@@ -32,9 +34,11 @@ test('fails with a blank appstream file', async () => {
 
   await worker.mock('task/appstream/blank.xml', 'package/usr/share/metainfo/com.github.philip-scott.spice-up.appdata.xml')
 
+  worker.tasks.push(AppstreamValidate)
+
   await worker.setup()
-  await worker.run(AppstreamValidate)
+  await worker.run()
   await worker.teardown()
 
-  expect(worker.storage.logs).toHaveLength(1)
+  expect(worker.context.logs).toHaveLength(1)
 }, 300000) // A 5 minute timeout

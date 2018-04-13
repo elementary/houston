@@ -18,7 +18,7 @@ export class AppstreamContentRating extends Task {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.storage.nameDomain}.appdata.xml`)
+    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.context.nameDomain}.appdata.xml`)
   }
 
   /**
@@ -72,7 +72,7 @@ export class AppstreamContentRating extends Task {
       const template = path.resolve(__dirname, 'content-rating-required.md')
 
       throw Log.template(Log.Level.ERROR, template, {
-        storage: this.worker.storage
+        storage: this.worker.context
       })
     }
 
@@ -80,7 +80,7 @@ export class AppstreamContentRating extends Task {
       const template = path.resolve(__dirname, 'content-rating-type.md')
 
       throw Log.template(Log.Level.WARN, template, {
-        storage: this.worker.storage
+        storage: this.worker.context
       })
     }
 
@@ -92,7 +92,7 @@ export class AppstreamContentRating extends Task {
 
       throw Log.template(Log.Level.ERROR, template, {
         attributes: missingAttributes,
-        storage: this.worker.storage
+        storage: this.worker.context
       })
     }
   }

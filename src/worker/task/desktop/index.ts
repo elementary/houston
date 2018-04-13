@@ -20,7 +20,7 @@ export class Desktop extends WrapperTask {
    * @var {Task[]}
    */
   public get tasks () {
-    switch (this.worker.storage.type) {
+    switch (this.worker.context.type) {
       // System apps are allowed system icons
       case 'system-app':
         return [
@@ -43,7 +43,7 @@ export class Desktop extends WrapperTask {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/applications', this.worker.storage.nameAppstream)
+    return path.resolve(this.worker.workspace, 'package/usr/share/applications', this.worker.context.nameAppstream)
   }
 
   /**

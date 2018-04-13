@@ -81,16 +81,16 @@ export class WorkspaceSetup extends Task {
    */
   protected async branches (): Promise<string[]> {
     const repositoryReferences = await this.worker.repository.references()
-    const workspaceReferences = [...this.worker.storage.references]
+    const workspaceReferences = [...this.worker.context.references]
 
     const packageReference = WorkspaceSetup.crossFindRef(repositoryReferences, [
-      `${this.worker.storage.packageSystem}-package-${this.worker.storage.distribution}`,
-      `${this.worker.storage.packageSystem}-packaging-${this.worker.storage.distribution}`,
-      `${this.worker.storage.packageSystem}-package`,
-      `${this.worker.storage.packageSystem}-packaging`,
-      `${this.worker.storage.distribution}-package`,
-      `${this.worker.storage.distribution}-packaging`,
-      `${this.worker.storage.distribution}`
+      `${this.worker.context.packageSystem}-package-${this.worker.context.distribution}`,
+      `${this.worker.context.packageSystem}-packaging-${this.worker.context.distribution}`,
+      `${this.worker.context.packageSystem}-package`,
+      `${this.worker.context.packageSystem}-packaging`,
+      `${this.worker.context.distribution}-package`,
+      `${this.worker.context.distribution}-packaging`,
+      `${this.worker.context.distribution}`
     ])
 
     if (packageReference != null) {

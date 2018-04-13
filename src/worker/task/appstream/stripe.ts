@@ -18,7 +18,7 @@ export class AppstreamStripe extends Task {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.storage.nameDomain}.appdata.xml`)
+    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.context.nameDomain}.appdata.xml`)
   }
 
   /**
@@ -28,7 +28,7 @@ export class AppstreamStripe extends Task {
    * @return {void}
    */
   public async run () {
-    if (this.worker.storage.stripe == null) {
+    if (this.worker.context.stripe == null) {
       return
     }
 
@@ -44,7 +44,7 @@ export class AppstreamStripe extends Task {
     const $el = $('component > custom > value:last-of-type')
 
     $el.attr('key', 'x-appcenter-stripe')
-    $el.text(this.worker.storage.stripe)
+    $el.text(this.worker.context.stripe)
 
     await fs.writeFile(this.path, $.xml())
   }

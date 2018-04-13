@@ -17,11 +17,13 @@ test('validates files besides default desktop file', async () => {
 
   await worker.mock('task/desktop/blank.desktop', 'package/usr/share/applications/blank.desktop')
 
+  worker.tasks.push(DesktopValidate)
+
   await worker.setup()
-  await worker.run(DesktopValidate)
+  await worker.run()
   await worker.teardown()
 
-  expect(worker.storage.logs).toHaveLength(1)
+  expect(worker.context.logs).toHaveLength(1)
 })
 
 test('validate concats logs to single issue', async () => {
@@ -33,9 +35,11 @@ test('validate concats logs to single issue', async () => {
   await worker.mock('task/desktop/blank.desktop', 'package/usr/share/applications/blank.desktop')
   await worker.mock('task/desktop/spice-up.desktop', 'package/usr/share/applications/com.github.philip-scott.spice-up.desktop')
 
+  worker.tasks.push(DesktopValidate)
+
   await worker.setup()
-  await worker.run(DesktopValidate)
+  await worker.run()
   await worker.teardown()
 
-  expect(worker.storage.logs).toHaveLength(1)
+  expect(worker.context.logs).toHaveLength(1)
 })

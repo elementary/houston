@@ -28,7 +28,7 @@ export class Appstream extends WrapperTask {
    * @var {Task[]}
    */
   public get tasks () {
-    switch (this.worker.storage.type) {
+    switch (this.worker.context.type) {
       // System apps will never have a stripe key
       case 'system-app':
         return [
@@ -65,7 +65,7 @@ export class Appstream extends WrapperTask {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.storage.nameDomain}.appdata.xml`)
+    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.context.nameDomain}.appdata.xml`)
   }
 
   /**
@@ -102,7 +102,7 @@ export class Appstream extends WrapperTask {
       const template = path.resolve(__dirname, 'exist.md')
 
       throw Log.template(Log.Level.ERROR, template, {
-        storage: this.worker.storage
+        storage: this.worker.context
       })
     }
 
@@ -123,7 +123,7 @@ export class Appstream extends WrapperTask {
     }
 
     // Save the appstream information
-    this.worker.storage.appstream = await fs.readFile(this.path)
+    this.worker.context.appstream = await fs.readFile(this.path)
   }
 
   /**
@@ -141,7 +141,7 @@ export class Appstream extends WrapperTask {
 
     const log = Log.template(topLevel, template, {
       errors: this.errorPartials,
-      storage: this.worker.storage,
+      storage: this.worker.context,
       warnings: this.warnPartials
     })
 

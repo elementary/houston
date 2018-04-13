@@ -11,7 +11,7 @@ import * as path from 'path'
 import markdown from '../../../lib/utility/markdown'
 import template from '../../../lib/utility/template'
 import { Log } from '../../log'
-import { Change, Storable } from '../../type'
+import { IChange, IContext } from '../../type'
 import { Task } from '../task'
 
 export class DebianChangelog extends Task {
@@ -34,14 +34,14 @@ export class DebianChangelog extends Task {
    * Returns the string templated version of the changelog
    *
    * @async
-   * @param {Storable} storage
+   * @param {IContext} context
    * @return {string}
    */
-  public static async template (storage: Storable): Promise<string> {
-    const changes = await this.getChanges(storage.changelog)
+  public static async template (context: IContext): Promise<string> {
+    const changes = await this.getChanges(context.changelog)
 
     const file = await fs.readFile(this.templatePath, 'utf8')
-    const changelog = template(file, { storage, changes })
+    const changelog = template(file, { context, changes })
 
     return changelog
       // Trim empty lines of whitespace
@@ -129,11 +129,11 @@ export class DebianChangelog extends Task {
   public async fill () {
     await fs.ensureFile(this.path)
 
-    if (this.worker.storage.changelog.length === 0) {
-      this.worker.storage.changelog.push(this.noopChange())
+    if (this.worker.context.changelog.length === 0) {
+      this.worker.context.changelog.push(this.noopChange())
     }
 
-    const changelog = await DebianChangelog.template(this.worker.storage)
+    const changelog = await DebianChangelog.template(this.worker.context)
 
     await fs.writeFile(this.path, changelog, 'utf8')
   }
@@ -145,10 +145,10 @@ export class DebianChangelog extends Task {
    */
   protected noopChange () {
     return {
-      author: this.worker.storage.nameDeveloper,
+      author: this.worker.context.nameDeveloper,
       changes: 'Version Bump',
       date: new Date(),
-      version: this.worker.storage.version
-    } as Change
+      version: this.worker.context.version
+    } as IChange
   }
 }

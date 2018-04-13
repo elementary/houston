@@ -18,7 +18,7 @@ export class AppstreamId extends Task {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.storage.nameDomain}.appdata.xml`)
+    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.context.nameDomain}.appdata.xml`)
   }
 
   /**
@@ -34,15 +34,15 @@ export class AppstreamId extends Task {
     const id = $('component > id')
 
     if (id.length === 0) {
-      $('component').prepend(`<id>${this.worker.storage.nameAppstream}</id>`)
+      $('component').prepend(`<id>${this.worker.context.nameAppstream}</id>`)
       await fs.writeFile(this.path, $.xml())
 
       throw new Log(Log.Level.WARN, 'Missing "id" field')
-    } else if (id.text() !== this.worker.storage.nameAppstream) {
-      id.text(this.worker.storage.nameAppstream)
+    } else if (id.text() !== this.worker.context.nameAppstream) {
+      id.text(this.worker.context.nameAppstream)
       await fs.writeFile(this.path, $.xml())
 
-      throw new Log(Log.Level.WARN, `"id" field should be "${this.worker.storage.nameAppstream}"`)
+      throw new Log(Log.Level.WARN, `"id" field should be "${this.worker.context.nameAppstream}"`)
     }
   }
 }

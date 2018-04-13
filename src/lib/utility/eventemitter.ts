@@ -33,7 +33,7 @@ export class EventEmitter extends EventEmitter2 {
    * @param {*} arg
    * @return {*} - Results of arg after modification from listeners
    */
-  public async emitAsyncChain (event, arg) {
+  public async emitAsyncChain<T> (event, arg): Promise<T> {
     const listeners = this.listeners(event)
     let value = arg
 

@@ -58,12 +58,14 @@ This is another change I made`,
 
   await worker.mock('task/appstream/blank.xml', p)
 
+  worker.tasks.push(AppstreamRelease)
+
   await worker.setup()
-  await worker.run(AppstreamRelease)
+  await worker.run()
 
   const file = await fs.readFile(worker.get(p), 'utf8')
 
-  expect(worker.passes()).toBeTruthy()
+  expect(worker.passes).toBeTruthy()
   expectChangelog(file, `
     <release version="1.0.0" urgency="medium">
       <description>
@@ -103,12 +105,14 @@ This is a bunch of cool things that are updated.
 
   await worker.mock('task/appstream/blank.xml', p)
 
+  worker.tasks.push(AppstreamRelease)
+
   await worker.setup()
-  await worker.run(AppstreamRelease)
+  await worker.run()
 
   const file = await fs.readFile(worker.get(p), 'utf8')
 
-  expect(worker.passes()).toBeTruthy()
+  expect(worker.passes).toBeTruthy()
   expectChangelog(file, `
     <release version="1.0.0" urgency="medium">
       <description>

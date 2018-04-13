@@ -38,7 +38,7 @@ export class AppstreamValidate extends Task {
   public async run () {
     const docker = await this.docker()
 
-    const file = `${this.worker.storage.nameDomain}.appdata.xml`
+    const file = `${this.worker.context.nameDomain}.appdata.xml`
     const cmd = `validate ${file} --no-color`
     const exit = await docker.run(cmd)
 
@@ -59,7 +59,7 @@ export class AppstreamValidate extends Task {
 
     return Log.template(Log.Level.ERROR, p, {
       log,
-      storage: this.worker.storage
+      storage: this.worker.context
     })
   }
 

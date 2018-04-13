@@ -1,21 +1,21 @@
 /**
- * houston/test/utililty/worker/storage.ts
- * Helpful functions to test the worker process storage
+ * houston/test/utililty/worker/context.ts
+ * Helpful functions to test the worker process context
  */
 
 import { defaultsDeep } from 'lodash'
 
-import { Storable } from '../../../src/worker/type'
+import { IContext } from '../../../src/worker/type'
 
 /**
- * Creates a new Storable object for testing.
+ * Creates a new context object for testing.
  *
  * @param {Object} [override]
  *
- * @return {Storable}
+ * @return {IContext}
  */
-export function storage (override = {}) {
-  const def: Storable = {
+export function context (override = {}) {
+  const def: IContext = {
     appcenter: {},
     appstream: '',
     architecture: 'amd64',

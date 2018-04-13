@@ -11,11 +11,13 @@ import { mock } from '../../../../test/utility/worker'
 test('failures stop the build', async () => {
   const worker = await mock()
 
+  worker.tasks.push(Desktop)
+
   await worker.setup()
-  await worker.run(Desktop)
+  await worker.run()
   await worker.teardown()
 
-  expect(worker.fails()).toBeTruthy()
+  expect(worker.fails).toBeTruthy()
 })
 
 test('com.github.philip-scott.spice-up passes desktop tests', async () => {
@@ -26,11 +28,13 @@ test('com.github.philip-scott.spice-up passes desktop tests', async () => {
 
   await worker.mock('task/desktop/spice-up.desktop', 'package/usr/share/applications/com.github.philip-scott.spice-up.desktop')
 
+  worker.tasks.push(Desktop)
+
   await worker.setup()
-  await worker.run(Desktop)
+  await worker.run()
   await worker.teardown()
 
-  expect(worker.passes()).toBeTruthy()
+  expect(worker.passes).toBeTruthy()
 })
 
 test('system apps do not have icon validation #590', async () => {

@@ -20,13 +20,15 @@ test('can insert a basic list of changes', async () => {
   const p = 'package/usr/share/metainfo/com.github.elementary.houston.appdata.xml'
   await worker.mock('task/appstream/blank.xml', p)
 
+  worker.tasks.push(AppstreamStripe)
+
   await worker.setup()
-  await worker.run(AppstreamStripe)
+  await worker.run()
 
   const file = await fs.readFile(worker.get(p), 'utf8')
   const $ = cheerio.load(file, { xmlMode: true })
 
-  expect(worker.passes()).toBeTruthy()
+  expect(worker.passes).toBeTruthy()
   expect($('component > custom > value').text()).toBe('testingvaluehere')
 
   await worker.teardown()

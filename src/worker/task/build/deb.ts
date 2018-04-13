@@ -11,7 +11,6 @@ import { glob } from '../../../lib/utility/glob'
 import render from '../../../lib/utility/template'
 import { Docker } from '../../docker'
 import { Log } from '../../log'
-import { Change } from '../../type'
 import { Task } from '../task'
 
 export class BuildDeb extends Task {
@@ -51,13 +50,13 @@ export class BuildDeb extends Task {
    * @return {string}
    */
   protected get distribution () {
-    switch (this.worker.storage.distribution) {
+    switch (this.worker.context.distribution) {
       case ('loki'):
         return 'xenial'
       case ('juno'):
         return 'bionic'
       default:
-        return this.worker.storage.distribution
+        return this.worker.context.distribution
     }
   }
 
@@ -72,7 +71,7 @@ export class BuildDeb extends Task {
 
     const docker = await this.docker()
 
-    const arch = this.worker.storage.architecture
+    const arch = this.worker.context.architecture
     const dist = this.distribution
     const cmd = `-a ${arch} -d ${dist} -o /tmp/houston`
 
@@ -107,7 +106,7 @@ export class BuildDeb extends Task {
    * @return {string|null}
    */
   protected async package () {
-    const storage = this.worker.storage
+    const storage = this.worker.context
 
     // The correct name scheme
     const domainName = `${storage.nameDomain}_${storage.version}_${storage.architecture}.${storage.packageSystem}`
@@ -170,7 +169,7 @@ export class BuildDeb extends Task {
 
     return Log.template(Log.Level.ERROR, p, {
       log,
-      storage: this.worker.storage
+      storage: this.worker.context
     })
   }
 

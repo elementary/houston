@@ -17,7 +17,7 @@ export class DesktopExec extends Task {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/applications', this.worker.storage.nameAppstream)
+    return path.resolve(this.worker.workspace, 'package/usr/share/applications', this.worker.context.nameAppstream)
   }
 
   /**
@@ -38,7 +38,7 @@ export class DesktopExec extends Task {
       ? data['Desktop Entry'].Exec
       : ''
 
-    if (execValue.startsWith(this.worker.storage.nameDomain) === false) {
+    if (execValue.startsWith(this.worker.context.nameDomain) === false) {
       throw new Log(Log.Level.ERROR, 'Exec field does not start with binary name')
     }
   }

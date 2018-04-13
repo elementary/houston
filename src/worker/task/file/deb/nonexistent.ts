@@ -49,7 +49,7 @@ export class FileDebNonexistent extends Task {
 
     throw Log.template(Log.Level.ERROR, p, {
       files: relativePaths,
-      storage: this.worker.storage
+      storage: this.worker.context
     })
   }
 }

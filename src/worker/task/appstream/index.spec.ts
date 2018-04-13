@@ -10,11 +10,13 @@ import { mock } from '../../../../test/utility/worker'
 test('failures stop the build', async () => {
   const worker = await mock()
 
+  worker.tasks.push(Appstream)
+
   await worker.setup()
-  await worker.run(Appstream)
+  await worker.run()
   await worker.teardown()
 
-  expect(worker.fails()).toBeTruthy()
+  expect(worker.fails).toBeTruthy()
 }, 300000) // A 5 minute timeout
 
 test('com.github.philip-scott.spice-up passes appstream tests', async () => {
@@ -25,11 +27,13 @@ test('com.github.philip-scott.spice-up passes appstream tests', async () => {
 
   await worker.mock('task/appstream/spice-up.xml', 'package/usr/share/metainfo/com.github.philip-scott.spice-up.appdata.xml')
 
+  worker.tasks.push(Appstream)
+
   await worker.setup()
-  await worker.run(Appstream)
+  await worker.run()
   await worker.teardown()
 
-  expect(worker.passes()).toBeTruthy()
+  expect(worker.passes).toBeTruthy()
 }, 300000) // A 5 minute timeout
 
 test('basic errors get concated to single log', async () => {
@@ -40,14 +44,16 @@ test('basic errors get concated to single log', async () => {
 
   await worker.mock('task/appstream/blank.xml', 'package/usr/share/metainfo/com.github.philip-scott.spice-up.appdata.xml')
 
+  worker.tasks.push(Appstream)
+
   await worker.setup()
-  await worker.run(Appstream)
+  await worker.run()
   await worker.teardown()
 
-  expect(worker.fails()).toBeTruthy()
+  expect(worker.fails).toBeTruthy()
 
   // God this kinda sucks, but it does what it needs to.
-  const concatLog = worker.storage.logs
+  const concatLog = worker.context.logs
     .find((l) => (l.title.indexOf('tests') !== -1))
 
   expect(concatLog.body).toBeDefined()

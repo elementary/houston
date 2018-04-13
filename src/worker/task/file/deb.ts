@@ -5,14 +5,19 @@
 
 import { WrapperTask } from '../wrapperTask'
 
+import { FileDebBinary } from './deb/binary'
+import { FileDebNonexistent } from './deb/nonexistent'
+
 export class FileDeb extends WrapperTask {
   /**
    * Tasks to run for checking file paths
    *
    * @var {Task[]}
    */
-  public tasks = [
-    require('./deb/binary').FileDebBinary,
-    require('./deb/nonexistent').FileDebNonexistent
-  ]
+  public get tasks () {
+    return [
+      FileDebBinary,
+      FileDebNonexistent
+    ]
+  }
 }

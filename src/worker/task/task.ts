@@ -6,10 +6,10 @@
  */
 
 import { Log } from '../log'
-import { Workable } from '../type'
+import { ITask, ITaskConstructor } from '../type'
 import { Worker } from '../worker'
 
-export class Task implements Workable {
+export class Task implements ITask {
   /**
    * The current running worker
    *
@@ -48,8 +48,7 @@ export class Task implements Workable {
     // A real error. Not a Log
     if (!(e instanceof Log)) {
       const log = new Log(Log.Level.ERROR, 'Internal error while running')
-        .workable(this)
-        .wrap(e)
+        .setError(e)
 
       this.worker.report(log)
       this.worker.stop()

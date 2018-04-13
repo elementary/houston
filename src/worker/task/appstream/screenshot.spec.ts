@@ -15,9 +15,11 @@ test('passes with screenshots specified', async () => {
 
   await worker.mock('task/appstream/spice-up.xml', 'package/usr/share/metainfo/com.github.philip-scott.spice-up.appdata.xml')
 
+  worker.tasks.push(AppstreamScreenshot)
+
   await worker.setup()
-  await worker.run(AppstreamScreenshot)
+  await worker.run()
   await worker.teardown()
 
-  expect(worker.storage.logs).toHaveLength(0)
+  expect(worker.context.logs).toHaveLength(0)
 })

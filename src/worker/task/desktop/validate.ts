@@ -75,7 +75,7 @@ export class DesktopValidate extends Task {
 
     return Log.template(Log.Level.ERROR, p, {
       logs,
-      storage: this.worker.storage
+      storage: this.worker.context
     })
   }
 

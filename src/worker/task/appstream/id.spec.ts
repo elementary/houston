@@ -15,11 +15,13 @@ test('passes with a matching ID', async () => {
 
   await worker.mock('task/appstream/spice-up.xml', 'package/usr/share/metainfo/com.github.philip-scott.spice-up.appdata.xml')
 
+  worker.tasks.push(AppstreamId)
+
   await worker.setup()
-  await worker.run(AppstreamId)
+  await worker.run()
   await worker.teardown()
 
-  expect(worker.storage.logs).toHaveLength(0)
+  expect(worker.context.logs).toHaveLength(0)
 })
 
 test('fails with an incorrect ID', async () => {
@@ -30,9 +32,11 @@ test('fails with an incorrect ID', async () => {
 
   await worker.mock('task/appstream/spice-up.xml', 'package/usr/share/metainfo/com.github.elementary.houston.appdata.xml')
 
+  worker.tasks.push(AppstreamId)
+
   await worker.setup()
-  await worker.run(AppstreamId)
+  await worker.run()
   await worker.teardown()
 
-  expect(worker.storage.logs).toHaveLength(1)
+  expect(worker.context.logs).toHaveLength(1)
 })

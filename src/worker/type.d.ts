@@ -3,23 +3,45 @@
  * A bunch of type definitions for the worker process
  */
 
-import { Log } from './log'
-import { Worker } from './worker'
+import { Config } from '../lib/config'
+import { Level } from '../lib/log/level'
+import { Repository } from '../lib/service/base/repository'
+import { EventEmitter } from '../lib/utility/eventemitter'
 
-type type = 'app' | 'system-app' | 'library'
-type architecture = 'amd64'
-type distribution = 'loki' | 'juno'
-type packageSystem = 'deb'
+type Type = 'app' | 'system-app' | 'library' | 'system-library' | 'debug'
+type PackageSystem = 'deb'
 
-export interface Change {
+export interface IPackage {
+  type: PackageSystem
+  path: string // Full path on the FS
+}
+
+export interface IResult {
+  failed: boolean
+
+  packages: IPackage[]
+
+  appcenter?: object
+  appstream?: string
+
+  logs: ILog[]
+}
+
+export interface ILog extends Error {
+  level: Level
+  title: string
+  body?: string
+}
+
+export interface IChange {
   version: string
   author: string
   changes: string
   date: Date
 }
 
-export interface Storable {
-  type: type
+export interface IContext {
+  type: Type
 
   nameDeveloper: string
   nameDomain: string
@@ -28,25 +50,37 @@ export interface Storable {
 
   version: string
 
+  architecture: string
+  distribution: string
+
   references: string[]
-  changelog: Change[]
+  changelog: IChange[]
 
-  distribution: distribution
-  architecture: architecture
-  packageSystem: packageSystem
+  packageSystem: PackageSystem
+  packagePath?: string
 
-  appcenter: object
-  appstream: string // An XML formatted string
+  appcenter?: object
+  appstream?: string // An XML formatted string
 
   stripe?: string
 
-  logs: Log[]
+  logs: ILog[]
 }
 
-export interface WorkableConstructor {
-  new (worker: Worker): Workable
+export interface ITaskConstructor {
+  new (worker: IWorker): ITask
 }
 
-export interface Workable {
+export interface ITask {
   run (): Promise<void>
+}
+
+export interface IWorker extends EventEmitter {
+  config: Config
+  context: IContext
+  repository: Repository
+  workspace: string
+
+  report (err: Error)
+  stop ()
 }

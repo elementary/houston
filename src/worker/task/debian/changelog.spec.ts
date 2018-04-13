@@ -8,10 +8,10 @@ import * as os from 'os'
 import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
-import { Storable } from '../../type'
+import { IContext } from '../../type'
 import { DebianChangelog } from './changelog'
 
-import { storage as createStorage } from '../../../../test/utility/worker'
+import { context as createContext } from '../../../../test/utility/worker'
 
 /**
  * Returns the string debian changelog version of a date
@@ -24,7 +24,7 @@ function debianDate (date: Date): string {
 }
 
 test('can pull a list out of a markdown changelog', async () => {
-  const storage = createStorage({
+  const storage = createContext({
     changelog: [{
       author: 'Blake Kostner',
       changes: `
@@ -56,7 +56,7 @@ Features:
 })
 
 test('templates multiple changelogs correctly', async () => {
-  const storage = createStorage({
+  const storage = createContext({
     changelog: [{
       author: 'Blake Kostner',
       changes: '0.0.3 release whoooo',

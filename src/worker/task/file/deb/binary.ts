@@ -17,7 +17,7 @@ export class FileDebBinary extends Task {
    * @return {string}
    */
   protected get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/bin', this.worker.storage.nameDomain)
+    return path.resolve(this.worker.workspace, 'package/usr/bin', this.worker.context.nameDomain)
   }
 
   /**
@@ -30,7 +30,7 @@ export class FileDebBinary extends Task {
     const exists = await fs.exists(this.path)
 
     if (exists === false) {
-      throw new Log(Log.Level.ERROR, `Missing shipped binary at /usr/bin/${this.worker.storage.nameDomain}`)
+      throw new Log(Log.Level.ERROR, `Missing shipped binary at /usr/bin/${this.worker.context.nameDomain}`)
     }
   }
 }

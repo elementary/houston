@@ -39,7 +39,7 @@ export class AppstreamRelease extends Task {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.storage.nameDomain}.appdata.xml`)
+    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.context.nameDomain}.appdata.xml`)
   }
 
   /**
@@ -71,7 +71,7 @@ export class AppstreamRelease extends Task {
       $('component').append('<releases></releases>')
     }
 
-    this.worker.storage.changelog
+    this.worker.context.changelog
       .sort((a, b) => semver.rcompare(a.version, b.version))
       .forEach((change) => {
         $('component > releases').prepend('<release></release>')

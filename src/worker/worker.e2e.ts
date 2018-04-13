@@ -10,8 +10,8 @@ import * as uuid from 'uuid/v4'
 
 import { Config } from '../lib/config'
 import { Repository as GithubRepository } from '../lib/service/github/repository'
-import { Build } from './role/build'
-import { Storable } from './storable'
+import { Build } from './preset/build'
+import * as type from './type'
 import { Worker } from './worker'
 
 import { create } from '../../test/utility/app'
@@ -26,34 +26,31 @@ beforeAll(async () => {
   config = app.get<Config>(Config)
 
   testingDir = await tmp('worker')
-  Worker.tempDir = testingDir
-})
-
-afterAll(async () => {
-  // await fs.remove(testingDir)
 })
 
 // TODO: Enable when AppStream OARS added
 test.skip('needle-and-thread/vocal passes build process', async () => {
   const repo = new GithubRepository('https://github.com/needle-and-thread/vocal')
 
-  const storage : Storable = {
+  const context : type.IContext = {
     appcenter: {},
     appstream: '',
     architecture: 'amd64',
     changelog: [],
-    distribution: 'loki',
+    distribution: 'xenial',
     logs: [],
     nameAppstream: 'com.github.needle-and-thread.vocal.desktop',
     nameDeveloper: 'Needle & Thread',
     nameDomain: 'com.github.needle-and-thread.vocal',
     nameHuman: 'Vocal',
-    packageSystem: 'deb',
+    packageSystem: null,
     references: ['refs/tags/2.1.5'],
+    type: 'app',
     version: '2.1.5'
   }
 
-  const proc = new Worker(config, repo, storage)
+  const proc = new Worker(config, repo, context)
+  proc.workspace = path.resolve(testingDir, uuid())
 
   proc.on('run:error', (e) => console.error(e))
 
@@ -61,30 +58,32 @@ test.skip('needle-and-thread/vocal passes build process', async () => {
   await proc.run(Build)
   await proc.teardown()
 
-  expect(proc.passes()).toBeTruthy()
+  expect(proc.passes).toBeTruthy()
 }, 3600000) // An hour long timeout because we are building things
 
 // TODO: Enable when AppStream OARS added
 test.skip('Philip-Scott/Spice-up passes build process', async () => {
   const repo = new GithubRepository('https://github.com/Philip-Scott/Spice-up')
 
-  const storage : Storable = {
+  const context : type.IContext = {
     appcenter: {},
     appstream: '',
     architecture: 'amd64',
     changelog: [],
-    distribution: 'loki',
+    distribution: 'xenial',
     logs: [],
     nameAppstream: 'com.github.philip-scott.spice-up.desktop',
     nameDeveloper: 'Philip Scott',
     nameDomain: 'com.github.philip-scott.spice-up',
     nameHuman: 'Spice-Up',
-    packageSystem: 'deb',
+    packageSystem: null,
     references: ['refs/tags/0.6.0'],
+    type: 'app',
     version: '0.6.0'
   }
 
-  const proc = new Worker(config, repo, storage)
+  const proc = new Worker(config, repo, context)
+  proc.workspace = path.resolve(testingDir, uuid())
 
   proc.on('run:error', (e) => console.error(e))
 
@@ -92,30 +91,32 @@ test.skip('Philip-Scott/Spice-up passes build process', async () => {
   await proc.run(Build)
   await proc.teardown()
 
-  expect(proc.passes()).toBeTruthy()
+  expect(proc.passes).toBeTruthy()
 }, 3600000) // An hour long timeout because we are building things
 
 // TODO: Fix bugs
 test.skip('elementary/code passes build process', async () => {
   const repo = new GithubRepository('https://github.com/elementary/code')
 
-  const storage : Storable = {
+  const context : type.IContext = {
     appcenter: {},
     appstream: '',
     architecture: 'amd64',
     changelog: [],
-    distribution: 'juno',
+    distribution: 'xenial',
     logs: [],
     nameAppstream: 'io.elementary.code.desktop',
     nameDeveloper: 'elementary',
     nameDomain: 'io.elementary.code',
     nameHuman: 'Code',
-    packageSystem: 'deb',
+    packageSystem: null,
     references: [],
+    type: 'app',
     version: '2.4.1'
   }
 
-  const proc = new Worker(config, repo, storage)
+  const proc = new Worker(config, repo, context)
+  proc.workspace = path.resolve(testingDir, uuid())
 
   proc.on('run:error', (e) => console.error(e))
 
@@ -123,5 +124,5 @@ test.skip('elementary/code passes build process', async () => {
   await proc.run(Build)
   await proc.teardown()
 
-  expect(proc.passes()).toBeTruthy()
+  expect(proc.passes).toBeTruthy()
 }, 3600000) // An hour long timeout because we are building things

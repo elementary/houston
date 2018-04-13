@@ -6,19 +6,23 @@
 import * as fs from 'fs-extra'
 import * as os from 'os'
 import * as path from 'path'
+import * as uuid from 'uuid'
 
-import { Log } from '../../../src/worker/log'
 import { Worker } from '../../../src/worker/worker'
-import { storage } from './storage'
 
 export class TestWorker extends Worker {
-
   /**
-   * Overwrites the tempDir for testing workers
+   * Creates a new worker process
    *
-   * @var {String}
+   * @param {Config} config - The configuration to use
+   * @param {Repository} repository - The repository to process on
+   * @param {IContext} context - Storage for the worker information
    */
-  protected static tempDir = path.resolve(os.tmpdir(), 'houston-test/worker')
+  constructor (config, repository, storage) {
+    super(config, repository, storage)
+
+    this.workspace = path.resolve(os.tmpdir(), 'houston-test/worker', uuid())
+  }
 
   /**
    * Returns the full path of a file in the workspace

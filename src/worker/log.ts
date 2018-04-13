@@ -7,10 +7,9 @@ import * as fs from 'fs-extra'
 
 import { Level } from '../lib/log/level'
 import render from '../lib/utility/template'
-import { Task } from './task/task'
-import { Workable } from './type'
+import { ILog } from './type'
 
-export class Log extends Error {
+export class Log extends Error implements ILog {
   /**
    * A handy level assignment for easier usage
    *
@@ -38,13 +37,6 @@ export class Log extends Error {
    * @var {LogLevel}
    */
   public level: Level
-
-  /**
-   * The workable item this error occured on
-   *
-   * @var {Workable|null}
-   */
-  public work?: Workable
 
   /**
    * A wrapped native error
@@ -94,24 +86,12 @@ export class Log extends Error {
   }
 
   /**
-   * Sets the workable item for the log
-   *
-   * @param {Workable} work
-   * @return {Log}
-   */
-  public workable (work: Workable): Log {
-    this.work = work
-
-    return this
-  }
-
-  /**
    * Wraps an error in the current Log
    *
    * @param {Error} error
    * @return {Log}
    */
-  public wrap (error: Error): Log {
+  public setError (error: Error): Log {
     this.message = error.message
     this.error = error
 
@@ -126,19 +106,6 @@ export class Log extends Error {
    */
   public toString () {
     const out = []
-
-    if (this.workable != null) {
-      let o = this.workable.name || this.workable.constructor.name
-      o += ': '
-
-      if (this.title != null) {
-        o += this.title
-      } else {
-        o += this.message
-      }
-
-      out.push(o)
-    }
 
     if (this.body != null) {
       const bodyIndented = this.body

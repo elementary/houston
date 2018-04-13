@@ -4,21 +4,21 @@
  */
 
 import { Log } from '../log'
-import { WorkableConstructor } from '../type'
+import { ITaskConstructor } from '../type'
 import { Task } from './task'
 
 export class WrapperTask extends Task {
   /**
    * The tasks to run
    *
-   * @var {WorkableConstructor[]}
+   * @var {ITaskConstructor[]}
    */
-  public get tasks (): WorkableConstructor[] {
+  public get tasks (): ITaskConstructor[] {
     return []
   }
 
   // BUG: We have to set a no-op setter because Jest will error if we don't
-  public set tasks (tasks: WorkableConstructor[]) {
+  public set tasks (tasks: ITaskConstructor[]) {
     return
   }
 

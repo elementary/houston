@@ -3,6 +3,6 @@
  * Helpful functions to test the worker process
  */
 
+export { context } from './context'
 export { mock } from './mock'
-export { storage } from './storage'
 export { TestWorker } from './worker'

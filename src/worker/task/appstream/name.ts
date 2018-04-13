@@ -18,7 +18,7 @@ export class AppstreamName extends Task {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.storage.nameDomain}.appdata.xml`)
+    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.context.nameDomain}.appdata.xml`)
   }
 
   /**
@@ -34,7 +34,7 @@ export class AppstreamName extends Task {
     const name = $('component > name')
 
     if (name.length === 0) {
-      $('component').prepend(`<name>${this.worker.storage.nameHuman}</name>`)
+      $('component').prepend(`<name>${this.worker.context.nameHuman}</name>`)
       await fs.writeFile(this.path, $.xml())
 
       throw new Log(Log.Level.WARN, 'Missing "name" field')

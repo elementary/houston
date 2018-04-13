@@ -17,7 +17,7 @@ export class DesktopIcon extends Task {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/applications', this.worker.storage.nameAppstream)
+    return path.resolve(this.worker.workspace, 'package/usr/share/applications', this.worker.context.nameAppstream)
   }
 
   /**
@@ -34,7 +34,7 @@ export class DesktopIcon extends Task {
       throw new Log(Log.Level.ERROR, 'Missing application data')
     }
 
-    if (data['Desktop Entry'].Icon !== this.worker.storage.nameDomain) {
+    if (data['Desktop Entry'].Icon !== this.worker.context.nameDomain) {
       throw new Log(Log.Level.ERROR, 'Incorrect icon value')
     }
   }
