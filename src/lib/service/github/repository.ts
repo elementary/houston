@@ -183,7 +183,7 @@ export class Repository implements RepositoryInterface {
     const stat = await fs.stat(p)
     const file = await fs.createReadStream(p)
 
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       const res = agent
         .post(body.upload_url.replace('{?name,label}', ''))
         .set('content-type', type)

@@ -4,7 +4,7 @@
 
 # Application files
 .cache
-config*
+/config*
 coverage/
 dest/
 .nuxt

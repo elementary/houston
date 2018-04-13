@@ -8,5 +8,5 @@ export interface Repository {
   rdnn: string,
   clone: (p: string, reference?: string) => Promise<void>
   references: () => Promise<string[]>
-  asset: (reference: string, name: string, p: string) => Promise<void>
+  asset: (reference: string, p: string, type: string, name: string, description: string) => Promise<void>
 }
