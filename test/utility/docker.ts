@@ -42,7 +42,7 @@ export async function stopContainers (config: Config): Promise<void> {
 
   return Promise.all(containers
     .map((container) => container.stop())
-    .foreach((promise) => promise.catch((err) => {
+    .map((promise) => promise.catch((err) => {
       // If image is already stopped
       if (err.statusCode !== 304) {
         throw err
