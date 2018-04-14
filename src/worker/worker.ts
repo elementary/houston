@@ -233,12 +233,12 @@ export class Worker extends EventEmitter implements type.IWorker {
         this.report(err)
       }
 
-      if (this.running === null) {
+      if (this.running == null) {
         break
       }
 
       // And if we have any forks, stop running the tasks, and run the forks
-      if (this.forks.length !== -1) {
+      if (this.forks.length > 0) {
         const todoTasks = this.tasks.splice(this.runningIndex)
         this.forks.forEach((fork) => {
           fork.tasks = todoTasks

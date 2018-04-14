@@ -14,8 +14,8 @@ import { Config } from '../../lib/config'
 import { levelIndex } from '../../lib/log/level'
 import { sanitize } from '../../lib/service/rdnn'
 import { create as createRepository } from '../../lib/service/repository'
-import { Build } from '../../worker/role/build'
-import { Storable } from '../../worker/type'
+import { Build } from '../../worker/preset/build'
+import { IContext } from '../../worker/type'
 import { Worker } from '../../worker/worker'
 import { setup } from '../utilities'
 
@@ -106,7 +106,7 @@ function buildStorage (argv, repository) {
   const nameDeveloper = argv['name-developer'] || 'Rabbitbot'
   const nameHuman = argv['name-human'] || 'Application' // TODO: Better name?
 
-  const obj : Storable = {
+  const obj : IContext = {
     appcenter: {},
     appstream: '',
     architecture: argv.architecture,
@@ -146,9 +146,9 @@ export async function handler (argv) {
 
   const config = app.get<Config>(Config)
   const repository = createRepository(argv.repo)
-  const storage = buildStorage(argv, repository)
+  const context = buildStorage(argv, repository)
 
-  const worker = new Worker(config, repository, storage)
+  const worker = Build(config, repository, context)
 
   const projectDir = path.resolve(process.cwd(), argv.directory)
 
@@ -162,25 +162,19 @@ export async function handler (argv) {
   const interval = setInterval(() => process.stdout.write('.'), 10000)
 
   await worker.setup()
-  await worker.run(Build)
+  await worker.run()
 
   clearInterval(interval)
   console.log('.')
 
-  const packagePath = path.resolve(worker.workspace, `package.${storage.packageSystem}`)
-  if (await fs.exists(packagePath)) {
-    const fileName = path.resolve(projectDir, `${storage.nameDomain}-${storage.version}.${storage.packageSystem}`)
-    await fs.copy(packagePath, fileName, { overwrite: true })
-  }
-
-  if (worker.fails()) {
+  if (worker.fails) {
     console.error(`Error while running build for ${argv.repo} for ${argv.version}`)
-    logLogs(worker.storage.logs)
+    logLogs(worker.result.logs)
 
     process.exit(1)
   } else {
     console.log(`Built ${argv.repo} for version ${argv.version}`)
-    logLogs(worker.storage.logs)
+    logLogs(worker.result.logs)
 
     process.exit(0)
   }
