@@ -2,6 +2,7 @@
  * houston/test/utility/docker.ts
  * Usefull utility functions for testing with docker.
  * TODO: This has very similar content to the `worker/docker.ts` file.
+ * TODO: We need to make this more specific and only remove the given images
  *
  * @exports {Function} teardown - Removes all current containers
  */
@@ -39,7 +40,15 @@ export async function getContainers (config: Config): Promise<Dockerode.Image> {
 export async function stopContainers (config: Config): Promise<void> {
   const containers = await getContainers(config)
 
-  return Promise.all(containers.map((container) => container.stop()))
+  return Promise.all(containers
+    .map((container) => container.stop())
+    .foreach((promise) => promise.catch((err) => {
+      // If image is already stopped
+      if (err.statusCode !== 304) {
+        throw err
+      }
+    }))
+  )
 }
 
 /**
@@ -91,7 +100,10 @@ export async function removeImages (config: Config): Promise<void> {
 
   return Promise.all(images.map((image) => {
     image.remove({ force: true }).catch((err) => {
-      console.error('Unable to remove docker image', err)
+      // If the image is not found, or is currently being used
+      if (err.statusCode !== 404 && err.statusCode !== 409) {
+        console.error('Unable to remove docker image', err)
+      }
     })
   }))
 }

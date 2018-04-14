@@ -68,6 +68,9 @@ export class WorkspaceSetup extends Task {
     await fs.ensureDir(dirty)
     await fs.copy(clean, dirty)
 
+    // TODO: We need to fork for every build configuration
+    this.worker.context.packageSystem = 'deb'
+
     // Step 4: Profit
     await this.worker.emitAsync(`task:${this.constructor.name}:end`)
   }

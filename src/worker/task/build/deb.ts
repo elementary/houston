@@ -11,6 +11,7 @@ import { glob } from '../../../lib/utility/glob'
 import render from '../../../lib/utility/template'
 import { Docker } from '../../docker'
 import { Log } from '../../log'
+import { IPackage } from '../../type'
 import { Task } from '../task'
 
 export class BuildDeb extends Task {
@@ -103,20 +104,21 @@ export class BuildDeb extends Task {
    * more than one package. We need to run tests on the main one.
    * TODO: Do tests on all the packages made
    *
-   * @return {string|null}
+   * @async
+   * @return {IPackage|null}
    */
-  protected async package () {
-    const storage = this.worker.context
+  protected async package (): Promise<IPackage|null> {
+    const context = this.worker.context
 
     // The correct name scheme
-    const domainName = `${storage.nameDomain}_${storage.version}_${storage.architecture}.${storage.packageSystem}`
+    const domainName = `${context.nameDomain}_${context.version}_${context.architecture}.${context.packageSystem}`
     const domainNamed = await glob(path.resolve(this.path, domainName))
 
     if (domainNamed[0] != null) {
-      return domainNamed[0]
+      return { path: domainNamed[0], type: 'deb' }
     }
 
-    const allNames = await glob(path.resolve(this.path, `*.${storage.packageSystem}`))
+    const allNames = await glob(path.resolve(this.path, `*.${context.packageSystem}`))
 
     // Try to intelligently filter out the _extra_ packages.
     const filteredNames = allNames
@@ -126,7 +128,7 @@ export class BuildDeb extends Task {
       .filter((n) => (n.indexOf('-dbg') === -1))
 
     if (filteredNames[0] != null) {
-      return path.resolve(this.path, filteredNames[0])
+      return { path: path.resolve(this.path, filteredNames[0]), type: 'deb' }
     }
 
     // So... Last effort, we get all the package files, sort them by length, and
@@ -134,7 +136,7 @@ export class BuildDeb extends Task {
     const sortedNames = allNames.sort((a, b) => (a.length - b.length))
 
     if (sortedNames[0] != null) {
-      return sortedNames[0]
+      return { path: sortedNames[0], type: 'deb' }
     }
   }
 
@@ -152,7 +154,9 @@ export class BuildDeb extends Task {
     }
 
     const to = path.resolve(this.worker.workspace, 'package.deb')
-    await fs.copy(deb, to)
+    await fs.copy(deb.path, to)
+
+    this.worker.context.packagePath = to
 
     await fs.remove(this.path)
   }

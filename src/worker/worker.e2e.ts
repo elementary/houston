@@ -1,6 +1,8 @@
 /**
  * houston/src/worker/worker.e2e.ts
  * Runs some repositories through tests for end to end testing
+ *
+ * NOTE: All tests have an hour long timeout because we are building thing
  */
 
 import * as fs from 'fs-extra'
@@ -12,7 +14,6 @@ import { Config } from '../lib/config'
 import { Repository as GithubRepository } from '../lib/service/github/repository'
 import { Build } from './preset/build'
 import * as type from './type'
-import { Worker } from './worker'
 
 import { create } from '../../test/utility/app'
 import { tmp } from '../../test/utility/fs'
@@ -49,17 +50,17 @@ test.skip('needle-and-thread/vocal passes build process', async () => {
     version: '2.1.5'
   }
 
-  const proc = new Worker(config, repo, context)
+  const proc = Build(config, repo, context)
   proc.workspace = path.resolve(testingDir, uuid())
 
   proc.on('run:error', (e) => console.error(e))
 
   await proc.setup()
-  await proc.run(Build)
+  await proc.run()
   await proc.teardown()
 
   expect(proc.passes).toBeTruthy()
-}, 3600000) // An hour long timeout because we are building things
+}, 3600000)
 
 // TODO: Enable when AppStream OARS added
 test.skip('Philip-Scott/Spice-up passes build process', async () => {
@@ -77,22 +78,22 @@ test.skip('Philip-Scott/Spice-up passes build process', async () => {
     nameDomain: 'com.github.philip-scott.spice-up',
     nameHuman: 'Spice-Up',
     packageSystem: null,
-    references: ['refs/tags/0.6.0'],
+    references: ['refs/tags/1.3.2'],
     type: 'app',
-    version: '0.6.0'
+    version: '1.3.2'
   }
 
-  const proc = new Worker(config, repo, context)
+  const proc = Build(config, repo, context)
   proc.workspace = path.resolve(testingDir, uuid())
 
   proc.on('run:error', (e) => console.error(e))
 
   await proc.setup()
-  await proc.run(Build)
+  await proc.run()
   await proc.teardown()
 
   expect(proc.passes).toBeTruthy()
-}, 3600000) // An hour long timeout because we are building things
+}, 3600000)
 
 // TODO: Fix bugs
 test.skip('elementary/code passes build process', async () => {
@@ -115,14 +116,14 @@ test.skip('elementary/code passes build process', async () => {
     version: '2.4.1'
   }
 
-  const proc = new Worker(config, repo, context)
+  const proc = Build(config, repo, context)
   proc.workspace = path.resolve(testingDir, uuid())
 
   proc.on('run:error', (e) => console.error(e))
 
   await proc.setup()
-  await proc.run(Build)
+  await proc.run()
   await proc.teardown()
 
   expect(proc.passes).toBeTruthy()
-}, 3600000) // An hour long timeout because we are building things
+}, 3600000)
