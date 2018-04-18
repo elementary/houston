@@ -33,5 +33,5 @@ test('Queue resolves to a factory function', () => {
 test('workerQueue is a resolved Queue instance', () => {
   const queue = app.get<Queue>(workerQueue)
 
-  expect(queue.send).toBeDefined()
+  expect(typeof queue.send === 'function').toBeTruthy()
 })
