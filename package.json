@@ -15,12 +15,11 @@
   "scripts": {
     "start": "node dest/bin.js",
     "build": "gulp --gulpfile 'build/gulpfile.ts' build",
-    "build:dev": "gulp --gulpfile 'build/gulpfile.ts' watch",
+    "build:watch": "gulp --gulpfile 'build/gulpfile.ts' watch",
     "test": "jest --no-cache",
-    "test:watch": "jest --no-cache --watch --no-coverage",
     "test:unit": "jest --no-cache .spec.ts",
     "test:e2e": "jest --no-cache .e2e.ts",
-    "test:dev": "jest --no-cache --watch .spec.ts",
+    "test:watch": "jest --no-cache --watch .spec.ts",
     "coverage": "jest --no-cache --coverage",
     "ci": "jest --ci --no-cache --coverage",
     "lint": "tslint --project 'tsconfig.json'",
@@ -84,6 +83,9 @@
   "files": [
     "dest/"
   ],
+  "publichConfig": {
+    "access": "public"
+  },
   "jest": {
     "collectCoverage": true,
     "collectCoverageFrom": [
