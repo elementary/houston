@@ -40,6 +40,31 @@ module.exports = {
   },
 
   /**
+   * The Queue configuration
+   * NOTE: Currently only supports a redis backend
+   *
+   * @property {string} client
+   *
+   * @property {object} connection
+   */
+  queue: {
+    client: 'redis', // TODO: Testing queue provider
+
+    /**
+     * Queue connection configuration.
+     * Take a look at the Bull GitHub page for information
+     *
+     * @see https://github.com/OptimalBits/bull#basic-usage
+     */
+    connection: {
+      host: 'localhost',
+      prefix: '{queue}',
+      password: '',
+      port: 6379,
+    }
+  },
+
+  /**
    * Log configuration
    * Configures Houston log output
    * NOTE: This is an optional configuration value.

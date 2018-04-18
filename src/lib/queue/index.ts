@@ -4,6 +4,6 @@
  */
 
 export { Status } from './type'
-export { QueueConstructor } from './type'
-export { Queue } from './type'
-export { Job } from './type'
+
+export const Queue = Symbol.for('IQueue') // tslint:disable-line
+export const workerQueue = Symbol.for('workerQueue') // tslint:disable-line

@@ -14,8 +14,7 @@ export type OnProgressCallback = (job: IJob, amount: number) => void
 export type OnFailedCallback = (job: IJob, error: Error) => void
 export type OnCompletedCallback = (job: IJob, result: object) => void
 
-export type QueueConstructor = (name: string) => IQueue
-export const Queue = Symbol.for('IQueue') // tslint:disable-line
+export type IQueueConstructor = (name: string) => IQueue
 
 export interface IQueue {
   send (data: object, opts?: IJobOptions): Promise<IJob>

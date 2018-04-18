@@ -3,12 +3,33 @@
  * Sets up the needed providers for the Queue system
  */
 
-import { ContainerModule } from 'inversify'
+import { ContainerModule, interfaces } from 'inversify'
 
-import { Queue } from './providers/redis'
-import * as type from './type'
+import { Config } from '../config'
+import { Queue, workerQueue } from './index'
+import { Queue as RedisQueue } from './providers/redis'
+import { IQueue, IQueueConstructor } from './type'
 
-// TODO: Add more providers.
 export const provider = new ContainerModule((bind) => {
-  bind<type.QueueConstructor>(type.Queue).toConstructor(Queue)
+  bind<IQueueConstructor>(Queue).toFactory<IQueue>((context: interfaces.Context) => {
+    return function QueueFactory (name: string) {
+      const config = context.container.get<Config>(Config)
+
+      if (config.get('queue.client') === 'redis') {
+        return new RedisQueue(config, name)
+      }
+
+      if (config.has('queue.client') === false) {
+        throw new Error('No queue client configured')
+      } else {
+        throw new Error(`Unknown queue client of "${config.get('queue.client')}" configured`)
+      }
+    }
+  })
+
+  bind<IQueue>(workerQueue).toDynamicValue((context: interfaces.Context) => {
+    const queueConstructor = context.container.get<IQueueConstructor>(Queue)
+
+    return queueConstructor('WorkerQueue')
+  })
 })

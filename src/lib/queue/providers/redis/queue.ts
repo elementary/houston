@@ -8,19 +8,10 @@ import { inject, injectable } from 'inversify'
 
 import { Config } from '../../../config'
 import * as type from '../../type'
-import Job from './job'
+import { Job } from './job'
 
 @injectable()
 export class Queue implements type.IQueue {
-
-  /**
-   * The configuration instance to use
-   *
-   * @var {Config}
-   */
-  @inject(Config)
-  protected config: Config
-
   /**
    * The bull instance we will be proxying to
    *
@@ -33,11 +24,11 @@ export class Queue implements type.IQueue {
    *
    * @param {String} name
    */
-  constructor (name: string) {
-    const config = this.config.get('queue.connection')
+  constructor (@inject(Config) config: Config, name: string) {
+    const connection = config.get('queue.connection')
 
     if (typeof config === 'object') {
-      this.bull = new BaseBull(name, { redis: config })
+      this.bull = new BaseBull(name, { redis: connection })
     } else {
       this.bull = new BaseBull(name, config)
     }
@@ -88,21 +79,10 @@ export class Queue implements type.IQueue {
     }
   }
 
-  public async jobs (state) {
-    switch (state) {
-      case ('waiting'):
-        return this.bull.getWaiting()
-      case ('active'):
-        return this.bull.getActive()
-      case ('completed'):
-        return this.bull.getCompleted()
-      case ('failed'):
-        return this.bull.getFailed()
-      case ('delayed'):
-        return this.bull.getDelayed()
-      default:
-        return []
-    }
+  public async jobs (state: type.Status): Promise<Job[]> {
+    const bullJobs = await this.bullJobs(state)
+
+    return bullJobs.map((j) => new Job(j))
   }
 
   public onActive (fn) {
@@ -121,4 +101,20 @@ export class Queue implements type.IQueue {
     this.bull.on('completed', fn)
   }
 
+  protected async bullJobs (state: type.Status): Promise<BaseBull.Job[]> {
+    switch (state) {
+      case ('waiting'):
+        return this.bull.getWaiting()
+      case ('active'):
+        return this.bull.getActive()
+      case ('completed'):
+        return this.bull.getCompleted()
+      case ('failed'):
+        return this.bull.getFailed()
+      case ('delayed'):
+        return this.bull.getDelayed()
+      default:
+        return []
+    }
+  }
 }
