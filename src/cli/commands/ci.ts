@@ -134,7 +134,11 @@ function buildStorage (argv, repository) {
  */
 function logLogs (logs) {
   for (const log of logs.sort((a, b) => (b.level - a.level))) {
+    console.log('')
+    console.log('')
     console.log(log.toString())
+    console.log('')
+    console.log('')
   }
 }
 
