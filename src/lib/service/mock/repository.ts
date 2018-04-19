@@ -58,13 +58,12 @@ export class Repository implements RepositoryInterface {
   /**
    * references
    * Returns a list of references this repository has
-   * TODO: Try to figure out a more optimized way
    *
    * @async
    * @return {string[]}
    */
   public async references (): Promise<string[]> {
-    return []
+    return ['refs/origin/master']
   }
 
   /**

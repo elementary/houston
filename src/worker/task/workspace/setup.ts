@@ -16,21 +16,19 @@ export class WorkspaceSetup extends Task {
   /**
    * Given two lists of strings we can find the first most common string.
    *
-   * @param {String[]} haystacks
-   * @param {String[]} needles
-   * @return {String|null}
+   * @param {String[]} references
+   * @param {String[]} search - All of the reference parts we are looking for
+   * @return {String[]}
    */
-  protected static crossFindRef (haystacks, needles): string|null {
-    for (const needle of needles) {
-      for (const haystack of haystacks) {
-        const n = needle.split('/').reverse()[0]
-        const h = haystack.split('/').reverse()[0]
+  protected static filterRefs (references, search): string[] {
+    // Gets the last part of a git reference "refs/origin/master" -> "master"
+    const shortReferences = references
+      .map((ref) => ref.split('/').reverse()[0])
 
-        if (h === n) {
-          return haystack
-        }
-      }
-    }
+    return search
+      .map((ref) => shortReferences.findIndex((short) => (short === ref)))
+      .filter((ref) => (ref !== -1))
+      .map((i) => references[i])
   }
 
   /**
@@ -84,22 +82,20 @@ export class WorkspaceSetup extends Task {
    */
   protected async branches (): Promise<string[]> {
     const repositoryReferences = await this.worker.repository.references()
-    const workspaceReferences = [...this.worker.context.references]
 
-    const packageReference = WorkspaceSetup.crossFindRef(repositoryReferences, [
-      `${this.worker.context.packageSystem}-package-${this.worker.context.distribution}`,
-      `${this.worker.context.packageSystem}-packaging-${this.worker.context.distribution}`,
-      `${this.worker.context.packageSystem}-package`,
-      `${this.worker.context.packageSystem}-packaging`,
-      `${this.worker.context.distribution}-package`,
+    const packageReferences = WorkspaceSetup.filterRefs(repositoryReferences, [
+      `${this.worker.context.distribution}`,
       `${this.worker.context.distribution}-packaging`,
-      `${this.worker.context.distribution}`
+      `${this.worker.context.distribution}-package`,
+      `${this.worker.context.packageSystem}-packaging`,
+      `${this.worker.context.packageSystem}-package`,
+      `${this.worker.context.packageSystem}-packaging-${this.worker.context.distribution}`,
+      `${this.worker.context.packageSystem}-package-${this.worker.context.distribution}`
     ])
 
-    if (packageReference != null) {
-      workspaceReferences.push(packageReference)
-    }
-
-    return workspaceReferences
+    return [
+      ...this.worker.context.references,
+      ...packageReferences
+    ]
   }
 }
