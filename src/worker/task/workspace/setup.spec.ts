@@ -11,11 +11,12 @@ test('builds workspace from all matching branches', async () => {
   const worker = await mock({
     distribution: 'loki',
     nameDomain: 'com.github.elementary.houston',
-    packageSystem: 'deb'
+    packageSystem: 'deb',
+    references: ['refs/heads/loki']
   })
 
   worker.repository.references = async () => ([
-    'refs/heads/deb-package-loki',
+    'refs/heads/deb-packaging-loki',
     'refs/heads/deb-packaging-juno',
     'refs/heads/deb-packaging',
     'refs/heads/juno',
@@ -27,9 +28,8 @@ test('builds workspace from all matching branches', async () => {
   const branches = await setup.branches()
 
   expect(branches).toEqual([
-    'refs/heads/master',
     'refs/heads/loki',
     'refs/heads/deb-packaging',
-    'refs/heads/deb-package-loki'
+    'refs/heads/deb-packaging-loki'
   ])
 }, 300000)
