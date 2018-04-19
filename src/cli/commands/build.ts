@@ -114,6 +114,12 @@ function buildContext (argv, repository) {
   return obj
 }
 
+function logSpacer () {
+  console.log('')
+  console.log('='.repeat(80))
+  console.log('')
+}
+
 /**
  * Logs all of the logs to the console
  *
@@ -122,11 +128,8 @@ function buildContext (argv, repository) {
  */
 function logLogs (logs) {
   for (const log of logs.sort((a, b) => (b.level - a.level))) {
-    console.log('')
-    console.log('')
+    logSpacer()
     console.log(log.toString())
-    console.log('')
-    console.log('')
   }
 }
 
@@ -145,7 +148,7 @@ export async function handler (argv) {
   await worker.run()
 
   for (const pkg of worker.result.packages) {
-    if (await fs.exists(pkg.path)) {
+    if (pkg.path != null && await fs.exists(pkg.path)) {
       const fileName = path.resolve(process.cwd(), path.basename(pkg.path))
       await fs.copy(pkg.path, fileName, { overwrite: true })
     }
@@ -154,11 +157,13 @@ export async function handler (argv) {
   if (worker.fails) {
     console.error(`Error while running build for ${argv.repo} for ${argv.version}`)
     logLogs(worker.result.logs)
+    logSpacer()
 
     process.exit(1)
   } else {
     console.log(`Built ${argv.repo} for version ${argv.version}`)
     logLogs(worker.result.logs)
+    logSpacer()
 
     process.exit(0)
   }
