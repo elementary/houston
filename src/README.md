@@ -29,3 +29,8 @@ need to change something about the database.
 
 This holds the code for the repository syslog server. This is used by nginx
 to record download counts of files in the repository.
+
+## worker/
+
+This is the worker process. It is responsible for building and releasing
+projects.
