@@ -24,6 +24,7 @@ export const describe = 'Tests a local project with the worker process'
 
 const SLUG = process.env.TRAVIS_REPO_SLUG
 const REPO = `https://github.com/${SLUG}`
+const BRANCH = process.env.TRAVIS_BRANCH
 
 export const builder = (yargs) => {
     return yargs
@@ -86,7 +87,7 @@ export const builder = (yargs) => {
         type: 'string'
       })
       .option('references', {
-        default: [],
+        default: (BRANCH != null) ? [`refs/heads/${BRANCH}`] : [],
         describe: 'References to pull',
         type: 'array'
       })
