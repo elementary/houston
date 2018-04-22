@@ -16,6 +16,12 @@ export const provider = new ContainerModule((bind) => {
       const config = context.container.get<Config>(Config)
 
       if (config.get('queue.client') === 'redis') {
+        try {
+          require.resolve('bull')
+        } catch (e) {
+          throw new Error('Package "bull" is not installed. Please install it.')
+        }
+
         return new RedisQueue(config, name)
       }
 
