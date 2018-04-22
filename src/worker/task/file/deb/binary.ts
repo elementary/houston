@@ -30,7 +30,26 @@ export class FileDebBinary extends Task {
     const exists = await fs.exists(this.path)
 
     if (exists === false) {
-      throw new Log(Log.Level.ERROR, `Missing shipped binary at /usr/bin/${this.worker.context.nameDomain}`)
+      throw Log.template(Log.Level.ERROR, path.resolve(__dirname, 'binary.md'), {
+        context: this.worker.context,
+        files: await this.files()
+      })
     }
+  }
+
+  /**
+   * Returns a list of useful files in the package. Filters out custom files
+   *
+   * @async
+   * @return {string[]}
+   */
+  protected async files (): Promise<string[]> {
+    const root = path.resolve(this.worker.workspace, 'package')
+    const files = await glob(path.resolve(root, '**/*'), { nodir: true })
+
+    return files
+      .filter((p) => !p.startsWith(path.resolve(root, 'DEBIAN')))
+      .filter((p) => (p !== path.resolve(root, 'FILES')))
+      .map((p) => p.substring(root.length))
   }
 }
