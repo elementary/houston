@@ -113,6 +113,7 @@
     "setupFiles": [
       "<rootDir>/src/bootstrap.js"
     ],
+    "setupTestFrameworkScriptFile": "<rootDir>/test/bootstrap.js",
     "testRegex": "\\.(spec|e2e)\\.ts$",
     "transform": {
       "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
