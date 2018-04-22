@@ -88,7 +88,7 @@ export const builder = (yargs) => {
         type: 'string'
       })
       .option('references', {
-        default: (BRANCH != null) ? [`refs/heads/${BRANCH}`] : [],
+        default: [],
         describe: 'References to pull',
         type: 'array'
       })
