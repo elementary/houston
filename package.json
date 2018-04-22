@@ -22,8 +22,7 @@
     "test:watch": "jest --no-cache --watch .spec.ts",
     "coverage": "jest --no-cache --coverage",
     "ci": "jest --no-cache --coverage --verbose --ci --runInBand false -w 2",
-    "lint": "tslint --project 'tsconfig.json'",
-    "prepublishOnly": "npm run lint && npm run test && npm run build"
+    "lint": "tslint --project 'tsconfig.json'"
   },
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.5",

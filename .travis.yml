@@ -38,6 +38,7 @@ jobs:
     - node_js: 8
 
     - stage: Release
+      script: npm run build
       deploy:
         provider: npm
         email: btkostner@gmail.com
