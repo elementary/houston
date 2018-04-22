@@ -51,6 +51,7 @@ export const builder = (yargs) => {
       type: 'string'
     })
     .option('name-appstream', {
+      coerce: sanitize,
       describe: 'AppStream id',
       type: 'string'
     })
