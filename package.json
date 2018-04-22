@@ -21,7 +21,7 @@
     "test:e2e": "jest --no-cache .e2e.ts",
     "test:watch": "jest --no-cache --watch .spec.ts",
     "coverage": "jest --no-cache --coverage",
-    "ci": "jest --no-cache --coverage --verbose --ci --runInBand false",
+    "ci": "jest --no-cache --coverage --verbose --ci --runInBand false -w 2",
     "lint": "tslint --project 'tsconfig.json'",
     "prepublishOnly": "npm run lint && npm run test && npm run build"
   },
