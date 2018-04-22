@@ -10,7 +10,6 @@ import { inject, injectable, multiInject } from 'inversify'
 import * as Koa from 'koa'
 import * as Router from 'koa-router'
 
-import { compress } from './middleware/compress'
 import { report } from './middleware/report'
 
 import { Config } from '../config'
@@ -67,7 +66,6 @@ export class Server implements Servable {
    * @var {Middleware[]}
    */
   protected middlewares: Middleware[] = [
-    compress,
     report
   ]
 

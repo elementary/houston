@@ -7,7 +7,7 @@
   "author": "elementary (https://elementary.io)",
   "license": "MIT",
   "engines": {
-    "node": "^8.9.4"
+    "node": ">= 8.0.0"
   },
   "bin": {
     "houston": "dest/bin.js"
@@ -21,7 +21,7 @@
     "test:e2e": "jest --no-cache .e2e.ts",
     "test:watch": "jest --no-cache --watch .spec.ts",
     "coverage": "jest --no-cache --coverage",
-    "ci": "jest --ci --no-cache --coverage",
+    "ci": "jest --no-cache --coverage --verbose --ci --runInBand false",
     "lint": "tslint --project 'tsconfig.json'",
     "prepublishOnly": "npm run lint && npm run test && npm run build"
   },
@@ -41,7 +41,6 @@
     "inversify": "^4.13.0",
     "knex": "^0.14.6",
     "koa": "^2.5.0",
-    "koa-compress": "^3.0.0",
     "koa-router": "^7.3.0",
     "koa-static": "^4.0.2",
     "lodash": "^4.17.4",
