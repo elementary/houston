@@ -7,7 +7,7 @@
   "author": "elementary (https://elementary.io)",
   "license": "MIT",
   "engines": {
-    "node": "^6.10.0"
+    "node": "^8.9.4"
   },
   "bin": {
     "houston": "dest/bin.js"
