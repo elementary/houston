@@ -24,7 +24,13 @@ test('adds underscore before number starting section', () => {
 })
 
 test('can convert 7-zip.org Archiver correctly', () => {
-  const str = rdnn.sanitize('org.7-zip.Archiver')
+  const str = rdnn.sanitize('org.7-zip.archiver')
 
-  expect(str).toEqual('org._7_zip.Archiver')
+  expect(str).toEqual('org._7_zip.archiver')
+})
+
+test('it lowercases everything', () => {
+  const str = rdnn.sanitize('com.github.Username.RePoSiToRy')
+
+  expect(str).toEqual('com.github.username.repository')
 })

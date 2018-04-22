@@ -15,4 +15,5 @@ export function sanitize (rdnn: string): string {
     .replace(/\s/gi, '_')
     .replace(/\.([0-9])/gi, '._$1')
     .replace(/\-/gi, '_')
+    .toLowerCase()
 }
