@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://developer.elementary.io" align="center">
-    <center>
+    <center align="center">
       <img src="https://raw.githubusercontent.com/elementary/houston/v2/brand/AppCenter.png" alt="AppCenter" align="center">
     </center>
   </a>
@@ -27,10 +27,9 @@
 
 ---
 
-> Houston is not even at a 1.0.0 release, yet there are many aspects that can be
-approved on, especially as the idea and goal get more set in stone. This `v2`
-branch is a place to talk and discuss the improvements to be made with
-developers and users.
+> Houston is currently undergoing a rewrite to typescript with an emphasis on
+testability. Currently, the only part used in production for v2 is the worker
+process. Everything else will be found in the master branch.
 
 Houston is part of AppCenter, a multi component system for helping developers
 and making users' life easier. Houston includes processes for building, testing,
