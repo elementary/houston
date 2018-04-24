@@ -1,8 +1,6 @@
 /**
  * houston/src/worker/worker.e2e.ts
  * Runs some repositories through tests for end to end testing
- *
- * NOTE: All tests have an hour long timeout because we are building thing
  */
 
 import * as fs from 'fs-extra'
@@ -18,6 +16,9 @@ import * as type from './type'
 import { create } from '../../test/utility/app'
 import { tmp } from '../../test/utility/fs'
 
+// NOTE: All tests have an hour long timeout because we are building thing
+jest.setTimeout(3600000)
+
 let config: Config
 let testingDir: string
 
@@ -29,7 +30,6 @@ beforeAll(async () => {
   testingDir = await tmp('worker')
 })
 
-// TODO: Enable when AppStream OARS added
 test.skip('needle-and-thread/vocal passes build process', async () => {
   const repo = new GithubRepository('https://github.com/needle-and-thread/vocal')
 
@@ -38,16 +38,16 @@ test.skip('needle-and-thread/vocal passes build process', async () => {
     appstream: '',
     architecture: 'amd64',
     changelog: [],
-    distribution: 'xenial',
+    distribution: 'juno',
     logs: [],
     nameAppstream: 'com.github.needle-and-thread.vocal.desktop',
     nameDeveloper: 'Needle & Thread',
     nameDomain: 'com.github.needle-and-thread.vocal',
     nameHuman: 'Vocal',
     packageSystem: null,
-    references: ['refs/tags/2.1.5'],
+    references: ['refs/tags/2.2.0'],
     type: 'app',
-    version: '2.1.5'
+    version: '2.2.0'
   }
 
   const proc = Build(config, repo, context)
@@ -60,7 +60,7 @@ test.skip('needle-and-thread/vocal passes build process', async () => {
   await proc.teardown()
 
   expect(proc.passes).toBeTruthy()
-}, 3600000)
+})
 
 // TODO: Enable when AppStream OARS added
 test.skip('Philip-Scott/Spice-up passes build process', async () => {
@@ -71,7 +71,7 @@ test.skip('Philip-Scott/Spice-up passes build process', async () => {
     appstream: '',
     architecture: 'amd64',
     changelog: [],
-    distribution: 'xenial',
+    distribution: 'loki',
     logs: [],
     nameAppstream: 'com.github.philip-scott.spice-up.desktop',
     nameDeveloper: 'Philip Scott',
@@ -93,7 +93,7 @@ test.skip('Philip-Scott/Spice-up passes build process', async () => {
   await proc.teardown()
 
   expect(proc.passes).toBeTruthy()
-}, 3600000)
+})
 
 // TODO: Fix bugs
 test.skip('elementary/code passes build process', async () => {
@@ -104,7 +104,7 @@ test.skip('elementary/code passes build process', async () => {
     appstream: '',
     architecture: 'amd64',
     changelog: [],
-    distribution: 'xenial',
+    distribution: 'juno',
     logs: [],
     nameAppstream: 'io.elementary.code.desktop',
     nameDeveloper: 'elementary',
