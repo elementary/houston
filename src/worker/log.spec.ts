@@ -18,3 +18,10 @@ test('it can render a template', () => {
   expect(log.title).toBe('testing')
   expect(log.body).toBe('This is a basic test1 Log template.\n\n## This is a subheader')
 })
+
+test('toString returns a nice templated log', () => {
+  const err = new Log(Log.Level.ERROR, 'title', 'body')
+  const str = err.toString()
+
+  expect(str).toBe('# title\n\nbody')
+})

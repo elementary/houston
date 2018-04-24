@@ -80,6 +80,10 @@ export class Log extends Error implements ILog {
   constructor (level: Level, title: string, body?: string) {
     super(title)
 
+    // Proper extending of builtin Error
+    this.name = this.constructor.name
+    Error.captureStackTrace(this, this.constructor)
+
     this.level = level
     this.title = title
     this.body = body
@@ -100,26 +104,16 @@ export class Log extends Error implements ILog {
 
   /**
    * Returns a nice string version of the log
-   * BUG: This should override the default node `Error.toString()`
    *
    * @return {string}
    */
   public toString () {
-    const out = []
+    const out = [`# ${this.title}`, '']
 
-    if (this.body != null) {
-      const bodyIndented = this.body
-        .split('\n')
-        .map((l) => `  ${l}`)
+    const bodyLines = ((this.body != null) ? this.body : this.stack)
+      .split('\n')
 
-      out.push(...bodyIndented)
-    } else {
-      const stackIndented = this.stack
-        .split('\n')
-        .map((l) => `  ${l}`)
-
-      out.push(...stackIndented)
-    }
+    out.push(...bodyLines)
 
     return out.join('\n')
   }
