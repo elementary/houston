@@ -1,5 +1,5 @@
 /**
- * houston/src/worker/type.d.ts
+ * houston/src/worker/type.ts
  * A bunch of type definitions for the worker process
  */
 
@@ -8,8 +8,8 @@ import { Level } from '../lib/log/level'
 import { Repository } from '../lib/service/base/repository'
 import { EventEmitter } from '../lib/utility/eventemitter'
 
-type Type = 'app' | 'system-app' | 'library' | 'system-library' | 'debug'
-type PackageSystem = 'deb'
+export type Type = 'app' | 'system-app' | 'library' | 'system-library' | 'debug'
+export type PackageSystem = 'deb'
 
 export interface IPackage {
   type: PackageSystem
