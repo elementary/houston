@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/elementary/houston"
+    "url": "git+https://github.com/elementary/houston.git"
   },
   "engines": {
     "node": ">= 8.0.0"
