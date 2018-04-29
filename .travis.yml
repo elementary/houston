@@ -23,15 +23,10 @@ cache:
 script:
   - npm run build
   - npm run lint
-  - npm run ci
+  - npm run ci:test
 
 jobs:
   include:
-    - stage: Setup
-      script: docker pull ubuntu:16.04
-      # TODO: Pull testing docker images
-      # TODO: Warm up liftoff cache
-
     - stage: Test
       node_js: lts/*
     - node_js: 9
@@ -40,11 +35,9 @@ jobs:
     - stage: Release
       script: npm run build
       deploy:
-        provider: npm
-        email: btkostner@gmail.com
+        provider: script
         skip_cleanup: true
-        api_key:
-          secure: Qn7e6BYWVYRRRpEY+5c5iNTuuj8c/vM8dc53Su8iGptvCKCXumAGObzsS6QtA0ayP8uiYYU9y6NHmIzjVbcvovLX9BgWOR3WjKngJfT7K3Ekv0Ox7v0YT/gPAmeug4VnMboe1YDjsHzIlcDkYHDrzxfsS7SQqQlWiQj7xxMBAW8LtuFb37syKGcN/wmsK/7GcWxb5Q/6Oc25IA6d1ndgTZExXUosVuk5JqPpnA5jKwdv7HZFjY0ZkXG8NkcwJNeMTC35cajgjTennYf8uF4yAaBJMmMnIcXn7GPU+rJreQL1EPsDoWGUDlLNxVHKR+DZM1ZSRA26lsEt5JH61lgg5bN/ke6xA+6iELM1A//uvFOVZ9ddr/m1SCDGyAUWTqVlCnB8poc5UtxkEC4SblJ140bTJVN4WnoMsVlgBM67vqniwRiwl9jhPnrQBH8v5kvWCWQKUXrkBlRjqZaUGc9LcIchuEJv+ioSIsQoW8dO6cT9rGJGkMhInfIATSBLfJJPZmAiMM46g2rxzRrcZ/PEsH5+hghpmDq6xNtW6d2w7+cRPOw0hcfbnFlBd0KZxM7oXi18/vb1ZOKTy/A/HGSUFcoFnrgNL1u+fsJ8dhrzDYsnGOYG95Il9EwB02F/QttAl20WBZV0NqFPUyUSEAYsV1RnBVzuEqz0masEEaGK+wQ=
+        script: npm run ci:release
         on:
           repo: elementary/houston
           branch: v2

@@ -1,11 +1,14 @@
 {
   "name": "@elementaryos/houston",
-  "version": "2.0.0-alpha.35",
+  "version": "0.0.0-development",
   "description": "Backend to AppCenter",
   "main": "dist/app.js",
-  "repository": "https://github.com/elementary/houston",
   "author": "elementary (https://elementary.io)",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elementary/houston"
+  },
   "engines": {
     "node": ">= 8.0.0"
   },
@@ -16,12 +19,14 @@
     "start": "node dest/bin.js",
     "build": "gulp --gulpfile 'build/gulpfile.ts' build",
     "build:watch": "gulp --gulpfile 'build/gulpfile.ts' watch",
+    "commit": "git-cz",
     "test": "jest --no-cache",
     "test:unit": "jest --no-cache .spec.ts",
     "test:e2e": "jest --no-cache .e2e.ts",
     "test:watch": "jest --no-cache --watch .spec.ts",
     "coverage": "jest --no-cache --coverage",
-    "ci": "jest --no-cache --coverage --verbose --ci --runInBand false -w 2",
+    "ci:test": "jest --no-cache --coverage --verbose --ci --runInBand false -w 2",
+    "ci:release": "semantic-release",
     "lint": "tslint --project 'tsconfig.json'"
   },
   "dependencies": {
@@ -62,11 +67,14 @@
     "@types/knex": "0.14.12",
     "@types/koa-router": "^7.0.27",
     "@types/node": "^9.6.6",
+    "commitizen": "^2.9.6",
+    "cz-conventional-changelog": "^2.1.0",
     "gulp": "^4.0.0",
     "gulp-sourcemaps": "^2.6.3",
     "gulp-typescript": "^4.0.2",
     "jest": "^22.4.3",
     "nock": "^9.2.5",
+    "semantic-release": "^15.1.8",
     "sinon": "^4.5.0",
     "sqlite3": "^4.0.0",
     "supertest": "^3.0.0",
@@ -83,6 +91,9 @@
   ],
   "publichConfig": {
     "access": "public"
+  },
+  "release": {
+    "branch": "v2"
   },
   "jest": {
     "collectCoverage": true,
@@ -116,6 +127,11 @@
     "testRegex": "\\.(spec|e2e)\\.ts$",
     "transform": {
       "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    }
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
     }
   }
 }
