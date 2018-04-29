@@ -4,4 +4,7 @@
  */
 
 export { App } from './lib/app'
+
 export { Config } from './lib/config'
+
+export { Worker } from './worker'
