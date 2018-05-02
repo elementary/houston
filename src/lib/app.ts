@@ -21,6 +21,7 @@ export class App extends Container {
    */
   protected static providers: ContainerModule[] = [
     require('../repo/provider').provider,
+    require('../worker/provider').provider,
     require('./database/provider').provider,
     require('./log/provider').provider,
     require('./queue/provider').provider,
