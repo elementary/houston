@@ -2,7 +2,7 @@
   "name": "@elementaryos/houston",
   "version": "0.0.0-development",
   "description": "Backend to AppCenter",
-  "main": "dist/app.js",
+  "main": "dest/app.js",
   "author": "elementary (https://elementary.io)",
   "license": "MIT",
   "repository": {
