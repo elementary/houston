@@ -8,3 +8,4 @@ export { App } from './lib/app'
 export { Config } from './lib/config'
 
 export { Worker } from './worker'
+export { Build as BuildWorker } from './worker'

@@ -12,3 +12,6 @@ export {
 
 export { Server } from './server'
 export { Worker } from './worker'
+
+// Export presets
+export { Build } from './preset/build'
