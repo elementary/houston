@@ -1,6 +1,6 @@
 /**
- * houston/src/worker/preset/build.ts
- * Builds a package and edits contents for appcenter.
+ * houston/src/worker/preset/release.ts
+ * Releases a package to all able endpoints.
  */
 
 import { Config } from '../../lib/config'
@@ -18,7 +18,7 @@ import { FileDeb } from '../task/file/deb'
 import { PackDeb } from '../task/pack/deb'
 import { WorkspaceSetup } from '../task/workspace/setup'
 
-function buildTasks (t: type.Type): type.ITaskConstructor[] {
+function releaseTasks (t: type.Type): type.ITaskConstructor[] {
   switch (t) {
     case 'library':
       return [
@@ -42,10 +42,10 @@ function buildTasks (t: type.Type): type.ITaskConstructor[] {
   }
 }
 
-export function Build (config: Config, repository: ICodeRepository, context: type.IContext) {
+export function Release (config: Config, repository: ICodeRepository, context: type.IContext) {
   const worker = new Worker(config, repository, context)
 
-  for (const task of buildTasks(context.type)) {
+  for (const task of releaseTasks(context.type)) {
     worker.tasks.push(task)
   }
 

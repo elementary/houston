@@ -26,6 +26,7 @@ export class App extends Container {
     require('./log/provider').provider,
     require('./queue/provider').provider,
     require('./server/provider').provider,
+    require('./service/provider').provider,
     require('./utility/faker/provider').provider
   ]
 

@@ -9,7 +9,7 @@ import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
 import { Config } from '../lib/config'
-import { Repository as GithubRepository } from '../lib/service/github/repository'
+import { GitHub } from '../lib/service'
 import { Build } from './preset/build'
 import * as type from './type'
 
@@ -31,7 +31,7 @@ beforeAll(async () => {
 })
 
 test.skip('needle-and-thread/vocal passes build process', async () => {
-  const repo = new GithubRepository('https://github.com/needle-and-thread/vocal')
+  const repo = new GitHub('https://github.com/needle-and-thread/vocal')
 
   const context : type.IContext = {
     appcenter: {},
@@ -64,7 +64,7 @@ test.skip('needle-and-thread/vocal passes build process', async () => {
 
 // TODO: Enable when AppStream OARS added
 test.skip('Philip-Scott/Spice-up passes build process', async () => {
-  const repo = new GithubRepository('https://github.com/Philip-Scott/Spice-up')
+  const repo = new GitHub('https://github.com/Philip-Scott/Spice-up')
 
   const context : type.IContext = {
     appcenter: {},
@@ -97,7 +97,7 @@ test.skip('Philip-Scott/Spice-up passes build process', async () => {
 
 // TODO: Fix bugs
 test.skip('elementary/code passes build process', async () => {
-  const repo = new GithubRepository('https://github.com/elementary/code')
+  const repo = new GitHub('https://github.com/elementary/code')
 
   const context : type.IContext = {
     appcenter: {},
@@ -127,3 +127,34 @@ test.skip('elementary/code passes build process', async () => {
 
   expect(proc.passes).toBeTruthy()
 }, 3600000)
+
+// TODO: Remove after we are all in v2
+test.skip('needle-and-thread/vocal passes old flightcheck process', async () => {
+  const repo = new GitHub('https://github.com/needle-and-thread/vocal')
+
+  const context : type.IContext = {
+    appcenter: {},
+    appstream: '',
+    changelog: [],
+    logs: [],
+    nameAppstream: 'com.github.needle-and-thread.vocal.desktop',
+    nameDeveloper: 'needle-and-thread',
+    nameDomain: 'com.github.needle-and-thread.vocal',
+    nameHuman: 'vocal',
+    packageSystem: 'deb',
+    references: ['refs/tags/2.2.0'],
+    type: 'app',
+    version: '2.2.0'
+  }
+
+  const proc = Build(config, repo, context)
+  proc.workspace = path.resolve(testingDir, uuid())
+
+  proc.on('run:error', (e) => console.error(e))
+
+  await proc.setup()
+  await proc.run()
+  await proc.teardown()
+
+  expect(proc.passes).toBeTruthy()
+})

@@ -11,7 +11,7 @@ import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
 import { Config } from '../lib/config'
-import { Repository } from '../lib/service/base/repository'
+import { ICodeRepository } from '../lib/service'
 import { EventEmitter } from '../lib/utility/eventemitter'
 import { Log } from './log'
 import * as type from './type'
@@ -31,9 +31,9 @@ export class Worker extends EventEmitter implements type.IWorker {
    * repository
    * A repository to use for this process
    *
-   * @var {Repository}
+   * @var {ICodeRepository}
    */
-  public repository: Repository
+  public repository: ICodeRepository
 
   /**
    * context
@@ -78,10 +78,10 @@ export class Worker extends EventEmitter implements type.IWorker {
    * Creates a new worker process
    *
    * @param {Config} config - The configuration to use
-   * @param {Repository} repository - The repository to process on
+   * @param {ICodeRepository} repository - The repository to process on
    * @param {IContext} context - The starting context for building
    */
-  constructor (config: Config, repository: Repository, context: type.IContext) {
+  constructor (config: Config, repository: ICodeRepository, context: type.IContext) {
     super()
 
     this.config = config

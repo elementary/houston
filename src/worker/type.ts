@@ -5,7 +5,7 @@
 
 import { Config } from '../lib/config'
 import { Level } from '../lib/log/level'
-import { Repository } from '../lib/service/base/repository'
+import { ICodeRepository } from '../lib/service'
 import { EventEmitter } from '../lib/utility/eventemitter'
 
 export type Type = 'app' | 'system-app' | 'library' | 'system-library' | 'debug'
@@ -14,6 +14,10 @@ export type PackageSystem = 'deb'
 export interface IPackage {
   type: PackageSystem
   path: string // Full path on the FS
+
+  // All the published ids
+  aptlyId?: string
+  githubId?: string
 }
 
 export interface IResult {
@@ -78,7 +82,7 @@ export interface ITask {
 export interface IWorker extends EventEmitter {
   config: Config
   context: IContext
-  repository: Repository
+  repository: ICodeRepository
   workspace: string
 
   report (err: Error)

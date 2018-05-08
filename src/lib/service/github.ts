@@ -1,10 +1,9 @@
 /**
- * houston/src/lib/service/github/repository.ts
+ * houston/src/lib/service/github.ts
  * Handles interaction with GitHub repositories.
- *
- * @return {class} Repository - A GitHub repository class
  */
 
+import * as fileType from 'file-type'
 import * as fs from 'fs-extra'
 import * as Git from 'nodegit'
 import * as os from 'os'
@@ -12,10 +11,10 @@ import * as path from 'path'
 import * as agent from 'superagent'
 import * as uuid from 'uuid/v4'
 
-import { Repository as RepositoryInterface } from '../base/repository'
-import { sanitize } from '../rdnn'
+import { sanitize } from '../utility/rdnn'
+import * as type from './type'
 
-export class Repository implements RepositoryInterface {
+export class GitHub implements type.ICodeRepository, type.IPackageRepository {
 
   /**
    * tmpFolder
@@ -56,6 +55,44 @@ export class Repository implements RepositoryInterface {
    * @var {string}
    */
   public reference = 'refs/heads/master'
+
+  /**
+   * Tries to get the file mime type by reading the first chunk of a file.
+   * Required by GitHub API
+   *
+   * Code taken from examples of:
+   * https://github.com/sindresorhus/file-type
+   * https://github.com/sindresorhus/read-chunk/blob/master/index.js
+   *
+   * @async
+   * @param {String} p Full file path
+   * @return {String} The file mime type
+   */
+  protected static async getFileType (p: string): Promise<string> {
+    const buffer = await new Promise((resolve, reject) => {
+      fs.open(p, 'r', (openErr, fd) => {
+        if (openErr != null) {
+          return reject(openErr)
+        }
+
+        fs.read(fd, Buffer.alloc(4100), 0, 4100, 0, (readErr, bytesRead, buff) => {
+          fs.close(fd)
+
+          if (readErr != null) {
+            return reject(readErr)
+          }
+
+          if (bytesRead < 4100) {
+            return resolve(buff.slice(0, bytesRead))
+          } else {
+            return resolve(buff)
+          }
+        })
+      })
+    })
+
+    return fileType(buffer).mime
+  }
 
   /**
    * Creates a new GitHub Repository
@@ -146,7 +183,7 @@ export class Repository implements RepositoryInterface {
    * @return {string[]}
    */
   public async references (): Promise<string[]> {
-    const p = path.resolve(Repository.tmpFolder, uuid())
+    const p = path.resolve(GitHub.tmpFolder, uuid())
     const repo = await Git.Clone(this.url, p)
 
     const branches = await repo.getReferenceNames(Git.Reference.TYPE.LISTALL)
@@ -160,14 +197,13 @@ export class Repository implements RepositoryInterface {
    * Uploads an asset to a GitHub release.
    *
    * @async
-   * @param {string} reference
-   * @param {string} p
-   * @param {string} type - The HTTP Content-Type ("text/markdown")
+   * @param {string} p Path to the asset file
    * @param {string} name
    * @param {string} [description]
+   * @param {string} [reference]
    * @return {void}
    */
-  public async asset (reference, p, type, name, description) {
+  public async uploadPackage (p: string, name: string, description: string, reference?: string) {
     const url = `${this.username}/${this.repository}/releases/tags/${reference}`
     const { body } = await agent
       .get(`https://api.github.com/repos/${url}`)
@@ -180,13 +216,14 @@ export class Repository implements RepositoryInterface {
 
     // TODO: Should we remove existing assets that would conflict?
 
+    const mime = await GitHub.getFileType(p)
     const stat = await fs.stat(p)
     const file = await fs.createReadStream(p)
 
     await new Promise((resolve, reject) => {
       const res = agent
         .post(body.upload_url.replace('{?name,label}', ''))
-        .set('content-type', type)
+        .set('content-type', mime)
         .set('content-length', stat.size)
         .set('authorization', `token ${this.auth}`)
         .query({ name })
@@ -197,4 +234,5 @@ export class Repository implements RepositoryInterface {
       file.pipe(res)
     })
   }
+
 }

@@ -1,5 +1,5 @@
 /**
- * houston/src/lib/service/rdnn.spec.ts
+ * houston/src/lib/utility/rdnn.spec.ts
  * Tests RDNN functions
  */
 

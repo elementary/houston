@@ -4,10 +4,10 @@
  */
 
 import { Config } from '../../../src/lib/config'
-import { Repository } from '../../../src/lib/service/mock/repository'
 
 import { create } from '../app'
 import { context } from './context'
+import { Repository } from './repository'
 import { TestWorker } from './worker'
 
 export async function mock (values = {}): Promise<TestWorker> {

@@ -12,8 +12,8 @@ import * as semver from 'semver'
 
 import { Config } from '../../lib/config'
 import { levelIndex } from '../../lib/log/level'
-import { sanitize } from '../../lib/service/rdnn'
-import { create as createRepository } from '../../lib/service/repository'
+import { codeRepository } from '../../lib/service'
+import { sanitize } from '../../lib/utility/rdnn'
 import { Build } from '../../worker/preset/build'
 import { IContext } from '../../worker/type'
 import { Worker } from '../../worker/worker'
@@ -138,7 +138,7 @@ export async function handler (argv) {
   const { app } = setup(argv)
 
   const config = app.get<Config>(Config)
-  const repository = createRepository(argv.repo)
+  const repository = codeRepository(argv.repo)
   const context = buildContext(argv, repository)
 
   const worker = Build(config, repository, context)

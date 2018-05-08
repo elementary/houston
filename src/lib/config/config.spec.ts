@@ -1,9 +1,9 @@
 /**
- * houston/src/lib/config/index.spec.ts
+ * houston/src/lib/config/config.spec.ts
  * Tests the configuration class
  */
 
-import { Config } from './index'
+import { Config } from './config'
 
 test('can be created with an object', () => {
   const config = new Config({

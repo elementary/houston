@@ -7,7 +7,7 @@
 // tslint:disable no-console
 
 import { App } from '../lib/app'
-import { getConfig } from '../lib/config/loader'
+import { Config, getConfig } from '../lib/config'
 import { Logger } from '../lib/log'
 
 /**
@@ -16,7 +16,7 @@ import { Logger } from '../lib/log'
  * @param {Object} argv
  * @return {Object}
  */
-export function setup (argv) {
+export function setup (argv): { app: App, config: Config, logger: Logger } {
   const config = getConfig(argv.config)
   const app = new App(config)
   const logger = app.get(Logger)

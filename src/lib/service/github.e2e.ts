@@ -1,6 +1,6 @@
 /**
- * houston/src/lib/service/github/repository.spec.ts
- * Tests the GitHub repository class.
+ * houston/src/lib/service/github.spec.ts
+ * Tests the GitHub class.
  */
 
 import * as fs from 'fs-extra'
@@ -8,9 +8,9 @@ import * as os from 'os'
 import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
-import { Repository } from './repository'
+import { GitHub } from './github'
 
-import { tmp } from '../../../../test/utility/fs'
+import { tmp } from '../../../test/utility/fs'
 
 let testingDir: string
 
@@ -18,7 +18,7 @@ beforeAll(async () => {
   testingDir = await tmp('lib/service/github')
 
   // Redirect tmp folder for testing because testing
-  Repository.tmpFolder = testingDir
+  GitHub.tmpFolder = testingDir
 })
 
 afterAll(async() => {
@@ -26,7 +26,7 @@ afterAll(async() => {
 })
 
 test('can clone a repository', async () => {
-  const repo = new Repository('https://github.com/elementary/houston')
+  const repo = new GitHub('https://github.com/elementary/houston')
 
   const folder = path.resolve(testingDir, uuid())
   await fs.mkdirs(folder)
@@ -38,7 +38,7 @@ test('can clone a repository', async () => {
 }, 600000) // 10 minutes because of git clone
 
 test('can clone a repository with tag', async () => {
-  const repo = new Repository('https://github.com/elementary/houston')
+  const repo = new GitHub('https://github.com/elementary/houston')
 
   const folder = path.resolve(testingDir, uuid())
   await fs.mkdirs(folder)
@@ -55,7 +55,7 @@ test('can clone a repository with tag', async () => {
 }, 600000) // 10 minutes because of git clone
 
 test.skip('can clone a repository with a non-annotated tag (#511)', async () => {
-  const repo = new Repository('https://github.com/fluks-eos/gdice')
+  const repo = new GitHub('https://github.com/fluks-eos/gdice')
 
   const folder = path.resolve(testingDir, uuid())
   await fs.mkdirs(folder)
@@ -67,7 +67,7 @@ test.skip('can clone a repository with a non-annotated tag (#511)', async () => 
 }, 600000) // 10 minutes because of git clone
 
 test('can list all references for a repository', async () => {
-  const repo = new Repository('https://github.com/elementary/houston')
+  const repo = new GitHub('https://github.com/elementary/houston')
 
   const references = await repo.references()
 
