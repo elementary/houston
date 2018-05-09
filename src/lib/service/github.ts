@@ -197,13 +197,12 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository {
    * Uploads an asset to a GitHub release.
    *
    * @async
-   * @param {string} p Path to the asset file
-   * @param {string} name
-   * @param {string} [description]
+   * @param {IPackage} pkg Package to upload
+   * @param {IStage} stage
    * @param {string} [reference]
-   * @return {void}
+   * @return {IPackage}
    */
-  public async uploadPackage (p: string, name: string, description: string, reference?: string) {
+  public async uploadPackage (pkg: type.IPackage, stage: type.IStage, reference?: string) {
     const url = `${this.username}/${this.repository}/releases/tags/${reference}`
     const { body } = await agent
       .get(`https://api.github.com/repos/${url}`)
@@ -216,23 +215,40 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository {
 
     // TODO: Should we remove existing assets that would conflict?
 
-    const mime = await GitHub.getFileType(p)
-    const stat = await fs.stat(p)
-    const file = await fs.createReadStream(p)
+    const mime = await GitHub.getFileType(pkg.path)
+    const stat = await fs.stat(pkg.path)
+    const file = await fs.createReadStream(pkg.path)
 
-    await new Promise((resolve, reject) => {
-      const res = agent
+    const res: agent = await new Promise((resolve, reject) => {
+      let data = ''
+
+      const req = agent
         .post(body.upload_url.replace('{?name,label}', ''))
         .set('content-type', mime)
         .set('content-length', stat.size)
         .set('authorization', `token ${this.auth}`)
-        .query({ name })
-        .query((description != null) ? { label: description } : {})
-        .on('error', reject)
-        .on('end', resolve)
+        .query({ name: pkg.name })
+        .query((pkg.description != null) ? { label: pkg.description } : {})
+        .parse((response, fn) => {
+          response.on('data', (chunk) => { data += chunk })
+          response.on('end', fn)
+        })
+        .on('end', (err, response) => {
+          if (err != null) {
+            return reject(err)
+          }
 
-      file.pipe(res)
+          try {
+            return resolve(JSON.parse(data))
+          } catch (err) {
+            return reject(err)
+          }
+        })
+
+      file.pipe(req)
     })
+
+    return { ...pkg, githubId: res.id }
   }
 
 }

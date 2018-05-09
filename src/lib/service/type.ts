@@ -3,6 +3,23 @@
  * A bunch of interfaces to abstract away third party services
  */
 
+export type IStage = 'review' | 'stable'
+
+export interface IPackage {
+  type: string
+  path?: string
+
+  architecture?: string
+  distribution?: string
+
+  name?: string
+  description?: string
+
+  // A list of all the PackageRepository references after published
+  aptlyId?: string
+  githubId?: number
+}
+
 export interface ICodeRepository {
   /**
    * The code repository URL
@@ -44,11 +61,10 @@ export interface IPackageRepository {
    * Takes a full path to file and uploads it to a package repository
    *
    * @async
-   * @param {String} p The full path to the asset
-   * @param {String} name The human readable name of the file
-   * @param {String} [description] A human readable description of the file
+   * @param {IPackage} pkg The package to upload
+   * @param {IStage} stage The build stage the package is in
    * @param {String} [reference] A code-repository reference that this file was from
-   * @return {void}
+   * @return {IPackage}
    */
-  uploadPackage: (p: string, name: string, description?: string, reference?: string) => Promise<void>
+  uploadPackage: (pkg: IPackage, stage: IStage, reference?: string) => Promise<IPackage>
 }

@@ -15,6 +15,9 @@ export interface IPackage {
   type: PackageSystem
   path: string // Full path on the FS
 
+  architecture?: string
+  distribution?: string
+
   // All the published ids
   aptlyId?: string
   githubId?: string

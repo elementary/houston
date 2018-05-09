@@ -7,6 +7,7 @@ import * as path from 'path'
 
 import { record } from '../../../test/utility/http'
 import { GitHub } from './github'
+import * as type from './type'
 
 test('url returns correct string without authentication', () => {
   const repo = new GitHub('https://github.com/elementary/houston')
@@ -52,9 +53,18 @@ test('can set values based on ssh url', () => {
 test('can post assets to reference', async () => {
   const { done } = await record('lib/service/github/asset.json')
   const repo = new GitHub('https://github.com/btkostner/vocal')
-  const file = path.resolve(__dirname, '../../../test/fixture/lib/service/github/vocal.deb')
+  const pkg = {
+    architecture: 'amd64',
+    description: 'Vocal 3.2.6 Loki (amd64)',
+    distribution: 'xenial',
+    name: 'package.deb',
+    path: path.resolve(__dirname, '../../../test/fixture/lib/service/github/vocal.deb'),
+    type: 'deb'
+  } as type.IPackage
 
-  await repo.uploadPackage(file, 'package.deb', 'Vocal 3.2.6 Loki (amd64)', '3.2.6')
+  const newPkg = await repo.uploadPackage(pkg, 'review', '3.2.6')
+
+  expect(newPkg.githubId).toBe(6174740)
 
   await done()
 })
