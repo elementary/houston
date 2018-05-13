@@ -18,8 +18,8 @@
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
    sodipodi:docname="apple-touch-icon.svg"
    inkscape:export-filename="/home/daniel/Projects/houston/src/houston/public/images/apple-touch-icon.png"
-   inkscape:export-xdpi="90"
-   inkscape:export-ydpi="90">
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
   <defs
      id="defs4">
     <linearGradient
@@ -91,8 +91,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.5"
-     inkscape:cx="223"
-     inkscape:cy="256"
+     inkscape:cx="-272"
+     inkscape:cy="240"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
