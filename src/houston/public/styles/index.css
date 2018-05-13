@@ -26,43 +26,58 @@ footer ul li a:focus i.fa {
     text-shadow: 0 1px 6px #fff;
 }
 
-/*******
-* Hero *
-*******/
+/********
+* Cards *
+********/
 
-section.hero {
-    background-color: #4d4267;
-    background-image: linear-gradient(to right bottom, #5d4e75, #4d4267);
-    color: #fff;
-    text-align: center;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    padding: 120px 0 64px;
-    max-width: 100%;
-    position: relative;
+.card {
+    background-color: #fff;
+    border-radius: 3px;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.12),
+        0 1px 2px rgba(0, 0, 0, 0.24);
+    margin: 16px;
+    padding: 24px;
 }
 
-section.hero > div {
-    position: relative;
-}
-
-section.hero .button.suggested-action {
-    max-width: 100%;
-}
-
-section.hero .small-label a {
+a.card {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.15),
+        0 8px 10px 1px rgba(0, 0, 0, 0.07),
+        0 3px 14px 2px rgba(0, 0, 0, 0.06),
+        0 5px 5px -3px rgba(0, 0, 0, 0.2);
     color: inherit;
-    font-weight: bold;
+    text-decoration: inherit;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-section.hero .small-label a:hover {
-    text-decoration: underline;
+a.card:hover,
+a.card:focus {
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.15),
+        0 12px 20px 1px rgba(0, 0, 0, 0.07),
+        0 5px 28px 2px rgba(0, 0, 0, 0.06),
+        0 8px 10px -3px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
 }
 
-sup {
-    font-family: 'Open Sans';
-    font-size: 16px;
-    font-weight: 600;
-    margin-left: 12px;
+a.card:focus {
+    box-shadow:
+        0 0 0 1px #64baff,
+        0 12px 20px 1px rgba(0, 0, 0, 0.07),
+        0 5px 28px 2px rgba(0, 0, 0, 0.06),
+        0 8px 10px -3px rgba(0, 0, 0, 0.2);
+    color: inherit;
+    text-decoration: inherit;
+}
+
+a.card:active {
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.12),
+        0 1px 2px rgba(0, 0, 0, 0.24);
+    color: inherit;
+    text-decoration: inherit;
+    transform: translateY(2px);
 }
 
 /*********
@@ -74,24 +89,48 @@ button > i.fa,
     margin-left: 16px;
 }
 
-.dark button.suggested-action,
 .dark .button.suggested-action {
-    border: none;
+    background-image: linear-gradient(to bottom, #4d4d4d, #333);
+    border-color: rgba(0, 0, 0, 0.8);
     box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.05),
-        inset 0 1px 0 0 rgba(255, 255, 255, 0.45),
-        inset 0 -1px 0 0 rgba(255, 255, 255, 0.15),
-        0 1px 0 0 rgba(0, 0, 0, 0.15);
+        inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 0 rgba(255, 255, 255, 0.05),
+        0 3px 6px rgba(0, 0, 0, 0.16),
+        0 3px 6px rgba(0, 0, 0, 0.23);
+    overflow: hidden;
+    padding-left: 80px;
+    position: relative;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dark button.suggested-action:active,
-.dark .button.suggested-action:active {
-    background-color: rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.25);
+.dark .button.suggested-action:hover {
     box-shadow:
-        inset 0 0 0 1px rgba(0, 0, 0, 0.15),
-        0 0 0 1px rgba(0, 0, 0, 0.25),
-        0 2px 0 0 rgba(255, 255, 255, 0.1);
+        inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 0 rgba(255, 255, 255, 0.05),
+        0 10px 20px rgba(0, 0, 0, 0.19),
+        0 6px 6px rgba(0, 0, 0, 0.23);
+    transform: translateY(-1px);
+}
+
+.dark .button.suggested-action::before {
+    position: absolute;
+    font-family: 'FontAwesome';
+    top: calc(50% - 40px);
+    left: -12px;
+    content: "\f09b";
+    font-size: 80px;
+}
+
+.dark .button.suggested-action:active {
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 0 rgba(255, 255, 255, 0.05),
+        0 1px 3px rgba(0, 0, 0, 0.12),
+        0 1px 2px rgba(0, 0, 0, 0.24);
+    transform: translateY(1px);
 }
 
 /*************
@@ -147,32 +186,99 @@ pre.highlighted .pre-numbering {
     user-select: none;
 }
 
-/********
-* Other *
-********/
+/*******
+* Hero *
+*******/
+
+section.hero {
+    background-color: #7a36b1;
+    background-image: linear-gradient(to right bottom, #4c158a, #ad65d6);
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    padding: 128px 0;
+    max-width: 100%;
+    position: relative;
+}
+
+section.hero > div {
+    position: relative;
+}
+
+section.hero img {
+    filter: drop-shadow(0 12px 24px rgba(255, 255, 255, 0.25));
+}
+
+section.hero h1 {
+    font-weight: 800;
+}
+
+section.hero h4 {
+    font-weight: 400;
+}
+
+section.hero .button.suggested-action {
+    max-width: 100%;
+}
+
+sup {
+    font-family: 'Open Sans';
+    font-size: 16px;
+    font-weight: 600;
+    margin-left: 12px;
+}
+
+/*******
+* Docs *
+*******/
+
+section.docs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    margin: -96px auto 128px;
+    position: relative;
+}
+
+section.docs h2 {
+    color: #7a36b1;
+    margin: 16px 0;
+}
+
+section.docs p {
+    color: #333;
+    text-align: center;
+}
+
+section.docs .card {
+    text-align: center;
+}
 
 @media only screen and (min-width: 640px) {
-    .grid .grid .half {
-        text-align: center;
+    section.docs {
+        max-width: 1200px;
     }
 
-    .pitch-appcenter .grid {
-        align-items: center;
-        display: flex;
-    }
-
-    .pitch-appcenter .grid:nth-child(odd) .half:first-child {
-        order: 2;
-    }
-
-    .pitch-appcenter .discovery img {
-        left: -15%;
-        position: relative;
-        transform: scale(1.25);
+    section.docs .card {
+        max-width: 300px;
     }
 }
 
-.pitch-appcenter li {
+/************
+* AppCenter *
+************/
+
+section.pitch-appcenter {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    margin: 0 auto;
+}
+
+section.pitch-appcenter div {
+    margin: 16px;
+}
+
+section.pitch-appcenter li {
     line-height: 1.65;
     margin: 16px 0;
     text-align: left;
@@ -182,11 +288,150 @@ pre.highlighted .pre-numbering {
     font-size: 1.25em;
 }
 
+@media only screen and (min-width: 640px) {
+    section.pitch-appcenter {
+        max-width: 1200px;
+    }
+
+    section.pitch-appcenter div {
+        flex: 0 0 calc(50% - 32px);
+    }
+
+    section.pitch-appcenter.pitch-appcenter div:first-child {
+        order: 2;
+    }
+}
+
+/*******
+* Tools *
+*******/
+
+section.tools {
+    padding: 64px 0;
+}
+
+section.tools h2 {
+    margin: 0 16px 64px;
+    text-align: center;
+}
+
+section.tools > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+
+section.tools .card {
+    margin-bottom: 32px;
+}
+
+section.tools .card > img {
+    height: 36px;
+    margin: 0 auto 24px;
+    display: block;
+}
+
+section.tools .banner {
+    background-color: #7a36b1;
+    background-image: linear-gradient(to right bottom, #4c158a, #ad65d6);
+    color: #fff;
+    margin: 0 -24px;
+    padding: 6px 24px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+section.tools .banner h1 {
+    font-size: 4em;
+}
+
+section.tools .banner h1,
+section.tools .banner p {
+    text-align: center;
+}
+
+section.tools .banner p.small {
+    font-size: 0.8em;
+}
+
+section.tools .banner p.split {
+    font-size: 3em;
+    font-weight: 300;
+    line-height: 1.2em;
+    margin: 0;
+}
+
+section.tools .banner p.split span {
+    font-size: 0.5em;
+    opacity: 0.8;
+    vertical-align: middle;
+}
+
+section.tools .banner svg {
+    height: 46px;
+    vertical-align: bottom;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+}
+
+section.tools .banner .fa {
+    color: #fff;
+}
+
+section.tools .workflow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-around;
+}
+
+section.tools .workflow div {
+    flex: 0 0 30%;
+    text-align: center;
+}
+
+section.tools .workflow,
+section.tools .workflow p {
+    margin-top: 22px;
+}
+
+section.tools ul {
+    margin-top: 24px;
+}
+
+section.tools p {
+    text-align: center;
+}
+
+@media only screen and (min-width: 640px) {
+    section.tools > div {
+        margin: 0 auto;
+        max-width: 1200px;
+    }
+
+    section.tools > div > div {
+        flex: 0 0 calc(50% - 32px);
+        max-width: 468px;
+    }
+}
+
+/********
+* Other *
+********/
+
+.fa-li,
+.card .fa,
 .third .fa {
-    color: #4d4267;
+    color: #7a36b1;
 }
 
 footer,
 .grey {
     background-color: #fafafa;
 }
+
+.fa-ul li {
+    margin-bottom: 32px;
+}
+
+.fa-li {
+    width: 16px;
+}
+

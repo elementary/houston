@@ -5,9 +5,9 @@
  * @exports {Class} - Creates the debian control file
  */
 
+import fs from 'lib/helpers/fs'
 import path from 'path'
 
-import Parsable from 'flightcheck/file/parsable'
 import Pipe from 'flightcheck/pipes/pipe'
 
 /**
@@ -15,28 +15,6 @@ import Pipe from 'flightcheck/pipes/pipe'
  * Creates the debian control file
  */
 export default class DebianControl extends Pipe {
-
-  /**
-   * Creates a new Pipe
-   *
-   * @param {Object} pipeline - Current running Pipeline
-   */
-  constructor (pipeline) {
-    super(pipeline)
-
-    // The first group is required by Debian law, second is optional, third is just gravy
-    this.data.control = {
-      Source: pipeline.build.name,
-      Maintainer: null,
-
-      Section: null,
-      Priority: 'optional',
-      'Standards-Version': '3.9.8',
-
-      'Vcs-Git': pipeline.build.repo
-    }
-  }
-
   /**
    * code
    * Creates the debian control file
@@ -46,66 +24,33 @@ export default class DebianControl extends Pipe {
    */
   async code (p = 'repository/debian') {
     const controlPath = path.join(this.pipeline.build.dir, p, 'control')
-    const file = new Parsable(controlPath, undefined, 'colon')
 
-    if (await file.exists() == null) {
+    if (await fs.exists(controlPath) === false) {
       return this.log('error', 'Debian/Control/existance.md')
     }
 
-    let contents = null
-    try {
-      contents = await file.parse()
-    } catch (e) {
-      return this.log('error', 'Debian/Control/parse.md', e)
-    }
-
-    const lintedControl = Object.assign({}, this.data.control, contents)
+    const file = await fs.readFile(controlPath, 'utf8')
     const errors = []
 
-    /**
-     * thr
-     * Adds an error to the collection
-     *
-     * @param {String} err - the message to show on log
-     * @param {Boolean} exit - true to stop the build
-     * @throws {Error} - if error is unrecoverable
-     * @returns {Void}
-     */
-    const thr = (err, exit = false) => {
-      errors.push({
-        error: err,
-        critical: exit
-      })
-      if (exit) throw new Error(err)
+    // Ensure the Source field in the file matches the build name
+    if (file.indexOf(`Source: ${this.pipeline.build.name}`) === -1) {
+      errors.push(`Source is not correct. It should be "${this.pipeline.build.name}"`)
     }
 
-    try {
-      if (lintedControl['Source'] !== this.pipeline.build.name) {
-        thr(`Source is not correct. It should be "${this.pipeline.build.name}"`)
+    // Ensure the maintainer field is set correctly
+    if (!/^Maintainer:/gmi.test(file)) {
+      errors.push('Maintainer value is missing')
+    } else if (!/^Maintainer: .+ <.+>$/gmi.test(file)) {
+      errors.push('Maintainer is not a valid value. Must be in the form of "Maintainer Name <maintainer@email.com>"')
+    }
 
-        lintedControl['Source'] = this.pipeline.build.name
-      }
-
-      if (lintedControl['Maintainer'] == null) {
-        thr('Maintainer has no value', true)
-      } else if (!/^.*\s<.*>$/.test(lintedControl['Maintainer'])) {
-        thr('Maintainer is not a valid value. Must be in the form of "Maintainer Name <maintainer@email.com>"')
-      }
-
-      if (lintedControl['Package'] !== this.pipeline.build.name) {
-        thr(`Package is not correct. It should be "${this.pipeline.build.name}"`)
-
-        lintedControl['Package'] = this.pipeline.build.name
-      }
-    } catch (e) {
-      return this.log('error', 'Debian/Control/error.md', errors)
+    // Ensure the package name is correct
+    if (file.indexOf(`Package: ${this.pipeline.build.name}`) === -1) {
+      errors.push(`Package is incorrect. It should be "${this.pipeline.build.name}"`)
     }
 
     if (errors.length > 0) {
-      await this.log('warn', 'Debian/Control/warn.md', errors)
+      return this.log('error', 'Debian/Control/error.md', errors)
     }
-
-    this.data.control = lintedControl
-    await file.stringify(this.data.control)
   }
 }
