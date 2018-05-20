@@ -202,7 +202,7 @@ export class Worker extends EventEmitter implements type.IWorker {
       appcenter: appcenters[0],
       appstream: appstreams[0],
       failed: this.fails,
-      logs,
+      logs: (logs || []), // TODO: Why can `logs` be undefined?
       packages
     }
   }
@@ -247,7 +247,7 @@ export class Worker extends EventEmitter implements type.IWorker {
 
       // And if we have any forks, stop running the tasks, and run the forks
       if (this.forks.length > 0) {
-        const todoTasks = this.tasks.splice(this.runningIndex)
+        const todoTasks = this.tasks.splice(this.runningIndex + 1)
         this.forks.forEach((fork) => {
           fork.tasks = todoTasks
         })
@@ -276,12 +276,12 @@ export class Worker extends EventEmitter implements type.IWorker {
    *   storages.
    *
    * @async
-   * @param {Object} context - Overwrite for the forked context
+   * @param {Object} [context] - Overwrite for the forked context
    * @return {Worker}
    */
-  public async fork (context: object): Promise<Worker> {
-    const newContext = Object.assign({}, this.context, context)
-    const fork = this.constructor(this.config, this.repository, newContext)
+  public async fork (context = {}): Promise<Worker> {
+    const newContext = Object.assign({}, this.context, context, { logs: [] })
+    const fork = new Worker(this.app, this.repository, newContext)
 
     this.forks.push(fork)
 
