@@ -5,22 +5,18 @@
 
 import { Config } from '../lib/config'
 import { Level } from '../lib/log/level'
-import { ICodeRepository } from '../lib/service'
+import { ICodeRepository, IServiceIds } from '../lib/service'
 import { EventEmitter } from '../lib/utility/eventemitter'
 
 export type Type = 'app' | 'system-app' | 'library' | 'system-library' | 'debug'
 export type PackageSystem = 'deb'
 
-export interface IPackage {
+export interface IPackage extends IServiceIds {
   type: PackageSystem
-  path: string // Full path on the FS
+  path?: string // Full path on the FS
 
   architecture?: string
   distribution?: string
-
-  // All the published ids
-  aptlyId?: string
-  githubId?: string
 }
 
 export interface IResult {
@@ -34,7 +30,7 @@ export interface IResult {
   logs: ILog[]
 }
 
-export interface ILog extends Error {
+export interface ILog extends Error, IServiceIds {
   level: Level
   title: string
   body?: string
@@ -63,8 +59,7 @@ export interface IContext {
   references: string[]
   changelog: IChange[]
 
-  packageSystem: PackageSystem
-  packagePath?: string
+  package?: IPackage
 
   appcenter?: object
   appstream?: string // An XML formatted string

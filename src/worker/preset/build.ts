@@ -3,7 +3,7 @@
  * Builds a package and edits contents for appcenter.
  */
 
-import { Config } from '../../lib/config'
+import { App } from '../../lib/app'
 import { ICodeRepository } from '../../lib/service'
 import * as type from '../type'
 import { Worker } from '../worker'
@@ -42,8 +42,8 @@ function buildTasks (t: type.Type): type.ITaskConstructor[] {
   }
 }
 
-export function Build (config: Config, repository: ICodeRepository, context: type.IContext) {
-  const worker = new Worker(config, repository, context)
+export function Build (app: App, repository: ICodeRepository, context: type.IContext) {
+  const worker = new Worker(app, repository, context)
 
   for (const task of buildTasks(context.type)) {
     worker.tasks.push(task)

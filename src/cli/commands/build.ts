@@ -12,7 +12,7 @@ import * as semver from 'semver'
 
 import { Config } from '../../lib/config'
 import { levelIndex } from '../../lib/log/level'
-import { codeRepository } from '../../lib/service'
+import { createCodeRepository } from '../../lib/service'
 import { sanitize } from '../../lib/utility/rdnn'
 import { Build } from '../../worker/preset/build'
 import { IContext } from '../../worker/type'
@@ -69,12 +69,6 @@ export const builder = (yargs) => {
       describe: 'Human readable name',
       type: 'string'
     })
-    .option('package-system', {
-      choices: ['deb'],
-      default: 'deb',
-      describe: 'Package system',
-      type: 'string'
-    })
     .option('references', {
       default: [],
       describe: 'References to pull',
@@ -106,7 +100,6 @@ function buildContext (argv, repository) {
     nameDeveloper,
     nameDomain,
     nameHuman,
-    packageSystem: argv['package-system'],
     references: argv.references,
     type: argv.type,
     version: argv.version
@@ -137,11 +130,10 @@ function logLogs (logs) {
 export async function handler (argv) {
   const { app } = setup(argv)
 
-  const config = app.get<Config>(Config)
-  const repository = codeRepository(argv.repo)
+  const repository = createCodeRepository(argv.repo)
   const context = buildContext(argv, repository)
 
-  const worker = Build(config, repository, context)
+  const worker = Build(app, repository, context)
 
   console.log(`Running build for ${argv.repo} version ${argv.version}`)
 

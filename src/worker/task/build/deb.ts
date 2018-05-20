@@ -111,14 +111,14 @@ export class BuildDeb extends Task {
     const context = this.worker.context
 
     // The correct name scheme
-    const domainName = `${context.nameDomain}_${context.version}_${context.architecture}.${context.packageSystem}`
+    const domainName = `${context.nameDomain}_${context.version}_${context.architecture}.${context.package.type}`
     const domainNamed = await glob(path.resolve(this.path, domainName))
 
     if (domainNamed[0] != null) {
       return { path: domainNamed[0], type: 'deb' }
     }
 
-    const allNames = await glob(path.resolve(this.path, `*.${context.packageSystem}`))
+    const allNames = await glob(path.resolve(this.path, `*.${context.package.type}`))
 
     // Try to intelligently filter out the _extra_ packages.
     const filteredNames = allNames
@@ -156,7 +156,7 @@ export class BuildDeb extends Task {
     const to = path.resolve(this.worker.workspace, 'package.deb')
     await fs.copy(deb.path, to)
 
-    this.worker.context.packagePath = to
+    this.worker.context.package.path = to
 
     await fs.remove(this.path)
   }

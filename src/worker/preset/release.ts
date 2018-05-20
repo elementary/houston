@@ -3,7 +3,7 @@
  * Releases a package to all able endpoints.
  */
 
-import { Config } from '../../lib/config'
+import { App } from '../../lib/app'
 import { ICodeRepository } from '../../lib/service'
 import * as type from '../type'
 import { Worker } from '../worker'
@@ -42,8 +42,8 @@ function releaseTasks (t: type.Type): type.ITaskConstructor[] {
   }
 }
 
-export function Release (config: Config, repository: ICodeRepository, context: type.IContext) {
-  const worker = new Worker(config, repository, context)
+export function Release (app: App, repository: ICodeRepository, context: type.IContext) {
+  const worker = new Worker(app, repository, context)
 
   for (const task of releaseTasks(context.type)) {
     worker.tasks.push(task)

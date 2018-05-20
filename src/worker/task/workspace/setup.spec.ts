@@ -11,7 +11,7 @@ test('builds workspace from all matching branches', async () => {
   const worker = await mock({
     distribution: 'loki',
     nameDomain: 'com.github.elementary.houston',
-    packageSystem: 'deb',
+    package: { type: 'deb' },
     references: ['refs/heads/loki']
   })
 

@@ -34,10 +34,9 @@ export class WrapperTask extends Task {
    *
    * @return {Log[]}
    */
-  protected get errorLogs () {
+  protected get errorLogs (): Log[] {
     return this.logs
-      .map((l) => l.level)
-      .filter((l) => (l === Log.Level.ERROR))
+      .filter((l) => (l.level === Log.Level.ERROR))
   }
 
   /**

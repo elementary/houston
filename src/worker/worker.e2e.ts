@@ -8,7 +8,7 @@ import * as os from 'os'
 import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
-import { Config } from '../lib/config'
+import { App } from '../lib/app'
 import { GitHub } from '../lib/service'
 import { Build } from './preset/build'
 import * as type from './type'
@@ -19,13 +19,12 @@ import { tmp } from '../../test/utility/fs'
 // NOTE: All tests have an hour long timeout because we are building thing
 jest.setTimeout(3600000)
 
-let config: Config
+let app: App
 let testingDir: string
 
 // Change the default workspace location for testing
 beforeAll(async () => {
-  const app = await create()
-  config = app.get<Config>(Config)
+  app = await create()
 
   testingDir = await tmp('worker')
 })
@@ -44,13 +43,12 @@ test.skip('needle-and-thread/vocal passes build process', async () => {
     nameDeveloper: 'Needle & Thread',
     nameDomain: 'com.github.needle-and-thread.vocal',
     nameHuman: 'Vocal',
-    packageSystem: null,
     references: ['refs/tags/2.2.0'],
     type: 'app',
     version: '2.2.0'
   }
 
-  const proc = Build(config, repo, context)
+  const proc = Build(app, repo, context)
   proc.workspace = path.resolve(testingDir, uuid())
 
   proc.on('run:error', (e) => console.error(e))
@@ -77,13 +75,12 @@ test.skip('Philip-Scott/Spice-up passes build process', async () => {
     nameDeveloper: 'Philip Scott',
     nameDomain: 'com.github.philip-scott.spice-up',
     nameHuman: 'Spice-Up',
-    packageSystem: null,
     references: ['refs/tags/1.3.2'],
     type: 'app',
     version: '1.3.2'
   }
 
-  const proc = Build(config, repo, context)
+  const proc = Build(app, repo, context)
   proc.workspace = path.resolve(testingDir, uuid())
 
   proc.on('run:error', (e) => console.error(e))
@@ -110,13 +107,12 @@ test.skip('elementary/code passes build process', async () => {
     nameDeveloper: 'elementary',
     nameDomain: 'io.elementary.code',
     nameHuman: 'Code',
-    packageSystem: null,
     references: [],
     type: 'app',
     version: '2.4.1'
   }
 
-  const proc = Build(config, repo, context)
+  const proc = Build(app, repo, context)
   proc.workspace = path.resolve(testingDir, uuid())
 
   proc.on('run:error', (e) => console.error(e))
@@ -141,13 +137,13 @@ test.skip('needle-and-thread/vocal passes old flightcheck process', async () => 
     nameDeveloper: 'needle-and-thread',
     nameDomain: 'com.github.needle-and-thread.vocal',
     nameHuman: 'vocal',
-    packageSystem: 'deb',
+    package: { type: 'deb' },
     references: ['refs/tags/2.2.0'],
     type: 'app',
     version: '2.2.0'
   }
 
-  const proc = Build(config, repo, context)
+  const proc = Build(app, repo, context)
   proc.workspace = path.resolve(testingDir, uuid())
 
   proc.on('run:error', (e) => console.error(e))

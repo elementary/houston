@@ -5,19 +5,25 @@
 
 export type IStage = 'review' | 'stable'
 
-export interface IPackage {
+export interface IServiceIds {
+  aptlyId?: string
+  githubId?: number
+}
+
+export interface IPackage extends IServiceIds {
   type: string
-  path?: string
+  path: string
 
   architecture?: string
   distribution?: string
 
-  name?: string
+  name: string
   description?: string
+}
 
-  // A list of all the PackageRepository references after published
-  aptlyId?: string
-  githubId?: number
+export interface ILog extends IServiceIds {
+  title: string
+  body?: string
 }
 
 export interface ICodeRepository {
@@ -67,4 +73,17 @@ export interface IPackageRepository {
    * @return {IPackage}
    */
   uploadPackage: (pkg: IPackage, stage: IStage, reference?: string) => Promise<IPackage>
+}
+
+export interface ILogRepository {
+  /**
+   * Takes a log object and uploads it to a log repository
+   *
+   * @async
+   * @param {ILog} log The log to upload
+   * @param {IStage} stage The build stage the package is in
+   * @param {String} [reference] A code-repository reference that this file was from
+   * @return {ILog}
+   */
+  uploadLog: (log: ILog, stage: IStage, reference?: string) => Promise<ILog>
 }

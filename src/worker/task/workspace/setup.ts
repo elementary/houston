@@ -67,7 +67,7 @@ export class WorkspaceSetup extends Task {
     await fs.copy(clean, dirty)
 
     // TODO: We need to fork for every build configuration
-    this.worker.context.packageSystem = 'deb'
+    this.worker.context.package = { type: 'deb' }
 
     // Step 4: Profit
     await this.worker.emitAsync(`task:${this.constructor.name}:end`)
@@ -83,15 +83,18 @@ export class WorkspaceSetup extends Task {
   protected async branches (): Promise<string[]> {
     const repositoryReferences = await this.worker.repository.references()
 
-    const mergableReferences = [
-      `${this.worker.context.distribution}`,
-      `${this.worker.context.packageSystem}-packaging`,
-      `${this.worker.context.packageSystem}-packaging-${this.worker.context.distribution}`
-    ]
+    const mergableReferences = [`${this.worker.context.distribution}`]
 
-    if (this.worker.context.references[0] != null) {
-      const shortBranch = this.worker.context.references[0].split('/').reverse()[0]
-      mergableReferences.push(`${this.worker.context.packageSystem}-packaging-${this.worker.context.distribution}-${shortBranch}`)
+    if (this.worker.context.package != null) {
+      mergableReferences.push(
+        `${this.worker.context.package.type}-packaging`,
+        `${this.worker.context.package.type}-packaging-${this.worker.context.distribution}`
+      )
+
+      if (this.worker.context.references[0] != null) {
+        const shortBranch = this.worker.context.references[0].split('/').reverse()[0]
+        mergableReferences.push(`${this.worker.context.package.type}-packaging-${this.worker.context.distribution}-${shortBranch}`)
+      }
     }
 
     const packageReferences = WorkspaceSetup.filterRefs(repositoryReferences, mergableReferences)

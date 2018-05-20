@@ -10,6 +10,7 @@ import * as os from 'os'
 import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
+import { App } from '../lib/app'
 import { Config } from '../lib/config'
 import { ICodeRepository } from '../lib/service'
 import { EventEmitter } from '../lib/utility/eventemitter'
@@ -20,12 +21,22 @@ const tempDir = path.resolve(os.tmpdir(), 'houston')
 
 export class Worker extends EventEmitter implements type.IWorker {
   /**
+   * app
+   * The base App container. Used for roles that need access to something.
+   *
+   * @var {App}
+   */
+  public app: App
+
+  /**
    * config
    * The configuration to use during processing
    *
    * @var {Config}
    */
-  public config: Config
+  public get config (): Config {
+    return this.app.get<Config>(Config)
+  }
 
   /**
    * repository
@@ -77,14 +88,14 @@ export class Worker extends EventEmitter implements type.IWorker {
   /**
    * Creates a new worker process
    *
-   * @param {Config} config - The configuration to use
+   * @param {App} app - The base App container
    * @param {ICodeRepository} repository - The repository to process on
    * @param {IContext} context - The starting context for building
    */
-  constructor (config: Config, repository: ICodeRepository, context: type.IContext) {
+  constructor (app: App, repository: ICodeRepository, context: type.IContext) {
     super()
 
-    this.config = config
+    this.app = app
     this.repository = repository
     this.context = context
 
@@ -154,10 +165,7 @@ export class Worker extends EventEmitter implements type.IWorker {
    */
   public get result (): type.IResult {
     const packages = this.contexts
-      .map((ctx) => ({
-        path: ctx.packagePath,
-        type: ctx.packageSystem
-      }))
+      .map((ctx) => ctx.package)
       .filter((p) => (p != null))
 
     // We just assume the longest appcenter and appstream fields are the best
