@@ -1,5 +1,5 @@
 /**
- * houston/src/lib/service/github.spec.ts
+ * houston/src/lib/service/github.e2e.ts
  * Tests the GitHub class.
  */
 
@@ -18,10 +18,19 @@ import { record } from '../../../test/utility/http'
 let testingDir: string
 
 beforeAll(async () => {
-  testingDir = await tmp('lib/service/github')
+  // I'm so sorry to whom is reading this next. My best guess is a race
+  // Condition in fs-extra, uuid, or jest. This whole file will just hang
+  // Forever without it. I'm so sorry.
+  await new Promise((resolve, reject) => {
+    setTimeout(async () => {
+      testingDir = await tmp('lib/service/github')
 
-  // Redirect tmp folder for testing because testing
-  GitHub.tmpFolder = testingDir
+      // Redirect tmp folder for testing because testing
+      GitHub.tmpFolder = testingDir
+
+      return resolve()
+    }, 100)
+  })
 })
 
 afterAll(async() => {
