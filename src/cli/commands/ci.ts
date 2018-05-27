@@ -52,16 +52,6 @@ export const builder = (yargs) => {
         describe: 'Semver version to build for',
         type: 'string'
       })
-      .option('architecture', {
-        default: 'amd64',
-        describe: 'Architecture to build for',
-        type: 'string'
-      })
-      .option('distribution', {
-        default: 'loki',
-        describe: 'Distribution to build for',
-        type: 'string'
-      })
       .option('name-appstream', {
         coerce: sanitize,
         describe: 'AppStream id',
@@ -105,9 +95,9 @@ function buildStorage (argv, repository) {
   const obj : IContext = {
     appcenter: {},
     appstream: '',
-    architecture: argv.architecture,
+    architecture: '',
     changelog: [],
-    distribution: argv.distribution,
+    distribution: '',
     logs: [],
     nameAppstream,
     nameDeveloper,
@@ -156,8 +146,12 @@ export async function handler (argv) {
   console.log(`Testing "${projectDir}" project for "${argv.repo}"`)
 
   // Copy over the current folder to the workspace for CI testing.
-  await fs.copy(projectDir, path.resolve(worker.workspace, 'clean'), { overwrite: true })
-  await fs.copy(projectDir, path.resolve(worker.workspace, 'dirty'), { overwrite: true })
+  worker.on('task:WorkspaceSetup:fork', async (w) => {
+    await fs.copy(projectDir, path.resolve(w.workspace, 'clean'), { overwrite: true })
+    await fs.copy(projectDir, path.resolve(w.workspace, 'dirty'), { overwrite: true })
+
+    return w
+  })
 
   // We set a simple interval to output so we don't timeout on travis
   const interval = setInterval(() => process.stdout.write('.'), 10000)

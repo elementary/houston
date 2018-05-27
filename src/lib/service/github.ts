@@ -5,6 +5,7 @@
 
 import * as fileType from 'file-type'
 import * as fs from 'fs-extra'
+import { injectable } from 'inversify'
 import * as Git from 'nodegit'
 import * as os from 'os'
 import * as path from 'path'
@@ -14,8 +15,8 @@ import * as uuid from 'uuid/v4'
 import { sanitize } from '../utility/rdnn'
 import * as type from './type'
 
-export class GitHub implements type.ICodeRepository, type.IPackageRepository {
-
+@injectable()
+export class GitHub implements type.ICodeRepository, type.IPackageRepository, type.ILogRepository {
   /**
    * tmpFolder
    * Folder to use as scratch space for cloning repos
@@ -23,6 +24,13 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository {
    * @var {string}
    */
   protected static tmpFolder = path.resolve(os.tmpdir(), 'houston')
+
+  /**
+   * The human readable name of the service.
+   *
+   * @var {String}
+   */
+  public serviceName = 'GitHub'
 
   /**
    * username
@@ -251,4 +259,42 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository {
     return { ...pkg, githubId: res.id }
   }
 
+  /**
+   * Uploads a log to GitHub as an issue witht he 'AppCenter' label
+   *
+   * @async
+   * @param {ILog} log
+   * @param {IStage} stage
+   * @param {string} [reference]
+   * @return {ILog}
+   */
+  public async uploadLog (log: type.ILog, stage: type.IStage, reference?: string): Promise<type.ILog> {
+    const hasLabel = await agent
+      .get(`https://api.github.com/repos/${this.username}/${this.repository}/labels/AppCenter`)
+      .set('authorization', `token ${this.auth}`)
+      .then(() => true)
+      .catch(() => false)
+
+    if (!hasLabel) {
+      await agent
+        .post(`https://api.github.com/repos/${this.username}/${this.repository}/labels`)
+        .set('authorization', `token ${this.auth}`)
+        .send({
+          color: '4c158a',
+          description: 'Issues related to releasing on AppCenter',
+          name: 'AppCenter'
+        })
+    }
+
+    const { body } = await agent
+      .post(`https://api.github.com/repos/${this.username}/${this.repository}/issues`)
+      .set('authorization', `token ${this.auth}`)
+      .send({
+        body: log.body,
+        labels: ['AppCenter'],
+        title: log.title
+      })
+
+    return { ...log, githubId: body.id }
+  }
 }

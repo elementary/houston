@@ -10,6 +10,8 @@ import { sanitize } from '../../../src/lib/utility/rdnn'
 export class Repository implements type.ICodeRepository, type.IPackageRepository {
   public url: string
 
+  public serviceName = 'mock Repository'
+
   constructor (url: string) {
     this.url = url
   }

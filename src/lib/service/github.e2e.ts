@@ -8,9 +8,12 @@ import * as os from 'os'
 import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
+import * as Log from '../log'
 import { GitHub } from './github'
+import * as type from './type'
 
 import { tmp } from '../../../test/utility/fs'
+import { record } from '../../../test/utility/http'
 
 let testingDir: string
 
@@ -74,3 +77,38 @@ test('can list all references for a repository', async () => {
   expect(references).toContain('refs/heads/master')
   expect(references).toContain('refs/remotes/origin/v2') // TODO: Future me: remove this
 }, 600000) // 10 minutes because of git clone for references
+
+test('can post assets to reference', async () => {
+  const { done } = await record('lib/service/github/asset.json')
+  const repo = new GitHub('https://github.com/btkostner/vocal')
+  const pkg = {
+    architecture: 'amd64',
+    description: 'Vocal 3.2.6 Loki (amd64)',
+    distribution: 'xenial',
+    name: 'package.deb',
+    path: path.resolve(__dirname, '../../../test/fixture/lib/service/github/vocal.deb'),
+    type: 'deb'
+  } as type.IPackage
+
+  const newPkg = await repo.uploadPackage(pkg, 'review', '3.2.6')
+
+  expect(newPkg.githubId).toBe(6174740)
+
+  await done()
+})
+
+test('can post an log', async () => {
+  const { done } = await record('lib/service/github/log.json')
+  const repo = new GitHub('https://github.com/btkostner/vocal')
+  const log = {
+    body: 'testy test test',
+    level: Log.Level.ERROR,
+    title: 'test'
+  } as type.ILog
+
+  const newLog = await repo.uploadLog(log, 'review', '3.2.6')
+
+  expect(newLog.githubId).toBe(326839748)
+
+  await done()
+})

@@ -40,16 +40,6 @@ export const builder = (yargs) => {
       describe: 'The type of project',
       type: 'string'
     })
-    .option('architecture', {
-      default: 'amd64',
-      describe: 'Architecture to build for',
-      type: 'string'
-    })
-    .option('distribution', {
-      default: 'loki',
-      describe: 'Distribution to build for',
-      type: 'string'
-    })
     .option('name-appstream', {
       coerce: sanitize,
       describe: 'AppStream id',
@@ -92,9 +82,9 @@ function buildContext (argv, repository) {
   const obj : IContext = {
     appcenter: {},
     appstream: '',
-    architecture: argv.architecture,
+    architecture: '',
     changelog: [],
-    distribution: argv.distribution,
+    distribution: '',
     logs: [],
     nameAppstream,
     nameDeveloper,

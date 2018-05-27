@@ -71,6 +71,16 @@ export class Worker extends EventEmitter implements type.IWorker {
   public tasks: type.ITaskConstructor[] = []
 
   /**
+   * postTasks
+   * These tasks run after all the tasks and forks are ran. They are usually
+   * processing the end result, like uploading packages or logs after the
+   * regular tasks are finished.
+   *
+   * @var {ITaskConstructor[]}
+   */
+  public postTasks: type.ITaskConstructor[] = []
+
+  /**
    * forks
    * All of the forks we are going to run after the current task ends.
    *
@@ -109,13 +119,7 @@ export class Worker extends EventEmitter implements type.IWorker {
    * @return {boolean}
    */
   public get fails (): boolean {
-    for (const log of this.context.logs) {
-      if (log.level === Log.Level.ERROR) {
-        return true
-      }
-    }
-
-    return false
+    return this.result.failed
   }
 
   /**
@@ -136,9 +140,17 @@ export class Worker extends EventEmitter implements type.IWorker {
    */
   protected get runningIndex (): number {
     if (this.running != null) {
-      return this.tasks.findIndex((task) => {
+      const tI = this.tasks.findIndex((task) => {
         return (this.running instanceof task)
       })
+
+      if (tI !== -1) {
+        return tI
+      } else {
+        return this.postTasks.findIndex((task) => {
+          return (this.running instanceof task)
+        })
+      }
     }
   }
 
@@ -195,13 +207,18 @@ export class Worker extends EventEmitter implements type.IWorker {
 
         if (similarLog.body.length < log.body.length) {
           return allLogs.splice(similarLogIndex, 1, log)
+        } else {
+          return allLogs
         }
       }, [])
+
+    const failed = logs
+      .some((l) => (l.level === Log.Level.ERROR))
 
     return {
       appcenter: appcenters[0],
       appstream: appstreams[0],
-      failed: this.fails,
+      failed,
       logs: (logs || []), // TODO: Why can `logs` be undefined?
       packages
     }
@@ -254,6 +271,16 @@ export class Worker extends EventEmitter implements type.IWorker {
 
         await Promise.all(this.forks.map((fork) => fork.run()))
         break
+      }
+    }
+
+    for (const task of this.postTasks) {
+      try {
+        const taskConstructor = await this.emitAsyncChain<type.ITaskConstructor>('task:start', task)
+        this.running = new taskConstructor(this)
+        await this.running.run()
+      } catch (err) {
+        this.report(err)
       }
     }
 

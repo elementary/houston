@@ -25,11 +25,19 @@ test('builds workspace from all matching branches', async () => {
   ])
 
   const setup = new WorkspaceSetup(worker)
-  const branches = await setup.branches()
+  const setups = await setup.possibleBuilds()
 
-  expect(branches).toEqual([
-    'refs/heads/loki',
-    'refs/heads/deb-packaging',
-    'refs/heads/deb-packaging-loki'
-  ])
+  expect(setups.length).toBe(2)
+
+  expect(setups).toContainEqual({
+    architecture: 'amd64',
+    distribution: 'loki',
+    packageType: 'deb'
+  })
+
+  expect(setups).toContainEqual({
+    architecture: 'amd64',
+    distribution: 'juno',
+    packageType: 'deb'
+  })
 }, 300000)

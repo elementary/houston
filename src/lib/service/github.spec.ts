@@ -5,7 +5,6 @@
 
 import * as path from 'path'
 
-import { record } from '../../../test/utility/http'
 import { GitHub } from './github'
 import * as type from './type'
 
@@ -48,23 +47,4 @@ test('can set values based on ssh url', () => {
   expect(repo.username).toEqual('elementary')
   expect(repo.repository).toEqual('houston')
   expect(repo.auth).toEqual('test')
-})
-
-test('can post assets to reference', async () => {
-  const { done } = await record('lib/service/github/asset.json')
-  const repo = new GitHub('https://github.com/btkostner/vocal')
-  const pkg = {
-    architecture: 'amd64',
-    description: 'Vocal 3.2.6 Loki (amd64)',
-    distribution: 'xenial',
-    name: 'package.deb',
-    path: path.resolve(__dirname, '../../../test/fixture/lib/service/github/vocal.deb'),
-    type: 'deb'
-  } as type.IPackage
-
-  const newPkg = await repo.uploadPackage(pkg, 'review', '3.2.6')
-
-  expect(newPkg.githubId).toBe(6174740)
-
-  await done()
 })

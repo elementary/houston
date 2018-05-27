@@ -11,6 +11,16 @@ import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
 /**
+ * Returns full path to a fixture file
+ *
+ * @param {string} file - Relative to the fixture test directory
+ * @return {string}
+ */
+export function fixture (file = ''): string {
+  return path.resolve(__dirname, '../fixture', file)
+}
+
+/**
  * tmp
  * Creates a temp directory for tests
  *

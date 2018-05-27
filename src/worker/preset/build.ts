@@ -42,7 +42,7 @@ function buildTasks (t: type.Type): type.ITaskConstructor[] {
   }
 }
 
-export function Build (app: App, repository: ICodeRepository, context: type.IContext) {
+export function Build (app: App, repository: ICodeRepository, context: type.IContext): type.IWorker {
   const worker = new Worker(app, repository, context)
 
   for (const task of buildTasks(context.type)) {

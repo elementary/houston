@@ -3,6 +3,8 @@
  * A bunch of interfaces to abstract away third party services
  */
 
+import { Level } from '../log'
+
 export type IStage = 'review' | 'stable'
 
 export interface IServiceIds {
@@ -22,11 +24,19 @@ export interface IPackage extends IServiceIds {
 }
 
 export interface ILog extends IServiceIds {
+  level: Level,
   title: string
   body?: string
 }
 
 export interface ICodeRepository {
+  /**
+   * The human readable name of the service.
+   *
+   * @var {String}
+   */
+  serviceName: string,
+
   /**
    * The code repository URL
    *
@@ -64,6 +74,13 @@ export interface ICodeRepository {
 
 export interface IPackageRepository {
   /**
+   * The human readable name of the service.
+   *
+   * @var {String}
+   */
+  serviceName: string,
+
+  /**
    * Takes a full path to file and uploads it to a package repository
    *
    * @async
@@ -76,6 +93,13 @@ export interface IPackageRepository {
 }
 
 export interface ILogRepository {
+  /**
+   * The human readable name of the service.
+   *
+   * @var {String}
+   */
+  serviceName: string,
+
   /**
    * Takes a log object and uploads it to a log repository
    *

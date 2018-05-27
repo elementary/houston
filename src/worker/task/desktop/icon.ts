@@ -35,7 +35,7 @@ export class DesktopIcon extends Task {
     }
 
     if (data['Desktop Entry'].Icon !== this.worker.context.nameDomain) {
-      throw new Log(Log.Level.ERROR, 'Incorrect icon value')
+      throw new Log(Log.Level.ERROR, 'Incorrect desktop file icon value')
     }
   }
 }

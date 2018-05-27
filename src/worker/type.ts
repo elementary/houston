@@ -3,26 +3,19 @@
  * A bunch of type definitions for the worker process
  */
 
-import { Config } from '../lib/config'
+import { App } from '../lib/app'
 import { Level } from '../lib/log/level'
-import { ICodeRepository, IServiceIds } from '../lib/service'
+import * as service from '../lib/service'
 import { EventEmitter } from '../lib/utility/eventemitter'
 
 export type Type = 'app' | 'system-app' | 'library' | 'system-library' | 'debug'
-export type PackageSystem = 'deb'
 
-export interface IPackage extends IServiceIds {
-  type: PackageSystem
-  path?: string // Full path on the FS
-
-  architecture?: string
-  distribution?: string
-}
+export { IPackage } from '../lib/service'
 
 export interface IResult {
   failed: boolean
 
-  packages: IPackage[]
+  packages: service.IPackage[]
 
   appcenter?: object
   appstream?: string
@@ -30,10 +23,8 @@ export interface IResult {
   logs: ILog[]
 }
 
-export interface ILog extends Error, IServiceIds {
+export interface ILog extends service.ILog {
   level: Level
-  title: string
-  body?: string
 }
 
 export interface IChange {
@@ -59,7 +50,7 @@ export interface IContext {
   references: string[]
   changelog: IChange[]
 
-  package?: IPackage
+  package?: service.IPackage
 
   appcenter?: object
   appstream?: string // An XML formatted string
@@ -78,11 +69,20 @@ export interface ITask {
 }
 
 export interface IWorker extends EventEmitter {
-  config: Config
+  app: App
   context: IContext
-  repository: ICodeRepository
+  fails: boolean
+  passes: boolean
+  postTasks: ITaskConstructor[]
+  repository: service.ICodeRepository
+  result: IResult
+  tasks: ITaskConstructor[]
   workspace: string
 
-  report (err: Error)
+  setup ()
+  run ()
+  teardown ()
   stop ()
+
+  report (err: Error)
 }

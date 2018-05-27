@@ -92,9 +92,8 @@ test.skip('Philip-Scott/Spice-up passes build process', async () => {
   expect(proc.passes).toBeTruthy()
 })
 
-// TODO: Fix bugs
-test.skip('elementary/code passes build process', async () => {
-  const repo = new GitHub('https://github.com/elementary/code')
+test.skip('elementary/appcenter passes build process', async () => {
+  const repo = new GitHub('https://github.com/elementary/appcenter')
 
   const context : type.IContext = {
     appcenter: {},
@@ -103,13 +102,13 @@ test.skip('elementary/code passes build process', async () => {
     changelog: [],
     distribution: 'juno',
     logs: [],
-    nameAppstream: 'io.elementary.code.desktop',
+    nameAppstream: 'io.elementary.appcenter.desktop',
     nameDeveloper: 'elementary',
-    nameDomain: 'io.elementary.code',
-    nameHuman: 'Code',
+    nameDomain: 'io.elementary.appcenter',
+    nameHuman: 'AppCenter',
     references: [],
     type: 'app',
-    version: '2.4.1'
+    version: '0.2.9'
   }
 
   const proc = Build(app, repo, context)

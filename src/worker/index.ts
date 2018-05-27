@@ -6,8 +6,7 @@
 export {
   IResult,
   IChange,
-  IContext,
-  PackageSystem
+  IContext
 } from './type'
 
 export { Server } from './server'

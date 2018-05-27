@@ -48,6 +48,13 @@ function createUrl (...args) {
 @injectable()
 export class Aptly implements type.IPackageRepository {
   /**
+   * The human readable name of the service.
+   *
+   * @var {String}
+   */
+  public serviceName = 'elementary Package Repository'
+
+  /**
    * The application configuration
    *
    * @var {Config}

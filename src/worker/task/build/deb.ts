@@ -115,7 +115,11 @@ export class BuildDeb extends Task {
     const domainNamed = await glob(path.resolve(this.path, domainName))
 
     if (domainNamed[0] != null) {
-      return { path: domainNamed[0], type: 'deb' }
+      return {
+        name: domainName,
+        path: domainNamed[0],
+        type: 'deb'
+      }
     }
 
     const allNames = await glob(path.resolve(this.path, `*.${context.package.type}`))
@@ -128,7 +132,11 @@ export class BuildDeb extends Task {
       .filter((n) => (n.indexOf('-dbg') === -1))
 
     if (filteredNames[0] != null) {
-      return { path: path.resolve(this.path, filteredNames[0]), type: 'deb' }
+      return {
+        name: filteredNames[0],
+        path: path.resolve(this.path, filteredNames[0]),
+        type: 'deb'
+      }
     }
 
     // So... Last effort, we get all the package files, sort them by length, and
@@ -136,7 +144,11 @@ export class BuildDeb extends Task {
     const sortedNames = allNames.sort((a, b) => (a.length - b.length))
 
     if (sortedNames[0] != null) {
-      return { path: sortedNames[0], type: 'deb' }
+      return {
+        name: path.basename(sortedNames[0]),
+        path: sortedNames[0],
+        type: 'deb'
+      }
     }
   }
 
