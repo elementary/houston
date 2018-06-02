@@ -6,6 +6,7 @@
  */
 
 import * as fs from 'fs-extra'
+import { clone } from 'lodash'
 import * as os from 'os'
 import * as path from 'path'
 import * as uuid from 'uuid/v4'
@@ -170,6 +171,70 @@ export class Worker extends EventEmitter implements type.IWorker {
   }
 
   /**
+   * Returns all the logs that the worker had created. Inserts some helpful
+   * information like architecture, distribution, and references to the log as
+   * well.
+   *
+   * @return {ILog[]}
+   */
+  protected get resultLogs (): type.ILog[] {
+    return this.contexts
+      .map((ctx) => ctx.logs)
+      .reduce((a, b) => [...a, ...b], [])
+      .filter((l) => (l != null))
+      .reduce((currentLogs, log, i, allLogs) => {
+        const newLog = new Log(log.level, log.title, log.body)
+
+        const allSimilarLogs = allLogs
+          .filter((l) => (l.title === log.title))
+
+        const contexts = [...allSimilarLogs, log]
+          .map((l) => this.getContextForLog(l))
+          .filter((c) => (c != null))
+
+        const architectures = [...new Set(contexts.map((c) => c.architecture))]
+        const distributions = [...new Set(contexts.map((c) => c.distribution))]
+        const references = [...new Set(this.getContextForLog(log).references)]
+
+        newLog.body += '\n\n### Build Information\n'
+
+        if (architectures.length > 1) {
+          newLog.body += `Affects Architectures: ${architectures.join(', ')}`
+        } else if (architectures.length === 1) {
+          newLog.body += `Affects Architecture: ${architectures[0]}`
+        }
+
+        newLog.body += '\n'
+
+        if (distributions.length > 1) {
+          newLog.body += `Affects Distributions: ${distributions.join(', ')}`
+        } else if (distributions.length === 1) {
+          newLog.body += `Affects Distribution: ${distributions[0]}`
+        }
+
+        newLog.body += '\n\n'
+
+        if (references.length > 0) {
+          newLog.body += 'Built with the following references:'
+          for (const reference of references) {
+            newLog.body += `\n- ${reference}`
+          }
+        }
+
+        newLog.body = newLog.body.trim()
+
+        const similarLogs = currentLogs
+          .filter((l) => (l.title === log.title))
+
+        if (similarLogs.length === 0) {
+          return [...currentLogs, newLog]
+        } else {
+          return currentLogs
+        }
+      }, [])
+  }
+
+  /**
    * result
    * Returns the result of the worker. Possible, but incomplete if not stopped.
    *
@@ -191,26 +256,7 @@ export class Worker extends EventEmitter implements type.IWorker {
       .filter((a) => (a != null))
       .sort((a, b) => (b.length - a.length))
 
-    const logs = this.contexts
-      .map((ctx) => ctx.logs)
-      .reduce((a, b) => [...a, ...b], [])
-      .filter((l) => (l != null))
-      .reduce((allLogs, log) => {
-        const similarLogIndex = allLogs
-          .findIndex((l) => (l.title === log.title))
-
-        if (similarLogIndex === -1) {
-          return [...allLogs, log]
-        }
-
-        const similarLog = allLogs[similarLogIndex]
-
-        if (similarLog.body.length < log.body.length) {
-          return allLogs.splice(similarLogIndex, 1, log)
-        } else {
-          return allLogs
-        }
-      }, [])
+    const logs = this.resultLogs
 
     const failed = logs
       .some((l) => (l.level === Log.Level.ERROR))
@@ -366,5 +412,30 @@ export class Worker extends EventEmitter implements type.IWorker {
     this.running = null
 
     return this.result
+  }
+
+  /**
+   * Given a log, we can find what context, or context of a fork the log belongs
+   * to. This is useful to get more information about the log's origin like
+   * architecture and distribution.
+   *
+   * @param {ILog} log
+   * @return {IContext|null}
+   */
+  protected getContextForLog (log: type.ILog): type.IContext | null {
+    for (const l of this.context.logs) {
+      if (l === log) {
+        return this.context
+      }
+    }
+
+    for (const fork of this.forks) {
+      const foundChildForkContext = fork.getContextForLog(log)
+      if (foundChildForkContext != null) {
+        return foundChildForkContext
+      }
+    }
+
+    return null
   }
 }
