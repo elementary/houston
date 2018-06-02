@@ -211,6 +211,10 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    * @return {IPackage}
    */
   public async uploadPackage (pkg: type.IPackage, stage: type.IStage, reference?: string) {
+    if (pkg.githubId != null) {
+      return
+    }
+
     const url = `${this.username}/${this.repository}/releases/tags/${reference}`
     const { body } = await agent
       .get(`https://api.github.com/repos/${url}`)
@@ -269,6 +273,10 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    * @return {ILog}
    */
   public async uploadLog (log: type.ILog, stage: type.IStage, reference?: string): Promise<type.ILog> {
+    if (log.githubId != null) {
+      return
+    }
+
     const hasLabel = await agent
       .get(`https://api.github.com/repos/${this.username}/${this.repository}/labels/AppCenter`)
       .set('authorization', `token ${this.auth}`)
