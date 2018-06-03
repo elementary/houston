@@ -183,8 +183,6 @@ export class Worker extends EventEmitter implements type.IWorker {
       .reduce((a, b) => [...a, ...b], [])
       .filter((l) => (l != null))
       .reduce((currentLogs, log, i, allLogs) => {
-        const newLog = new Log(log.level, log.title, log.body)
-
         const allSimilarLogs = allLogs
           .filter((l) => (l.title === log.title))
 
@@ -192,42 +190,13 @@ export class Worker extends EventEmitter implements type.IWorker {
           .map((l) => this.getContextForLog(l))
           .filter((c) => (c != null))
 
-        const architectures = [...new Set(contexts.map((c) => c.architecture))]
-        const distributions = [...new Set(contexts.map((c) => c.distribution))]
-        const references = [...new Set(this.getContextForLog(log).references)]
-
-        newLog.body += '\n\n### Build Information\n'
-
-        if (architectures.length > 1) {
-          newLog.body += `Affects Architectures: ${architectures.join(', ')}`
-        } else if (architectures.length === 1) {
-          newLog.body += `Affects Architecture: ${architectures[0]}`
-        }
-
-        newLog.body += '\n'
-
-        if (distributions.length > 1) {
-          newLog.body += `Affects Distributions: ${distributions.join(', ')}`
-        } else if (distributions.length === 1) {
-          newLog.body += `Affects Distribution: ${distributions[0]}`
-        }
-
-        newLog.body += '\n\n'
-
-        if (references.length > 0) {
-          newLog.body += 'Built with the following references:'
-          for (const reference of references) {
-            newLog.body += `\n- ${reference}`
-          }
-        }
-
-        newLog.body = newLog.body.trim()
+        log.body = this.getContextLogBody(log, contexts)
 
         const similarLogs = currentLogs
           .filter((l) => (l.title === log.title))
 
         if (similarLogs.length === 0) {
-          return [...currentLogs, newLog]
+          return [...currentLogs, log]
         } else {
           return currentLogs
         }
@@ -316,7 +285,6 @@ export class Worker extends EventEmitter implements type.IWorker {
         })
 
         await Promise.all(this.forks.map((fork) => fork.run()))
-        break
       }
     }
 
@@ -437,5 +405,50 @@ export class Worker extends EventEmitter implements type.IWorker {
     }
 
     return null
+  }
+
+  /**
+   * Adds some context information to the end of the log
+   *
+   * @param {type.ILog} log The log to add information to
+   * @param {type.IContext[]} contexts Information to add to the log
+   * @return {string} New Log body text
+   */
+  protected getContextLogBody (log: type.ILog, contexts: type.IContext[]): string {
+    if (log.body == null || log.body.includes('### Build Information')) {
+      return log.body
+    }
+
+    const architectures = [...new Set(contexts.map((c) => c.architecture))]
+      .filter((a) => (a != null))
+    const distributions = [...new Set(contexts.map((c) => c.distribution))]
+      .filter((d) => (d != null))
+    const references = [...new Set(this.getContextForLog(log).references)]
+      .filter((r) => (r != null))
+
+    let body = (log.body || '').trim()
+
+    body += '\n\n### Build Information'
+
+    if (architectures.length > 1) {
+      body += `\nAffects Architectures: ${architectures.join(', ')}`
+    } else if (architectures.length === 1) {
+      body += `\nAffects Architecture: ${architectures[0]}`
+    }
+
+    if (distributions.length > 1) {
+      body += `\nAffects Distributions: ${distributions.join(', ')}`
+    } else if (distributions.length === 1) {
+      body += `\nAffects Distribution: ${distributions[0]}`
+    }
+
+    if (references.length > 0) {
+      body += '\nBuilt with the following references:'
+      for (const reference of references) {
+        body += `\n- ${reference}`
+      }
+    }
+
+    return body
   }
 }

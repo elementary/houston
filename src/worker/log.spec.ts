@@ -8,9 +8,8 @@ import * as path from 'path'
 import { Log } from './log'
 
 test('it can render a template', () => {
-  const test1 = path.resolve(__dirname, '../../test/fixture/worker/log/test1.md')
-
-  const log = Log.template(Log.Level.ERROR, test1, {
+  const template = path.resolve(__dirname, '../../test/fixture/worker/log/test1.md')
+  const log = Log.template(Log.Level.ERROR, template, {
     body: '## This is a subheader',
     title: 'testing'
   })
@@ -20,8 +19,19 @@ test('it can render a template', () => {
 })
 
 test('toString returns a nice templated log', () => {
-  const err = new Log(Log.Level.ERROR, 'title', 'body')
-  const str = err.toString()
+  const log = new Log(Log.Level.ERROR, 'title', 'body')
+  const str = log.toString()
 
-  expect(str).toBe('# title\n\nbody')
+  expect(str).toMatch(/# title/)
+  expect(str).toMatch(/body/)
+})
+
+test('toString outputs error message and stack', () => {
+  const error = new Error('testing error')
+  const log = new Log(Log.Level.ERROR, 'title').setError(error)
+  const str = log.toString()
+
+  expect(str).toMatch(/# title/)
+  expect(str).toMatch(/testing error/)
+  expect(str).toMatch(/log\.spec\.ts/)
 })

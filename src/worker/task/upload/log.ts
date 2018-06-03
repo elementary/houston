@@ -26,7 +26,7 @@ export class UploadLog extends Task {
    * @return {void}
    */
   public async run () {
-    let logs = this.worker.context.logs
+    let logs = this.worker.result.logs
     const ref = this.worker.context.references[this.worker.context.references.length - 1]
 
     logs = await this.uploadToCodeRepository(logs, ref)
