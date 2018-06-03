@@ -110,10 +110,14 @@ export class Log extends Error implements ILog {
   public toString () {
     const out = [`# ${this.title}`, '']
 
-    const bodyLines = ((this.body != null) ? this.body : this.stack)
-      .split('\n')
-
-    out.push(...bodyLines)
+    if (this.body != null) {
+      out.push(...this.body.split('\n'))
+    } else if (this.error != null) {
+      out.push(this.error.message)
+      out.push(...this.error.stack.split('\n'))
+    } else if (this.stack != null) {
+      out.push(...this.stack.split('\n'))
+    }
 
     return out.join('\n')
   }

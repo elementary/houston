@@ -5,11 +5,19 @@
 
 import { WrapperTask } from '../wrapperTask'
 
+import { UploadLog } from './log'
+import { UploadPackage } from './package'
+
 export class Upload extends WrapperTask {
   /**
    * All of the upload tasks we should run
    *
    * @var {Task[]}
    */
-  public tasks = []
+  public get tasks () {
+    return [
+      UploadPackage,
+      UploadLog
+    ]
+  }
 }
