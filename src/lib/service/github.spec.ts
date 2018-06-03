@@ -15,9 +15,9 @@ test('url returns correct string without authentication', () => {
 })
 
 test('url returns correct string with authentication', () => {
-  const repo = new GitHub('https://fakeauthcode@github.com/elementary/houston')
+  const repo = new GitHub('https://:fakeauthcode@github.com/elementary/houston')
 
-  expect(repo.url).toEqual('https://fakeauthcode@github.com/elementary/houston.git')
+  expect(repo.url).toEqual('https://x-access-token:fakeauthcode@github.com/elementary/houston.git')
 })
 
 test('can set values based on url', () => {
@@ -46,5 +46,4 @@ test('can set values based on ssh url', () => {
 
   expect(repo.username).toEqual('elementary')
   expect(repo.repository).toEqual('houston')
-  expect(repo.auth).toEqual('test')
 })
