@@ -3,6 +3,8 @@
  * Handles interaction with GitHub repositories.
  */
 
+import * as URL from 'url'
+
 import * as fileType from 'file-type'
 import * as fs from 'fs-extra'
 import { injectable } from 'inversify'
@@ -119,7 +121,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    */
   public get url (): string {
     if (this.auth != null) {
-      return `https://${this.auth}@github.com/${this.username}/${this.repository}.git`
+      return `https://x-access-token:${this.auth}@github.com/${this.username}/${this.repository}.git`
     }
 
     return `https://github.com/${this.username}/${this.repository}.git`
@@ -137,22 +139,17 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
       throw new Error('Given URL is not a GitHub repository')
     }
 
-    const chunks = p.split(/[@\/:\.]/)
-    const reverseChunks = [...chunks].reverse()
+    // NOTE: This is A+ 10/10 string logic. Will not break ever.
+    const httpPath = (p.startsWith('git@') ? p.replace('git@', 'https://') : p)
+      .replace('://github.com:', '://github.com/')
+      .replace(/\.git$/, '')
 
-    if (reverseChunks[0].toLowerCase() === 'git') {
-      this.username = reverseChunks[2]
-      this.repository = reverseChunks[1]
-    } else {
-      this.username = reverseChunks[1]
-      this.repository = reverseChunks[0]
-    }
+    const url = new URL.URL(httpPath)
+    const [, username, repository] = url.pathname.split('/')
 
-    if (chunks[0].toLowerCase() === 'https' || chunks[0].toLowerCase() === 'http') {
-      if (chunks[3].toLowerCase() !== 'github') {
-        this.auth = chunks[3]
-      }
-    }
+    this.username = username
+    this.repository = repository
+    this.auth = url.password || url.username || null
   }
 
   /**
@@ -219,7 +216,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
     const { body } = await agent
       .get(`https://api.github.com/repos/${url}`)
       .set('accept', 'application/vnd.github.v3+json')
-      .set('authorization', `token ${this.auth}`)
+      .set('authorization', `Bearer ${this.auth}`)
 
     if (body.upload_url == null) {
       throw new Error('No Upload URL for GitHub release')
@@ -238,7 +235,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
         .post(body.upload_url.replace('{?name,label}', ''))
         .set('content-type', mime)
         .set('content-length', stat.size)
-        .set('authorization', `token ${this.auth}`)
+        .set('authorization', `Bearer ${this.auth}`)
         .query({ name: pkg.name })
         .query((pkg.description != null) ? { label: pkg.description } : {})
         .parse((response, fn) => {
@@ -279,14 +276,14 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
 
     const hasLabel = await agent
       .get(`https://api.github.com/repos/${this.username}/${this.repository}/labels/AppCenter`)
-      .set('authorization', `token ${this.auth}`)
+      .set('authorization', `Bearer ${this.auth}`)
       .then(() => true)
       .catch(() => false)
 
     if (!hasLabel) {
       await agent
         .post(`https://api.github.com/repos/${this.username}/${this.repository}/labels`)
-        .set('authorization', `token ${this.auth}`)
+        .set('authorization', `Bearer ${this.auth}`)
         .send({
           color: '4c158a',
           description: 'Issues related to releasing on AppCenter',
@@ -296,7 +293,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
 
     const { body } = await agent
       .post(`https://api.github.com/repos/${this.username}/${this.repository}/issues`)
-      .set('authorization', `token ${this.auth}`)
+      .set('authorization', `Bearer ${this.auth}`)
       .send({
         body: log.body,
         labels: ['AppCenter'],
