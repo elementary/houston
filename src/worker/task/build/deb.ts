@@ -168,6 +168,7 @@ export class BuildDeb extends Task {
     const to = path.resolve(this.worker.workspace, 'package.deb')
     await fs.copy(deb.path, to)
 
+    this.worker.context.package = deb
     this.worker.context.package.path = to
 
     await fs.remove(this.path)

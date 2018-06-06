@@ -31,25 +31,26 @@ export class UploadPackage extends Task {
    * @return {void}
    */
   public async run () {
-    if (this.worker.context.package == null || this.worker.context.package.path == null) {
-      return
+    const packages = this.worker.result.packages
+
+    for (const context of this.worker.contexts) {
+      if (context.package == null) {
+        continue
+      }
+
+      const ref = context.references[context.references.length - 1]
+
+      context.package.name = `${context.nameHuman} ${context.version}`
+      context.package.description = [
+        context.nameDomain,
+        context.architecture,
+        context.distribution,
+        context.version
+      ].join(' ')
+
+      context.package = await this.uploadToCodeRepository(context.package, ref)
+      context.package = await this.uploadToPackageRepositories(context.package, ref)
     }
-
-    let pkg = this.worker.context.package
-    const ref = this.worker.context.references[this.worker.context.references.length - 1]
-
-    pkg.name = `${this.worker.context.nameHuman} ${this.worker.context.version}`
-    pkg.description = [
-      this.worker.context.nameDomain,
-      this.worker.context.architecture,
-      this.worker.context.distribution,
-      this.worker.context.version
-    ].join(' ')
-
-    pkg = await this.uploadToCodeRepository(pkg, ref)
-    pkg = await this.uploadToPackageRepositories(pkg, ref)
-
-    this.worker.context.package = pkg
 
     if (this.errors.length !== 0) {
       this.reportErrors()
@@ -112,7 +113,11 @@ export class UploadPackage extends Task {
    */
   protected reportErrors () {
     const logger = this.worker.app.get<Logger>(Logger)
-    this.errors.map((e) => logger.error('Error uploading package').setError(e.error))
+    this.errors.forEach((e) => {
+      logger.error('Error uploading package')
+        .setError(e.error)
+        .send()
+    })
 
     if (this.errors.length !== 0) {
       const logPath = path.resolve(__dirname, 'package.md')

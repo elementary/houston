@@ -134,6 +134,21 @@ export class Worker extends EventEmitter implements type.IWorker {
   }
 
   /**
+   * contexts
+   * Returns a list of all the contexts this worker has, and all of it's forks
+   *
+   * @return {IContext[]}
+   */
+  public get contexts (): type.IContext[] {
+    return [
+      this.context,
+      ...this.forks
+        .map((worker) => worker.contexts)
+        .reduce((a, b) => [...a, ...b], [])
+    ]
+  }
+
+  /**
    * runningIndex
    * Returns the currently running task index
    *
@@ -153,21 +168,6 @@ export class Worker extends EventEmitter implements type.IWorker {
         })
       }
     }
-  }
-
-  /**
-   * contexts
-   * Returns a list of all the contexts this worker has, and all of it's forks
-   *
-   * @return {IContext[]}
-   */
-  protected get contexts (): type.IContext[] {
-    return [
-      this.context,
-      ...this.forks
-        .map((worker) => worker.contexts)
-        .reduce((a, b) => [...a, ...b], [])
-    ]
   }
 
   /**
@@ -399,6 +399,7 @@ export class Worker extends EventEmitter implements type.IWorker {
 
     for (const fork of this.forks) {
       const foundChildForkContext = fork.getContextForLog(log)
+
       if (foundChildForkContext != null) {
         return foundChildForkContext
       }
