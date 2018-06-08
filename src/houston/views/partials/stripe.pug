@@ -1,16 +1,16 @@
 if config.stripe != null
   if project.stripe.enabled
     a(href="/auth/stripe/disable/" + project.name)
-      div.fab.success
-        i.fa.fa-usd
+      div.btn-fab.success
+        i.fas.fa-dollar-sign
         div.popover-container
           div.popover-content
             h3 Disable Payments for #{project.name}
             p #{project.stripe.user.username} has enabled payments. Disabling payments will take effect after the next release.
   else
     a(href="/auth/stripe/enable/" + project.name)
-      div.fab.warn
-        i.fa.fa-usd
+      div.btn-fab.warn
+        i.fas.fa-dollar-sign
         div.popover-container
           div.popover-content
             h3 Enable Payments for #{project.name}
