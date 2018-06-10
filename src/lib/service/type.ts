@@ -10,6 +10,7 @@ export type IStage = 'review' | 'stable'
 export interface IServiceIds {
   aptlyId?: string
   githubId?: number
+  gitlabId?: number
 }
 
 export interface IPackage extends IServiceIds {

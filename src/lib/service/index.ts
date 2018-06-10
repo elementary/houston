@@ -6,6 +6,7 @@
 import * as type from './type'
 
 import { GitHub } from './github'
+import { GitLab } from './gitlab'
 
 /**
  * Creates a new repository service given any URL
@@ -15,7 +16,11 @@ import { GitHub } from './github'
  * @return {Repository}
  */
 export function createCodeRepository (url: string): type.ICodeRepository {
-  return new GitHub(url)
+  if (url.search('gitlab') > 0) {
+    return new GitLab(url)
+  } else {
+    return new GitHub(url)
+  }
 }
 
 // Typescript typeguard to ensure given value is an ICodeRepository
@@ -43,6 +48,7 @@ export {
 
 export { Aptly } from './aptly'
 export { GitHub } from './github'
+export { GitLab } from './gitlab'
 
 export const codeRepository = Symbol('codeRepository')
 export const packageRepository = Symbol('packageRepository')

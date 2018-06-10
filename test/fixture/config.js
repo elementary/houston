@@ -129,6 +129,29 @@ module.exports = {
       installation: 0,
       key: '/etc/houston/github.pem',
       hook: false
+    },
+
+    /**
+     * GitLab configuration
+     * You will need an OAuth application setup with GitLab, and an integration
+     * application setup.
+     *
+     * @see https://docs.gitlab.com/ee/integration/oauth_provider.html
+     *
+     * @property {string} client - The OAuth application client key
+     * @property {string} secret - The OAuth application secret key
+     *
+     * @property {string} installation - The installation ID
+     * @property {string} key - The full path to the installation key file
+     * @property {string} [hook] - The installation web hook secret.
+     */
+    gitlab: {
+      client: 'xxxxxxxxxxxxxxxxxxxx',
+      secret: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+
+      installation: 0,
+      key: '/etc/houston/gitlab.pem',
+      hook: false
     }
   }
 }

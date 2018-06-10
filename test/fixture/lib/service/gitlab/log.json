@@ -1,0 +1,80 @@
+[
+    {
+        "scope": "https://gitlab.com",
+        "method": "GET",
+        "path": "/api/v4/projects/RupertDev%2Fhoustontesting/labels",
+        "body": "",
+        "status": 200,
+        "response": [
+          {
+            "id": 6378447,
+            "name": "AppCenter",
+            "color": "#4c158a",
+            "description": "Issues related to releasing on AppCenter",
+            "open_issues_count": 3,
+            "closed_issues_count": 0,
+            "open_merge_requests_count": 0,
+            "priority": null,
+            "subscribed": false
+          }
+        ]
+    },
+  {
+    "scope": "https://gitlab.com",
+    "method": "POST",
+    "path": "/api/v4/projects/RupertDev%2Fhoustontesting/issues",
+    "body": {
+      "description": "testy test test",
+      "labels": "AppCenter",
+      "title": "test"
+    },
+    "status": 201,
+    "response": {
+      "id": 11882433,
+      "iid": 4,
+      "project_id": 6990324,
+      "title": "test",
+      "description": "testy test test",
+      "state": "opened",
+      "created_at": "2018-06-10T03:51:16.686Z",
+      "updated_at": "2018-06-10T03:51:16.686Z",
+      "closed_at": null,
+      "closed_by": null,
+      "labels": [
+        "AppCenter"
+      ],
+      "milestone": null,
+      "assignees": [],
+      "author": {
+        "id": 551379,
+        "name": "Michael Rupert",
+        "username": "RupertDev",
+        "state": "active",
+        "avatar_url": "https://assets.gitlab-static.net/uploads/-/system/user/avatar/551379/avatar.png",
+        "web_url": "https://gitlab.com/RupertDev"
+      },
+      "assignee": null,
+      "user_notes_count": 0,
+      "upvotes": 0,
+      "downvotes": 0,
+      "due_date": null,
+      "confidential": false,
+      "discussion_locked": null,
+      "web_url": "https://gitlab.com/RupertDev/houstontesting/issues/4",
+      "time_stats": {
+        "time_estimate": 0,
+        "total_time_spent": 0,
+        "human_time_estimate": null,
+        "human_total_time_spent": null
+      },
+      "_links": {
+        "self": "https://gitlab.com/api/v4/projects/6990324/issues/4",
+        "notes": "https://gitlab.com/api/v4/projects/6990324/issues/4/notes",
+        "award_emoji": "https://gitlab.com/api/v4/projects/6990324/issues/4/award_emoji",
+        "project": "https://gitlab.com/api/v4/projects/6990324"
+      },
+      "subscribed": true,
+      "weight": null
+    }
+  }
+]
