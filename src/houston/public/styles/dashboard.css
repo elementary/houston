@@ -17,7 +17,7 @@
 * Floating Action Button *
 *************************/
 
-.fab {
+.btn-fab {
     background-color: #f9c440;
     border-radius: 50%;
     color: #fff;
@@ -29,31 +29,31 @@
     width: 30px;
 }
 
-.fab.tag {
+.btn-fab.tag {
     background-color: #f3f3f3;
     color: #888;
 }
 
-.fab.success {
+.btn-fab.success {
     background-color: #68b723;
 }
 
-.fab.warn {
+.btn-fab.warn {
     background-color: #888;
 }
 
-.fab.error {
+.btn-fab.error {
     background-color: #c6262e;
 }
 
-.fab > i {
+.btn-fab > i {
     font-size: 14px;
     line-height: 30px;
     text-align: center;
     width: 30px;
 }
 
-.fab.tag > i {
+.btn-fab.tag > i {
     -webkit-text-fill-color: #f3f3f3;
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: #888;
@@ -64,7 +64,7 @@
     margin: auto 16px 8px;
 }
 
-#gitter .fab {
+#gitter .btn-fab {
     background-color: #4c158a;
     box-shadow:
         0 3px 6px rgba(0, 0, 0, 0.16),
@@ -73,13 +73,13 @@
     width: 40px;
 }
 
-#gitter .fab > i {
+#gitter .btn-fab > i {
     line-height: 40px;
     width: 40px;
     font-size: 18px;
 }
 
-#gitter .fab:hover {
+#gitter .btn-fab:hover {
     box-shadow:
         0 10px 20px rgba(0, 0, 0, 0.19),
         0 6px 6px rgba(0, 0, 0, 0.23);
@@ -160,7 +160,7 @@
 }
 
 .repo__action .button,
-.repo__action .fab {
+.repo__action .btn-fab {
     margin: 6px;
 }
 
@@ -242,7 +242,7 @@
     border-top: 6px solid rgba(51, 51, 51, 0.9);
 }
 
-.repo .fab:hover .popover-container .popover-content {
+.repo .btn-fab:hover .popover-container .popover-content {
     visibility: visible;
     pointer-events: auto;
     opacity: 1;
