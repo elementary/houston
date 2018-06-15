@@ -116,7 +116,7 @@ button > i.fa,
 
 .dark .button.suggested-action::before {
     position: absolute;
-    font-family: 'FontAwesome';
+    font-family: 'Font Awesome\ 5 Brands';
     top: calc(50% - 40px);
     left: -12px;
     content: "\f09b";
