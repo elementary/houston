@@ -119,6 +119,7 @@ export class WorkspaceSetup extends Task {
     // And have a `deb-packaging-juno-testing` branch for packaging
     this.worker.context.references
       .map((ref) => ref.split('/').reverse()[0])
+      .filter((ref) => (ref != null && ref !== ''))
       .forEach((shortRef) => {
         mergableReferences.push(`${build.packageType}-packaging-${shortRef}`)
         mergableReferences.push(`${build.packageType}-packaging-${build.distribution}-${shortRef}`)
