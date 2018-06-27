@@ -13,43 +13,41 @@ import { Log } from '../../log'
 import { IWorker } from '../../type'
 import { Task } from '../task'
 
-interface IBuildConfiguration {
+/**
+ * Everything that makes a build unique. All of these can be derived from
+ * reference names in the repository.
+ */
+export interface IBuildConfiguration {
   architecture: string,
   distribution: string,
   packageType: string
 }
 
+/**
+ * These are all possible types of outputs we can have. They are used for
+ * generating possible reference names.
+ *
+ * @var {string[]}
+ */
+const POSSIBLE_ARCHITECTURES = ['amd64']
+const POSSIBLE_DISTRIBUTIONS = ['loki', 'juno']
+const POSSIBLE_PACKAGE_TYPES = ['deb']
+
+/**
+ * A list of default build setups if nothing else was found. This is left
+ * mostly for people who have not updated there repo since old houston v1.
+ *
+ * @var {IBuildConfiguration[]}
+ */
+const DEFAULT_BUILDS: IBuildConfiguration[] = [{
+  architecture: 'amd64',
+  distribution: 'juno',
+  packageType: 'deb'
+}]
+
 export class WorkspaceSetup extends Task {
   /**
-   * These are all possible types of outputs we can have. They are used for
-   * generating possible reference names.
-   *
-   * @var {String[]}
-   */
-  protected possiblePackageTypes = ['deb']
-  protected possibleArchitectures = ['amd64']
-  protected possibleDistributions = ['loki', 'juno']
-
-  /**
-   * Given two lists of strings we can find the first most common string.
-   *
-   * @param {String[]} references
-   * @param {String[]} search - All of the reference parts we are looking for
-   * @return {String[]}
-   */
-  protected static filterRefs (references, search): string[] {
-    // Gets the last part of a git reference "refs/origin/master" -> "master"
-    const shortReferences = references
-      .map((ref) => ref.split('/').reverse()[0])
-
-    return search
-      .map((ref) => shortReferences.findIndex((short) => (short === ref)))
-      .filter((ref) => (ref !== -1))
-      .map((i) => references[i])
-  }
-
-  /**
-   * Fills the workspace by merging the release and package branches of a repo.
+   * Finds and creates all of the different build configurations
    *
    * @async
    * @return {void}
@@ -57,54 +55,10 @@ export class WorkspaceSetup extends Task {
   public async run () {
     await this.worker.emitAsync(`task:WorkspaceSetup:start`)
 
-    const builds = await this.possibleBuilds()
-
-    if (builds.length === 0) {
-      builds.push({
-        architecture: 'amd64',
-        distribution: 'loki',
-        packageType: 'deb'
-      })
+    for (const build of await this.possibleBuilds()) {
+      await this.setupBuild(build)
     }
 
-    for (const build of builds) {
-      const worker = await this.worker.emitAsyncChain<IWorker>(
-        `task:WorkspaceSetup:fork`,
-        await this.worker.fork({
-          architecture: build.architecture,
-          distribution: build.distribution,
-          package: { type: build.packageType }
-        })
-      )
-
-      await fs.ensureDir(worker.workspace)
-      const branches = await this.branches(build)
-
-      // Step 1: Download all the needed branches
-      for (let i = 0; i < branches.length; i++) {
-        // TODO: Maybe go and slugify the branch for easier debugging of folders
-        const gitFolder = path.resolve(worker.workspace, 'repository', `${i}`)
-        await worker.repository.clone(gitFolder, branches[i])
-      }
-
-      // Step 2: Merge the downloaded branches to form a single folder
-      for (let i = 0; i < branches.length; i++) {
-        const from = path.resolve(worker.workspace, 'repository', `${i}`)
-        const to = path.resolve(worker.workspace, 'clean')
-
-        await fs.copy(from, to, { overwrite: true })
-      }
-
-      // Step 3: Copy pasta to the dirty directory
-      const clean = path.resolve(worker.workspace, 'clean')
-      const dirty = path.resolve(worker.workspace, 'dirty')
-
-      await fs.ensureDir(clean)
-      await fs.ensureDir(dirty)
-      await fs.copy(clean, dirty)
-    }
-
-    // Step 4: Profit
     await this.worker.emitAsync(`task:WorkspaceSetup:end`)
   }
 
@@ -116,23 +70,19 @@ export class WorkspaceSetup extends Task {
    * @async
    * @return {IBuildConfiguration[]}
    */
-  private async possibleBuilds (): Promise<IBuildConfiguration[]> {
+  public async possibleBuilds (): Promise<IBuildConfiguration[]> {
     const repositoryReferences = await this.worker.repository.references()
-    const buildConfigurations: IBuildConfiguration[] = []
+    const builds: IBuildConfiguration[] = []
 
-    for (const packageType of this.possiblePackageTypes) {
-      for (const architecture of this.possibleArchitectures) {
-        for (const distribution of this.possibleDistributions) {
-          const possibleReferences = [
-            `${distribution}`,
-            `${packageType}-packaging`,
-            `${packageType}-packaging-${distribution}`
-          ]
+    for (const packageType of POSSIBLE_PACKAGE_TYPES) {
+      for (const architecture of POSSIBLE_ARCHITECTURES) {
+        for (const distribution of POSSIBLE_DISTRIBUTIONS) {
+          const foundReference = repositoryReferences
+            .map((ref) => ref.split('/').reverse()[0])
+            .find((ref) => (ref === `${packageType}-packaging-${distribution}`))
 
-          const matchingRefs = WorkspaceSetup.filterRefs(repositoryReferences, possibleReferences)
-
-          if (matchingRefs.length !== 0) {
-            buildConfigurations.push({
+          if (foundReference != null) {
+            builds.push({
               architecture,
               distribution,
               packageType
@@ -142,17 +92,21 @@ export class WorkspaceSetup extends Task {
       }
     }
 
-    return buildConfigurations
+    if (builds.length === 0) {
+      builds.push(...DEFAULT_BUILDS)
+    }
+
+    return builds
   }
 
   /**
-   * Returns a list of branches to use for making the build.
+   * Returns a list of references to use for making the build.
    *
    * @async
    * @param {IBuildConfiguration} build
    * @return {String[]}
    */
-  private async branches (build: IBuildConfiguration): Promise<string[]> {
+  public async buildReferences (build: IBuildConfiguration): Promise<string[]> {
     const repositoryReferences = await this.worker.repository.references()
 
     const mergableReferences = [
@@ -161,14 +115,62 @@ export class WorkspaceSetup extends Task {
       `${build.packageType}-packaging-${build.distribution}`
     ]
 
-    if (this.worker.context.references[0] != null) {
-      const shortBranch = this.worker.context.references[0].split('/').reverse()[0]
-      mergableReferences.push(`${build.packageType}-packaging-${build.distribution}-${shortBranch}`)
+    // This allows us to add an `origin/heads/testing` reference to the build
+    // And have a `deb-packaging-juno-testing` branch for packaging
+    this.worker.context.references
+      .map((ref) => ref.split('/').reverse()[0])
+      .forEach((shortRef) => {
+        mergableReferences.push(`${build.packageType}-packaging-${shortRef}`)
+        mergableReferences.push(`${build.packageType}-packaging-${build.distribution}-${shortRef}`)
+      })
+
+    return mergableReferences
+      .filter((ref) => repositoryReferences.includes(ref))
+  }
+
+  /**
+   * Does the heavy lifting of forking the repo, and setting up the folders
+   * with cloned and merged packaging.
+   *
+   * @async
+   * @param {IBuildConfiguration} build
+   * @return {void}
+   */
+  protected async setupBuild (build: IBuildConfiguration) {
+    const basicFork = await this.worker.fork({
+      architecture: build.architecture,
+      distribution: build.distribution,
+      package: { type: build.packageType }
+    })
+
+    const worker = await this.worker.emitAsyncChain<IWorker>(`task:WorkspaceSetup:fork`, basicFork)
+
+    await fs.ensureDir(worker.workspace)
+    const references = await this.buildReferences(build)
+
+    // Step 1: Download all the needed references
+    for (let i = 0; i < references.length; i++) {
+      // TODO: Maybe go and slugify the branch for easier debugging of folders
+      const gitFolder = path.resolve(worker.workspace, 'repository', `${i}`)
+      await worker.repository.clone(gitFolder, references[i])
     }
 
-    const packageReferences = WorkspaceSetup.filterRefs(repositoryReferences, mergableReferences)
+    // Step 2: Merge the downloaded references to form a single folder
+    for (let i = 0; i < references.length; i++) {
+      const from = path.resolve(worker.workspace, 'repository', `${i}`)
+      const to = path.resolve(worker.workspace, 'clean')
 
-    // Returns a unique array. No dups.
-    return [...new Set([...this.worker.context.references, ...packageReferences])]
+      await fs.copy(from, to, { overwrite: true })
+    }
+
+    // Step 3: Copy pasta to the dirty directory
+    const clean = path.resolve(worker.workspace, 'clean')
+    const dirty = path.resolve(worker.workspace, 'dirty')
+
+    await fs.ensureDir(clean)
+    await fs.ensureDir(dirty)
+    await fs.copy(clean, dirty)
+
+    // Step 4: Profit.
   }
 }

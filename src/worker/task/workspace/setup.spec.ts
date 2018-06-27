@@ -11,7 +11,6 @@ test('builds workspace from all matching branches', async () => {
   const worker = await mock({
     distribution: 'loki',
     nameDomain: 'com.github.elementary.houston',
-    package: { type: 'deb' },
     references: ['refs/heads/loki']
   })
 
@@ -27,17 +26,35 @@ test('builds workspace from all matching branches', async () => {
   const setup = new WorkspaceSetup(worker)
   const setups = await setup.possibleBuilds()
 
-  expect(setups.length).toBe(2)
-
-  expect(setups).toContainEqual({
+  expect(setups).toEqual([{
     architecture: 'amd64',
     distribution: 'loki',
     packageType: 'deb'
-  })
-
-  expect(setups).toContainEqual({
+  }, {
     architecture: 'amd64',
     distribution: 'juno',
     packageType: 'deb'
+  }])
+})
+
+test('builds workspace defaults to latest version', async () => {
+  const worker = await mock({
+    distribution: 'loki',
+    nameDomain: 'com.github.elementary.houston',
+    references: ['refs/heads/loki']
   })
-}, 300000)
+
+  worker.repository.references = async () => ([
+    'refs/heads/deb-packaging',
+    'refs/heads/master'
+  ])
+
+  const setup = new WorkspaceSetup(worker)
+  const setups = await setup.possibleBuilds()
+
+  expect(setups).toEqual([{
+    architecture: 'amd64',
+    distribution: 'juno',
+    packageType: 'deb'
+  }])
+})
