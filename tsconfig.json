@@ -1,26 +1,8 @@
 {
+  "extends": "./tsconfig.production.json",
+
   "include": [
-    "./src/**/*"
-  ],
-
-  "exclude": [
-    "./src/**/*.e2e.ts",
-    "./src/**/*.spec.ts"
-  ],
-
-  "compilerOptions": {
-    "alwaysStrict": true,
-    "baseUrl": "./src",
-    "declaration": true,
-    "experimentalDecorators": true,
-    "forceConsistentCasingInFileNames": true,
-    "lib": ["es2015", "es2016", "es2017"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "outDir": "./dest",
-    "pretty": true,
-    "sourceMap": true,
-    "emitDecoratorMetadata": true,
-    "target": "es2015"
-  }
+    "./src",
+    "./test"
+  ]
 }

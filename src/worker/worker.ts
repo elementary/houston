@@ -420,11 +420,11 @@ export class Worker extends EventEmitter implements type.IWorker {
       return log.body
     }
 
-    const architectures = [...new Set(contexts.map((c) => c.architecture))]
+    const architectures = Array.from(new Set(contexts.map((c) => c.architecture)))
       .filter((a) => (a != null))
-    const distributions = [...new Set(contexts.map((c) => c.distribution))]
+    const distributions = Array.from(new Set(contexts.map((c) => c.distribution)))
       .filter((d) => (d != null))
-    const references = [...new Set(this.getContextForLog(log).references)]
+    const references = Array.from(new Set(this.getContextForLog(log).references))
       .filter((r) => (r != null))
 
     let body = (log.body || '').trim()

@@ -20,37 +20,37 @@
     "build": "gulp --gulpfile 'build/gulpfile.ts' build",
     "build:watch": "gulp --gulpfile 'build/gulpfile.ts' watch",
     "commit": "git-cz",
-    "test": "jest --no-cache",
-    "test:unit": "jest --no-cache .spec.ts",
-    "test:e2e": "jest --no-cache .e2e.ts",
-    "test:watch": "jest --no-cache --watch .spec.ts",
-    "coverage": "jest --no-cache --coverage",
-    "ci:test": "jest --no-cache --coverage --verbose --ci --runInBand false -w 2",
+    "test": "ava",
+    "test:spec": "ava test/spec",
+    "test:e2e": "ava test/e2e",
+    "test:watch": "ava --watch test/spec",
+    "coverage": "nyc ava",
+    "ci:test": "nyc ava -v",
     "ci:release": "semantic-release",
-    "lint": "tslint --project 'tsconfig.json'"
+    "lint": "tslint --project tsconfig.json"
   },
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
     "@fortawesome/fontawesome-free-brands": "^5.0.13",
     "@fortawesome/fontawesome-free-solid": "^5.0.13",
-    "@fortawesome/vue-fontawesome": "0.0.22",
+    "@fortawesome/vue-fontawesome": "0.0.23",
     "cheerio": "^1.0.0-rc.2",
     "dockerode": "^2.5.5",
     "ejs": "^2.6.1",
     "eventemitter2": "^5.0.1",
     "faker": "^4.1.0",
     "file-type": "^7.7.1",
-    "fs-extra": "^5.0.0",
+    "fs-extra": "^6.0.1",
     "glob": "^7.1.2",
     "ini": "^1.3.5",
     "inversify": "^4.13.0",
     "knex": "^0.14.6",
     "koa": "^2.5.1",
-    "koa-router": "^7.3.0",
+    "koa-router": "^7.4.0",
     "koa-static": "^4.0.3",
     "lodash": "^4.17.10",
     "markdown-it": "^8.4.1",
-    "nodegit": "^0.22.0",
+    "nodegit": "^0.22.1",
     "reflect-metadata": "^0.1.12",
     "sanitize-html": "^1.18.2",
     "superagent": "^3.8.3",
@@ -58,34 +58,33 @@
     "yargs": "^11.0.0"
   },
   "optionalDependencies": {
-    "bull": "^3.3.10",
-    "raven": "^2.0.1"
+    "bull": "^3.4.2",
+    "raven": "^2.6.2"
   },
   "devDependencies": {
-    "@types/bull": "^3.3.10",
+    "@types/bull": "^3.3.12",
     "@types/faker": "^4.1.2",
-    "@types/jest": "^22.2.3",
-    "@types/knex": "0.14.12",
+    "@types/knex": "0.14.14",
     "@types/koa-router": "^7.0.28",
-    "@types/node": "^9.6.18",
+    "@types/node": "^10.3.4",
+    "ava": "^1.0.0-beta.6",
     "commitizen": "^2.10.1",
     "cz-conventional-changelog": "^2.1.0",
     "gulp": "^4.0.0",
-    "gulp-sourcemaps": "^2.6.3",
+    "gulp-sourcemaps": "^2.6.4",
     "gulp-typescript": "^4.0.2",
-    "jest": "^22.4.4",
-    "nock": "^9.2.6",
-    "semantic-release": "^15.5.0",
-    "sinon": "^5.0.10",
-    "sqlite3": "^4.0.0",
+    "nock": "^9.3.2",
+    "nyc": "^12.0.2",
+    "semantic-release": "^15.5.1",
+    "sinon": "^5.1.1",
+    "sqlite3": "^4.0.1",
     "supertest": "^3.1.0",
-    "ts-jest": "^22.4.6",
-    "ts-node": "^6.0.5",
+    "ts-node": "^6.1.1",
     "tslint": "^5.10.0",
-    "tslint-consistent-codestyle": "^1.13.0",
+    "tslint-consistent-codestyle": "^1.13.1",
     "tslint-jsdoc-rules": "^0.1.2",
     "tslint-microsoft-contrib": "^5.0.3",
-    "typescript": "^2.8.3"
+    "typescript": "^2.9.2"
   },
   "files": [
     "dest/"
@@ -96,43 +95,57 @@
   "release": {
     "branch": "v2"
   },
-  "jest": {
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "src/**/*.ts",
-      "!src/cli/**/*.ts"
-    ],
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "/cli/",
-      "/.*\\.d\\.ts"
-    ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 20,
-        "functions": 50,
-        "lines": 50,
-        "statements": 50
-      }
-    },
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts",
-      "tsx"
-    ],
-    "setupFiles": [
-      "<rootDir>/src/bootstrap.js"
-    ],
-    "setupTestFrameworkScriptFile": "<rootDir>/test/bootstrap.js",
-    "testRegex": "\\.(spec|e2e)\\.ts$",
-    "transform": {
-      "^.+\\.tsx?$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
-    }
-  },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "ava": {
+    "babel": false,
+    "compileEnhancements": false,
+    "extensions": [
+      "ts"
+    ],
+    "files": [
+      "./test/e2e",
+      "./test/spec"
+    ],
+    "require": [
+      "./test/bootstrap.js",
+      "ts-node/register"
+    ]
+  },
+  "nyc": {
+    "all": true,
+    "branches": 0,
+    "cache": true,
+    "check-coverage": true,
+    "exclude": [
+      "**/node_modules/**",
+      "**/*.d.ts",
+      "**/*.spec.ts",
+      "**/*.e2e.ts",
+      "./src/bootstrap.js",
+      "./src/bin.js",
+      "./src/app.ts",
+      "./src/cli/**/*"
+    ],
+    "extension": [
+      ".js",
+      ".ts"
+    ],
+    "functions": 0,
+    "include": [
+      "./src/**/*.js",
+      "./src/**/*.ts"
+    ],
+    "instrument": true,
+    "lines": 0,
+    "produceSourceMap": true,
+    "require": [
+      "ts-node/register"
+    ],
+    "statements": 0,
+    "sourceMap": true
   }
 }

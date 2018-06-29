@@ -21,7 +21,7 @@ export interface INockOptions {
  * @return {Function} done - The function to run to stop mocking
  */
 export async function record (p: string, opts?: INockOptions) {
-  const options = {}
+  const options: any = {} // tslint:disable-line no-any
 
   if (opts != null && opts.ignoreBody === true) {
     options.before = (scope) => {

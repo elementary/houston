@@ -20,10 +20,10 @@ export function up (knex: Knex) {
     table.uuid('id').primary()
 
     table.string('version').notNullable()
-    table.integer('version_major', 12).notNullable()
-    table.integer('version_minor', 12).notNullable()
-    table.integer('version_patch', 12).notNullable()
-    table.integer('version_build', 12).nullable()
+    table.integer('version_major').notNullable()
+    table.integer('version_minor').notNullable()
+    table.integer('version_patch').notNullable()
+    table.integer('version_build').nullable()
 
     table.boolean('is_prerelease').defaultTo(false)
 

@@ -10,7 +10,6 @@ import * as path from 'path'
 
 import { Log } from '../../log'
 import { Task } from '../task'
-import { Parser } from './controlParser'
 
 export class DebianControl extends Task {
 
@@ -20,13 +19,6 @@ export class DebianControl extends Task {
    * @var {string}
    */
   public static path = 'debian/control'
-
-  /**
-   * The parser to use when doing stuff to the debian control file
-   *
-   * @var {Parser}
-   */
-  public parser = new Parser(this.path)
 
   /**
    * Returns the full path for the debian control file and the current test.
@@ -49,107 +41,9 @@ export class DebianControl extends Task {
       throw new Log(Log.Level.ERROR, 'Missing debian control file')
     }
 
-    // TODO: Disabled Debian parser until we can handle multi package control
-    // Files like the one used by io.elementary.code
-    return
-
-    const data = await this.parser.read()
-
-    this.fill(data)
-
-    const logs = (this.lint(data) || [])
-    const highestLogs = logs.sort((a, b) => (b.level - a.level))
-
-    if (highestLogs.length > 0) {
-      // TODO: Report errors
-    }
-  }
-
-  /**
-   * Fills in missing data.
-   *
-   * @async'
-   * @param {Object} data
-   * @return {void}
-   */
-  protected fill (data: object): void {
-    // Required fields by Debian law
-    this.deepFill(data, 'Source', this.worker.context.nameAppstream)
-    this.deepFill(data, 'Maintainer', `${this.worker.context.nameDeveloper} <appcenter@elementary.io>`)
-    this.deepFill(data, 'Package', this.worker.context.nameDomain)
-
-    // Extra optional fun stuff
-    this.deepFill(data, 'Priority', 'optional')
-    this.deepFill(data, 'Standards-Version', this.worker.context.version)
-  }
-
-  /**
-   * Lints an object representation of the Debian control file.
-   *
-   * @async
-   * @param {Object} data
-   * @return {Log[]}
-   */
-  protected lint (data: object): Log[] {
-    const logs = []
-
-    this.deepAssert(logs, data, 'Source', this.worker.context.nameAppstream, `Source should be \`${this.worker.context.nameAppstream}\``)
-
-    this.deepAssert(logs, data, 'Maintainer', null, 'Missing maintainer')
-    this.deepAssert(logs, data, 'Maintainer', /^.*\s<.*>$/, 'Maintainer should be in the form of `Maintainer Name <maintainer@email.com>`')
-
-    this.deepAssert(logs, data, 'Package', this.worker.context.nameDomain, `Package should be \`${this.worker.context.nameDomain}\``)
-
-    return logs
-  }
-
-  /**
-   * Inserts value into object it it does not yet exist
-   *
-   * @param {Object} data
-   * @param {String} key
-   * @param {String|Number} value
-   * @return {void}
-   */
-  protected deepFill (data: object, key: string, value: string|number): void {
-    if (get(data, key) == null) {
-      set(data, key, value)
-    }
-
-    return
-  }
-
-  /**
-   * Asserts a deep value in the debian control file
-   *
-   * @param {Log[]} logs
-   * @param {Object} data
-   * @param {String} key
-   * @param {String|Number|RegExp|Function|null} value
-   * @param {String} [error]
-   * @return {void}
-   */
-  protected deepAssert (logs: Log[], data: object, key: string, value, error = `Assert of ${key} failed`): void {
-    const d = get(data, key)
-
-    let failed = false
-
-    if (typeof value === 'string' || typeof value === 'number') {
-      failed = (d !== value)
-    } else if (value instanceof RegExp) {
-      failed = !value.test(d)
-    } else if (typeof value === 'function') {
-      failed = !value(d)
-    } else if (value == null) {
-      failed = (d == null)
-    } else {
-      throw new Error(`Unknown deepAssert value for "${value}"`)
-    }
-
-    if (failed) {
-      const log = new Log(Log.Level.ERROR, 'Debian control linting failed', error)
-
-      logs.push(log)
-    }
+    // TODO: Use regex to do the following checks
+    //   Source should be nameAppstream
+    //   Maintainer should match "Name <email@mail.com>"
+    //   Package should be nameDomain
   }
 }

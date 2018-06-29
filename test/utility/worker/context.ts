@@ -26,7 +26,6 @@ export function context (override = {}) {
     nameDeveloper: 'elementary',
     nameDomain: 'io.elementary.houston',
     nameHuman: 'Houston',
-    package: { type: 'deb' },
     references: ['refs/heads/master'],
     type: 'app',
     version: '0.0.1'

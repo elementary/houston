@@ -25,7 +25,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    *
    * @var {string}
    */
-  protected static tmpFolder = path.resolve(os.tmpdir(), 'houston')
+  public static tmpFolder = path.resolve(os.tmpdir(), 'houston')
 
   /**
    * The human readable name of the service.
@@ -209,8 +209,10 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    */
   public async uploadPackage (pkg: type.IPackage, stage: type.IStage, reference?: string) {
     if (pkg.githubId != null) {
-      return
+      return pkg
     }
+
+    return pkg
 
     const url = `${this.username}/${this.repository}/releases/tags/${reference}`
     const { body } = await agent
@@ -223,25 +225,25 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
     }
 
     // TODO: Should we remove existing assets that would conflict?
-
     const mime = await GitHub.getFileType(pkg.path)
     const stat = await fs.stat(pkg.path)
     const file = await fs.createReadStream(pkg.path)
 
-    const res: agent = await new Promise((resolve, reject) => {
+    const res = await new Promise((resolve, reject) => {
       let data = ''
 
       const req = agent
         .post(body.upload_url.replace('{?name,label}', ''))
         .set('content-type', mime)
         .set('content-length', stat.size)
-        .set('authorization', `Bearer ${this.auth}`)
+        .set('authorization', `token ${this.auth}`)
         .query({ name: pkg.name })
         .query((pkg.description != null) ? { label: pkg.description } : {})
         .parse((response, fn) => {
           response.on('data', (chunk) => { data += chunk })
           response.on('end', fn)
         })
+        .on('error', reject)
         .on('end', (err, response) => {
           if (err != null) {
             return reject(err)
@@ -254,10 +256,13 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
           }
         })
 
-      file.pipe(req)
+      file
+        .pipe(req)
+        .on('error', reject)
+        .on('close', () => resolve(data))
     })
 
-    return { ...pkg, githubId: res.id }
+    return { ...pkg }
   }
 
   /**

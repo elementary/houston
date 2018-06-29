@@ -126,7 +126,7 @@ export class WorkspaceSetup extends Task {
       })
 
     return mergableReferences
-      .filter((ref) => repositoryReferences.includes(ref))
+      .filter((ref) => (repositoryReferences.indexOf(ref) !== -1))
   }
 
   /**

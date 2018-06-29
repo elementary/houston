@@ -1,0 +1,21 @@
+{
+  "include": [
+    "./src"
+  ],
+
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "baseUrl": "./src",
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["ES6", "ES2015"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "./dest",
+    "pretty": true,
+    "sourceMap": true,
+    "target": "es5"
+  }
+}

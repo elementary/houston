@@ -7,7 +7,7 @@
 import * as type from '../../../src/lib/service/type'
 import { sanitize } from '../../../src/lib/utility/rdnn'
 
-export class Repository implements type.ICodeRepository, type.IPackageRepository {
+export class Repository implements type.ICodeRepository, type.IPackageRepository, type.ILogRepository {
   public url: string
 
   public serviceName = 'mock Repository'
@@ -33,7 +33,11 @@ export class Repository implements type.ICodeRepository, type.IPackageRepository
     return ['refs/origin/master']
   }
 
-  public async uploadPackage (p: string, name: string, description?: string, reference?: string): Promise<void> {
+  public async uploadPackage (pkg: type.IPackage, stage: type.IStage, reference?: string): Promise<type.IPackage> {
+    throw new Error('Unimplimented in mock repository')
+  }
+
+  public async uploadLog (log: type.ILog, stage: type.IStage, reference?: string): Promise<type.ILog> {
     throw new Error('Unimplimented in mock repository')
   }
 }

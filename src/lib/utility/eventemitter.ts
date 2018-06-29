@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter2 } from 'eventemitter2'
-import { defaultsDeep } from 'lodash'
+import * as defaultsDeep from 'lodash/defaultsDeep'
 
 const DEFAULT_OPTS = {
   delimiter: ':',

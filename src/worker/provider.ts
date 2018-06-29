@@ -5,9 +5,8 @@
 
 import { ContainerModule } from 'inversify'
 
-import { Server, Worker } from './index'
+import { Worker } from './index'
 
 export const provider = new ContainerModule((bind) => {
-  bind<Server>(Server).toConstructor(Server)
   bind<Worker>(Worker).toConstructor(Worker)
 })

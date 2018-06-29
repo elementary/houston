@@ -24,14 +24,6 @@ export class Config {
   protected tree: object
 
   /**
-   * immutable
-   * True if we do not allow setting of values anymore
-   *
-   * @var {boolean}
-   */
-  protected immutable: boolean
-
-  /**
    * freeze
    * Freezes an object
    *
@@ -74,13 +66,21 @@ export class Config {
   }
 
   /**
+   * Checks if the current configuration is immutable
+   *
+   * @var {Boolean}
+   */
+  protected get immutable () {
+    return Object.isFrozen(this.tree)
+  }
+
+  /**
    * Create a new Config class with the given object
    *
    * @param {object} configuration - A basic object to set as config
    */
   constructor (configuration: object = {}) {
     this.tree = configuration
-    this.immutable = false
   }
 
   /**
@@ -124,7 +124,7 @@ export class Config {
    */
   public set (key, value): this {
     if (this.immutable === true) {
-      return this
+      throw new Error('Configuration is immutable')
     }
 
     set(this.tree, key, value)
@@ -141,7 +141,7 @@ export class Config {
    */
   public merge (obj: object): this {
     if (this.immutable === true) {
-      return this
+      throw new Error('Configuration is immutable')
     }
 
     merge(this.tree, obj)
@@ -156,8 +156,6 @@ export class Config {
    * @return {Config} - The configuration after being frozen
    */
   public freeze (): this {
-    this.immutable = true
-
     this.tree = Config.freeze(this.tree)
 
     return this
@@ -170,7 +168,6 @@ export class Config {
    * @return {Config} - The configuration after unfrozzen
    */
   public unfreeze (): this {
-    this.immutable = false
     this.tree = Config.unfreeze(this.tree)
 
     return this

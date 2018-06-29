@@ -7,6 +7,8 @@
  * @exports {Function} setup - Creates an in memory database for use in tests
  */
 
+import { create } from './app'
+
 import { Config } from '../../src/lib/config'
 import { Database } from '../../src/lib/database/database'
 
@@ -43,7 +45,8 @@ export async function seed (database: Database): Promise<void> {
  * @return {Database} - A fully setup database connection
  */
 export async function setup (config: Config): Promise<Database> {
-  const database = new Database(config)
+  const app = await create()
+  const database = app.get<Database>(Database)
 
   await migrate(database)
   await seed(database)

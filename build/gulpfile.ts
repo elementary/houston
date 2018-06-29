@@ -13,7 +13,7 @@ import * as typescript from 'gulp-typescript'
 
 import * as common from './common'
 
-const tsConfig = path.resolve(common.paths.root, 'tsconfig.json')
+const tsConfig = path.resolve(common.paths.root, 'tsconfig.production.json')
 const tsProject = typescript.createProject(tsConfig)
 
 /**
@@ -80,5 +80,7 @@ gulp.task('build', gulp.series('clean', gulp.parallel('copy', 'typescript')))
  * @return {void}
  */
 gulp.task('watch', () => {
-  gulp.watch(path.resolve(common.paths.src, '**', '*.ts'), gulp.series('typescript'))
+  const src = path.resolve(common.paths.src, '**', '*.ts')
+
+  return gulp.watch(src, gulp.series('typescript'))
 })

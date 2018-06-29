@@ -79,6 +79,7 @@ export class Log extends Error implements ILog {
    */
   constructor (level: Level, title: string, body?: string) {
     super(title)
+    Object.setPrototypeOf(this, Log.prototype)
 
     // Proper extending of builtin Error
     this.name = this.constructor.name

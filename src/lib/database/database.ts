@@ -51,7 +51,7 @@ export class Database {
     this.config = config
     this.log = log
 
-    this.knex = new Knex(databaseConfig)
+    this.knex = Knex(databaseConfig)
   }
 
 }

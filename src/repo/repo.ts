@@ -128,7 +128,12 @@ export class Repo {
       throw err
     }
 
-    this.port = this.server.address().port
+    const address = this.server.address()
+
+    if (typeof address !== 'string') {
+      this.port = address.port
+    }
+
     this.logger
       .info(`Server listening on port ${this.port} with ${env} configuration`)
       .send()

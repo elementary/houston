@@ -146,7 +146,7 @@ export class Aptly implements type.IPackageRepository {
    * @param {IStage} stage
    * @return {IAptlyDetails}
    */
-  protected getAptlyDetails (pkg: type.IPackage, stage: type.IStage): IAptlyDetails {
+  public getAptlyDetails (pkg: type.IPackage, stage: type.IStage): IAptlyDetails {
     const resolveFn = (value) => {
       const defaultValue = {
         architectures: ((value || {}).architectures || DEFAULT_ARCHITECTURES),

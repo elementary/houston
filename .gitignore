@@ -6,6 +6,7 @@
 .cache
 /config*
 coverage/
+.nyc_output
 dest/
 .nuxt
 

@@ -3,5 +3,4 @@
  * Runs before all tests. Sets things up.
  */
 
-// Our tests can get pretty dang complex. Up the timeout to make travis happy.
-jest.setTimeout(70000)
+require('reflect-metadata')

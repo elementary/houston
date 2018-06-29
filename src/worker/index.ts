@@ -9,7 +9,6 @@ export {
   IContext
 } from './type'
 
-export { Server } from './server'
 export { Worker } from './worker'
 
 // Export presets
