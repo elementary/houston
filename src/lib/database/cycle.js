@@ -1,4 +1,4 @@
-/**
+0/**
  * lib/database/cycle.js
  * Mongoose schema for cycles
  *
@@ -184,15 +184,24 @@ schema.methods.setStatus = function (status) {
  * @returns {Void}
  */
 schema.methods.doFlightcheck = async function () {
+  const Project = db.model('project')
+  const project = await Project.findById(this.project)
+
   return sender.add('release', {
-    id: this._id,
     auth: this.installation,
-    repo: this.repo,
-    tag: this.tag,
-    name: this.name,
-    version: this.version,
     changelog: this.changelog.reverse(),
-    stripe: this.stripe
+    developer: project.github.owner,
+    id: this._id,
+    name: this.name,
+    project: project.id,
+    repo: this.repo,
+    stripe: this.stripe,
+    tag: this.tag,
+    version: this.version,
+    github: {
+      name: project.github.name,
+      owner: project.github.owner
+    }
   })
 }
 

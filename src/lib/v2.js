@@ -4,9 +4,11 @@
  * we can slowly upgrade current houston until all the parts are in v2.
  */
 
-import { App, Config, Worker } from '@elementaryos/houston'
+require('reflect-metadata')
 
-import { config } from './config'
+import { App, Aptly, Config, Worker } from '@elementaryos/houston'
+
+import config from './config'
 
 /**
  * Creates a houston v2 configuration class based on the current v1 config.
@@ -22,6 +24,10 @@ function createConfig () {
       service: 'error'
     },
 
+    docker: {
+      socketPath: config.flightcheck.docker
+    },
+
     service: {
       aptly: {
         url: config.aptly.url,
@@ -35,9 +41,9 @@ function createConfig () {
         client: config.github.client,
         secret: config.github.secret,
 
-        installation: config.github.integration.id,
-        key: config.github.integration.key,
-        hook: config.github.integration.secret
+        installation: config.github.app.id,
+        key: config.github.app.key,
+        hook: config.github.app.secret
       },
 
       ...(config.sentry == null) ? {} : {
@@ -67,4 +73,16 @@ export async function createWorker () {
   const app = await createApp()
 
   return app.get(Worker)
+}
+
+/**
+ * Creates a new v2 houston aptly service
+ *
+ * @async
+ * @return {Aptly}
+ */
+export async function createAptly () {
+  const app = await createApp()
+
+  return app.get(Aptly)
 }

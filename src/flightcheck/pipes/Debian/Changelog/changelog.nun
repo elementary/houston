@@ -1,6 +1,0 @@
-{{ project }} ({{ version }}) {{ distribution }}; urgency=low
-
-{% for change in changes %}  * {{ change }}
-{% endfor %}
-
-{{ " " }}-- {{ author }} <{{ author }}@houston.elementary.io>  {{ date | debianTime }}
