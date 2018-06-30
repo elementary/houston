@@ -34,7 +34,7 @@ export class UploadPackage extends Task {
     const packages = this.worker.result.packages
 
     for (const context of this.worker.contexts) {
-      if (context.package == null) {
+      if (context.package == null || context.package.path == null) {
         continue
       }
 
