@@ -60,7 +60,6 @@ export const builder = (yargs) => {
       type: 'string'
     })
     .option('references', {
-      default: [],
       describe: 'References to pull',
       type: 'array'
     })
@@ -78,6 +77,7 @@ function buildContext (argv, repository) {
   const nameAppstream = argv['name-appstream'] || `${nameDomain}.desktop`
   const nameDeveloper = argv['name-developer'] || 'Rabbitbot'
   const nameHuman = argv['name-human'] || 'Application' // TODO: Better name?
+  const references = argv.references || [`refs/tags/${argv.version}`]
 
   const obj : IContext = {
     appcenter: {},
@@ -90,7 +90,7 @@ function buildContext (argv, repository) {
     nameDeveloper,
     nameDomain,
     nameHuman,
-    references: argv.references,
+    references,
     type: argv.type,
     version: argv.version
   }
