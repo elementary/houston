@@ -29,7 +29,8 @@ jobs:
   include:
     - stage: Test
       node_js: lts/*
-    - node_js: 10
+    # TODO: Enable once travis doesn't fail on `nvm use 10`
+    # - node_js: 10
     - node_js: 8
 
     - stage: Release
