@@ -125,8 +125,18 @@ export class WorkspaceSetup extends Task {
         mergableReferences.push(`${build.packageType}-packaging-${build.distribution}-${shortRef}`)
       })
 
-    return mergableReferences
-      .filter((ref) => (repositoryReferences.indexOf(ref) !== -1))
+    return repositoryReferences
+      .filter((rref) => {
+        return mergableReferences.some((ref) => (rref.indexOf(ref) !== -1))
+      })
+      .sort((a, b) => {
+        const aIndex = mergableReferences
+          .findIndex((ref) => (a.indexOf(ref) !== -1))
+        const bIndex = mergableReferences
+          .findIndex((ref) => (b.indexOf(ref) !== -1))
+
+        return (aIndex - bIndex)
+      })
   }
 
   /**
