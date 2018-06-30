@@ -7,7 +7,12 @@ export { App } from './lib/app'
 
 export { Config } from './lib/config'
 
-export { createCodeRepository } from './lib/service'
+export {
+  createCodeRepository,
+
+  Aptly,
+  GitHub
+} from './lib/service'
 
 export { Worker } from './worker'
 export { Build as BuildWorker } from './worker'
