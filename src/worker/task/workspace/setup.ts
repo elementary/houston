@@ -147,7 +147,10 @@ export class WorkspaceSetup extends Task {
     const worker = await this.worker.emitAsyncChain<IWorker>(`task:WorkspaceSetup:fork`, basicFork)
 
     await fs.ensureDir(worker.workspace)
-    const references = await this.buildReferences(build)
+    const references = [
+      ...worker.context.references,
+      ...(await this.buildReferences(build))
+    ]
 
     // Step 1: Download all the needed references
     for (let i = 0; i < references.length; i++) {
