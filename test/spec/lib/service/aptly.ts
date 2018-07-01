@@ -8,7 +8,7 @@ import * as path from 'path'
 
 import { App } from '../../../../src/lib/app'
 import { Config } from '../../../../src/lib/config'
-import { Aptly } from '../../../../src/lib/service/aptly'
+import { Aptly, createUrl } from '../../../../src/lib/service/aptly'
 import * as type from '../../../../src/lib/service/type'
 
 import { create } from '../../../utility/app'
@@ -29,6 +29,10 @@ const DEFAULT_PKG: type.IPackage = {
   path: path.resolve(__dirname, '../../../test/fixture/lib/service/github/vocal.deb'),
   type: 'deb'
 }
+
+test('createUrl removes undefined values', (t) => {
+  t.is(createUrl('test', null, 'things', undefined, 5), 'test/things/5')
+})
 
 test('resolves aptly details from a config string', (t) => {
   const config = t.context.app.get(Config)

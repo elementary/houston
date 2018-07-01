@@ -39,8 +39,9 @@ export interface IAptlyDetails {
  * @param {...String} args
  * @return {String}
  */
-function createUrl (...args) {
+export function createUrl (...args) {
   return args
+    .filter((arg) => (arg != null && arg !== undefined))
     .join('/')
     .replace(/(?<!:)\/{2,}/, '/')
 }
