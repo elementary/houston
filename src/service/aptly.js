@@ -39,7 +39,7 @@ export default api
  * @param {Object} [res] - Aptly response object
  * @returns {ServiceError} - a parsed error from Aptly
  */
-const errorCheck = (err: Object, res: ?Object): error.ServiceError => {
+export const errorCheck = (err: Object, res: ?Object): error.ServiceError => {
   if (err.status === 401) {
     log.info(`Bad credentials`)
     return new error.ServiceError('Aptly', 'Bad Credentials')
@@ -240,9 +240,9 @@ export function publish (repo: string): Promise<string> {
  */
 export async function review (project: string, version: string, file: string): Promise<string[]> {
   await upload(project, version, file)
-  const keys = await ingest(config.aptly.review, project, version)
+  const keys = await ingest(config.aptly.review({ distribution: 'xenial' }), project, version)
 
-  await publish(config.aptly.review)
+  await publish(config.aptly.review({ distribution: 'xenial' }))
 
   return keys
 }
@@ -257,6 +257,6 @@ export async function review (project: string, version: string, file: string): P
  * @returns {String} - Name of the repo published
  */
 export async function stable (pkg: string[]): Promise<string> {
-  await move(config.aptly.review, config.aptly.stable, pkg)
-  return publish(config.aptly.stable)
+  await move(config.aptly.review({ distribution: 'xenial' }), config.aptly.stable({ distribution: 'xenial' }), pkg)
+  return publish(config.aptly.stable({ distribution: 'xenial' }))
 }

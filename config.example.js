@@ -56,8 +56,8 @@ module.exports.aptly = {
   passphrase: 'gpgkeyphrase',
 
   // Repository names
-  review: 'review',
-  stable: 'houston'
+  review: ({ distribution }) => `review-${distribution}`,
+  stable: ({ distribution }) => `houston-${distribution}`
 }
 
 module.exports.database = 'mongodb://localhost/houston-dev'

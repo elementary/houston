@@ -8,7 +8,9 @@
  * @exports {Function} stop - Stops the timer
  */
 
-import { publish } from 'service/aptly'
+import superagent from 'superagent'
+
+import { errorCheck } from 'service/aptly'
 import config from 'lib/config'
 import Log from 'lib/log'
 
@@ -16,6 +18,21 @@ export const delay = 15 * 60 * 1000 // Run every 15 minutes
 
 const log = new Log('refuel')
 let interval = null
+
+const publish = async (repo, dist) => {
+  return superagent
+    .put(`${config.aptly.url}/publish/${repo}/${dist}`)
+    .set('User-Agent', 'elementary-houston')
+    .send({
+      Signing: {
+        Batch: true,
+        Passphrase: config.aptly.passphrase
+      }
+    })
+    .catch((err, res) => {
+      throw errorCheck(err, res)
+    })
+}
 
 /**
  * run
@@ -26,11 +43,14 @@ let interval = null
 export function start () {
   log.debug('Starting interval')
 
-  interval = setInterval(() => {
+  interval = setInterval(async () => {
     log.debug('Updating repository')
 
     try {
-      publish(config.aptly.stable)
+      await publish(config.aptly.stable({ distribution: 'xenial' }), 'xenial')
+      await publish(config.aptly.stable({ distribution: 'bionic' }), 'bionic')
+      await publish(config.aptly.review({ distribution: 'xenial' }), 'xenial')
+      await publish(config.aptly.review({ distribution: 'bionic' }), 'bionic')
     } catch (err) {
       log.error('Unable to publish repository', err)
     }
