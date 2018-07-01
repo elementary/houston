@@ -32,19 +32,19 @@ test.beforeEach(async (t) => {
   t.context.directory = await tmp('worker')
 })
 
-test.failing('needle-and-thread/vocal passes build process', async (t) => {
-  const repo = new GitHub('https://github.com/needle-and-thread/vocal')
+test('cassidyjames/palette passes build process', async (t) => {
+  const repo = new GitHub('https://github.com/cassidyjames/palette')
   const context : type.IContext = {
     appcenter: {},
     appstream: '',
-    architecture: 'amd64',
+    architecture: '',
     changelog: [],
-    distribution: 'juno',
+    distribution: '',
     logs: [],
-    nameAppstream: 'com.github.needle-and-thread.vocal.desktop',
-    nameDeveloper: 'Needle & Thread',
-    nameDomain: 'com.github.needle-and-thread.vocal',
-    nameHuman: 'Vocal',
+    nameAppstream: 'com.github.cassidyjames.palette.desktop',
+    nameDeveloper: 'Palette',
+    nameDomain: 'com.github.cassidyjames.palette',
+    nameHuman: 'Palette',
     references: ['refs/tags/2.2.0'],
     type: 'app',
     version: '2.2.0'
@@ -60,64 +60,6 @@ test.failing('needle-and-thread/vocal passes build process', async (t) => {
   await proc.teardown()
 
   t.true(proc.passes)
-})
-
-test.failing('Philip-Scott/Spice-up passes build process', async (t) => {
-  const repo = new GitHub('https://github.com/Philip-Scott/Spice-up')
-  const context : type.IContext = {
-    appcenter: {},
-    appstream: '',
-    architecture: 'amd64',
-    changelog: [],
-    distribution: 'loki',
-    logs: [],
-    nameAppstream: 'com.github.philip-scott.spice-up.desktop',
-    nameDeveloper: 'Philip Scott',
-    nameDomain: 'com.github.philip-scott.spice-up',
-    nameHuman: 'Spice-Up',
-    references: ['refs/tags/1.3.2'],
-    type: 'app',
-    version: '1.3.2'
-  }
-
-  const proc = Build(t.context.app, repo, context)
-  proc.workspace = path.resolve(t.context.directory, uuid())
-
-  proc.on('run:error', (e) => t.log(e))
-
-  await proc.setup()
-  await proc.run()
-  await proc.teardown()
-
-  t.true(proc.passes)
-})
-
-test.failing('elementary/code passes build process', async (t) => {
-  const repo = new GitHub('https://github.com/elementary/code')
-  const context : type.IContext = {
-    appcenter: {},
-    appstream: '',
-    architecture: 'amd64',
-    changelog: [],
-    distribution: 'juno',
-    logs: [],
-    nameAppstream: 'io.elementary.code.desktop',
-    nameDeveloper: 'elementary',
-    nameDomain: 'io.elementary.code',
-    nameHuman: 'Code',
-    references: [],
-    type: 'app',
-    version: '2.4.1'
-  }
-
-  const proc = Build(t.context.app, repo, context)
-  proc.workspace = path.resolve(t.context.directory, uuid())
-
-  proc.on('run:error', (e) => t.log(e))
-
-  await proc.setup()
-  await proc.run()
-  await proc.teardown()
-
-  t.true(proc.passes)
+  t.is(proc.result.packages.length, 1)
+  t.is(proc.result.packages[0].name, 'com.github.cassidyjames.palette_2.2.0_amd64.deb')
 })
