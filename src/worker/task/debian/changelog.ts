@@ -38,10 +38,12 @@ export class DebianChangelog extends Task {
    * @return {string}
    */
   public static async template (context: IContext): Promise<string> {
-    const changes = await this.getChanges(context.changelog)
+    const changelogs = context.changelog
+      .sort((a, b) => (b.date.getTime() - a.date.getTime()))
+    const changes = (await this.getChanges(changelogs))
 
     const file = await fs.readFile(this.templatePath, 'utf8')
-    const changelog = template(file, { context, changes })
+    const changelog = template(file, { changelogs, context, changes })
 
     return changelog
       // Trim empty lines of whitespace

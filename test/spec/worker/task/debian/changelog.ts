@@ -101,3 +101,36 @@ io.elementary.houston (0.0.1) loki; urgency=low
  -- Blake Kostner <developer@elementary.io>  ${changelogDate3}
   `.trim())
 })
+
+test('sorts changes based on date', async (t) => {
+  const context = createContext({
+    changelog: [{
+      author: 'Blake Kostner',
+      changes: 'init',
+      date: new Date(2010, 0, 1),
+      version: '0.0.1'
+    }, {
+      author: 'Blake Kostner',
+      changes: 'release',
+      date: new Date(2020, 0, 1),
+      version: '1.0.0'
+    }]
+  })
+
+  const changelogDate1 = debianDate(context.changelog[1].date)
+  const changelogDate2 = debianDate(context.changelog[0].date)
+
+  t.is(await DebianChangelog.template(context), `
+io.elementary.houston (1.0.0) loki; urgency=low
+
+  * release
+
+ -- Blake Kostner <developer@elementary.io>  ${changelogDate1}
+
+io.elementary.houston (0.0.1) loki; urgency=low
+
+  * init
+
+ -- Blake Kostner <developer@elementary.io>  ${changelogDate2}
+  `.trim())
+})
