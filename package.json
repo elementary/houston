@@ -113,7 +113,8 @@
     "require": [
       "./test/bootstrap.js",
       "ts-node/register"
-    ]
+    ],
+    "snapshotDir": "./test/snapshot"
   },
   "nyc": {
     "all": true,

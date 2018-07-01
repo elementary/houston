@@ -48,4 +48,14 @@ export class TestWorker extends Worker {
     return fs.copy(fullFrom, this.get(to), { overwrite: true })
   }
 
+  /**
+   * Returns the string version a file file in the worker directory
+   *
+   * @async
+   * @param {string} p Path of file in worker workspace
+   * @return {string}
+   */
+  public async readFile (p) {
+    return fs.readFile(this.get(p), 'utf8')
+  }
 }

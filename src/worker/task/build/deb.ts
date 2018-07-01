@@ -93,7 +93,7 @@ export class BuildDeb extends Task {
    * @return {void}
    */
   protected async setup () {
-    const from = path.resolve(this.worker.workspace, 'clean')
+    const from = path.resolve(this.worker.workspace, 'dirty')
 
     await fs.ensureDir(this.path)
     await fs.copy(from, this.path)

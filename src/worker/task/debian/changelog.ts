@@ -106,16 +106,13 @@ export class DebianChangelog extends Task {
   }
 
   /**
-   * Checks the Debian control file for errors
+   * Checks the Debian changelog file for errors
    *
    * @async
    * @return {void}
    */
   public async run () {
-    const exists = fs.pathExists(this.path)
-    if (exists === false) {
-      await this.fill()
-    }
+    await this.fill()
 
     // TODO: Lint?
   }
