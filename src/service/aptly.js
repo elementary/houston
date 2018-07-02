@@ -240,9 +240,9 @@ export function publish (repo: string): Promise<string> {
  */
 export async function review (project: string, version: string, file: string): Promise<string[]> {
   await upload(project, version, file)
-  const keys = await ingest(config.aptly.review({ distribution: 'xenial' }), project, version)
+  const keys = await ingest(config.aptly.review({ distribution: 'loki' }).prefix, project, version)
 
-  await publish(config.aptly.review({ distribution: 'xenial' }))
+  await publish(config.aptly.review({ distribution: 'loki' }).prefix)
 
   return keys
 }
@@ -257,6 +257,6 @@ export async function review (project: string, version: string, file: string): P
  * @returns {String} - Name of the repo published
  */
 export async function stable (pkg: string[]): Promise<string> {
-  await move(config.aptly.review({ distribution: 'xenial' }), config.aptly.stable({ distribution: 'xenial' }), pkg)
-  return publish(config.aptly.stable({ distribution: 'xenial' }))
+  await move(config.aptly.review({ distribution: 'loki' }).prefix, config.aptly.stable({ distribution: 'loki' }).prefix, pkg)
+  return publish(config.aptly.stable({ distribution: 'loki' }).prefix)
 }

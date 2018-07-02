@@ -47,10 +47,10 @@ export function start () {
     log.debug('Updating repository')
 
     try {
-      await publish(config.aptly.stable({ distribution: 'xenial' }), 'xenial')
-      await publish(config.aptly.stable({ distribution: 'bionic' }), 'bionic')
-      await publish(config.aptly.review({ distribution: 'xenial' }), 'xenial')
-      await publish(config.aptly.review({ distribution: 'bionic' }), 'bionic')
+      await publish(config.aptly.stable({ distribution: 'loki' }).prefix, 'xenial')
+      await publish(config.aptly.stable({ distribution: 'juno' }).prefix, 'bionic')
+      await publish(config.aptly.review({ distribution: 'loki' }).prefix, 'xenial')
+      await publish(config.aptly.review({ distribution: 'juno' }).prefix, 'bionic')
     } catch (err) {
       log.error('Unable to publish repository', err)
     }
