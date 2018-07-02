@@ -47,13 +47,13 @@ export class UploadPackage extends Task {
         context.distribution,
         context.version
       ].join(' ')
- 
+
       if (context.architecture) {
         context.package.architecture = context.architecture
       }
-      
+
       if (context.distribution) {
-        context.package.distribution = context.distribution 
+        context.package.distribution = context.distribution
       }
 
       context.package = await this.uploadToCodeRepository(context.package, ref)
