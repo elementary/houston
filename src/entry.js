@@ -15,6 +15,14 @@ require('babel-polyfill')
 // @see https://github.com/elementary/houston/issues/189
 global.Promise = require('bluebird')
 
+process.on('uncaughtException', (err) => {
+  console.error(err)
+})
+
+process.on('unhandledRejection', (reason, p) => {
+  console.error(reason)
+})
+
 const program = require('commander')
 
 const config = require('lib/config').default
