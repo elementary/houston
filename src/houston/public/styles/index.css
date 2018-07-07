@@ -435,6 +435,11 @@ section.tools p {
 * Other *
 ********/
 
+a.button[disabled] {
+    background: transparent;
+    opacity: 0.6;
+}
+
 .fa-li,
 .card .fa,
 .third .fa {
@@ -453,4 +458,3 @@ footer,
 .fa-li {
     width: 16px;
 }
-
