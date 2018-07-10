@@ -20,3 +20,10 @@ test(sanitize, 'com.github.btkostner.this-is-a-repo', 'com.github.btkostner.this
 test(sanitize, 'com.github.4u.2test', 'com.github._4u._2test')
 test(sanitize, 'org.7-zip.archiver', 'org._7_zip.archiver')
 test(sanitize, 'com.github.Username.RePoSiToRy', 'com.github.username.repository')
+
+test('sanitize uses normalizer string', (t) => {
+  const input = 'com.github.testing.this-domain'
+  const expected = 'com.github.testing.thisisadomain'
+
+  t.is(rdnn.sanitize(input, 'isa'), expected)
+})
