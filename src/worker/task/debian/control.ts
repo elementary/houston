@@ -42,8 +42,8 @@ export class DebianControl extends Task {
     }
 
     // TODO: Use regex to do the following checks
-    //   Source should be nameAppstream
+    //   Source should be nameDomain with dashes
     //   Maintainer should match "Name <email@mail.com>"
-    //   Package should be nameDomain
+    //   Package should be nameDomain with dashes
   }
 }

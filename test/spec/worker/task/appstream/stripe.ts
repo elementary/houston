@@ -13,7 +13,6 @@ import { mock } from '../../../../utility/worker'
 
 test('can insert a basic list of changes', async (t) => {
   const worker = await mock({
-    nameAppstream: 'com.github.elementary.houston.desktop',
     nameDomain: 'com.github.elementary.houston',
     stripe: 'testingvaluehere'
   })

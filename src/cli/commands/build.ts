@@ -40,11 +40,6 @@ export const builder = (yargs) => {
       describe: 'The type of project',
       type: 'string'
     })
-    .option('name-appstream', {
-      coerce: sanitize,
-      describe: 'AppStream id',
-      type: 'string'
-    })
     .option('name-developer', {
       describe: 'Developer\'s name',
       type: 'string'
@@ -74,7 +69,6 @@ export const builder = (yargs) => {
  */
 function buildContext (argv, repository) {
   const nameDomain = argv['name-domain'] || repository.rdnn
-  const nameAppstream = argv['name-appstream'] || `${nameDomain}.desktop`
   const nameDeveloper = argv['name-developer'] || 'Rabbitbot'
   const nameHuman = argv['name-human'] || 'Application' // TODO: Better name?
   const references = argv.references || [`refs/tags/${argv.version}`]
@@ -86,7 +80,6 @@ function buildContext (argv, repository) {
     changelog: [],
     distribution: '',
     logs: [],
-    nameAppstream,
     nameDeveloper,
     nameDomain,
     nameHuman,

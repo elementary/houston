@@ -9,6 +9,7 @@ import * as os from 'os'
 import * as path from 'path'
 
 import markdown from '../../../lib/utility/markdown'
+import { sanitize } from '../../../lib/utility/rdnn'
 import template from '../../../lib/utility/template'
 import { Log } from '../../log'
 import { IChange, IContext } from '../../type'
@@ -41,9 +42,10 @@ export class DebianChangelog extends Task {
     const changelogs = context.changelog
       .sort((a, b) => (b.date.getTime() - a.date.getTime()))
     const changes = (await this.getChanges(changelogs))
+    const name = sanitize(context.nameDomain, '-')
 
     const file = await fs.readFile(this.templatePath, 'utf8')
-    const changelog = template(file, { changelogs, context, changes })
+    const changelog = template(file, { changelogs, context, changes, name })
 
     return changelog
       // Trim empty lines of whitespace

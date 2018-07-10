@@ -11,7 +11,6 @@ import { mock } from '../../../../utility/worker'
 
 test('missing content_rating causes an error', async (t) => {
   const worker = await mock({
-    nameAppstream: 'com.github.philip-scott.spice-up.desktop',
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 
@@ -31,7 +30,6 @@ test('missing content_rating causes an error', async (t) => {
 
 test('missing a content_rating attribute causes an error', async (t) => {
   const worker = await mock({
-    nameAppstream: 'com.github.philip-scott.spice-up.desktop',
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 

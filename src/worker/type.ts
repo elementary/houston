@@ -39,7 +39,6 @@ export interface IContext {
 
   nameDeveloper: string
   nameDomain: string
-  nameAppstream: string
   nameHuman: string
 
   version: string

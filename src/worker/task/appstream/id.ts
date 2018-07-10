@@ -7,6 +7,7 @@ import * as cheerio from 'cheerio'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
+import { sanitize } from '../../../lib/utility/rdnn'
 import { Log } from '../../log'
 import { Task } from '../task'
 
@@ -18,7 +19,9 @@ export class AppstreamId extends Task {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.context.nameDomain}.appdata.xml`)
+    const name = sanitize(this.worker.context.nameDomain, '-')
+
+    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${name}.appdata.xml`)
   }
 
   /**
@@ -32,17 +35,18 @@ export class AppstreamId extends Task {
     const $ = cheerio.load(raw, { xmlMode: true })
 
     const id = $('component > id')
+    const appstreamId = sanitize(this.worker.context.nameDomain, '_')
 
     if (id.length === 0) {
-      $('component').prepend(`<id>${this.worker.context.nameAppstream}</id>`)
+      $('component').prepend(`<id>${appstreamId}</id>`)
       await fs.writeFile(this.path, $.xml())
 
       throw new Log(Log.Level.WARN, 'Missing "id" field')
-    } else if (id.text() !== this.worker.context.nameAppstream) {
-      id.text(this.worker.context.nameAppstream)
+    } else if (id.text() !== appstreamId) {
+      id.text(appstreamId)
       await fs.writeFile(this.path, $.xml())
 
-      throw new Log(Log.Level.WARN, `"id" field should be "${this.worker.context.nameAppstream}"`)
+      throw new Log(Log.Level.WARN, `"id" field should be "${appstreamId}"`)
     }
   }
 }

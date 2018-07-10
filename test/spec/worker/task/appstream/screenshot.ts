@@ -11,7 +11,6 @@ import { mock } from '../../../../utility/worker'
 
 test('passes with screenshots specified', async (t) => {
   const worker = await mock({
-    nameAppstream: 'com.github.philip-scott.spice-up.desktop',
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 

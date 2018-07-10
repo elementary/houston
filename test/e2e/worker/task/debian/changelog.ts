@@ -22,7 +22,6 @@ test('changelog renders correctly', async (t) => {
       date: new Date(),
       version: '1.0.0'
     }],
-    nameAppstream: 'com.github.elementary.houston.desktop',
     nameDomain: 'com.github.elementary.houston'
   })
 

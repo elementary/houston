@@ -22,7 +22,6 @@ export function context (override = {}) {
     changelog: [],
     distribution: 'loki',
     logs: [],
-    nameAppstream: 'io.elementary.houston.desktop',
     nameDeveloper: 'elementary',
     nameDomain: 'io.elementary.houston',
     nameHuman: 'Houston',

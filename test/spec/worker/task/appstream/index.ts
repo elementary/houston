@@ -23,7 +23,6 @@ test('failures stop the build', async (t) => {
 
 test('com.github.philip-scott.spice-up passes appstream tests', async (t) => {
   const worker = await mock({
-    nameAppstream: 'com.github.philip-scott.spice-up.desktop',
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 
@@ -40,7 +39,6 @@ test('com.github.philip-scott.spice-up passes appstream tests', async (t) => {
 
 test('basic errors get concated to single log', async (t) => {
   const worker = await mock({
-    nameAppstream: 'com.github.philip-scott.spice-up.desktop',
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 

@@ -11,7 +11,6 @@ import { mock } from '../../../../utility/worker'
 
 test('validates files besides default desktop file', async (t) => {
   const worker = await mock({
-    nameAppstream: 'com.github.philip-scott.spice-up.desktop',
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 
@@ -30,7 +29,6 @@ test('validates files besides default desktop file', async (t) => {
 
 test('validate concats logs to single issue', async (t) => {
   const worker = await mock({
-    nameAppstream: 'com.github.philip-scott.spice-up.desktop',
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 

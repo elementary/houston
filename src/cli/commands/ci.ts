@@ -52,11 +52,6 @@ export const builder = (yargs) => {
         describe: 'Semver version to build for',
         type: 'string'
       })
-      .option('name-appstream', {
-        coerce: sanitize,
-        describe: 'AppStream id',
-        type: 'string'
-      })
       .option('name-developer', {
         describe: 'Developer\'s name',
         type: 'string'
@@ -88,7 +83,6 @@ export const builder = (yargs) => {
  */
 function buildStorage (argv, repository) {
   const nameDomain = argv['name-domain'] || repository.rdnn
-  const nameAppstream = argv['name-appstream'] || `${nameDomain}.desktop`
   const nameDeveloper = argv['name-developer'] || 'Rabbitbot'
   const nameHuman = argv['name-human'] || 'Application' // TODO: Better name?
 
@@ -99,7 +93,6 @@ function buildStorage (argv, repository) {
     changelog: [],
     distribution: '',
     logs: [],
-    nameAppstream,
     nameDeveloper,
     nameDomain,
     nameHuman,

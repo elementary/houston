@@ -11,7 +11,6 @@ import { mock } from '../../../../utility/worker'
 
 test('passes with a matching ID', async (t) => {
   const worker = await mock({
-    nameAppstream: 'com.github.philip-scott.spice-up.desktop',
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 
@@ -30,7 +29,6 @@ test('passes with a matching ID', async (t) => {
 
 test('fails with an incorrect ID', async (t) => {
   const worker = await mock({
-    nameAppstream: 'com.github.elementary.houston.desktop',
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 

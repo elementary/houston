@@ -41,7 +41,6 @@ test('cassidyjames/palette passes build process', async (t) => {
     changelog: [],
     distribution: '',
     logs: [],
-    nameAppstream: 'com.github.cassidyjames.palette.desktop',
     nameDeveloper: 'Palette',
     nameDomain: 'com.github.cassidyjames.palette',
     nameHuman: 'Palette',

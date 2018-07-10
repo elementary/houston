@@ -1,5 +1,5 @@
 <%_ changelogs.forEach(function (change, i) { _%>
-<%= context.nameDomain %> (<%= change.version %>) <%= context.distribution %>; urgency=low
+<%= name %> (<%= change.version %>) <%= context.distribution %>; urgency=low
 
 <% changes[i].forEach(function (c) { _%>
   * <%= c %>

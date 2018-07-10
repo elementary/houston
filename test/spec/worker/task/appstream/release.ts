@@ -54,7 +54,6 @@ This is another change I made`,
       date: new Date(),
       version: '1.0.0'
     }],
-    nameAppstream: 'com.github.elementary.houston.desktop',
     nameDomain: 'com.github.elementary.houston'
   })
 
@@ -103,7 +102,6 @@ This is a bunch of cool things that are updated.
       date: new Date(),
       version: '1.0.0'
     }],
-    nameAppstream: 'com.github.elementary.houston.desktop',
     nameDomain: 'com.github.elementary.houston'
   })
 

@@ -134,3 +134,23 @@ io.elementary.houston (0.0.1) loki; urgency=low
  -- Blake Kostner <developer@elementary.io>  ${changelogDate2}
   `.trim())
 })
+
+test('uses dash package name in the changelog', async (t) => {
+  const context = createContext({
+    changelog: [{
+      author: 'Blake Kostner',
+      changes: 'init',
+      date: new Date(2010, 0, 1),
+      version: '1.0.0'
+    }],
+    nameDomain: 'com.github.btkostner.this_is_invalid_debian_package_name'
+  })
+
+  const changelogDate = debianDate(context.changelog[0].date)
+  const template = await DebianChangelog.template(context)
+
+  t.log(template)
+
+  t.is(template.indexOf('com.github.btkostner.this_is_invalid_debian_package_name'), -1)
+  t.not(template.indexOf('com.github.btkostner.this-is-invalid-debian-package-name'), -1)
+})

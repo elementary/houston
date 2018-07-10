@@ -6,6 +6,7 @@
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
+import { sanitize } from '../../../lib/utility/rdnn'
 import { Log } from '../../log'
 import { WrapperTask } from '../wrapperTask'
 
@@ -43,7 +44,9 @@ export class Desktop extends WrapperTask {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/applications', this.worker.context.nameAppstream)
+    const name = sanitize(this.worker.context.nameDomain, '-')
+
+    return path.resolve(this.worker.workspace, 'package/usr/share/applications', `${name}.desktop`)
   }
 
   /**

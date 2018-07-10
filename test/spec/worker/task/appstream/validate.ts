@@ -12,7 +12,6 @@ import { mock } from '../../../../utility/worker'
 
 test('passes with a valid appstream file', async (t) => {
   const worker = await mock({
-    nameAppstream: 'com.github.philip-scott.spice-up.desktop',
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 
@@ -31,7 +30,6 @@ test('passes with a valid appstream file', async (t) => {
 
 test('fails with a blank appstream file', async (t) => {
   const worker = await mock({
-    nameAppstream: 'com.github.philip-scott.spice-up.desktop',
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 

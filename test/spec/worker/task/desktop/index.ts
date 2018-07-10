@@ -24,7 +24,6 @@ test('failures stop the build', async (t) => {
 
 test('com.github.philip-scott.spice-up passes desktop tests', async (t) => {
   const worker = await mock({
-    nameAppstream: 'com.github.philip-scott.spice-up.desktop',
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 
@@ -41,7 +40,6 @@ test('com.github.philip-scott.spice-up passes desktop tests', async (t) => {
 
 test('system apps do not have icon validation #590', async (t) => {
   const worker = await mock({
-    nameAppstream: 'io.elementary.appcenter.desktop',
     nameDomain: 'io.elementary.appcenter',
     type: 'system-app'
   })

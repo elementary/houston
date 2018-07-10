@@ -7,6 +7,7 @@ import * as fs from 'fs-extra'
 import * as ini from 'ini'
 import * as path from 'path'
 
+import { sanitize } from '../../../lib/utility/rdnn'
 import { Log } from '../../log'
 import { Task } from '../task'
 
@@ -17,7 +18,9 @@ export class DesktopIcon extends Task {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/applications', this.worker.context.nameAppstream)
+    const name = sanitize(this.worker.context.nameDomain, '-')
+
+    return path.resolve(this.worker.workspace, 'package/usr/share/applications', `${name}.desktop`)
   }
 
   /**
@@ -34,7 +37,7 @@ export class DesktopIcon extends Task {
       throw new Log(Log.Level.ERROR, 'Missing application data')
     }
 
-    if (data['Desktop Entry'].Icon !== this.worker.context.nameDomain) {
+    if (data['Desktop Entry'].Icon !== sanitize(this.worker.context.nameDomain, '-')) {
       throw new Log(Log.Level.ERROR, 'Incorrect desktop file icon value')
     }
   }
