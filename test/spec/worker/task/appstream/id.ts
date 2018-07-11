@@ -14,7 +14,7 @@ test('passes with a matching ID', async (t) => {
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 
-  await worker.mock('task/appstream/spice-up.xml', 'package/usr/share/metainfo/com.github.philip-scott.spice-up.appdata.xml')
+  await worker.mock('task/appstream/spice-up.xml', 'package/usr/share/metainfo/com.github.philip_scott.spice_up.appdata.xml')
 
   worker.tasks.push(AppstreamId)
 

@@ -14,7 +14,7 @@ test('missing content_rating causes an error', async (t) => {
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 
-  await worker.mock('task/appstream/blank.xml', 'package/usr/share/metainfo/com.github.philip-scott.spice-up.appdata.xml')
+  await worker.mock('task/appstream/blank.xml', 'package/usr/share/metainfo/com.github.philip_scott.spice_up.appdata.xml')
 
   worker.tasks.push(AppstreamContentRating)
 
@@ -33,7 +33,7 @@ test('missing a content_rating attribute causes an error', async (t) => {
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 
-  await worker.mock('task/appstream/content-rating.xml', 'package/usr/share/metainfo/com.github.philip-scott.spice-up.appdata.xml')
+  await worker.mock('task/appstream/content-rating.xml', 'package/usr/share/metainfo/com.github.philip_scott.spice_up.appdata.xml')
 
   worker.tasks.push(AppstreamContentRating)
 

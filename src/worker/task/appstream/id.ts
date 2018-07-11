@@ -14,21 +14,12 @@ import { Task } from '../task'
 export class AppstreamId extends Task {
 
   /**
-   * Returns what the appstream ID should be
-   *
-   * @return {string}
-   */
-  public get id () {
-    return sanitize(this.worker.context.nameDomain, '_')
-  }
-
-  /**
    * Returns the main appstream file name
    *
    * @return {string}
    */
   public get name () {
-    return sanitize(this.worker.context.nameDomain, '-')
+    return sanitize(this.worker.context.nameDomain, '_')
   }
 
   /**
@@ -53,15 +44,15 @@ export class AppstreamId extends Task {
     const id = $('component > id')
 
     if (id.length === 0) {
-      $('component').prepend(`<id>${this.id}</id>`)
+      $('component').prepend(`<id>${this.name}</id>`)
       await fs.writeFile(this.path, $.xml())
 
       throw new Log(Log.Level.WARN, 'Missing "id" field')
-    } else if (id.text() !== this.id) {
-      id.text(this.id)
+    } else if (id.text() !== this.name) {
+      id.text(this.name)
       await fs.writeFile(this.path, $.xml())
 
-      throw new Log(Log.Level.WARN, `"id" field should be "${this.id}"`)
+      throw new Log(Log.Level.WARN, `"id" field should be "${this.name}"`)
     }
   }
 }
