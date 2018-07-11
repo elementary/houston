@@ -6,10 +6,11 @@
 import * as cheerio from 'cheerio'
 import * as fs from 'fs-extra'
 import * as path from 'path'
-import * as sanitize from 'sanitize-html'
+import * as sanitizeHtml from 'sanitize-html'
 import * as semver from 'semver'
 
 import markdown from '../../../lib/utility/markdown'
+import { sanitize } from '../../../lib/utility/rdnn'
 import { Log } from '../../log'
 import { Task } from '../task'
 
@@ -34,12 +35,21 @@ export class AppstreamRelease extends Task {
   }
 
   /**
+   * Returns the main appstream file name
+   *
+   * @return {string}
+   */
+  public get name () {
+    return sanitize(this.worker.context.nameDomain, '-')
+  }
+
+  /**
    * Path the appstream file should exist at
    *
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.context.nameDomain}.appdata.xml`)
+    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.name}.appdata.xml`)
   }
 
   /**
@@ -141,7 +151,7 @@ export class AppstreamRelease extends Task {
   protected sanitize (change) {
     const $el = cheerio.load(change, AppstreamRelease.CHEERIO_OPTS)
 
-    const sanitized = sanitize($el.xml(), {
+    const sanitized = sanitizeHtml($el.xml(), {
       allowedTags: AppstreamRelease.WHITELISTED_TAGS,
       parser: AppstreamRelease.CHEERIO_OPTS
     })

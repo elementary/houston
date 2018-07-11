@@ -7,6 +7,7 @@
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
+import { sanitize } from '../../../lib/utility/rdnn'
 import { Log } from '../../log'
 import { WrapperTask } from '../wrapperTask'
 
@@ -60,12 +61,21 @@ export class Appstream extends WrapperTask {
   }
 
   /**
+   * Returns the main appstream file name
+   *
+   * @return {string}
+   */
+  public get name () {
+    return sanitize(this.worker.context.nameDomain, '-')
+  }
+
+  /**
    * Path the appstream file should exist at
    *
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.context.nameDomain}.appdata.xml`)
+    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.name}.appdata.xml`)
   }
 
   /**
@@ -102,6 +112,7 @@ export class Appstream extends WrapperTask {
       const template = path.resolve(__dirname, 'exist.md')
 
       throw Log.template(Log.Level.ERROR, template, {
+        name: this.name,
         storage: this.worker.context
       })
     }

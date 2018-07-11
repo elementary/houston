@@ -6,6 +6,7 @@
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
+import { sanitize } from '../../../lib/utility/rdnn'
 import { Docker } from '../../docker'
 import { Log } from '../../log'
 import { Task } from '../task'
@@ -18,6 +19,15 @@ export class AppstreamValidate extends Task {
    */
   protected get logPath () {
     return path.resolve(this.worker.workspace, 'appstream.log')
+  }
+
+  /**
+   * Returns the main appstream file name
+   *
+   * @return {string}
+   */
+  public get name () {
+    return sanitize(this.worker.context.nameDomain, '-')
   }
 
   /**
@@ -38,7 +48,7 @@ export class AppstreamValidate extends Task {
   public async run () {
     const docker = await this.docker()
 
-    const file = `${this.worker.context.nameDomain}.appdata.xml`
+    const file = `${this.name}.appdata.xml`
     const cmd = `validate ${file} --no-color`
     const exit = await docker.run(cmd)
 

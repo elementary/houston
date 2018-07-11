@@ -6,6 +6,7 @@
 import * as path from 'path'
 
 import { Logger } from '../../../lib/log'
+import { sanitize } from '../../../lib/utility/rdnn'
 import { Log } from '../../log'
 import { Task } from '../task'
 
@@ -42,7 +43,7 @@ export class UploadPackage extends Task {
 
       context.package.name = `${context.nameHuman} ${context.version}`
       context.package.description = [
-        context.nameDomain,
+        sanitize(context.nameDomain, '-'),
         context.architecture,
         context.distribution,
         context.version

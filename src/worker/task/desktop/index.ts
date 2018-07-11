@@ -39,14 +39,21 @@ export class Desktop extends WrapperTask {
   }
 
   /**
+   * Returns the desktop file name
+   *
+   * @return {string}
+   */
+  public get name () {
+    return sanitize(this.worker.context.nameDomain, '-')
+  }
+
+  /**
    * Path the desktop file should exist at
    *
    * @return {string}
    */
   public get path () {
-    const name = sanitize(this.worker.context.nameDomain, '-')
-
-    return path.resolve(this.worker.workspace, 'package/usr/share/applications', `${name}.desktop`)
+    return path.resolve(this.worker.workspace, 'package/usr/share/applications', `${this.name}.desktop`)
   }
 
   /**

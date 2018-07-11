@@ -12,15 +12,23 @@ import { Log } from '../../log'
 import { Task } from '../task'
 
 export class DesktopIcon extends Task {
+
+  /**
+   * Returns the desktop file name
+   *
+   * @return {string}
+   */
+  public get name () {
+    return sanitize(this.worker.context.nameDomain, '-')
+  }
+
   /**
    * Path the desktop file should exist at
    *
    * @return {string}
    */
   public get path () {
-    const name = sanitize(this.worker.context.nameDomain, '-')
-
-    return path.resolve(this.worker.workspace, 'package/usr/share/applications', `${name}.desktop`)
+    return path.resolve(this.worker.workspace, 'package/usr/share/applications', `${this.name}.desktop`)
   }
 
   /**
@@ -37,7 +45,7 @@ export class DesktopIcon extends Task {
       throw new Log(Log.Level.ERROR, 'Missing application data')
     }
 
-    if (data['Desktop Entry'].Icon !== sanitize(this.worker.context.nameDomain, '-')) {
+    if (data['Desktop Entry'].Icon !== this.name) {
       throw new Log(Log.Level.ERROR, 'Incorrect desktop file icon value')
     }
   }

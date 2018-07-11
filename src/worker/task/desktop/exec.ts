@@ -12,15 +12,23 @@ import { Log } from '../../log'
 import { Task } from '../task'
 
 export class DesktopExec extends Task {
+
+  /**
+   * Returns the desktop file name
+   *
+   * @return {string}
+   */
+  public get name () {
+    return sanitize(this.worker.context.nameDomain, '-')
+  }
+
   /**
    * Path the desktop file should exist at
    *
    * @return {string}
    */
   public get path () {
-    const name = sanitize(this.worker.context.nameDomain, '-')
-
-    return path.resolve(this.worker.workspace, 'package/usr/share/applications', `${name}.desktop`)
+    return path.resolve(this.worker.workspace, 'package/usr/share/applications', `${this.name}.desktop`)
   }
 
   /**
@@ -41,7 +49,7 @@ export class DesktopExec extends Task {
       ? data['Desktop Entry'].Exec
       : ''
 
-    if (execValue.startsWith(sanitize(this.worker.context.nameDomain, '-')) === false) {
+    if (execValue.startsWith(this.name) === false) {
       throw new Log(Log.Level.ERROR, 'Exec field does not start with binary name')
     }
   }

@@ -7,10 +7,20 @@ import * as cheerio from 'cheerio'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
+import { sanitize } from '../../../lib/utility/rdnn'
 import { Log } from '../../log'
 import { Task } from '../task'
 
 export class AppstreamContentRating extends Task {
+
+  /**
+   * Returns the main appstream file name
+   *
+   * @return {string}
+   */
+  public get name () {
+    return sanitize(this.worker.context.nameDomain, '-')
+  }
 
   /**
    * Path the appstream file should exist at
@@ -18,7 +28,7 @@ export class AppstreamContentRating extends Task {
    * @return {string}
    */
   public get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.worker.context.nameDomain}.appdata.xml`)
+    return path.resolve(this.worker.workspace, 'package/usr/share/metainfo', `${this.name}.appdata.xml`)
   }
 
   /**

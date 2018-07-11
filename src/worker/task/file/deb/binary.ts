@@ -7,17 +7,28 @@ import * as fs from 'fs-extra'
 import * as path from 'path'
 
 import { glob } from '../../../../lib/utility/glob'
+import { sanitize } from '../../../../lib/utility/rdnn'
 import { Log } from '../../../log'
 import { Task } from '../../task'
 
 export class FileDebBinary extends Task {
+
+  /**
+   * Returns the desktop file name
+   *
+   * @return {string}
+   */
+  public get name () {
+    return sanitize(this.worker.context.nameDomain, '-')
+  }
+
   /**
    * Location of the directory to build
    *
    * @return {string}
    */
   protected get path () {
-    return path.resolve(this.worker.workspace, 'package/usr/bin', this.worker.context.nameDomain)
+    return path.resolve(this.worker.workspace, 'package/usr/bin', this.name)
   }
 
   /**
@@ -32,7 +43,8 @@ export class FileDebBinary extends Task {
     if (exists === false) {
       throw Log.template(Log.Level.ERROR, path.resolve(__dirname, 'binary.md'), {
         context: this.worker.context,
-        files: await this.files()
+        files: await this.files(),
+        name: this.name
       })
     }
   }
