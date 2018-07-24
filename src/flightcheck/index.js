@@ -75,7 +75,7 @@ function handleError ({ id, error }) {
  * @return {void}
  */
 async function handleRelease (app, repo, context, { id, project }) {
-  log.info(`Starting build for "${id}"`)
+  log.info(`Starting build for "${context.nameDomain}"`)
   sender.add('start', { id })
 
   const worker = ReleaseWorker(app, repo, context)
@@ -91,9 +91,9 @@ async function handleRelease (app, repo, context, { id, project }) {
   const result = worker.result
 
   if (result.failed) {
-    log.info(`Finished failed build for "${id}"`)
+    log.info(`Finished failed build for "${context.nameDomain}"`)
   } else {
-    log.info(`Finished successful build for "${id}"`)
+    log.info(`Finished successful build for "${context.nameDomain}"`)
   }
 
   result.logs.forEach((l) => {
