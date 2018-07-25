@@ -21,10 +21,16 @@ import { WorkspaceSetup } from '../task/workspace/setup'
 function buildTasks (t: type.Type): type.ITaskConstructor[] {
   switch (t) {
     case 'library':
+    case 'system-library':
       return [
         WorkspaceSetup,
         DebianChangelog,
         DebianControl,
+        BuildDeb
+      ]
+    case 'system-app':
+      return [
+        WorkspaceSetup,
         BuildDeb
       ]
     default:
