@@ -55,19 +55,16 @@ export class DebianControl extends Task {
 
     const errors = [] as string[]
 
-    // TODO: Remove after Cody migrates everything to correct RDNN
-    if (this.worker.context.type !== 'system-app') {
-      if (file.indexOf(`Source: ${this.name}`) === -1) {
-        errors.push(`Source should be "${this.name}"`)
-      }
+    if (file.indexOf(`Source: ${this.name}`) === -1) {
+      errors.push(`Source should be "${this.name}"`)
+    }
 
-      if (file.indexOf(`Package: ${this.name}`) === -1) {
-        errors.push(`Package should be "${this.name}"`)
-      }
+    if (file.indexOf(`Package: ${this.name}`) === -1) {
+      errors.push(`Package should be "${this.name}"`)
+    }
 
-      if (!file.match(/^Maintainer: .* <.*@.*>$/gm)) {
-        errors.push('Maintainer should be in the form of "name <email@example.com"')
-      }
+    if (!file.match(/^Maintainer: .* <.*@.*>$/gm)) {
+      errors.push('Maintainer should be in the form of "name <email@example.com"')
     }
 
     if (errors.length > 0) {
