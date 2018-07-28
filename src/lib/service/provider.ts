@@ -7,15 +7,29 @@ import { ContainerModule, interfaces } from 'inversify'
 
 import {
   codeRepository,
+  codeRepositoryFactory,
   logRepository,
   packageRepository
 } from './index'
 
 import { Aptly } from './aptly'
-import { GitHub } from './github'
+import { GitHub, github, IGitHubFactory } from './github'
+import * as type from './type'
 
 export const provider = new ContainerModule((bind) => {
-  // TODO: Bind GitHub classes
+  bind<interfaces.Factory<GitHub>>(github)
+    .toFactory((context) => (url) => {
+      const instance = context.container.resolve(GitHub)
+      instance.url = url
+
+      return instance
+    })
+
+  bind(codeRepositoryFactory).toProvider((context) => (url) => {
+    return new Promise<type.ICodeRepository>((resolve) => {
+      return resolve(context.container.get<IGitHubFactory>(github)(url))
+    })
+  })
 
   bind<Aptly>(Aptly).toSelf()
 

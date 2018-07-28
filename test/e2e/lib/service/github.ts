@@ -10,19 +10,29 @@ import * as path from 'path'
 import * as uuid from 'uuid/v4'
 
 import * as Log from '../../../../src/lib/log'
-import { GitHub } from '../../../../src/lib/service/github'
+import { github, IGitHubFactory } from '../../../../src/lib/service/github'
 import * as type from '../../../../src/lib/service/type'
 
+import { create as createApp } from '../../../utility/app'
 import { tmp } from '../../../utility/fs'
 import { record } from '../../../utility/http'
 
 const test = baseTest as TestInterface<{
   folder: string
+  factory: IGitHubFactory
 }>
 
 test.beforeEach(async (t) => {
+  const app = await createApp()
+
   t.context.folder = await tmp(`lib/service/github/${uuid()}`)
-  GitHub.tmpFolder = t.context.folder
+  t.context.factory = (url: string) => {
+    const instance = app.get<IGitHubFactory>(github)(url)
+
+    instance.tmpFolder = t.context.folder
+
+    return instance
+  }
 })
 
 test.afterEach.always(async (t) => {
@@ -30,7 +40,7 @@ test.afterEach.always(async (t) => {
 })
 
 test.serial('can clone a repository', async (t) => {
-  const repo = new GitHub('https://github.com/elementary/houston')
+  const repo = t.context.factory('https://github.com/elementary/houston')
 
   const folder = path.resolve(t.context.folder, uuid())
   await fs.mkdirs(folder)
@@ -42,7 +52,7 @@ test.serial('can clone a repository', async (t) => {
 })
 
 test.serial('can clone a repository with tag', async (t) => {
-  const repo = new GitHub('https://github.com/elementary/houston')
+  const repo = t.context.factory('https://github.com/elementary/houston')
 
   const folder = path.resolve(t.context.folder, uuid())
   await fs.mkdirs(folder)
@@ -58,7 +68,7 @@ test.serial('can clone a repository with tag', async (t) => {
 })
 
 test.serial.failing('can clone a repository with a non-annotated tag (#511)', async (t) => {
-  const repo = new GitHub('https://github.com/fluks-eos/gdice')
+  const repo = t.context.factory('https://github.com/fluks-eos/gdice')
 
   const folder = path.resolve(t.context.folder, uuid())
   await fs.mkdirs(folder)
@@ -70,7 +80,7 @@ test.serial.failing('can clone a repository with a non-annotated tag (#511)', as
 })
 
 test.serial('can list all references for a repository', async (t) => {
-  const repo = new GitHub('https://github.com/elementary/houston')
+  const repo = t.context.factory('https://github.com/elementary/houston')
 
   const references = await repo.references()
 
@@ -80,7 +90,7 @@ test.serial('can list all references for a repository', async (t) => {
 
 test.serial.failing('can post assets to reference', async (t) => {
   const { done } = await record('lib/service/github/asset.json')
-  const repo = new GitHub('https://github.com/btkostner/vocal')
+  const repo = t.context.factory('https://github.com/btkostner/vocal')
   const pkg = {
     architecture: 'amd64',
     description: 'Vocal 3.2.6 Loki (amd64)',
@@ -99,7 +109,7 @@ test.serial.failing('can post assets to reference', async (t) => {
 
 test.serial('can post an log', async (t) => {
   const { done } = await record('lib/service/github/log.json')
-  const repo = new GitHub('https://github.com/btkostner/vocal')
+  const repo = t.context.factory('https://github.com/btkostner/vocal')
   const log = {
     body: 'testy test test',
     level: Log.Level.ERROR,

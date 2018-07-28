@@ -29,6 +29,8 @@ export interface ILog extends IServiceIds {
   body?: string
 }
 
+export type ICodeRepositoryFactory = (url: string) => ICodeRepository
+
 export interface ICodeRepository {
   /**
    * The human readable name of the service.

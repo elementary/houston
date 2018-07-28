@@ -12,7 +12,7 @@ import * as semver from 'semver'
 
 import { Config } from '../../lib/config'
 import { levelIndex } from '../../lib/log/level'
-import { createCodeRepository } from '../../lib/service'
+import { codeRepositoryFactory, ICodeRepositoryFactory } from '../../lib/service'
 import { sanitize } from '../../lib/utility/rdnn'
 import { Build } from '../../worker/preset/build'
 import { IContext } from '../../worker/type'
@@ -113,7 +113,8 @@ function logLogs (logs) {
 export async function handler (argv) {
   const { app } = setup(argv)
 
-  const repository = createCodeRepository(argv.repo)
+  const repoFactory = app.get<ICodeRepositoryFactory>(codeRepositoryFactory)
+  const repository = await repoFactory(argv.repo)
   const context = buildContext(argv, repository)
 
   const worker = Build(app, repository, context)

@@ -11,7 +11,7 @@ import * as uuid from 'uuid/v4'
 
 import { App } from '../../../src/lib/app'
 import { Config } from '../../../src/lib/config'
-import { GitHub } from '../../../src/lib/service/github'
+import { codeRepositoryFactory, ICodeRepositoryFactory } from '../../../src/lib/service'
 import { Build } from '../../../src/worker/preset/build'
 import * as type from '../../../src/worker/type'
 
@@ -22,6 +22,7 @@ interface IContext {
   app: App,
   config: Config,
   directory: string
+  factory: ICodeRepositoryFactory
 }
 
 const test = baseTest as TestInterface<IContext>
@@ -30,10 +31,11 @@ test.beforeEach(async (t) => {
   t.context.app = await create()
   t.context.config = t.context.app.get<Config>(Config)
   t.context.directory = await tmp('worker')
+  t.context.factory = t.context.app.get<ICodeRepositoryFactory>(codeRepositoryFactory)
 })
 
 test('cassidyjames/palette passes build process', async (t) => {
-  const repo = new GitHub('https://github.com/cassidyjames/palette')
+  const repo = await t.context.factory('https://github.com/cassidyjames/palette')
   const context : type.IContext = {
     appcenter: {},
     appstream: '',

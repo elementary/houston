@@ -14,8 +14,12 @@ import * as path from 'path'
 import * as agent from 'superagent'
 import * as uuid from 'uuid/v4'
 
+import { Config } from '../config'
 import { sanitize } from '../utility/rdnn'
 import * as type from './type'
+
+export const github = Symbol('GitHub')
+export type IGitHubFactory = (url: string) => GitHub
 
 @injectable()
 export class GitHub implements type.ICodeRepository, type.IPackageRepository, type.ILogRepository {
@@ -25,7 +29,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    *
    * @var {string}
    */
-  public static tmpFolder = path.resolve(os.tmpdir(), 'houston')
+  public tmpFolder = path.resolve(os.tmpdir(), 'houston')
 
   /**
    * The human readable name of the service.
@@ -65,6 +69,14 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    * @var {string}
    */
   public reference = 'refs/heads/master'
+
+  /**
+   * config
+   * The application configuration
+   *
+   * @var {Config}
+   */
+  protected config: Config
 
   /**
    * Tries to get the file mime type by reading the first chunk of a file.
@@ -107,10 +119,10 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
   /**
    * Creates a new GitHub Repository
    *
-   * @param {string} url - The full github url
+   * @param {Config} config - The application configuration
    */
-  constructor (url: string) {
-    this.url = url
+  constructor (config: Config) {
+    this.config = config
   }
 
   /**
@@ -188,7 +200,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    * @return {string[]}
    */
   public async references (): Promise<string[]> {
-    const p = path.resolve(GitHub.tmpFolder, uuid())
+    const p = path.resolve(this.tmpFolder, uuid())
     const repo = await Git.Clone(this.url, p)
 
     const branches = await repo.getReferenceNames(Git.Reference.TYPE.LISTALL)

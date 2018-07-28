@@ -8,10 +8,8 @@ export { App } from './lib/app'
 export { Config } from './lib/config'
 
 export {
-  createCodeRepository,
-
   Aptly,
-  GitHub
+  github
 } from './lib/service'
 
 export { Worker } from './worker'

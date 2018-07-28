@@ -7,17 +7,6 @@ import * as type from './type'
 
 import { GitHub } from './github'
 
-/**
- * Creates a new repository service given any URL
- * TODO: Add more repository services besides GitHub
- *
- * @param {string} url
- * @return {Repository}
- */
-export function createCodeRepository (url: string): type.ICodeRepository {
-  return new GitHub(url)
-}
-
 // Typescript typeguard to ensure given value is an ICodeRepository
 export function isCodeRepository (value): value is type.ICodeRepository {
   return (value != null && typeof value.clone === 'function')
@@ -35,6 +24,7 @@ export function isLogRepository (value): value is type.ILogRepository {
 
 export {
   ICodeRepository,
+  ICodeRepositoryFactory,
   ILog,
   IPackage,
   IPackageRepository,
@@ -42,8 +32,10 @@ export {
 } from './type'
 
 export { Aptly } from './aptly'
-export { GitHub } from './github'
+export { github, IGitHubFactory } from './github'
 
 export const codeRepository = Symbol('codeRepository')
 export const packageRepository = Symbol('packageRepository')
 export const logRepository = Symbol('logRepository')
+
+export const codeRepositoryFactory = Symbol('codeRepositoryFactory')
