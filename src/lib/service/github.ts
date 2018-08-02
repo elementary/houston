@@ -188,6 +188,8 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
 
     await repo.checkoutRef(ref)
 
+    await this.recursiveClone(p)
+
     await fs.remove(path.resolve(p, '.git'))
   }
 
@@ -318,5 +320,21 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
       })
 
     return { ...log, githubId: body.id }
+  }
+  
+  /**
+   * Clones all of the Git submodules for a given repo path
+   *
+   * @async
+   * @param {String} clonePath - Path of the repository
+   * @return {void}
+   */
+  protected async recursiveClone (clonePath) {
+    const repo = await Git.Repository.open(clonePath)
+
+    await Git.Submodule.foreach(repo, async (submodule) => {
+      await submodule.update(1, new Git.SubmoduleUpdateOptions())
+      await this.recursiveClone(path.join(clonePath, submodule.path()))
+    })
   }
 }
