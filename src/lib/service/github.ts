@@ -321,7 +321,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
 
     return { ...log, githubId: body.id }
   }
-  
+
   /**
    * Clones all of the Git submodules for a given repo path
    *
