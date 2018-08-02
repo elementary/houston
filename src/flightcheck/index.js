@@ -3,12 +3,12 @@
  * Proxies the old flightcheck information to the new houston v2 worker code.
  */
 
-import { createCodeRepository, ReleaseWorker } from '@elementaryos/houston'
+import { ReleaseWorker } from '@elementaryos/houston'
 import semver from 'semver'
 
 import * as atc from 'lib/atc'
 import Log from 'lib/log'
-import { createApp } from 'lib/v2'
+import { createApp, createCodeRepository } from 'lib/v2'
 import * as github from '../service/github'
 
 const log = new Log('flightcheck')

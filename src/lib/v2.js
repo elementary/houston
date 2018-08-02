@@ -6,7 +6,13 @@
 
 require('reflect-metadata')
 
-import { App, Aptly, Config, Worker } from '@elementaryos/houston'
+import {
+  App,
+  Aptly,
+  codeRepositoryFactory,
+  Config,
+  Worker
+} from '@elementaryos/houston'
 
 import config from './config'
 
@@ -85,4 +91,18 @@ export async function createAptly () {
   const app = await createApp()
 
   return app.get(Aptly)
+}
+
+/**
+ * Creates a new code repository from a given url
+ *
+ * @async
+ * @param {string} url A repository url
+ * @return {ICodeRepository}
+ */
+export async function createCodeRepository (url) {
+  const app = await createApp()
+  const factory = app.get(codeRepositoryFactory)
+
+  return factory(url)
 }
