@@ -9,6 +9,7 @@ export { Config } from './lib/config'
 
 export {
   Aptly,
+  codeRepositoryFactory,
   github
 } from './lib/service'
 
