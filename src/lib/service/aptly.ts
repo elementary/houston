@@ -101,7 +101,9 @@ export class Aptly implements type.IPackageRepository {
         .createHash('md5')
         .update(JSON.stringify(pkg))
         .digest('hex')
-      const fileName = `${fileHash}.${pkg.type}`
+        .substring(6)
+      const filePkgName = pkg.name.toLowerCase().replace(/[^0-9a-z-]/gi, '')
+      const fileName = `${filePkgName}-${fileHash}.${pkg.type}`
 
       await agent
         .post(createUrl(rootUrl, 'files', fileName))
