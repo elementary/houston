@@ -101,8 +101,8 @@ export class Aptly implements type.IPackageRepository {
         .createHash('md5')
         .update(JSON.stringify(pkg))
         .digest('hex')
-        .substring(6)
-      const filePkgName = pkg.name.toLowerCase().replace(/[^0-9a-z-]/gi, '')
+        .substring(0, 6)
+      const filePkgName = pkg.name.toLowerCase().replace(/[^0-9a-z-\.]/gi, '')
       const fileName = `${filePkgName}-${fileHash}.${pkg.type}`
 
       await agent
