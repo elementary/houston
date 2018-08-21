@@ -39,7 +39,7 @@ export class UploadPackage extends Task {
       if (context.package == null || context.package.path == null) {
         continue
       }
-      
+
       if (!(await fs.pathExists(context.package.path))) {
         continue
       }
