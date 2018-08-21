@@ -3,6 +3,7 @@
  * Responsible for uploading all the end results to third party services
  */
 
+import * as fs from 'fs-extra'
 import * as path from 'path'
 
 import { Logger } from '../../../lib/log'
