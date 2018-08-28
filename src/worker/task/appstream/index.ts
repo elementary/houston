@@ -7,8 +7,8 @@
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
-import { sanitize } from '../../../lib/utility/rdnn'
 import { Log } from '../../log'
+import { sanitize } from '../../../lib/utility/rdnn'
 import { WrapperTask } from '../wrapperTask'
 
 import { AppstreamContentRating } from './content-rating'
