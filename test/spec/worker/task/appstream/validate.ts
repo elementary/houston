@@ -15,7 +15,7 @@ test('passes with a valid appstream file', async (t) => {
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 
-  await worker.mock('task/appstream/spice-up.xml', 'package/usr/share/metainfo/com.github.philip_scott.spice_up.appdata.xml')
+  await worker.mock('task/appstream/spice-up.xml', 'package/usr/share/metainfo/com.github.philip-scott.spice-up.appdata.xml')
 
   worker.tasks.push(AppstreamValidate)
 
@@ -33,7 +33,7 @@ test('fails with a blank appstream file', async (t) => {
     nameDomain: 'com.github.philip-scott.spice-up'
   })
 
-  await worker.mock('task/appstream/blank.xml', 'package/usr/share/metainfo/com.github.philip_scott.spice_up.appdata.xml')
+  await worker.mock('task/appstream/blank.xml', 'package/usr/share/metainfo/com.github.philip-scott.spice-up.appdata.xml')
 
   worker.tasks.push(AppstreamValidate)
 
