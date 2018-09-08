@@ -7,6 +7,7 @@
 // tslint:disable no-console
 
 import * as fs from 'fs-extra'
+import * as isEqual from 'lodash/isEqual'
 import * as path from 'path'
 import * as semver from 'semver'
 
@@ -110,6 +111,36 @@ function logLogs (logs) {
   }
 }
 
+/**
+ * Reports the result of the worker
+ *
+ * @param {Object} argv
+ * @param {Worker} worker
+ * @return {void}
+ */
+function logResult (argv, worker) {
+  if (worker.fails) {
+    console.error(`Error while running build for ${argv.repo} for ${argv.version}`)
+    logLogs(worker.result.logs)
+    logSpacer()
+  } else {
+    console.log(`Built ${argv.repo} for version ${argv.version}`)
+
+    const builds = worker.contexts
+      .map(({ architecture, distribution }) => ({ architecture, distribution }))
+      .filter(({ architecture }) => (architecture !== ''))
+      .filter(({ distribution }) => (distribution !== ''))
+      .filter((b, i, a) => (a.findIndex((mb) => isEqual(b, mb)) === i))
+
+    for (const build of builds) {
+      console.log(`Built ${build.architecture} ${build.distribution}`)
+    }
+
+    logLogs(worker.result.logs)
+    logSpacer()
+  }
+}
+
 export async function handler (argv) {
   const { app } = setup(argv)
 
@@ -131,17 +162,11 @@ export async function handler (argv) {
     }
   }
 
-  if (worker.fails) {
-    console.error(`Error while running build for ${argv.repo} for ${argv.version}`)
-    logLogs(worker.result.logs)
-    logSpacer()
+  logResult(argv, worker)
 
+  if (worker.fails) {
     process.exit(1)
   } else {
-    console.log(`Built ${argv.repo} for version ${argv.version}`)
-    logLogs(worker.result.logs)
-    logSpacer()
-
     process.exit(0)
   }
 }

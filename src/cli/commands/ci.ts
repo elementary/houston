@@ -7,6 +7,7 @@
 // tslint:disable no-console
 
 import * as fs from 'fs-extra'
+import * as isEqual from 'lodash/isEqual'
 import * as path from 'path'
 import * as semver from 'semver'
 
@@ -27,50 +28,50 @@ const REPO = `https://github.com/${SLUG}`
 const BRANCH = process.env.TRAVIS_BRANCH
 
 export const builder = (yargs) => {
-    return yargs
-      .positional('directory', {
-        coerce: (v) => path.resolve(process.cwd(), v),
-        default: '.',
-        describe: 'The project directory to build',
-        type: 'string'
-      })
-      .option('type', {
-        choices: ['app', 'system-app', 'library'],
-        default: 'app',
-        describe: 'The type of project',
-        type: 'string'
-      })
-      .option('repo', {
-        ...(SLUG != null) ? { default: REPO } : {},
-        demandOption: true,
-        describe: 'Full repository URL',
-        type: 'string'
-      })
-      .option('version', {
-        coerce: semver.valid,
-        default: '0.0.1',
-        describe: 'Semver version to build for',
-        type: 'string'
-      })
-      .option('name-developer', {
-        describe: 'Developer\'s name',
-        type: 'string'
-      })
-      .option('name-domain', {
-        alias: 'n',
-        coerce: sanitize,
-        describe: 'Reverse Domain Name Notation',
-        type: 'string'
-      })
-      .option('name-human', {
-        describe: 'Human readable name',
-        type: 'string'
-      })
-      .option('references', {
-        default: [],
-        describe: 'References to pull',
-        type: 'array'
-      })
+  return yargs
+    .positional('directory', {
+      coerce: (v) => path.resolve(process.cwd(), v),
+      default: '.',
+      describe: 'The project directory to build',
+      type: 'string'
+    })
+    .option('type', {
+      choices: ['app', 'system-app', 'library'],
+      default: 'app',
+      describe: 'The type of project',
+      type: 'string'
+    })
+    .option('repo', {
+      ...(SLUG != null) ? { default: REPO } : {},
+      demandOption: true,
+      describe: 'Full repository URL',
+      type: 'string'
+    })
+    .option('version', {
+      coerce: semver.valid,
+      default: '0.0.1',
+      describe: 'Semver version to build for',
+      type: 'string'
+    })
+    .option('name-developer', {
+      describe: 'Developer\'s name',
+      type: 'string'
+    })
+    .option('name-domain', {
+      alias: 'n',
+      coerce: sanitize,
+      describe: 'Reverse Domain Name Notation',
+      type: 'string'
+    })
+    .option('name-human', {
+      describe: 'Human readable name',
+      type: 'string'
+    })
+    .option('references', {
+      default: [],
+      describe: 'References to pull',
+      type: 'array'
+    })
 }
 
 /**
@@ -123,6 +124,36 @@ function logLogs (logs) {
   }
 }
 
+/**
+ * Reports the result of the worker
+ *
+ * @param {Object} argv
+ * @param {Worker} worker
+ * @return {void}
+ */
+function logResult (argv, worker) {
+  if (worker.fails) {
+    console.error(`Error while running build for ${argv.repo} for ${argv.version}`)
+    logLogs(worker.result.logs)
+    logSpacer()
+  } else {
+    console.log(`Built ${argv.repo} for version ${argv.version}`)
+
+    const builds = worker.contexts
+      .map(({ architecture, distribution }) => ({ architecture, distribution }))
+      .filter(({ architecture }) => (architecture !== ''))
+      .filter(({ distribution }) => (distribution !== ''))
+      .filter((b, i, a) => (a.findIndex((mb) => isEqual(b, mb)) === i))
+
+    for (const build of builds) {
+      console.log(`Built ${build.architecture} ${build.distribution}`)
+    }
+
+    logLogs(worker.result.logs)
+    logSpacer()
+  }
+}
+
 export async function handler (argv) {
   console.warn('THIS COMMAND IS NOT FULLY COMPLETE')
   console.warn('IT ONLY WORKS ON GITHUB WITH TRAVIS AT THIS TIME')
@@ -156,17 +187,11 @@ export async function handler (argv) {
   clearInterval(interval)
   console.log('.')
 
-  if (worker.fails) {
-    console.error(`Error while running build for ${argv.repo} for ${argv.version}`)
-    logLogs(worker.result.logs)
-    logSpacer()
+  logResult(argv, worker)
 
+  if (worker.fails) {
     process.exit(1)
   } else {
-    console.log(`Built ${argv.repo} for version ${argv.version}`)
-    logLogs(worker.result.logs)
-    logSpacer()
-
     process.exit(0)
   }
 }
