@@ -131,7 +131,7 @@ export class Appstream extends WrapperTask {
     }
 
     // Save the appstream information
-    this.worker.context.appstream = await fs.readFile(this.path)
+    this.worker.context.appstream = await fs.readFile(this.path, 'utf-8')
   }
 
   /**
