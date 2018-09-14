@@ -1,6 +1,9 @@
 /**
  * houston/src/lib/service/github.ts
  * Handles interaction with GitHub repositories.
+ *
+ * NOTE: If you are using a personal auth token, the url should be like so:
+ * "https://x-access-token:asdf1234@github.com/elementary/houston"
  */
 
 import * as URL from 'url'
@@ -8,6 +11,7 @@ import * as URL from 'url'
 import * as fileType from 'file-type'
 import * as fs from 'fs-extra'
 import { injectable } from 'inversify'
+import * as jsonwebtoken from 'jsonwebtoken'
 import * as Git from 'nodegit'
 import * as os from 'os'
 import * as path from 'path'
@@ -24,7 +28,6 @@ export type IGitHubFactory = (url: string) => GitHub
 @injectable()
 export class GitHub implements type.ICodeRepository, type.IPackageRepository, type.ILogRepository {
   /**
-   * tmpFolder
    * Folder to use as scratch space for cloning repos
    *
    * @var {string}
@@ -39,7 +42,14 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
   public serviceName = 'GitHub'
 
   /**
-   * username
+   * The host for the repo. This is almost always "github.com" but can change if
+   * you have an enterprise instance.
+   *
+   * @var {string}
+   */
+  public host = 'github.com'
+
+  /**
    * The GitHub username or organization.
    *
    * @var {string}
@@ -47,7 +57,6 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
   public username: string
 
   /**
-   * repository
    * The GitHub user's repository name
    *
    * @var {string}
@@ -55,15 +64,22 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
   public repository: string
 
   /**
-   * auth
-   * Authentication to use when interacting
+   * The http username
    *
-   * @var {string}
+   * @var {string|null}
    */
-  public auth?: string
+  public authUsername?: string
 
   /**
-   * reference
+   * The http password authentication string.
+   * NOTE: When the `authUsername` is 'installation', this will be an
+   * installation id. Not an accurate http password.
+   *
+   * @var {string|null}
+   */
+  public authPassword?: string
+
+  /**
    * The reference to branch or tag.
    *
    * @var {string}
@@ -71,7 +87,6 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
   public reference = 'refs/heads/master'
 
   /**
-   * config
    * The application configuration
    *
    * @var {Config}
@@ -126,21 +141,36 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
   }
 
   /**
-   * url
+   * Returns the default RDNN value for this repository
+   *
+   * @return {string}
+   */
+  public get rdnn () {
+    return sanitize(`com.github.${this.username}.${this.repository}`)
+  }
+
+  /**
    * Returns the Git URL for the repository
    *
    * @return {string}
    */
   public get url (): string {
-    if (this.auth != null) {
-      return `https://x-access-token:${this.auth}@github.com/${this.username}/${this.repository}.git`
+    let auth = null
+    if (this.authUsername !== 'installation') {
+      if (this.authUsername != null || this.authPassword != null) {
+        auth = `${this.authUsername}:${this.authPassword}`
+      }
     }
 
-    return `https://github.com/${this.username}/${this.repository}.git`
+    return URL.format({
+      auth,
+      host: this.host,
+      pathname: `/${this.username}/${this.repository}.git`,
+      protocol: 'https'
+    })
   }
 
   /**
-   * url
    * Sets the Git URL for the repository
    * NOTE: Auth code is case sensitive, so we can't lowercase the whole url
    *
@@ -157,24 +187,23 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
       .replace(/\.git$/, '')
 
     const url = new URL.URL(httpPath)
-    const [, username, repository] = url.pathname.split('/')
+    const [host, username, repository] = url.pathname.split('/')
 
+    this.host = url.host
     this.username = username
     this.repository = repository
-    this.auth = url.password || url.username || null
+    this.authUsername = (url.username !== '') ? url.username : null
+    this.authPassword = (url.password !== '') ? url.password : null
+
+    // GitHub never sends auth codes as the username due to http security
+    // Headers. This probably means it was parsed weird so we should fix it.
+    if (this.authUsername != null && this.authPassword == null) {
+      this.authPassword = this.authUsername
+      this.authUsername = 'x-access-token'
+    }
   }
 
   /**
-   * Returns the default RDNN value for this repository
-   *
-   * @return {string}
-   */
-  public get rdnn () {
-    return sanitize(`com.github.${this.username}.${this.repository}`)
-  }
-
-  /**
-   * clone
    * Clones the repository to a folder
    *
    * @async
@@ -194,7 +223,6 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
   }
 
   /**
-   * references
    * Returns a list of references this repository has
    * TODO: Try to figure out a more optimized way
    *
@@ -228,11 +256,13 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
 
     return pkg
 
+    const auth = await this.getAuthorization()
+
     const url = `${this.username}/${this.repository}/releases/tags/${reference}`
     const { body } = await agent
       .get(`https://api.github.com/repos/${url}`)
       .set('accept', 'application/vnd.github.v3+json')
-      .set('authorization', `Bearer ${this.auth}`)
+      .set('authorization', auth)
 
     if (body.upload_url == null) {
       throw new Error('No Upload URL for GitHub release')
@@ -250,7 +280,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
         .post(body.upload_url.replace('{?name,label}', ''))
         .set('content-type', mime)
         .set('content-length', stat.size)
-        .set('authorization', `token ${this.auth}`)
+        .set('authorization', auth)
         .query({ name: pkg.name })
         .query((pkg.description != null) ? { label: pkg.description } : {})
         .parse((response, fn) => {
@@ -280,7 +310,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
   }
 
   /**
-   * Uploads a log to GitHub as an issue witht he 'AppCenter' label
+   * Uploads a log to GitHub as an issue with the 'AppCenter' label
    *
    * @async
    * @param {ILog} log
@@ -293,16 +323,18 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
       return
     }
 
+    const auth = await this.getAuthorization()
+
     const hasLabel = await agent
       .get(`https://api.github.com/repos/${this.username}/${this.repository}/labels/AppCenter`)
-      .set('authorization', `Bearer ${this.auth}`)
+      .set('authorization', auth)
       .then(() => true)
       .catch(() => false)
 
     if (!hasLabel) {
       await agent
         .post(`https://api.github.com/repos/${this.username}/${this.repository}/labels`)
-        .set('authorization', `Bearer ${this.auth}`)
+        .set('authorization', auth)
         .send({
           color: '4c158a',
           description: 'Issues related to releasing on AppCenter',
@@ -312,7 +344,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
 
     const { body } = await agent
       .post(`https://api.github.com/repos/${this.username}/${this.repository}/issues`)
-      .set('authorization', `Bearer ${this.auth}`)
+      .set('authorization', auth)
       .send({
         body: log.body,
         labels: ['AppCenter'],
@@ -320,6 +352,68 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
       })
 
     return { ...log, githubId: body.id }
+  }
+
+  /**
+   * Returns the http Authorization header value
+   *
+   * @async
+   * @return {string}
+   */
+  protected async getAuthorization (): Promise<string> {
+    if (this.authUsername !== 'installation') {
+      return `Bearer ${this.authPassword}`
+    } else {
+      const token = await this.generateToken(Number(this.authPassword))
+
+      return `token ${token}`
+    }
+  }
+
+  /**
+   * Generates a json web token used for making app requests to GitHub.
+   *
+   * @async
+   * @return {string}
+   */
+  protected async generateJwt (): Promise<string> {
+    const keyPath = this.config.get('service.github.key')
+    const key = await fs.readFile(keyPath, 'utf-8')
+    const payload = {
+      iat: Math.floor(Date.now() / 1000),
+      iss: this.config.get('service.github.app')
+    }
+    const options = {
+      algorithm: 'RS256',
+      expiresIn: '1m'
+    }
+
+    return new Promise<string>((resolve, reject) => {
+      jsonwebtoken.sign(payload, key, options, (err, token) => {
+        if (err != null) {
+          return reject(err)
+        } else {
+          return resolve(token)
+        }
+      })
+    })
+  }
+
+  /**
+   * Uses a json web token to generate an API usable authentication token for
+   * GitHub.
+   *
+   * @async
+   * @param {number} installation The GitHub app installation number
+   * @return {string}
+   */
+  protected async generateToken (installation: number): Promise<string> {
+    const jwt = await this.generateJwt()
+
+    return agent
+      .get(`https://api.github.com/installations/${installation}/access_tokens`)
+      .set('authorization', `Bearer ${jwt}`)
+      .then((res) => res.body.token)
   }
 
   /**

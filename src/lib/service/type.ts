@@ -40,19 +40,19 @@ export interface ICodeRepository {
   serviceName: string,
 
   /**
-   * The code repository URL
-   *
-   * @var {String}
-   */
-  url: string,
-
-  /**
    * The default RDNN of the given code repository. This _can_ be changed in the
    * database, but we use _this_ string to get a sane default.
    *
    * @var {String}
    */
   rdnn: string,
+
+  /**
+   * The full git URL.
+   *
+   * @var {String}
+   */
+  url: string,
 
   /**
    * Clones a repository of code to the given path.

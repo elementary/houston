@@ -49,7 +49,7 @@ test('can set values based on url with auth', (t) => {
 
   t.is(repo.username, 'elementary')
   t.is(repo.repository, 'houston')
-  t.is(repo.auth, 'auth')
+  t.is(repo.auth, 'x-access-token:auth')
 })
 
 test('can set values based on ssh url', (t) => {

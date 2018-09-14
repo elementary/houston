@@ -128,7 +128,7 @@ module.exports = {
      * @property {string} client - The OAuth application client key
      * @property {string} secret - The OAuth application secret key
      *
-     * @property {string} installation - The installation ID
+     * @property {string} app - The GitHub developer app ID
      * @property {string} key - The full path to the installation key file
      * @property {string} [hook] - The installation web hook secret.
      */
@@ -136,7 +136,7 @@ module.exports = {
       client: 'xxxxxxxxxxxxxxxxxxxx',
       secret: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
 
-      installation: 0,
+      app: 0,
       key: '/etc/houston/github.pem',
       hook: false
     },
