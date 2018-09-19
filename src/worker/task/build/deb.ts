@@ -17,15 +17,6 @@ import { Task } from '../task'
 export class BuildDeb extends Task {
 
   /**
-   * Returns the path of the liftoff cache
-   *
-   * @return {string}
-   */
-  protected static get cachePath () {
-    return path.resolve(os.tmpdir(), 'liftoff')
-  }
-
-  /**
    * Location of the liftoff log
    *
    * @return {string}
@@ -207,7 +198,6 @@ export class BuildDeb extends Task {
 
     docker.log = this.logPath
 
-    docker.mount(BuildDeb.cachePath, '/var/cache/liftoff')
     docker.mount(this.path, '/tmp/houston')
 
     return docker

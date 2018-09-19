@@ -19,7 +19,7 @@ export class AppstreamSummary extends Task {
    * @return {string}
    */
   public get name () {
-    return sanitize(this.worker.context.nameDomain, '_')
+    return sanitize(this.worker.context.nameDomain, '-')
   }
 
   /**

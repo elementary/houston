@@ -11,7 +11,6 @@ import { sanitize } from '../../../lib/utility/rdnn'
 import { Log } from '../../log'
 import { WrapperTask } from '../wrapperTask'
 
-import { AppstreamContentRating } from './content-rating'
 import { AppstreamDescription } from './description'
 import { AppstreamId } from './id'
 import { AppstreamLicense } from './license'
@@ -39,7 +38,6 @@ export class Appstream extends WrapperTask {
           AppstreamSummary,
           AppstreamLicense,
           AppstreamScreenshot,
-          AppstreamContentRating,
           AppstreamRelease,
           AppstreamValidate
         ]
@@ -52,7 +50,6 @@ export class Appstream extends WrapperTask {
           AppstreamSummary,
           AppstreamLicense,
           AppstreamScreenshot,
-          AppstreamContentRating,
           AppstreamRelease,
           AppstreamStripe,
           AppstreamValidate
@@ -66,7 +63,7 @@ export class Appstream extends WrapperTask {
    * @return {string}
    */
   public get name () {
-    return sanitize(this.worker.context.nameDomain, '_')
+    return sanitize(this.worker.context.nameDomain, '-')
   }
 
   /**
@@ -134,7 +131,7 @@ export class Appstream extends WrapperTask {
     }
 
     // Save the appstream information
-    this.worker.context.appstream = await fs.readFile(this.path)
+    this.worker.context.appstream = await fs.readFile(this.path, 'utf-8')
   }
 
   /**

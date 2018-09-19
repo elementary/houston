@@ -3,6 +3,7 @@
  * Responsible for uploading all the end results to third party services
  */
 
+import * as fs from 'fs-extra'
 import * as path from 'path'
 
 import { Logger } from '../../../lib/log'
@@ -36,6 +37,10 @@ export class UploadPackage extends Task {
 
     for (const context of this.worker.contexts) {
       if (context.package == null || context.package.path == null) {
+        continue
+      }
+
+      if (!(await fs.pathExists(context.package.path))) {
         continue
       }
 

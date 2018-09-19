@@ -4,7 +4,7 @@
  */
 
 import * as fs from 'fs-extra'
-import { get, set } from 'lodash'
+import { get, isEqual, set } from 'lodash'
 import * as os from 'os'
 import * as path from 'path'
 import * as uuid from 'uuid/v4'
@@ -72,22 +72,41 @@ export class WorkspaceSetup extends Task {
    */
   public async possibleBuilds (): Promise<IBuildConfiguration[]> {
     const repositoryReferences = await this.worker.repository.references()
+    const referenceShorthands = repositoryReferences
+      .map((ref) => ref.split('/').reverse()[0])
+
     const builds: IBuildConfiguration[] = []
 
     for (const packageType of POSSIBLE_PACKAGE_TYPES) {
       for (const architecture of POSSIBLE_ARCHITECTURES) {
         for (const distribution of POSSIBLE_DISTRIBUTIONS) {
-          const foundReference = repositoryReferences
-            .map((ref) => ref.split('/').reverse()[0])
+          const foundExactReference = referenceShorthands
             .find((ref) => (ref === `${packageType}-packaging-${distribution}`))
 
-          if (foundReference != null) {
+          if (foundExactReference != null) {
             builds.push({
               architecture,
               distribution,
               packageType
             })
           }
+        }
+      }
+
+      const foundShortReference = referenceShorthands
+        .find((ref) => (ref === `${packageType}-packaging`))
+
+      if (foundShortReference != null) {
+        // Array.reverse is destructive. Damn you JS!!!
+        const latestDistro = [...POSSIBLE_DISTRIBUTIONS].reverse()[0]
+        const shortBuild = {
+          architecture: 'amd64',
+          distribution: latestDistro,
+          packageType
+        }
+
+        if (builds.find((b) => (isEqual(b, shortBuild))) == null) {
+          builds.push(shortBuild)
         }
       }
     }

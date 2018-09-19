@@ -39,6 +39,33 @@ test('builds workspace from all matching branches', async (t) => {
   }])
 })
 
+test('deb-packaging adds the latest version even if builds exist', async (t) => {
+  const worker = await mock({
+    distribution: 'loki',
+    nameDomain: 'com.github.elementary.houston',
+    references: ['refs/heads/loki']
+  })
+
+  worker.repository.references = async () => ([
+    'refs/heads/deb-packaging-loki',
+    'refs/heads/deb-packaging',
+    'refs/heads/master'
+  ])
+
+  const setup = new WorkspaceSetup(worker)
+  const setups = await setup.possibleBuilds()
+
+  t.deepEqual(setups, [{
+    architecture: 'amd64',
+    distribution: 'loki',
+    packageType: 'deb'
+  }, {
+    architecture: 'amd64',
+    distribution: 'juno',
+    packageType: 'deb'
+  }])
+})
+
 test('builds workspace defaults to latest version', async (t) => {
   const worker = await mock({
     distribution: 'loki',
