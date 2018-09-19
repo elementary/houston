@@ -8,7 +8,7 @@
 
 import * as fileType from 'file-type'
 import * as fs from 'fs-extra'
-import { inject, injectable } from 'inversify'
+import { inject, injectable, LazyServiceIdentifer } from 'inversify'
 import * as jsonwebtoken from 'jsonwebtoken'
 import * as Git from 'nodegit'
 import * as os from 'os'
@@ -144,7 +144,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    *
    * @param {App} app - The application IOC instance
    */
-  constructor (@inject(App) app: App) {
+  constructor (@inject(new LazyServiceIdentifer(() => App)) app: App) {
     this.config = app.get(Config)
     this.cache = app.get<ICacheFactory>(Cache)('lib/service/github')
   }
