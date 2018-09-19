@@ -3,6 +3,8 @@
  * An example configuration file for Houston
  */
 
+const { resolve } = require('path')
+
 /**
  * Houston configuration
  * All values to be used by Houston processes
@@ -118,7 +120,7 @@ module.exports = {
      * @property {string} client - The OAuth application client key
      * @property {string} secret - The OAuth application secret key
      *
-     * @property {string} installation - The installation ID
+     * @property {string} app - The GitHub developer app ID
      * @property {string} key - The full path to the installation key file
      * @property {string} [hook] - The installation web hook secret.
      */
@@ -126,8 +128,8 @@ module.exports = {
       client: 'xxxxxxxxxxxxxxxxxxxx',
       secret: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
 
-      installation: 0,
-      key: '/etc/houston/github.pem',
+      app: 17747,
+      key: resolve(__dirname, 'lib/service/github/key.pem'),
       hook: false
     }
   }

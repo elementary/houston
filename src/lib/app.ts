@@ -22,6 +22,7 @@ export class App extends Container {
   protected static providers: ContainerModule[] = [
     require('../repo/provider').provider,
     require('../worker/provider').provider,
+    require('./cache/provider').provider,
     require('./database/provider').provider,
     require('./log/provider').provider,
     require('./queue/provider').provider,
@@ -36,6 +37,7 @@ export class App extends Container {
   public constructor (config: Config) {
     super()
 
+    this.bind<App>(App).toConstantValue(this)
     this.bind<Config>(Config).toConstantValue(config)
 
     this.setupProviders()

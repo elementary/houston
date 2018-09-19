@@ -122,3 +122,13 @@ test.serial('can post an log', async (t) => {
 
   await done()
 })
+
+test.serial('generates authentication with installation number', async (t) => {
+  const { done } = await record('lib/service/github/installation.json')
+  const repo = t.context.factory('https://installation:341025@github.com/btkostner/vocal')
+  const auth = await repo.getAuthorization()
+
+  t.is(auth, 'token v1.2474f2e312406721d0f20ef317948573101e6144')
+
+  await done()
+})

@@ -6,8 +6,6 @@
  * "https://x-access-token:asdf1234@github.com/elementary/houston"
  */
 
-import * as URL from 'url'
-
 import * as fileType from 'file-type'
 import * as fs from 'fs-extra'
 import { injectable } from 'inversify'
@@ -16,8 +14,11 @@ import * as Git from 'nodegit'
 import * as os from 'os'
 import * as path from 'path'
 import * as agent from 'superagent'
+import * as URL from 'url'
 import * as uuid from 'uuid/v4'
 
+import { App } from '../app'
+import { Cache, ICache, ICacheFactory } from '../cache'
 import { Config } from '../config'
 import { sanitize } from '../utility/rdnn'
 import * as type from './type'
@@ -94,6 +95,13 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
   protected config: Config
 
   /**
+   * A cache store for GitHub authentication tokens
+   *
+   * @var {Cache}
+   */
+  protected cache: ICache
+
+  /**
    * Tries to get the file mime type by reading the first chunk of a file.
    * Required by GitHub API
    *
@@ -134,10 +142,11 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
   /**
    * Creates a new GitHub Repository
    *
-   * @param {Config} config - The application configuration
+   * @param {App} app - The application IOC instance
    */
-  constructor (config: Config) {
-    this.config = config
+  constructor (app: App) {
+    this.config = app.get(Config)
+    this.cache = app.get<ICacheFactory>(Cache)('lib/service/github')
   }
 
   /**
@@ -262,6 +271,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
     const { body } = await agent
       .get(`https://api.github.com/repos/${url}`)
       .set('accept', 'application/vnd.github.v3+json')
+      .set('user-agent', 'elementary-houston')
       .set('authorization', auth)
 
     if (body.upload_url == null) {
@@ -280,6 +290,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
         .post(body.upload_url.replace('{?name,label}', ''))
         .set('content-type', mime)
         .set('content-length', stat.size)
+        .set('user-agent', 'elementary-houston')
         .set('authorization', auth)
         .query({ name: pkg.name })
         .query((pkg.description != null) ? { label: pkg.description } : {})
@@ -327,6 +338,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
 
     const hasLabel = await agent
       .get(`https://api.github.com/repos/${this.username}/${this.repository}/labels/AppCenter`)
+      .set('user-agent', 'elementary-houston')
       .set('authorization', auth)
       .then(() => true)
       .catch(() => false)
@@ -334,6 +346,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
     if (!hasLabel) {
       await agent
         .post(`https://api.github.com/repos/${this.username}/${this.repository}/labels`)
+        .set('user-agent', 'elementary-houston')
         .set('authorization', auth)
         .send({
           color: '4c158a',
@@ -344,6 +357,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
 
     const { body } = await agent
       .post(`https://api.github.com/repos/${this.username}/${this.repository}/issues`)
+      .set('user-agent', 'elementary-houston')
       .set('authorization', auth)
       .send({
         body: log.body,
@@ -356,17 +370,25 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
 
   /**
    * Returns the http Authorization header value
+   * NOTE: This should be private, but is public for easier testing.
    *
    * @async
    * @return {string}
    */
-  protected async getAuthorization (): Promise<string> {
+  public async getAuthorization (): Promise<string> {
     if (this.authUsername !== 'installation') {
       return `Bearer ${this.authPassword}`
     } else {
-      const token = await this.generateToken(Number(this.authPassword))
+      const cachedToken = await this.cache.get(this.authPassword)
 
-      return `token ${token}`
+      if (cachedToken == null) {
+        const token = await this.generateToken(Number(this.authPassword))
+        await this.cache.set(this.authPassword, token)
+
+        return `token ${token}`
+      } else {
+        return `token ${cachedToken}`
+      }
     }
   }
 
@@ -411,7 +433,9 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
     const jwt = await this.generateJwt()
 
     return agent
-      .get(`https://api.github.com/installations/${installation}/access_tokens`)
+      .post(`https://api.github.com/app/installations/${installation}/access_tokens`)
+      .set('accept', 'application/vnd.github.machine-man-preview+json')
+      .set('user-agent', 'elementary-houston')
       .set('authorization', `Bearer ${jwt}`)
       .then((res) => res.body.token)
   }

@@ -28,7 +28,7 @@ test('url returns correct string without authentication', (t) => {
 })
 
 test('url returns correct string with authentication', (t) => {
-  const repo = t.context.factory('https://:fakeauthcode@github.com/elementary/houston')
+  const repo = t.context.factory('https://x-access-token:fakeauthcode@github.com/elementary/houston')
 
   t.is(repo.url, 'https://x-access-token:fakeauthcode@github.com/elementary/houston.git')
 })
@@ -49,7 +49,8 @@ test('can set values based on url with auth', (t) => {
 
   t.is(repo.username, 'elementary')
   t.is(repo.repository, 'houston')
-  t.is(repo.auth, 'x-access-token:auth')
+  t.is(repo.authUsername, 'x-access-token')
+  t.is(repo.authPassword, 'auth')
 })
 
 test('can set values based on ssh url', (t) => {
