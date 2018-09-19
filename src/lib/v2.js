@@ -47,7 +47,7 @@ function createConfig () {
         client: config.github.client,
         secret: config.github.secret,
 
-        installation: config.github.app.id,
+        app: config.github.app.id,
         key: config.github.app.key,
         hook: config.github.app.secret
       },

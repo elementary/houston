@@ -30,8 +30,7 @@ async function createRepository (owner, name, auth) {
   if (auth == null) {
     return createCodeRepository(`https://github.com/${owner}/${name}`)
   } else {
-    const token = await github.generateToken(auth)
-    return createCodeRepository(`https://x-access-token:${token}@github.com/${owner}/${name}`)
+    return createCodeRepository(`https://installation:${auth}@github.com/${owner}/${name}`)
   }
 }
 
