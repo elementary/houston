@@ -8,7 +8,7 @@ console.log('Loaded script')
 
 // Juno beta download link
 $('document').ready(function () {
-  const filename = 'elementaryos-5.0-beta1.20180703.iso'
+  const filename = 'elementaryos-5.0-beta2.20180920.iso'
 
   if ($('.juno-download').length !== 0) {
     $.get('https://elementary.io/api/config', (data) => {
