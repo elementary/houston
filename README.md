@@ -27,6 +27,8 @@
 
 ---
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/elementary/houston.svg)](https://greenkeeper.io/)
+
 > Houston is currently undergoing a rewrite to typescript with an emphasis on
 testability. Currently, the only part used in production for v2 is the worker
 process. Everything else will be found in the master branch.
