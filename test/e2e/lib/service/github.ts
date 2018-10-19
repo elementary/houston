@@ -45,7 +45,7 @@ test.serial('can clone a repository', async (t) => {
   const folder = path.resolve(t.context.folder, uuid())
   await fs.mkdirs(folder)
 
-  await repo.clone(folder)
+  await repo.clone(folder, 'refs/heads/origin/v2')
 
   const stat = await fs.stat(folder)
   t.true(stat.isDirectory())
@@ -84,7 +84,7 @@ test.serial('can list all references for a repository', async (t) => {
 
   const references = await repo.references()
 
-  t.not(references.indexOf('refs/heads/master'), -1)
+  t.not(references.indexOf('refs/remotes/origin/master'), -1)
   t.not(references.indexOf('refs/remotes/origin/v2'), -1)
 })
 
