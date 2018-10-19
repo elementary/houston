@@ -67,7 +67,7 @@ test.serial('can clone a repository with tag', async (t) => {
   t.is(pkg.version, '0.1.8')
 })
 
-test.serial.failing('can clone a repository with a non-annotated tag (#511)', async (t) => {
+test.serial('can clone a repository with a non-annotated tag (#511)', async (t) => {
   const repo = t.context.factory('https://github.com/fluks-eos/gdice')
 
   const folder = path.resolve(t.context.folder, uuid())
