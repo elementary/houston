@@ -45,7 +45,7 @@ test.serial('can clone a repository', async (t) => {
   const folder = path.resolve(t.context.folder, uuid())
   await fs.mkdirs(folder)
 
-  await repo.clone(folder)
+  await repo.clone(folder, 'refs/remotes/origin/master')
 
   const stat = await fs.stat(folder)
   t.true(stat.isDirectory())
@@ -67,7 +67,7 @@ test.serial('can clone a repository with tag', async (t) => {
   t.is(pkg.version, '0.1.8')
 })
 
-test.serial.failing('can clone a repository with a non-annotated tag (#511)', async (t) => {
+test.serial('can clone a repository with a non-annotated tag (#511)', async (t) => {
   const repo = t.context.factory('https://github.com/fluks-eos/gdice')
 
   const folder = path.resolve(t.context.folder, uuid())
@@ -84,7 +84,7 @@ test.serial('can list all references for a repository', async (t) => {
 
   const references = await repo.references()
 
-  t.not(references.indexOf('refs/heads/master'), -1)
+  t.not(references.indexOf('refs/remotes/origin/master'), -1)
   t.not(references.indexOf('refs/remotes/origin/v2'), -1)
 })
 
