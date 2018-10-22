@@ -222,12 +222,12 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    */
   public async clone (p: string, reference = this.reference): Promise<void> {
     const repo = await Git.Clone(this.url, p)
+
     const ref = await repo.getReference(reference)
     const commit = await ref.peel(Git.Object.TYPE.COMMIT)
+    const branch = await repo.createBranch('houston', commit, true)
 
-    const checkoutRef = await repo.createBranch('houston', commit, true)
-
-    await repo.checkoutBranch(checkoutRef, {})
+    await repo.checkoutBranch(branch, {})
 
     await this.recursiveClone(p)
 
