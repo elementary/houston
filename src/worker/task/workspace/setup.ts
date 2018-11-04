@@ -145,9 +145,7 @@ export class WorkspaceSetup extends Task {
       })
 
     return repositoryReferences
-      .filter((rref) => {
-        return mergableReferences.some((ref) => (rref.indexOf(ref) !== -1))
-      })
+      .filter((rref) => mergableReferences.some((ref) => rref.endsWith(ref)))
       .sort((a, b) => {
         const aIndex = mergableReferences
           .findIndex((ref) => (a.indexOf(ref) !== -1))

@@ -5,7 +5,7 @@
 #
 # Version: 1.1.0
 
-FROM ubuntu:rolling
+FROM ubuntu:bionic
 
 MAINTAINER elementary
 
