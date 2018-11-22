@@ -18,8 +18,8 @@ export const provider = new ContainerModule((bind) => {
       if (instances[namespace]) {
         return instances[namespace]
       } else {
-        instances[namespace] = Cache({
-          maxAge: (options.maxAge || '3600')
+        instances[namespace] = new Cache({
+          maxAge: (options.maxAge || 3600)
         })
 
         return instances[namespace]
