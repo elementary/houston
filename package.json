@@ -30,10 +30,6 @@
     "lint": "tslint --project tsconfig.json"
   },
   "dependencies": {
-    "@fortawesome/fontawesome": "^1.1.8",
-    "@fortawesome/fontawesome-free-brands": "^5.0.13",
-    "@fortawesome/fontawesome-free-solid": "^5.0.13",
-    "@fortawesome/vue-fontawesome": "0.1.2",
     "cheerio": "^1.0.0-rc.2",
     "dockerode": "^2.5.5",
     "ejs": "^2.6.1",
