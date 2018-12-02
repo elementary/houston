@@ -22,19 +22,23 @@ To setup Houston you will need a working node environment. Each operating system
 is different, so it's best to refer to the official
 [node documentation](https://nodejs.org/en/download/) on installing.
 
-_We highly recommend using `yarn` to keep your package versions in line with
-what we use for production. If you would like to use npm instead, replace `yarn`
-in the following commands with `npm`._
-
 Next you will need to install the needed node packages. This is done with:
 ```shell
-yarn install
+npm ci
 ```
 
 Then build Houston with:
 ```shell
-yarn run build
+npm run build
 ```
+
+Then install it with:
+```shell
+npm link
+```
+
+_NOTE: Depending on how you installed node, you may have to run the above command
+with `sudo`._
 
 You will need to setup your configuration. Simply copy the `config.example.js`
 file to another location and edit it's values. This file is well documented with
@@ -42,10 +46,10 @@ possible values and links to needed third party services.
 
 Lastly, you can run houston with:
 ```shell
-node ./dest/cli/houston.js
+houston
 ```
 
 For a full list of commands run:
 ```shell
-node ./dest/cli/houston.js --help
+houston --help
 ```
