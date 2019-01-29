@@ -3,7 +3,7 @@
  * Tests that known good appstream files pass appstream testing
  */
 
-import { test } from 'ava'
+import test from 'ava'
 
 import { Appstream } from '../../../../../src/worker/task/appstream/index'
 

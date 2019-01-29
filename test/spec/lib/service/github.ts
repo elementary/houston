@@ -3,7 +3,7 @@
  * Tests the GitHub class.
  */
 
-import { test as baseTest, TestInterface } from 'ava'
+import baseTest, { TestInterface } from 'ava'
 import * as path from 'path'
 
 import { github, IGitHubFactory } from '../../../../src/lib/service'

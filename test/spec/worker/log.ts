@@ -3,7 +3,7 @@
  * Tests the worker Log can do log related things :shrug:
  */
 
-import { test } from 'ava'
+import test from 'ava'
 import * as path from 'path'
 
 import { Log } from '../../../src/worker/log'

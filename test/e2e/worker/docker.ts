@@ -3,7 +3,7 @@
  * Tests docker usage ability
  */
 
-import { test as baseTest, TestInterface } from 'ava'
+import baseTest, { TestInterface } from 'ava'
 import * as fs from 'fs-extra'
 import * as os from 'os'
 import * as path from 'path'

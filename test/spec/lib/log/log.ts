@@ -3,7 +3,7 @@
  * Tests the log class.
  */
 
-import { test as baseTest, TestInterface } from 'ava'
+import baseTest, { TestInterface } from 'ava'
 import { create } from '../../../utility/app'
 
 import { App } from '../../../../src/app'

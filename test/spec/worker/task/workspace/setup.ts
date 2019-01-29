@@ -3,7 +3,7 @@
  * Tests building out workspaces
  */
 
-import { test } from 'ava'
+import test from 'ava'
 
 import { WorkspaceSetup } from '../../../../../src/worker/task/workspace/setup'
 

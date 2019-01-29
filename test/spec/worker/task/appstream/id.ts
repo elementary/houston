@@ -3,7 +3,7 @@
  * Tests the appstream id test
  */
 
-import { test } from 'ava'
+import test from 'ava'
 
 import { AppstreamId } from '../../../../../src/worker/task/appstream/id'
 

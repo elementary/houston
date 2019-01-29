@@ -3,11 +3,11 @@
  * Tests RDNN functions
  */
 
-import { Macro, test } from 'ava'
+import test, { Macro } from 'ava'
 
 import * as rdnn from '../../../../src/lib/utility/rdnn'
 
-const sanitize: Macro = (t, input: string, expected: string) => {
+const sanitize: Macro<[string, string]> = (t, input: string, expected: string) => {
   t.is(rdnn.sanitize(input), expected)
 }
 

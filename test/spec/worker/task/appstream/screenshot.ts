@@ -3,7 +3,7 @@
  * Tests the appstream screenshot test
  */
 
-import { test } from 'ava'
+import test from 'ava'
 
 import { AppstreamScreenshot } from '../../../../../src/worker/task/appstream/screenshot'
 

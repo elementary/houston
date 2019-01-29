@@ -3,7 +3,7 @@
  * Tests we can do the things we need to do in fun node event like fashion
  */
 
-import { test } from 'ava'
+import test from 'ava'
 
 import { EventEmitter } from '../../../../src/lib/utility/eventemitter'
 
@@ -36,5 +36,5 @@ test('thrown errors in listeners appear on emitter', async (t) => {
   em.on('test', async (v) => (v + 1))
   em.on('test', async (v) => { throw err })
 
-  await t.throws(em.emitAsyncChain('test', 1), err.message)
+  await t.throwsAsync(em.emitAsyncChain('test', 1), err.message)
 })

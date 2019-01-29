@@ -4,11 +4,11 @@
  * NOTE: Because of typescript enum values, we compare the enum index value
  */
 
-import { Macro, test } from 'ava'
+import test, { Macro } from 'ava'
 
 import * as Level from '../../../../src/lib/log/level'
 
-const testParseLevel: Macro = (t, input: string, expected: number) => {
+const testParseLevel: Macro<[string, number]> = (t, input: string, expected: number) => {
   t.is(Level.parseLevel(input), expected)
 }
 
@@ -16,11 +16,11 @@ testParseLevel.title = (_, input: string, expected: number) => {
   return `parseLevel ${input} = ${expected}`
 }
 
-const testLevelString: Macro = (t, input: number, expected: string) => {
+const testLevelString: Macro<[number, string]> = (t, input: number, expected: string) => {
   t.is(Level.levelString(input), expected)
 }
 
-testLevelString.title = (_, input: string, expected: number) => {
+testLevelString.title = (_, input: number, expected: string) => {
   return `levelString ${input} = ${expected}`
 }
 

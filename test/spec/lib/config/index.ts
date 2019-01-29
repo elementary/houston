@@ -3,7 +3,7 @@
  * Tests the configuration class
  */
 
-import { test } from 'ava'
+import test from 'ava'
 
 import { Config } from '../../../../src/lib/config/index'
 

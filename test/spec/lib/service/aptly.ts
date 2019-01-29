@@ -3,7 +3,7 @@
  * Tests the Aptly class.
  */
 
-import { test as baseTest, TestInterface } from 'ava'
+import baseTest, { TestInterface } from 'ava'
 import * as path from 'path'
 
 import { App } from '../../../../src/lib/app'
