@@ -3,7 +3,7 @@
  * Tests out the container system for the queue. I'm sorry am a IoC noob
  */
 
-import { test as baseTest, TestInterface } from 'ava'
+import baseTest, { TestInterface } from 'ava'
 
 import { App } from '../../../../src/lib/app'
 import { Config } from '../../../../src/lib/config'

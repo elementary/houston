@@ -3,7 +3,7 @@
  * Tests the validatecli docker test
  */
 
-import { test } from 'ava'
+import test from 'ava'
 import * as fs from 'fs-extra'
 
 import { AppstreamValidate } from '../../../../../src/worker/task/appstream/validate'

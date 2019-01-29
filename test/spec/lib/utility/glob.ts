@@ -5,7 +5,7 @@
 
 import * as path from 'path'
 
-import { test } from 'ava'
+import test from 'ava'
 
 import { glob } from '../../../../src/lib/utility/glob'
 

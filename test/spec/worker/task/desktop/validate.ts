@@ -3,7 +3,7 @@
  * Tests the desktop-file-validate docker test
  */
 
-import { test } from 'ava'
+import test from 'ava'
 
 import { DesktopValidate } from '../../../../../src/worker/task/desktop/validate'
 

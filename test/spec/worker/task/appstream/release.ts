@@ -3,7 +3,7 @@
  * Tests we can insert markdown changelogs to the appstream file
  */
 
-import { test } from 'ava'
+import test from 'ava'
 import * as cheerio from 'cheerio'
 import * as fs from 'fs-extra'
 

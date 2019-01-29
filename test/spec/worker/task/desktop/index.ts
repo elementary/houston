@@ -3,7 +3,7 @@
  * Tests that known good appstream files pass appstream testing
  */
 
-import { test } from 'ava'
+import test from 'ava'
 
 import { DesktopIcon } from '../../../../../src/worker/task/desktop/icon'
 import { Desktop } from '../../../../../src/worker/task/desktop/index'

@@ -3,7 +3,7 @@
  * Tests the deb file binary test
  */
 
-import { test } from 'ava'
+import test from 'ava'
 
 import { FileDebBinary } from '../../../../../../src/worker/task/file/deb/binary'
 

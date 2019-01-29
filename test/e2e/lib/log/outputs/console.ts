@@ -3,7 +3,7 @@
  * Tests console out logging. End to End testing due to mocks of the console
  */
 
-import { Macro, test as baseTest, TestInterface } from 'ava'
+import baseTest, { Macro, TestInterface } from 'ava'
 import { stub } from 'sinon'
 
 import { create } from '../../../../utility/app'
@@ -28,7 +28,7 @@ interface IContext {
 
 const test = baseTest as TestInterface<IContext>
 
-const testOutput: Macro<IContext> = (t, input: Level, fn: string, expected: string) => {
+const testOutput: Macro<[Level, string, string], IContext> = (t, input: Level, fn: string, expected: string) => {
   const log = new Log(t.context.logger)
     .setLevel(input)
 
@@ -37,7 +37,7 @@ const testOutput: Macro<IContext> = (t, input: Level, fn: string, expected: stri
   t.true(t.context[expected].called)
 }
 
-testOutput.title = (_, input: string, fn: string, expected: number) => {
+testOutput.title = (_, input: Level, fn: string, expected: string) => {
   return `${fn} gets outputted to console ${expected}`
 }
 

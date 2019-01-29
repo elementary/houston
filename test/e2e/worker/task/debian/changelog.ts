@@ -3,7 +3,7 @@
  * Tests that the changelog task works as needed
  */
 
-import { test } from 'ava'
+import test from 'ava'
 
 import { DebianChangelog } from '../../../../../src/worker/task/debian/changelog'
 
