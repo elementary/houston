@@ -62,7 +62,7 @@
   "devDependencies": {
     "@types/bull": "^3.3.18",
     "@types/faker": "^4.1.2",
-    "@types/knex": "0.15.1",
+    "@types/knex": "0.15.2",
     "@types/koa-router": "^7.0.31",
     "@types/node": "^11.9.0",
     "ava": "^1.2.0",
