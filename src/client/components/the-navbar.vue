@@ -22,10 +22,6 @@
           <font-awesome-icon :icon="Facebook" />
         </a></li>
 
-        <li><a href="https://plus.google.com/+elementary" target="_blank" rel="noopener">
-          <font-awesome-icon :icon="GooglePlus" />
-        </a></li>
-
         <li><a href="https://medium.com/elementaryos" target="_blank" rel="noopener">
           <font-awesome-icon :icon="Medium" />
         </a></li>
