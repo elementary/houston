@@ -22,6 +22,10 @@
           <font-awesome-icon :icon="Facebook" />
         </a></li>
 
+        <li><a href="https://mastodon.social/@elementary" target="_blank" rel="noopener">
+          <font-awesome-icon :icon="Mastodon" />
+        </a></li>
+
         <li><a href="https://medium.com/elementaryos" target="_blank" rel="noopener">
           <font-awesome-icon :icon="Medium" />
         </a></li>
@@ -36,6 +40,10 @@
 
         <li><a href="https://twitter.com/elementary" target="_blank" rel="noopener">
           <font-awesome-icon :icon="Twitter" />
+        </a></li>
+
+        <li><a href="https://join.slack.com/t/elementarycommunity/shared_invite/enQtMzU1NDU4OTE1MjY2LWUyOTBkZGNkZGM4MDgzZjE2ZjRiZDgwMDQ1ZTA0MzcxYjI0MDUyNGRlNDI5ZWViNDkwMzMwYzczMDY2ZjA0MTc" target="_blank" rel="noopener">
+          <font-awesome-icon :icon="Slack" />
         </a></li>
       </ul>
     </div>
