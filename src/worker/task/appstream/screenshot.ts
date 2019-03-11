@@ -60,7 +60,7 @@ export class AppstreamScreenshot extends Task {
     const screenshot = $(elem)
     const image = $('image', screenshot)
 
-    if (image.length !== 1) {
+    if (image.length < 1) {
       this.worker.report(new Log(Log.Level.ERROR, 'Missing image tag in screenshot'))
     }
   }
