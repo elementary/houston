@@ -25,7 +25,7 @@ You will need:
 
 ## Package
 
-Simply run `npm i -g houston`.
+Simply run `npm i -g @elementaryos/houston`.
 
 _NOTE: Depending on how you installed node, you may have to run the above command
 with `sudo`._
