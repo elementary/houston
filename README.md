@@ -16,10 +16,6 @@
     <img src="https://travis-ci.org/elementary/houston.svg?branch=v2" alt="travis-ci">
   </a>
 
-  <a href="https://greenkeeper.io/">
-    <img src="https://badges.greenkeeper.io/elementary/houston.svg" alt="greenkeeper">
-  </a>
-
   <a href="https://www.bountysource.com/trackers/27692469-elementary-houston">
     <img src="https://www.bountysource.com/badge/tracker?tracker_id=27692469" alt="bountysource">
   </a>
