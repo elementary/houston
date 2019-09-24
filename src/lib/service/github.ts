@@ -11,6 +11,7 @@ import * as fs from 'fs-extra'
 import { inject, injectable, LazyServiceIdentifer } from 'inversify'
 import * as jsonwebtoken from 'jsonwebtoken'
 import * as Git from 'isomorphic-git'
+import { plugins } from 'isomorphic-git'
 import * as os from 'os'
 import * as path from 'path'
 import * as agent from 'superagent'
@@ -22,6 +23,9 @@ import { Cache, ICache, ICacheFactory } from '../cache'
 import { Config } from '../config'
 import { sanitize } from '../utility/rdnn'
 import * as type from './type'
+
+// use node's fs for isogit
+plugins.set('fs', fs)
 
 export const github = Symbol('GitHub')
 export type IGitHubFactory = (url: string) => GitHub
@@ -238,8 +242,6 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
       ref: reference || 'master'
     })
 
-    // await this.recursiveClone(p)
-
     await fs.remove(path.resolve(p, '.git'))
   }
 
@@ -455,20 +457,4 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
       .set('authorization', `Bearer ${jwt}`)
       .then((res) => res.body.token)
   }
-
-  // /**
-  //  * Clones all of the Git submodules for a given repo path
-  //  *
-  //  * @async
-  //  * @param {String} clonePath - Path of the repository
-  //  * @return {void}
-  //  */
-  // protected async recursiveClone (clonePath) {
-  //   const repo = await Git.Repository.open(clonePath)
-
-  //   await Git.Submodule.foreach(repo, async (submodule) => {
-  //     await submodule.update(1, new Git.SubmoduleUpdateOptions())
-  //     await this.recursiveClone(path.join(clonePath, submodule.path()))
-  //   })
-  // }
 }
