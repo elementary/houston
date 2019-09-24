@@ -9,9 +9,9 @@
 import * as fileType from 'file-type'
 import * as fs from 'fs-extra'
 import { inject, injectable, LazyServiceIdentifer } from 'inversify'
-import * as jsonwebtoken from 'jsonwebtoken'
-import * as Git from 'isomorphic-git'
 import { plugins } from 'isomorphic-git'
+import * as Git from 'isomorphic-git'
+import * as jsonwebtoken from 'jsonwebtoken'
 import * as os from 'os'
 import * as path from 'path'
 import * as agent from 'superagent'
@@ -24,7 +24,7 @@ import { Config } from '../config'
 import { sanitize } from '../utility/rdnn'
 import * as type from './type'
 
-// use node's fs for isogit
+// Use node's fs for isogit
 plugins.set('fs', fs)
 
 export const github = Symbol('GitHub')
@@ -226,11 +226,11 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    */
   public async clone (p: string, reference = this.reference): Promise<void> {
     const repo = await Git.clone({
+      depth: 3,
       dir: p,
-      url: this.url,
       ref: reference || 'master',
-      depth: 3
-    });
+      url: this.url
+    })
 
     await Git.branch({
       dir: p,
@@ -255,10 +255,10 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
   public async references (): Promise<string[]> {
     const p = path.resolve(this.tmpFolder, uuid())
     const repo = await Git.clone({
+      depth: 3,
       dir: p,
-      url: this.url,
-      depth: 3
-    });
+      url: this.url
+    })
 
     const branches = await Git.listBranches({ dir: p })
 
