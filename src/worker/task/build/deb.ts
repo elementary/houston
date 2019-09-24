@@ -43,10 +43,10 @@ export class BuildDeb extends Task {
    */
   protected get distribution () {
     switch (this.worker.context.distribution) {
-      case ('hera'):
       case ('loki'):
         return 'xenial'
       case ('juno'):
+      case ('hera'):
         return 'bionic'
       default:
         return this.worker.context.distribution
