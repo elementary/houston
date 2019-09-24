@@ -225,8 +225,8 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    * @return {void}
    */
   public async clone (p: string, reference = this.reference): Promise<void> {
-    // get branch from ref, or default to master.
-    const ref = reference ? reference.split('/').slice(-1)[0] : 'master';
+    // Get branch from ref, or default to master.
+    const ref = reference ? reference.split('/').slice(-1)[0] : 'master'
     const repo = await Git.clone({
       depth: 3,
       dir: p,
