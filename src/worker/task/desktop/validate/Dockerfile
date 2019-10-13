@@ -1,11 +1,9 @@
 # Houston desktop validate docker file
 # Builds an ubuntu base with desktop-file-utils for validating desktop files
 #
-# Version: 1.0.2
+# Version: 1.0.3
 
-FROM elementary/docker:loki
-
-MAINTAINER elementary
+FROM elementary/docker:loki-stable
 
 # Install liftoff
 ENV DEBIAN_FRONTEND noninteractive
