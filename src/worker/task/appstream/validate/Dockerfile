@@ -1,11 +1,9 @@
 # Houston appdata docker file
 # Builds an ubuntu base with appstreamcli for validating appstream files
 #
-# Version: 1.0.3
+# Version: 1.0.4
 
-FROM elementary/docker:loki
-
-MAINTAINER elementary
+FROM elementary/docker:loki-stable
 
 # Install liftoff
 ENV DEBIAN_FRONTEND noninteractive
