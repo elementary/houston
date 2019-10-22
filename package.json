@@ -48,7 +48,7 @@
     "lodash": "^4.17.10",
     "lru-cache": "^5.1.1",
     "markdown-it": "^8.4.2",
-    "nodegit": "^0.24.0",
+    "nodegit": "^0.26.0",
     "reflect-metadata": "^0.1.12",
     "sanitize-html": "^1.18.2",
     "superagent": "^4.0.0",
