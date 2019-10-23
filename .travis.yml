@@ -14,7 +14,7 @@ addons:
     packages:
       - libstdc++-4.9-dev
 
-node_js: lts/*
+node_js: 10
 
 cache:
   directories:
@@ -28,10 +28,9 @@ script:
 jobs:
   include:
     - stage: Test
-      node_js: lts/*
-    # TODO: Enable once travis doesn't fail on `nvm use 10`
-    # - node_js: 10
-    - node_js: 8
+      node_js: 10
+
+    - node_js: 12
 
     - stage: Release
       script: npm run build
