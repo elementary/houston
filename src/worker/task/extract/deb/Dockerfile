@@ -1,11 +1,9 @@
 # Houston extract deb docker file
 # Extracts a debian package to editable files
 #
-# Version: 1.0.1
+# Version: 1.0.2
 
-FROM elementary/docker:loki
-
-MAINTAINER elementary
+FROM elementary/docker:loki-stable
 
 # Install liftoff
 ENV DEBIAN_FRONTEND noninteractive
