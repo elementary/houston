@@ -9,8 +9,9 @@
 import * as fileType from 'file-type'
 import * as fs from 'fs-extra'
 import { inject, injectable, LazyServiceIdentifer } from 'inversify'
-import * as jsonwebtoken from 'jsonwebtoken'
+import { plugins } from 'isomorphic-git'
 import * as Git from 'isomorphic-git'
+import * as jsonwebtoken from 'jsonwebtoken'
 import * as os from 'os'
 import * as path from 'path'
 import * as agent from 'superagent'
@@ -22,6 +23,9 @@ import { Cache, ICache, ICacheFactory } from '../cache'
 import { Config } from '../config'
 import { sanitize } from '../utility/rdnn'
 import * as type from './type'
+
+// Use node's fs for isogit
+plugins.set('fs', fs)
 
 export const github = Symbol('GitHub')
 export type IGitHubFactory = (url: string) => GitHub
@@ -221,12 +225,14 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    * @return {void}
    */
   public async clone (p: string, reference = this.reference): Promise<void> {
+    // Get branch from ref, or default to master.
+    const ref = reference ? reference.split('/').slice(-1)[0] : 'master'
     const repo = await Git.clone({
+      depth: 3,
       dir: p,
-      url: this.url,
-      ref: reference || 'master',
-      depth: 3
-    });
+      ref,
+      url: this.url
+    })
 
     await Git.branch({
       dir: p,
@@ -237,8 +243,6 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
       dir: p,
       ref: reference || 'master'
     })
-
-    // await this.recursiveClone(p)
 
     await fs.remove(path.resolve(p, '.git'))
   }
@@ -253,10 +257,10 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
   public async references (): Promise<string[]> {
     const p = path.resolve(this.tmpFolder, uuid())
     const repo = await Git.clone({
+      depth: 3,
       dir: p,
-      url: this.url,
-      depth: 3
-    });
+      url: this.url
+    })
 
     const branches = await Git.listBranches({ dir: p })
 
@@ -455,20 +459,4 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
       .set('authorization', `Bearer ${jwt}`)
       .then((res) => res.body.token)
   }
-
-  // /**
-  //  * Clones all of the Git submodules for a given repo path
-  //  *
-  //  * @async
-  //  * @param {String} clonePath - Path of the repository
-  //  * @return {void}
-  //  */
-  // protected async recursiveClone (clonePath) {
-  //   const repo = await Git.Repository.open(clonePath)
-
-  //   await Git.Submodule.foreach(repo, async (submodule) => {
-  //     await submodule.update(1, new Git.SubmoduleUpdateOptions())
-  //     await this.recursiveClone(path.join(clonePath, submodule.path()))
-  //   })
-  // }
 }
