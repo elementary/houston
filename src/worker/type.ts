@@ -59,9 +59,7 @@ export interface IContext {
   logs: ILog[]
 }
 
-export interface ITaskConstructor {
-  new (worker: IWorker): ITask
-}
+export type ITaskConstructor = new (worker: IWorker) => ITask
 
 export interface ITask {
   run (): Promise<void>

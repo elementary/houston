@@ -114,7 +114,7 @@ export class GitHub implements type.ICodeRepository, type.IPackageRepository, ty
    * @return {String} The file mime type
    */
   protected static async getFileType (p: string): Promise<string> {
-    const buffer = await new Promise((resolve, reject) => {
+    const buffer: Buffer = await new Promise((resolve, reject) => {
       fs.open(p, 'r', (openErr, fd) => {
         if (openErr != null) {
           return reject(openErr)

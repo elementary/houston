@@ -10,7 +10,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["ES6", "ES2015"],
+    "lib": ["es6", "es2015"],
     "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "./dest",

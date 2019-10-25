@@ -111,13 +111,7 @@ export class Repo {
 
     try {
       await new Promise((resolve, reject) => {
-        this.server.bind({ port }, (err: Error) => {
-          if (err) {
-            return reject(err)
-          }
-
-          return resolve()
-        })
+        this.server.bind({ port }, () => resolve())
       })
     } catch (err) {
       this.logger
