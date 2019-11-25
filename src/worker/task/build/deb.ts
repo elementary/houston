@@ -46,6 +46,7 @@ export class BuildDeb extends Task {
       case ('loki'):
         return 'xenial'
       case ('juno'):
+      case ('hera'):
         return 'bionic'
       default:
         return this.worker.context.distribution

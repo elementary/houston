@@ -30,7 +30,7 @@ export interface IBuildConfiguration {
  * @var {string[]}
  */
 const POSSIBLE_ARCHITECTURES = ['amd64']
-const POSSIBLE_DISTRIBUTIONS = ['loki', 'juno']
+const POSSIBLE_DISTRIBUTIONS = ['loki', 'juno', 'hera']
 const POSSIBLE_PACKAGE_TYPES = ['deb']
 
 /**
@@ -41,7 +41,7 @@ const POSSIBLE_PACKAGE_TYPES = ['deb']
  */
 const DEFAULT_BUILDS: IBuildConfiguration[] = [{
   architecture: 'amd64',
-  distribution: 'juno',
+  distribution: 'hera',
   packageType: 'deb'
 }]
 
