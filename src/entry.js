@@ -15,11 +15,18 @@ require('babel-polyfill')
 // @see https://github.com/elementary/houston/issues/189
 global.Promise = require('bluebird')
 
-import program from 'commander'
+process.on('uncaughtException', (err) => {
+  console.error(err)
+})
 
-import config from 'lib/config'
-import database from 'lib/database/connection'
-import Pipeline from 'flightcheck/pipeline'
+process.on('unhandledRejection', (reason, p) => {
+  console.error(reason)
+})
+
+const program = require('commander')
+
+const config = require('lib/config').default
+const database = require('lib/database/connection').default
 
 const databaseOptions = {
   server: {
@@ -35,7 +42,9 @@ program
   .command('flightcheck')
   .description('starts flightcheck to listen for requests from houston')
   .action(() => {
-    require('./flightcheck/houston')
+    database.connect(config.database, databaseOptions)
+
+    require('./flightcheck/index')
   })
 
 program
@@ -78,29 +87,6 @@ program
         console.error(err)
         process.exit(1)
       }
-    })
-  })
-
-program
-  .command('build <repo> <tag> [auth]')
-  .description('runs a single build with flightcheck')
-  .action((repo, tag, auth, opt) => {
-    if (opt == null) {
-      opt = auth
-      auth = null
-    }
-
-    if (repo == null || tag == null) {
-      program.help()
-      process.exit(1)
-    }
-
-    const pipeline = new Pipeline({ repo, tag, auth })
-
-    pipeline.start()
-    .catch((err) => {
-      console.error(err)
-      process.exit(2)
     })
   })
 

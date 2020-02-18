@@ -96,7 +96,7 @@ export const schema = new db.Schema({
     },
     label: {
       type: String,
-      default: 'AppHub'
+      default: 'AppCenter'
     },
     installation: Number
   },

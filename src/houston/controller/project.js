@@ -9,6 +9,7 @@ import Router from 'koa-router'
 
 import * as aptly from 'service/aptly'
 import * as error from 'lib/error/controller'
+import { createAptly } from 'lib/v2'
 import * as policy from 'houston/policy'
 import Project from 'lib/database/project'
 
@@ -85,8 +86,19 @@ route.get('/review/:fate', policy.isRole('REVIEW'), async (ctx, next) => {
   const cycle = await release.cycle.latest
 
   if (ctx.params.fate === 'yes') {
+    // In the original houston we stored packages as aptly strings
+    if (typeof cycle.packages[0] === 'string') {
+      await aptly.stable(cycle.packages)
+    // In houston v2 we store packages as objects to support multi repo publishing
+    } else {
+      const aptly = await createAptly()
+
+      await Promise.all(cycle.packages.map((pkg) => {
+        return aptly.uploadPackage(pkg, 'stable')
+      }))
+    }
+
     await Promise.all([
-      aptly.stable(cycle.packages),
       cycle.setStatus('FINISH'),
       release.update({ 'date.published': new Date() })
     ])

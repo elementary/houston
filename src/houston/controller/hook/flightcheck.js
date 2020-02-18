@@ -6,7 +6,6 @@
 import * as atc from 'lib/atc'
 import Cycle from 'lib/database/cycle'
 import Log from 'lib/log'
-import Project from 'lib/database/project'
 
 const log = new Log('controller:hook:flightcheck')
 const worker = new atc.Worker('cycle')
@@ -42,33 +41,27 @@ worker.register('finish', async (param) => {
   log.debug(`Received flightcheck data for finish cycle ${param.id}`)
   log.debug(`Found ${param.logs.length} logs in ${cycle.name}`)
   param.logs.forEach((l) => {
-    log.debug(`${l.pipe} ${l.level} log => ${l.title}`)
-    log.debug(`\n${l.body}`)
+    log.debug(`${l.level} log => ${l.title}`)
+    if (l.body != null) {
+      log.debug(`\n${l.body}`)
+    }
   })
 
-  const errors = param.logs.filter((l) => (l.level === 'error'))
-
-  if (param.apphub !== null) {
-    log.debug(`Updating ${cycle.name} project apphub object`)
-
-    await Project.findByIdAndUpdate(cycle.project, {
-      'apphub': param.apphub,
-      'github.label': param.apphub.log.label
-    })
-  }
+  // In houston v1, level was a string, in v2 it's an enum which maps to number
+  const errors = param.logs.filter((l) => (l.level === 3))
 
   if (errors.length > 0) {
     log.debug(`Failing ${cycle.name} due to error logs`)
     return cycle.setStatus('FAIL')
   }
 
-  if (param.aptly == null || param.aptly.publishedKeys.length < 1) {
+  if (param.packages == null || param.packages.length < 1) {
     log.debug(`${cycle.name} has no aptly published keys. Setting to finished`)
     return cycle.setStatus('FINISH')
   } else {
     log.debug(`Updating ${cycle.name} aptly file keys and setting to review`)
     await cycle.update({
-      'packages': param.aptly.publishedKeys
+      'packages': param.packages
     })
 
     return cycle.setStatus('REVIEW')

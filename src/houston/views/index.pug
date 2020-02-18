@@ -15,7 +15,6 @@ block body
       div.whole
         img(src='https://elementary.io/images/icons/apps/128/system-software-install.svg', alt='AppCenter icon')
         h1 Publish on AppCenter
-            sup BETA
         h4 An open, pay-what-you-want app store for indie developers
         if user
           a(href='/dashboard').button.suggested-action Welcome Back
@@ -43,8 +42,8 @@ block body
     div
       h2 Get In Front of Users
       ul.fa-ul
-        li <i class="fa fa-star fa-li"></i> New apps get featured with a large, branded banner. Plus, trending and recently-updated apps are featured on the front page. 
-        li <i class="fa fa-search fa-li"></i> Define your app's keywords, categories, and subcategories to help people find it. 
+        li <i class="fa fa-star fa-li"></i> New apps get featured with a large, branded banner. Plus, trending and recently-updated apps are featured on the front page.
+        li <i class="fa fa-search fa-li"></i> Define your app's keywords, categories, and subcategories to help people find it.
         li <i class="fa fa-share-alt fa-li"></i> With built-in social media sharing and app URLs, users can easily share your app right from AppCenter.
       a(href='https://elementary.io/docs/code/getting-started#the-desktop-file' target='_blank').read-more Learn more about app metadata
 
@@ -60,11 +59,11 @@ block body
             p.split 70 <span>/</span> 30
             p.small with a minimum platform fee of 50¢
           ul.fa-ul
-            li <i class="fa fa-credit-card fa-li"></i> Fast, easy pay-what-you-want downloads from users of elementary OS. 
-            li <i class="fa fa-lock fa-li"></i> Powered by Stripe Connect ensuring simplicity, security, and compliance. 
+            li <i class="fa fa-credit-card fa-li"></i> Fast, easy pay-what-you-want downloads from users of elementary OS.
+            li <i class="fa fa-lock fa-li"></i> Powered by Stripe Connect ensuring simplicity, security, and compliance.
             li <i class="fa fa-thumbs-up fa-li"></i> No enrollment fees or subscription costs.
         p: a(href='https://github.com/elementary/houston/wiki/Monetizing-Your-App' target='_blank').read-more Learn more about monetizing your app
-      
+
       div
         div.card
           img(src='/images/github_logo.svg')
@@ -72,11 +71,11 @@ block body
             p Publish without distrupting your workflow
             div.workflow
               div
-                i.fa.fa-3x.fa-github
+                i.fab.fa-3x.fa-github
                 p.small Git Tag
               i.fa.fa-angle-right
               div
-                i.fa.fa-3x.fa-gears
+                i.fas.fa-3x.fa-cogs
                 p.small Auto-Review
               i.fa.fa-angle-right
               div
@@ -85,9 +84,9 @@ block body
 
                 p.small Published
           ul.fa-ul
-            li <i class="fa fa-code-fork fa-li"></i> Keep issue tracking &amp; release management where you're familiar. 
-            li <i class="fa fa-refresh fa-li"></i> Submit updates and see review status in AppCenter Dashboard. 
-            li <i class="fa fa-github fa-li"></i> Track review feedback with GitHub Issues.
+            li <i class="fas fa-code-branch fa-li"></i> Keep issue tracking &amp; release management where you're familiar.
+            li <i class="fas fa-sync fa-li"></i> Submit updates and see review status in AppCenter Dashboard.
+            li <i class="fab fa-github fa-li"></i> Track review feedback with GitHub Issues.
         p: a(href='https://github.com/elementary/houston/wiki/Submission-Process' target='_blank').read-more Learn more about the submission process
 
   section
@@ -125,14 +124,20 @@ block body
                 return app.run (args);
             }
         }</code>
-      div.grid
-        div.whole: a(href="http://valadoc.elementary.io").read-more Library Documentation for Vala
+
+    div.grid
+      div.whole
+        p Full API documentation available on
+        a(href="http://valadoc.elementary.io").button.suggested-action.valadoc: img(src='images/valadoc_logo.svg', alt='Valadoc', target='_blank')
 
   section.grey
-    div.grid: div.two-thirds
+    div.grid#beta: div.two-thirds
       img(src='https://elementary.io/images/icons/places/64/distributor-logo.svg')
-      h2 A Feature-Complete SDK
-      p Loki brings a new API for Wingpanel, Launcher API support in Slingshot, new widgets like AlertView, new CSS style classes and icons, and tons more. Build feature-full apps easier than ever with Gtk 3.18 &amp; Vala 0.34, running atop Linux 4.8
+      h2 Download elementary OS 5 Juno
+      p Build and release your apps for the latest version of elementary OS. Juno brings new APIs, improved notifications, a new location agent, new Granite CSS constants, new icons, and tons more. Build feature-full apps easier than ever with Gtk 3.22 &amp; Vala 0.40.
+      a(href='https://medium.com/@cassidyjames/471dfdedc7b3' target='_blank').read-more Read the release notes
+      p
+        div.whole: a(href='https://elementary.io/').button.suggested-action Pay What You Want
 
     div.grid
       div.third
@@ -144,7 +149,7 @@ block body
       div.third
         strong System
         p: a(href='https://valadoc.org/gio-2.0/GLib.Notification.html', target='_blank').read-more Notifications
-        p: a(href='https://valadoc.org/libpeas-1.0/Peas.html', target='_blank').read-more Plugins 
+        p: a(href='https://valadoc.org/libpeas-1.0/Peas.html', target='_blank').read-more Plugins
         p: a(href='https://valadoc.org/gio-2.0/GLib.Settings.html', target='_blank').read-more Settings
         p: a(href='http://valadoc.org/granite/Granite.Services.ContractorProxy', target='_blank').read-more System Actions
       div.third
@@ -153,4 +158,3 @@ block body
         p: a(href='https://valadoc.org/granite/Granite.html', target='_blank').read-more Granite
         p: a(href='https://valadoc.org/gtk+-3.0/Gtk.html', target='_blank').read-more Gtk+
         p: a(href='https://valadoc.org/sdl/SDL.html', target='_blank').read-more SDL
-
