@@ -26,10 +26,6 @@
           <font-awesome-icon :icon="Mastodon" />
         </a></li>
 
-        <li><a href="https://medium.com/elementaryos" target="_blank" rel="noopener">
-          <font-awesome-icon :icon="Medium" />
-        </a></li>
-
         <li><a href="https://www.reddit.com/r/elementaryos" target="_blank" rel="noopener">
           <font-awesome-icon :icon="Reddit" />
         </a></li>
