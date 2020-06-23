@@ -48,6 +48,10 @@ module.exports = {
 
     link: [
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Open+Sans:300,400' }
+    ],
+
+    script: [
+      { src: 'https://stats.elementary.io/js/index.js', dataDomain: 'developer.elementary.io', async: true, defer: true }
     ]
   },
 
