@@ -106,22 +106,24 @@ block body
     div.grid: div.two-thirds
       pre.
         <code>public class MyApp : Gtk.Application {
-
             public MyApp () {
-                Object (application_id: "com.github.myteam.myapp",
-                flags: ApplicationFlags.FLAGS_NONE);
+                Object (
+                    application_id: "com.github.myteam.myapp",
+                    flags: ApplicationFlags.FLAGS_NONE
+                );
             }
 
             protected override void activate () {
-                var window = new Gtk.ApplicationWindow (this);
-                window.title = "MyApp";
-                window.set_default_size (1024, 768);
+                var window = new Gtk.ApplicationWindow (this) {
+                    default_height = 768,
+                    default_width = 1024,
+                    title = "MyApp"
+                };
                 window.show_all ();
             }
 
             public static int main (string[] args) {
-                var app = new MyApp ();
-                return app.run (args);
+                return new MyApp ().run (args);
             }
         }</code>
 
