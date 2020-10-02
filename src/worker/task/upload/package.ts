@@ -58,8 +58,19 @@ export class UploadPackage extends Task {
         context.package.architecture = context.architecture
       }
 
-      if (context.distribution) {
-        context.package.distribution = context.distribution
+      switch (context.distribution) {
+        case (null):
+          break
+        case ('loki'):
+          context.package.distribution = 'loki'
+          break
+        case ('juno'):
+        case ('hera'):
+          context.package.distribution = 'juno'
+          break
+        default:
+          context.package.distribution = context.distribution
+          break
       }
 
       context.package = await this.uploadToCodeRepository(context.package, ref)

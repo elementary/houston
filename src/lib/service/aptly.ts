@@ -24,7 +24,7 @@ const DEFAULT_ARCHITECTURES = ['amd64']
  *
  * @var {String}
  */
-const DEFAULT_DISTRIBUTION = 'xenial'
+const DEFAULT_DISTRIBUTION = 'bionic'
 
 // These are the settings we get when publishing
 export interface IAptlyDetails {
