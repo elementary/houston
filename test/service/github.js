@@ -88,7 +88,7 @@ test('Can generate an accurate token', async (t) => {
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
   .replyDate()
-  .post('/installations/1/access_tokens')
+  .post('/app/installations/1/access_tokens')
   .reply(201, {
     token: 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh',
     'expires_at': '2016-09-23T21:26:26Z',
@@ -108,7 +108,7 @@ test('Uses token cache', async (t) => {
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
   .replyDate()
-  .post('/installations/1/access_tokens')
+  .post('/app/installations/1/access_tokens')
   .reply(201, {
     token: 'v1.48b9a4we891aw9f9a4bv8we9a165hj4r89tjsdfh',
     'expires_at': moment().add(1, 'hours').toISOString(),
@@ -119,7 +119,7 @@ test('Uses token cache', async (t) => {
   .matchHeader('Accept', 'application/vnd.github.machine-man-preview+json')
   .replyContentLength()
   .replyDate()
-  .post('/installations/2/access_tokens')
+  .post('/app/installations/2/access_tokens')
   .reply(201, {
     token: 'v1.afj9830jf0a293jf0aj30f9jaw30f9jaw039fj0a',
     'expires_at': moment().add(1, 'hours').toISOString(),

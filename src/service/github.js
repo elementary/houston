@@ -45,7 +45,7 @@ const GITHUB_CACHE_TIME = 1 * 60 * 60 * 60 * 1000
 
 const api = domain('https://api.github.com')
 .use((req) => {
-  req.set('Accept', 'application/vnd.github.machine-man-preview+json')
+  req.set('Accept', 'application/vnd.github.v3+json')
   req.set('User-Agent', 'elementary-houston')
 })
 
@@ -262,7 +262,7 @@ export async function generateToken (inst: number, user: ?number): Promise<strin
   const JWT = await generateJWT()
 
   const githubReq = api
-  .post(`/installations/${inst}/access_tokens`)
+  .post(`/app/installations/${inst}/access_tokens`)
   .set('Authorization', `Bearer ${JWT}`)
 
   if (user != null) {
@@ -447,7 +447,7 @@ export function getReleaseByTag (owner: string, repo: string, tag: string, token
  */
 export function getInstallations (token: string, user: ?string): Promise<Object> {
   return api
-  .get('/installation/repositories')
+  .get('/app/installation/repositories')
   .set('Authorization', `token ${token}`)
   .then((res) => res.body.repositories.map((repo) => castProject(repo)))
   .catch((err, res) => {
