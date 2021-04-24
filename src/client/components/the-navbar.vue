@@ -14,7 +14,7 @@
         <li><a href="https://elementary.io/support">Support</a></li>
         <li><nuxt-link to="/">Developer</nuxt-link></li>
         <li><a href="https://elementary.io/get-involved">Get Involved</a></li>
-        <li><a href="https://elementary.io/store/">Store</a></li>
+        <li><a href="https://store.elementary.io">Store</a></li>
       </ul>
 
       <ul>
