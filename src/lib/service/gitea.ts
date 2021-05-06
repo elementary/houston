@@ -23,8 +23,8 @@ import { Config } from '../config'
 import { sanitize } from '../utility/rdnn'
 import * as type from './type'
 
-export const github = Symbol('GitHub')
-export type IGitHubFactory = (url: string) => GitHub
+export const gitea = Symbol('Gitea')
+export type IGiteaFactory = (url: string) => Gitea
 
 @injectable()
 export class Gitea implements type.ICodeRepository, type.IPackageRepository, type.ILogRepository {
@@ -40,7 +40,7 @@ export class Gitea implements type.ICodeRepository, type.IPackageRepository, typ
    *
    * @var {String}
    */
-  public serviceName = 'GitHub'
+  public serviceName = 'Gitea'
 
 
   /**
@@ -235,7 +235,7 @@ export class Gitea implements type.ICodeRepository, type.IPackageRepository, typ
       .set('authorization', auth)
 
     if (body.upload_url == null) {
-      throw new Error('No Upload URL for GitHub release')
+      throw new Error('No Upload URL for Gitea release')
     }
 
     // TODO: Should we remove existing assets that would conflict?
@@ -280,7 +280,7 @@ export class Gitea implements type.ICodeRepository, type.IPackageRepository, typ
   }
 
   /**
-   * Uploads a log to GitHub as an issue with the 'AppCenter' label
+   * Uploads a log to Gitea as an issue with the 'AppCenter' label
    *
    * @async
    * @param {ILog} log
@@ -349,54 +349,6 @@ export class Gitea implements type.ICodeRepository, type.IPackageRepository, typ
         return `token ${cachedToken}`
       }
     }
-  }
-
-  /**
-   * Generates a json web token used for making app requests to GitHub.
-   *
-   * @async
-   * @return {string}
-   */
-  protected async generateJwt (): Promise<string> {
-    const keyPath = this.config.get('service.github.key')
-    const key = await fs.readFile(keyPath, 'utf-8')
-    const payload = {
-      iat: Math.floor(Date.now() / 1000),
-      iss: this.config.get('service.github.app')
-    }
-    const options = {
-      algorithm: 'RS256',
-      expiresIn: '1m'
-    }
-
-    return new Promise<string>((resolve, reject) => {
-      jsonwebtoken.sign(payload, key, options, (err, token) => {
-        if (err != null) {
-          return reject(err)
-        } else {
-          return resolve(token)
-        }
-      })
-    })
-  }
-
-  /**
-   * Uses a json web token to generate an API usable authentication token for
-   * GitHub.
-   *
-   * @async
-   * @param {number} installation The GitHub app installation number
-   * @return {string}
-   */
-  protected async generateToken (installation: number): Promise<string> {
-    const jwt = await this.generateJwt()
-
-    return agent
-      .post(`https://api.github.com/app/installations/${installation}/access_tokens`)
-      .set('accept', 'application/vnd.github.machine-man-preview+json')
-      .set('user-agent', 'elementary-houston')
-      .set('authorization', `Bearer ${jwt}`)
-      .then((res) => res.body.token)
   }
 
   /**
