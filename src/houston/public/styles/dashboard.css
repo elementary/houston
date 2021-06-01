@@ -8,6 +8,18 @@
     flex-direction: column;
 }
 
+.alert.info {
+    background: #ffe16b;
+    color: black;
+    font-size: 0.8rem;
+    padding: 0 1rem;
+}
+
+.alert.info a {
+    color: inherit;
+    text-decoration: underline;
+}
+
 .alert h3,
 .alert p {
     margin: 12px 0;
