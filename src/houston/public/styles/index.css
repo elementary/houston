@@ -3,29 +3,6 @@
 * This file is part of houston.elementary.io *
 *********************************************/
 
-/*************
-* Navigation *
-*************/
-
-nav {
-    background-color: transparent;
-    color: #fff;
-    fill: #fff;
-    position: absolute;
-    width: 100%;
-    z-index: 3;
-}
-
-nav > ul > li > a:focus {
-    color: #1f1f1f;
-    fill: #1f1f1f;
-}
-
-footer ul li a:focus i.fa {
-    color: #1f1f1f;
-    text-shadow: 0 1px 6px #fff;
-}
-
 /********
 * Cards *
 ********/
@@ -214,7 +191,7 @@ section.hero {
     background-image: linear-gradient(to right bottom, #4c158a, #ad65d6);
     color: #fff;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    padding: 128px 0;
+    padding: 64px 0 128px;
     max-width: 100%;
     position: relative;
 }
