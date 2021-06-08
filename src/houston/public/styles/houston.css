@@ -52,6 +52,18 @@ nav#secondary {
     }
 }
 
+.alert.info {
+    background: #ffe16b;
+    color: black;
+    font-size: 0.8rem;
+    padding: 0 1rem;
+}
+
+.alert.info a {
+    color: inherit;
+    text-decoration: underline;
+}
+
 .form {
     align-items: stretch;
     display: flex;
