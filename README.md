@@ -1,3 +1,7 @@
+# This is the old AppCenter Dashboard for elementary OS 5.1 and older. You may be looking for the [new Flatpak-based AppCenter Dashboard](https://github.com/elementary/appcenter-dashboard) or the new [AppCenter Reviews repo](https://github.com/elementary/appcenter-reviews).
+
+---
+
 <div align="center">
   <a href="https://developer.elementary.io" align="center">
     <center align="center">
