@@ -50,7 +50,7 @@
     "markdown-it": "^8.4.2",
     "nodegit": "^0.26.0",
     "reflect-metadata": "^0.1.12",
-    "sanitize-html": "^1.18.2",
+    "sanitize-html": "^2.3.2",
     "superagent": "^4.0.0",
     "uuid": "^3.3.2",
     "yargs": "^13.1.0"
