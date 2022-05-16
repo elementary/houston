@@ -32,7 +32,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "dockerode": "^2.5.5",
-    "ejs": "^2.6.1",
+    "ejs": "^3.1.7",
     "eventemitter2": "^5.0.1",
     "faker": "^4.1.0",
     "file-type": "^10.1.0",
