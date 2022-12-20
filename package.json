@@ -41,7 +41,7 @@
     "ini": "^1.3.5",
     "inversify": "^4.13.0",
     "jsonwebtoken": "^8.4.0",
-    "knex": "^0.16.1",
+    "knex": "^2.3.0",
     "koa": "^2.5.2",
     "koa-router": "^7.4.0",
     "koa-static": "^5.0.0",
