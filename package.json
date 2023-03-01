@@ -66,7 +66,7 @@
     "@types/koa-router": "^7.0.31",
     "@types/node": "^11.9.0",
     "ava": "^1.2.0",
-    "commitizen": "^3.0.2",
+    "commitizen": "^4.3.0",
     "cz-conventional-changelog": "^2.1.0",
     "gulp": "^4.0.0",
     "gulp-sourcemaps": "^2.6.4",
